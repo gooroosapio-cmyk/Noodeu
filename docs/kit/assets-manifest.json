@@ -1,0 +1,988 @@
+{
+  "version": "1.0",
+  "date": "2026-10-21",
+  "basePath": "/assets/noodeu/",
+  "assets": [
+    {
+      "id": "icon-home",
+      "path": "03_Icones_SVG/icon-home.svg",
+      "format": "svg",
+      "alt": "Accueil",
+      "decorative": false,
+      "bytes": 274,
+      "sha256": "d1446c9eefbf570789ab6d574a31ea1acf6c4a19cda657859b9f7c3a55ce4293"
+    },
+    {
+      "id": "icon-library",
+      "path": "03_Icones_SVG/icon-library.svg",
+      "format": "svg",
+      "alt": "Bibliothèques",
+      "decorative": false,
+      "bytes": 352,
+      "sha256": "b980d542d626d9f2fa9132e1cf7d58a78b6c3c29a3ec2c4a7f0d0254630455e7"
+    },
+    {
+      "id": "icon-bulb",
+      "path": "03_Icones_SVG/icon-bulb.svg",
+      "format": "svg",
+      "alt": "Astuces",
+      "decorative": false,
+      "bytes": 314,
+      "sha256": "e339f6d6a17d3f5e02457f95dad02ec95eaf8b29cfbb4eccbd82caf5a233fb22"
+    },
+    {
+      "id": "icon-heart",
+      "path": "03_Icones_SVG/icon-heart.svg",
+      "format": "svg",
+      "alt": "Notre espace",
+      "decorative": false,
+      "bytes": 281,
+      "sha256": "a7bdbca06de77ea0a299ee459349aa05dbe07a44fa6f812349650c7b3c04a5cc"
+    },
+    {
+      "id": "icon-settings",
+      "path": "03_Icones_SVG/icon-settings.svg",
+      "format": "svg",
+      "alt": "Paramètres",
+      "decorative": false,
+      "bytes": 346,
+      "sha256": "497eb2c9341c662cae35c67b08fd47fd682ac88b509eb0e62bb317e00a85ee67"
+    },
+    {
+      "id": "icon-arrow-left",
+      "path": "03_Icones_SVG/icon-arrow-left.svg",
+      "format": "svg",
+      "alt": "Retour",
+      "decorative": false,
+      "bytes": 237,
+      "sha256": "8dc8b9f5e8fce33c4376acafda1b9c50ab37c9f86acc76c6c531373239cfe469"
+    },
+    {
+      "id": "icon-arrow-right",
+      "path": "03_Icones_SVG/icon-arrow-right.svg",
+      "format": "svg",
+      "alt": "Suivant",
+      "decorative": false,
+      "bytes": 238,
+      "sha256": "8b096024a3d2ac7438ebf9bc26ae99ed46a497f2a5bc9f0830ac6445e7fc9b28"
+    },
+    {
+      "id": "icon-chevron-down",
+      "path": "03_Icones_SVG/icon-chevron-down.svg",
+      "format": "svg",
+      "alt": "Déplier",
+      "decorative": false,
+      "bytes": 229,
+      "sha256": "2da5573001b3f0112fe05819ae8bbae9c7e485c14e8d742b4af71395415a9a15"
+    },
+    {
+      "id": "icon-chevron-up",
+      "path": "03_Icones_SVG/icon-chevron-up.svg",
+      "format": "svg",
+      "alt": "Replier",
+      "decorative": false,
+      "bytes": 229,
+      "sha256": "cb9398b0fe43a76575f7449b46dc651742c37f92a065877a81bca943c0e3228b"
+    },
+    {
+      "id": "icon-close",
+      "path": "03_Icones_SVG/icon-close.svg",
+      "format": "svg",
+      "alt": "Fermer",
+      "decorative": false,
+      "bytes": 236,
+      "sha256": "09c0b055d07764062ac09d3772dc0af985242e140e377d32e0f9a62776abba2f"
+    },
+    {
+      "id": "icon-check",
+      "path": "03_Icones_SVG/icon-check.svg",
+      "format": "svg",
+      "alt": "Confirmé",
+      "decorative": false,
+      "bytes": 232,
+      "sha256": "a3896fb6fa988b21a83b5a5f9bdfbfc946aa711f0b81095e77ef38b103fe605f"
+    },
+    {
+      "id": "icon-plus",
+      "path": "03_Icones_SVG/icon-plus.svg",
+      "format": "svg",
+      "alt": "Ajouter",
+      "decorative": false,
+      "bytes": 233,
+      "sha256": "b98370a457b66a893fe1ec3f8609dec3256a916635594dc2ba672c9a5049d9df"
+    },
+    {
+      "id": "icon-minus",
+      "path": "03_Icones_SVG/icon-minus.svg",
+      "format": "svg",
+      "alt": "Réduire",
+      "decorative": false,
+      "bytes": 225,
+      "sha256": "674d3d79457b7250812161dbdae75de3590fd209d4e633002862544d4da5b4de"
+    },
+    {
+      "id": "icon-search",
+      "path": "03_Icones_SVG/icon-search.svg",
+      "format": "svg",
+      "alt": "Rechercher",
+      "decorative": false,
+      "bytes": 266,
+      "sha256": "d01c4673df0ca16171e94c1d03e04c0079ca366d64fa209e05280512de0d9b94"
+    },
+    {
+      "id": "icon-filter",
+      "path": "03_Icones_SVG/icon-filter.svg",
+      "format": "svg",
+      "alt": "Filtrer",
+      "decorative": false,
+      "bytes": 376,
+      "sha256": "0d1ba269d26550dd1a1d4a6ddabefd8830df8886856e2da538de69bff1e42a60"
+    },
+    {
+      "id": "icon-bookmark",
+      "path": "03_Icones_SVG/icon-bookmark.svg",
+      "format": "svg",
+      "alt": "Enregistrer",
+      "decorative": false,
+      "bytes": 240,
+      "sha256": "b799b84a5529dd6bfc4973ca33938741d4776b597719f584f61af60e5cc35c2c"
+    },
+    {
+      "id": "icon-star",
+      "path": "03_Icones_SVG/icon-star.svg",
+      "format": "svg",
+      "alt": "Favori",
+      "decorative": false,
+      "bytes": 257,
+      "sha256": "f55acc29bf62ea623a78be464a6f07c5474dfbfabd5fa25e24eba904df21a9fe"
+    },
+    {
+      "id": "icon-share",
+      "path": "03_Icones_SVG/icon-share.svg",
+      "format": "svg",
+      "alt": "Partager",
+      "decorative": false,
+      "bytes": 327,
+      "sha256": "882c40abcd0fc1485d0222a9e51a7ef1472a1da8daee6b4ec75840b2e9dbe706"
+    },
+    {
+      "id": "icon-send",
+      "path": "03_Icones_SVG/icon-send.svg",
+      "format": "svg",
+      "alt": "Envoyer",
+      "decorative": false,
+      "bytes": 245,
+      "sha256": "971be2e7cb039d1ba379f724274e65bc4898a498d08733d907cbb7087d58c186"
+    },
+    {
+      "id": "icon-copy",
+      "path": "03_Icones_SVG/icon-copy.svg",
+      "format": "svg",
+      "alt": "Copier",
+      "decorative": false,
+      "bytes": 278,
+      "sha256": "9ed8d8e7aa4d120c6b1ef45f7d9d0d81e8139173bc9287f17d9ee5e00ef368d2"
+    },
+    {
+      "id": "icon-link",
+      "path": "03_Icones_SVG/icon-link.svg",
+      "format": "svg",
+      "alt": "Lien",
+      "decorative": false,
+      "bytes": 347,
+      "sha256": "16e303f72b23a06f1012ea281566d859c0cfd739d3952a4d9d2d3e07d7925fd8"
+    },
+    {
+      "id": "icon-users",
+      "path": "03_Icones_SVG/icon-users.svg",
+      "format": "svg",
+      "alt": "Duo",
+      "decorative": false,
+      "bytes": 309,
+      "sha256": "ad5849d19c0986452b67e833d8b1e94051948f8b41f8dc2c3d83934b9601f04e"
+    },
+    {
+      "id": "icon-user",
+      "path": "03_Icones_SVG/icon-user.svg",
+      "format": "svg",
+      "alt": "Profil",
+      "decorative": false,
+      "bytes": 270,
+      "sha256": "b16801efe836a1267d899d8c771999d6b32910cac9d25203f5df1f76be5f0e70"
+    },
+    {
+      "id": "icon-chat",
+      "path": "03_Icones_SVG/icon-chat.svg",
+      "format": "svg",
+      "alt": "Salon privé",
+      "decorative": false,
+      "bytes": 325,
+      "sha256": "9418d95bfa071172fc4da4020617af86144ea40127ed304bb37ad26a004d50d4"
+    },
+    {
+      "id": "icon-pause",
+      "path": "03_Icones_SVG/icon-pause.svg",
+      "format": "svg",
+      "alt": "Pause",
+      "decorative": false,
+      "bytes": 299,
+      "sha256": "49869e9e1ade0938b34fccfd6548d6a196b8353a1b74f569caf0332f7d5d7972"
+    },
+    {
+      "id": "icon-play",
+      "path": "03_Icones_SVG/icon-play.svg",
+      "format": "svg",
+      "alt": "Lire",
+      "decorative": false,
+      "bytes": 228,
+      "sha256": "69c4ffd383287b9221a9795263338ce89ab27070debc6be82448d3352f38d6ef"
+    },
+    {
+      "id": "icon-stop",
+      "path": "03_Icones_SVG/icon-stop.svg",
+      "format": "svg",
+      "alt": "Arrêter",
+      "decorative": false,
+      "bytes": 254,
+      "sha256": "87ee5f34cd7c01bdbbfdc13260451a85d21f1fbdc8c4c5772b7c88b7e601da88"
+    },
+    {
+      "id": "icon-skip",
+      "path": "03_Icones_SVG/icon-skip.svg",
+      "format": "svg",
+      "alt": "Passer",
+      "decorative": false,
+      "bytes": 239,
+      "sha256": "637be35be066f1e9432379c2501aa701fba818dd860b3977ad52b3851cb8f585"
+    },
+    {
+      "id": "icon-mic",
+      "path": "03_Icones_SVG/icon-mic.svg",
+      "format": "svg",
+      "alt": "Enregistrer un vocal",
+      "decorative": false,
+      "bytes": 319,
+      "sha256": "c4aa3d3dad0df41d41389c89c3cf3aa2830b07b4ee92761438e99162fda5278f"
+    },
+    {
+      "id": "icon-image",
+      "path": "03_Icones_SVG/icon-image.svg",
+      "format": "svg",
+      "alt": "Photo",
+      "decorative": false,
+      "bytes": 313,
+      "sha256": "51a6e1fa2f75c34e215f8b78b26bdc6b1ec98b2c3285ab0bb237ea684800e880"
+    },
+    {
+      "id": "icon-volume",
+      "path": "03_Icones_SVG/icon-volume.svg",
+      "format": "svg",
+      "alt": "Son",
+      "decorative": false,
+      "bytes": 276,
+      "sha256": "1d111b27f67d0ab75e00d1e41268140db4f085a40cbb4b8a4080a8b9f9653e17"
+    },
+    {
+      "id": "icon-clock",
+      "path": "03_Icones_SVG/icon-clock.svg",
+      "format": "svg",
+      "alt": "Durée",
+      "decorative": false,
+      "bytes": 257,
+      "sha256": "04572bf0615084f91dddc2322788620356cae18638c59bb014edc5dc1ff03408"
+    },
+    {
+      "id": "icon-lock",
+      "path": "03_Icones_SVG/icon-lock.svg",
+      "format": "svg",
+      "alt": "Privé",
+      "decorative": false,
+      "bytes": 298,
+      "sha256": "20d39b824b26852997b3dfe6aa957542bef7d13c6f73a691d2f5f349a63478f7"
+    },
+    {
+      "id": "icon-eye",
+      "path": "03_Icones_SVG/icon-eye.svg",
+      "format": "svg",
+      "alt": "Voir",
+      "decorative": false,
+      "bytes": 288,
+      "sha256": "f89062b89a878f5c472cbeaff778b61b46bc7534a54864c2106e3bfa17e60d92"
+    },
+    {
+      "id": "icon-eye-off",
+      "path": "03_Icones_SVG/icon-eye-off.svg",
+      "format": "svg",
+      "alt": "Masqué",
+      "decorative": false,
+      "bytes": 331,
+      "sha256": "4f974e65be515f53b5242a7f90fb5050a8af03720b8d6eae76460a64d925169a"
+    },
+    {
+      "id": "icon-bell",
+      "path": "03_Icones_SVG/icon-bell.svg",
+      "format": "svg",
+      "alt": "Notifications",
+      "decorative": false,
+      "bytes": 275,
+      "sha256": "3f6bb4b5b273b10b86a5f04e9567c2b9e1495c67eed9e8a336865de50ae42268"
+    },
+    {
+      "id": "icon-wifi",
+      "path": "03_Icones_SVG/icon-wifi.svg",
+      "format": "svg",
+      "alt": "Connexion",
+      "decorative": false,
+      "bytes": 333,
+      "sha256": "95bc304dbb21f2c6039ab2906789b3dcd88c50f1f4c4c3cc70acd9ec0a7f4ce0"
+    },
+    {
+      "id": "icon-refresh",
+      "path": "03_Icones_SVG/icon-refresh.svg",
+      "format": "svg",
+      "alt": "Réessayer",
+      "decorative": false,
+      "bytes": 249,
+      "sha256": "0af1fe75679c7dca9b6b0a45b1a7030792ff3d14e2de2a6bee24108e1da01019"
+    },
+    {
+      "id": "icon-logout",
+      "path": "03_Icones_SVG/icon-logout.svg",
+      "format": "svg",
+      "alt": "Déconnexion",
+      "decorative": false,
+      "bytes": 255,
+      "sha256": "b2a216e5d77fe77ec06b988332979bc920fdee7c21b034239e4b22a8a4d8c19d"
+    },
+    {
+      "id": "icon-info",
+      "path": "03_Icones_SVG/icon-info.svg",
+      "format": "svg",
+      "alt": "Information",
+      "decorative": false,
+      "bytes": 270,
+      "sha256": "b46151139eaf0b2a6fce0855fc94bf09c7e6c8f218d6303a14c89da45797c3d6"
+    },
+    {
+      "id": "icon-help",
+      "path": "03_Icones_SVG/icon-help.svg",
+      "format": "svg",
+      "alt": "Aide",
+      "decorative": false,
+      "bytes": 287,
+      "sha256": "477667dc7f759121939dda2fd553e0a7fa25935ab3ae040246da5c74248a8bb5"
+    },
+    {
+      "id": "icon-pencil",
+      "path": "03_Icones_SVG/icon-pencil.svg",
+      "format": "svg",
+      "alt": "Dessiner",
+      "decorative": false,
+      "bytes": 261,
+      "sha256": "87f04c516ca6e474f694f3d65e0a1d2e75f3bcc93109adb0b2dc9ed19fef140b"
+    },
+    {
+      "id": "icon-undo",
+      "path": "03_Icones_SVG/icon-undo.svg",
+      "format": "svg",
+      "alt": "Annuler",
+      "decorative": false,
+      "bytes": 252,
+      "sha256": "2f3e0b6d49a7725e0c8c2bba2ce353c1a243e5551a40fcd35a07bb25ea0e6f2a"
+    },
+    {
+      "id": "icon-eraser",
+      "path": "03_Icones_SVG/icon-eraser.svg",
+      "format": "svg",
+      "alt": "Gommer",
+      "decorative": false,
+      "bytes": 256,
+      "sha256": "84dc3659d03979e78883c0ce5295093090165d2278888b8869b1ceb383ffc04a"
+    },
+    {
+      "id": "icon-smile",
+      "path": "03_Icones_SVG/icon-smile.svg",
+      "format": "svg",
+      "alt": "Rire ensemble",
+      "decorative": false,
+      "bytes": 287,
+      "sha256": "09105757bcd029c885429da34d19725abcd636606571760af114d0ce8717d39b"
+    },
+    {
+      "id": "icon-puzzle",
+      "path": "03_Icones_SVG/icon-puzzle.svg",
+      "format": "svg",
+      "alt": "Coopérer",
+      "decorative": false,
+      "bytes": 351,
+      "sha256": "83fe32f31bbb0636655c9f08fd4be3e259fd78eda26148a5554e45de7ac39243"
+    },
+    {
+      "id": "icon-cards",
+      "path": "03_Icones_SVG/icon-cards.svg",
+      "format": "svg",
+      "alt": "Cartes de jeu",
+      "decorative": false,
+      "bytes": 312,
+      "sha256": "626f676a03ddb76bf2888f2ba34e61421f84861bf9b264783afdd89f187e7ef8"
+    },
+    {
+      "id": "icon-lightning",
+      "path": "03_Icones_SVG/icon-lightning.svg",
+      "format": "svg",
+      "alt": "Défi",
+      "decorative": false,
+      "bytes": 241,
+      "sha256": "c0f77cb29a746750584f1de39579f8d7a44abd4f4a6b8453ef89275088e0db82"
+    },
+    {
+      "id": "icon-leaf",
+      "path": "03_Icones_SVG/icon-leaf.svg",
+      "format": "svg",
+      "alt": "Se découvrir",
+      "decorative": false,
+      "bytes": 292,
+      "sha256": "0aa7513300dddc0a1d0557096af0b7a98c719623d939e90d2151e7682d8afa9f"
+    },
+    {
+      "id": "icon-sparkles",
+      "path": "03_Icones_SVG/icon-sparkles.svg",
+      "format": "svg",
+      "alt": "Découverte",
+      "decorative": false,
+      "bytes": 290,
+      "sha256": "9a74ede340abb0a3711d01345d178cb4402f20b0af1ff306e764cb9a3d0ede4b"
+    },
+    {
+      "id": "icon-delete",
+      "path": "03_Icones_SVG/icon-delete.svg",
+      "format": "svg",
+      "alt": "Supprimer",
+      "decorative": false,
+      "bytes": 272,
+      "sha256": "31d5d4ed2204d0096c5c605f520e69a4650d9cec27330456a6a2a5c105b41a9c"
+    },
+    {
+      "id": "icon-quote",
+      "path": "03_Icones_SVG/icon-quote.svg",
+      "format": "svg",
+      "alt": "Citation",
+      "decorative": false,
+      "bytes": 265,
+      "sha256": "e56bced29e2af0077d4ed7c3d7013ca077d92794c17f2cbda9e723451ed0003b"
+    },
+    {
+      "id": "noodeu-logo-couleur",
+      "path": "01_Logos/noodeu-logo-couleur.svg",
+      "format": "svg",
+      "alt": "Noodeu",
+      "decorative": false,
+      "bytes": 1108,
+      "sha256": "808021eb78f20009e07c8efcf4c230e6a5805fd8c5bb7c824f89ec3dbb3aff56"
+    },
+    {
+      "id": "noodeu-symbole-couleur",
+      "path": "01_Logos/noodeu-symbole-couleur.svg",
+      "format": "svg",
+      "alt": "Noodeu",
+      "decorative": false,
+      "bytes": 597,
+      "sha256": "58a66364bd8866fadfb423c812a3163a1e9ab78a6a97756e95bee0e17db85834"
+    },
+    {
+      "id": "noodeu-logo-prune",
+      "path": "01_Logos/noodeu-logo-prune.svg",
+      "format": "svg",
+      "alt": "Noodeu",
+      "decorative": false,
+      "bytes": 1108,
+      "sha256": "400349a813260dfe77efa77bab0afc5a0d24f41b9011968d3e2cb5e2167a6a61"
+    },
+    {
+      "id": "noodeu-symbole-prune",
+      "path": "01_Logos/noodeu-symbole-prune.svg",
+      "format": "svg",
+      "alt": "Noodeu",
+      "decorative": false,
+      "bytes": 597,
+      "sha256": "e1f753e1c1561ea50dc2a146036c94e970ae99d2d4af625568142699453c4162"
+    },
+    {
+      "id": "noodeu-logo-blanc",
+      "path": "01_Logos/noodeu-logo-blanc.svg",
+      "format": "svg",
+      "alt": "Noodeu",
+      "decorative": false,
+      "bytes": 1108,
+      "sha256": "dbfe2f7ec0f8c1907c3d2e09c14492f60b01b523ec1aa3c3bc8086d9de77d0a8"
+    },
+    {
+      "id": "noodeu-symbole-blanc",
+      "path": "01_Logos/noodeu-symbole-blanc.svg",
+      "format": "svg",
+      "alt": "Noodeu",
+      "decorative": false,
+      "bytes": 597,
+      "sha256": "05834a88e9463934dcca158b7ad32edd5b0d18ee3538fb52f5e01b823a863fad"
+    },
+    {
+      "id": "noodeu-favicon",
+      "path": "01_Logos/noodeu-favicon.svg",
+      "format": "svg",
+      "alt": "Noodeu",
+      "decorative": false,
+      "bytes": 344,
+      "sha256": "94ccefe793fb031dbb862cb0bec01019cdc668e2c3dc7433c177dd24c267faf8"
+    },
+    {
+      "id": "noodeu-logo-signature",
+      "path": "01_Logos/noodeu-logo-signature.svg",
+      "format": "svg",
+      "alt": "Noodeu. Le jeu nous rapproche.",
+      "decorative": false,
+      "bytes": 15835,
+      "sha256": "4f3b71dc088a500fc11a5904fc84cf5dda7e15dff8e44934eddf07b44688a7a1"
+    },
+    {
+      "id": "noodeu-app-icon",
+      "path": "01_Logos/noodeu-app-icon.svg",
+      "format": "svg",
+      "alt": "Noodeu",
+      "decorative": false,
+      "bytes": 657,
+      "sha256": "dce40692197630acda9fe3ca560959565a4a1d2ec21b643362a24d8dbdb9c54f"
+    },
+    {
+      "id": "decor-halo-abricot",
+      "path": "04_Decors_SVG/decor-halo-abricot.svg",
+      "format": "svg",
+      "alt": "",
+      "decorative": true,
+      "bytes": 225,
+      "sha256": "7fac148a6014b38c3086d13475b3f808029dea7ec03e85eab673aae35fbea1b3"
+    },
+    {
+      "id": "decor-halo-corail",
+      "path": "04_Decors_SVG/decor-halo-corail.svg",
+      "format": "svg",
+      "alt": "",
+      "decorative": true,
+      "bytes": 217,
+      "sha256": "e6d7c8b1bc159b71ff86cfa596df25aa97e9272df0d59b75228a1ce72273ff59"
+    },
+    {
+      "id": "decor-vague",
+      "path": "04_Decors_SVG/decor-vague.svg",
+      "format": "svg",
+      "alt": "",
+      "decorative": true,
+      "bytes": 179,
+      "sha256": "9b5c1b535ad48fe7e9d970f24356964eb2d4d06f51c42bc756379f170b68a1fd"
+    },
+    {
+      "id": "decor-rayons",
+      "path": "04_Decors_SVG/decor-rayons.svg",
+      "format": "svg",
+      "alt": "",
+      "decorative": true,
+      "bytes": 217,
+      "sha256": "39d162c065f8c460de81ba73c617da60c62d2904deb02ff9367974b94111bad0"
+    },
+    {
+      "id": "decor-coeur-trait",
+      "path": "04_Decors_SVG/decor-coeur-trait.svg",
+      "format": "svg",
+      "alt": "",
+      "decorative": true,
+      "bytes": 227,
+      "sha256": "7b684a9a1cfe7bbccaa81a39399f1119e21b390126f14cf21e40aef5222ef2c1"
+    },
+    {
+      "id": "decor-lien-coeur",
+      "path": "04_Decors_SVG/decor-lien-coeur.svg",
+      "format": "svg",
+      "alt": "",
+      "decorative": true,
+      "bytes": 243,
+      "sha256": "a7db729338a094c1704a273a7cd51187b2e7880ce4dcc556b7237cf7397bcc5f"
+    },
+    {
+      "id": "decor-confettis",
+      "path": "04_Decors_SVG/decor-confettis.svg",
+      "format": "svg",
+      "alt": "",
+      "decorative": true,
+      "bytes": 345,
+      "sha256": "059fecb57aaf6e18e792ed0ec085ad633337bafe67ed1e8891e1b74700573d72"
+    },
+    {
+      "id": "decor-etoiles",
+      "path": "04_Decors_SVG/decor-etoiles.svg",
+      "format": "svg",
+      "alt": "",
+      "decorative": true,
+      "bytes": 249,
+      "sha256": "95fbf62ad843258704c4341970f3c2c1d77029f0cc46e25a23b0583e887bc45f"
+    },
+    {
+      "id": "decor-pointilles",
+      "path": "04_Decors_SVG/decor-pointilles.svg",
+      "format": "svg",
+      "alt": "",
+      "decorative": true,
+      "bytes": 233,
+      "sha256": "1c14a3f8e1b97ee13d2c2c5acbb57b7efe0dc5789708234f7c3fb44095c7bbef"
+    },
+    {
+      "id": "decor-feuilles",
+      "path": "04_Decors_SVG/decor-feuilles.svg",
+      "format": "svg",
+      "alt": "",
+      "decorative": true,
+      "bytes": 300,
+      "sha256": "a02d8f56ba3b8eeb29365707b2c861f2b88b9501bf42c93574397bcbb053c2af"
+    },
+    {
+      "id": "noodeu-app-icon-192",
+      "path": "01_Logos/noodeu-app-icon-192.png",
+      "format": "png",
+      "alt": "Noodeu",
+      "decorative": false,
+      "bytes": 5666,
+      "sha256": "fa59ac8528755f0005507cbe6dacbe50d49062da35fd4a5c2325dbd967388e00"
+    },
+    {
+      "id": "noodeu-app-icon-512",
+      "path": "01_Logos/noodeu-app-icon-512.png",
+      "format": "png",
+      "alt": "Noodeu",
+      "decorative": false,
+      "bytes": 16146,
+      "sha256": "27e5664aeb5533e89d3e9dc4c8855c12301d1a7d594275908cd121739ee8b1db"
+    },
+    {
+      "id": "noodeu-app-icon-180",
+      "path": "01_Logos/noodeu-app-icon-180.png",
+      "format": "png",
+      "alt": "Noodeu",
+      "decorative": false,
+      "bytes": 5296,
+      "sha256": "671a676ed87bd93d87bf811d598f9d30978730ced5df3c2e444b561d8b5b6331"
+    },
+    {
+      "id": "noodeu-favicon-32",
+      "path": "01_Logos/noodeu-favicon-32.png",
+      "format": "png",
+      "alt": "Noodeu",
+      "decorative": false,
+      "bytes": 1429,
+      "sha256": "655b8dba4675a52386525ab5d7df1000081c11063cf6838fbc40cc1a7f7ac052"
+    },
+    {
+      "id": "noodeu-favicon-64",
+      "path": "01_Logos/noodeu-favicon-64.png",
+      "format": "png",
+      "alt": "Noodeu",
+      "decorative": false,
+      "bytes": 2813,
+      "sha256": "021235785ef88a601d57b43d6e02ff84f2901510f36b7e5bed6c68dfbc981c8e"
+    },
+    {
+      "id": "noodeu-logo-blanc-1560",
+      "path": "01_Logos/noodeu-logo-blanc-1560.png",
+      "format": "png",
+      "alt": "Noodeu",
+      "decorative": false,
+      "bytes": 41730,
+      "sha256": "9d6d299881d9c731037a53913af85d67cd89c143e466120fab42710f6e293561"
+    },
+    {
+      "id": "noodeu-logo-couleur-1560",
+      "path": "01_Logos/noodeu-logo-couleur-1560.png",
+      "format": "png",
+      "alt": "Noodeu",
+      "decorative": false,
+      "bytes": 48911,
+      "sha256": "2fd0f370601413bc9690e0acc233fb1691c0280fdfc5e57ce4465d3047bad163"
+    },
+    {
+      "id": "noodeu-logo-prune-1560",
+      "path": "01_Logos/noodeu-logo-prune-1560.png",
+      "format": "png",
+      "alt": "Noodeu",
+      "decorative": false,
+      "bytes": 47784,
+      "sha256": "f01b99d87d5fe2c8f00fb4774a869a9dd9c2ee3f0fd9acbf1661d447f74412b7"
+    },
+    {
+      "id": "noodeu-logo-signature-1560",
+      "path": "01_Logos/noodeu-logo-signature-1560.png",
+      "format": "png",
+      "alt": "Noodeu",
+      "decorative": false,
+      "bytes": 62589,
+      "sha256": "f58a4d99e41aec12760523feaaada70af9caf562523dfc752ada007f29b214eb"
+    },
+    {
+      "id": "noodeu-symbole-blanc-512",
+      "path": "01_Logos/noodeu-symbole-blanc-512.png",
+      "format": "png",
+      "alt": "Noodeu",
+      "decorative": false,
+      "bytes": 15843,
+      "sha256": "ec8225627c4abb56ed10c54c971d4eaea477547b0ca375e931a7397b99196f23"
+    },
+    {
+      "id": "noodeu-symbole-couleur-512",
+      "path": "01_Logos/noodeu-symbole-couleur-512.png",
+      "format": "png",
+      "alt": "Noodeu",
+      "decorative": false,
+      "bytes": 18626,
+      "sha256": "7481dec145e03bb5eda3713f5f07d7ab81d0841713bdf5cb554a8c1c90a39794"
+    },
+    {
+      "id": "noodeu-symbole-prune-512",
+      "path": "01_Logos/noodeu-symbole-prune-512.png",
+      "format": "png",
+      "alt": "Noodeu",
+      "decorative": false,
+      "bytes": 17947,
+      "sha256": "170d01e70a5ca2a08da2c08a4073241269fb1677d26a9c78734fe04b15752ed8"
+    },
+    {
+      "id": "noodeu-01-connexion-a-deux",
+      "path": "02_Illustrations_PNG/noodeu-01-connexion-a-deux.png",
+      "format": "png",
+      "width": 1448,
+      "height": 1086,
+      "alpha": true,
+      "alt": "Deux téléphones reliés par un cœur",
+      "decorative": true,
+      "recommendedWidthCss": 280,
+      "bytes": 516661,
+      "sha256": "6924f68653761bde62877e503cec368ec3584a377aa5ac26c01bed3bfc8a5e96"
+    },
+    {
+      "id": "noodeu-02-invitation",
+      "path": "02_Illustrations_PNG/noodeu-02-invitation.png",
+      "format": "png",
+      "width": 1448,
+      "height": 1086,
+      "alpha": true,
+      "alt": "Invitation dans une enveloppe",
+      "decorative": true,
+      "recommendedWidthCss": 280,
+      "bytes": 636949,
+      "sha256": "22bb99ae476ab3e832b6a6e494929efea0482f16942ec521188f1349fc0078a1"
+    },
+    {
+      "id": "noodeu-03-duo-confirme",
+      "path": "02_Illustrations_PNG/noodeu-03-duo-confirme.png",
+      "format": "png",
+      "width": 1448,
+      "height": 1086,
+      "alpha": true,
+      "alt": "Deux bulles réunies",
+      "decorative": true,
+      "recommendedWidthCss": 280,
+      "bytes": 559237,
+      "sha256": "0ed6b42a3a96314313e99e275e82de2b9e6e0d785e79201c0154300092340e30"
+    },
+    {
+      "id": "noodeu-04-portrait-en-mots",
+      "path": "02_Illustrations_PNG/noodeu-04-portrait-en-mots.png",
+      "format": "png",
+      "width": 1448,
+      "height": 1086,
+      "alpha": true,
+      "alt": "Cinq cartes autour de deux portraits",
+      "decorative": true,
+      "recommendedWidthCss": 280,
+      "bytes": 791907,
+      "sha256": "bd59064f1956b8296604ed3be9b3ac7656f10dec0410cac2a67117db6c930f05"
+    },
+    {
+      "id": "noodeu-05-conversation",
+      "path": "02_Illustrations_PNG/noodeu-05-conversation.png",
+      "format": "png",
+      "width": 1448,
+      "height": 1086,
+      "alpha": true,
+      "alt": "Deux bulles de conversation",
+      "decorative": true,
+      "recommendedWidthCss": 280,
+      "bytes": 641311,
+      "sha256": "5bb5685ef1d7d3d8891e2cb7eeb8cd3059211a1f39ea57ffb6bccc4f7a423754"
+    },
+    {
+      "id": "noodeu-06-quiz-devinette",
+      "path": "02_Illustrations_PNG/noodeu-06-quiz-devinette.png",
+      "format": "png",
+      "width": 1448,
+      "height": 1086,
+      "alpha": true,
+      "alt": "Cartes de devinette",
+      "decorative": true,
+      "recommendedWidthCss": 280,
+      "bytes": 709844,
+      "sha256": "64f765490711e54451326e177e824f7fdbb75d718823192cd12c2ccfb415f2df"
+    },
+    {
+      "id": "noodeu-07-dessin-creatif",
+      "path": "02_Illustrations_PNG/noodeu-07-dessin-creatif.png",
+      "format": "png",
+      "width": 1448,
+      "height": 1086,
+      "alpha": true,
+      "alt": "Carnet et crayon",
+      "decorative": true,
+      "recommendedWidthCss": 280,
+      "bytes": 816391,
+      "sha256": "24a0a659424b4fddae20105720fc95d65ad72f5921f39e615546b6d69683edff"
+    },
+    {
+      "id": "noodeu-08-cooperation",
+      "path": "02_Illustrations_PNG/noodeu-08-cooperation.png",
+      "format": "png",
+      "width": 1448,
+      "height": 1086,
+      "alpha": true,
+      "alt": "Deux pièces de puzzle complémentaires",
+      "decorative": true,
+      "recommendedWidthCss": 280,
+      "bytes": 592588,
+      "sha256": "9f918cbce6a12a4f904de3e4b7c6f9ff6874d4f66ffba351ce9722704672273a"
+    },
+    {
+      "id": "noodeu-09-attente-douce",
+      "path": "02_Illustrations_PNG/noodeu-09-attente-douce.png",
+      "format": "png",
+      "width": 1448,
+      "height": 1086,
+      "alpha": true,
+      "alt": "Deux tasses pour patienter",
+      "decorative": true,
+      "recommendedWidthCss": 280,
+      "bytes": 587973,
+      "sha256": "9684b4211507014883a31ec28fd69c1d828b78137311337189e857650447b2b7"
+    },
+    {
+      "id": "noodeu-10-revelation",
+      "path": "02_Illustrations_PNG/noodeu-10-revelation.png",
+      "format": "png",
+      "width": 1448,
+      "height": 1086,
+      "alpha": true,
+      "alt": "Deux cartes dévoilées",
+      "decorative": true,
+      "recommendedWidthCss": 280,
+      "bytes": 623423,
+      "sha256": "839632b116e40bff5dbad33e47ba9a67e9cc73da2eee1f8c789c3a07aa5b6fe6"
+    },
+    {
+      "id": "noodeu-11-fin-de-partie",
+      "path": "02_Illustrations_PNG/noodeu-11-fin-de-partie.png",
+      "format": "png",
+      "width": 1448,
+      "height": 1086,
+      "alpha": true,
+      "alt": "Deux mains célèbrent la fin de partie",
+      "decorative": true,
+      "recommendedWidthCss": 280,
+      "bytes": 535789,
+      "sha256": "798424cebf47f1174b283f0c7c78c3c8118796e346f82c54847787708f0769e0"
+    },
+    {
+      "id": "noodeu-12-astuce",
+      "path": "02_Illustrations_PNG/noodeu-12-astuce.png",
+      "format": "png",
+      "width": 1448,
+      "height": 1086,
+      "alpha": true,
+      "alt": "Une idée à découvrir",
+      "decorative": true,
+      "recommendedWidthCss": 280,
+      "bytes": 406901,
+      "sha256": "6523946006f5ea78d0998ca2be3cdcf05bb741f35186833d79d24937454cc7fc"
+    },
+    {
+      "id": "noodeu-13-favoris",
+      "path": "02_Illustrations_PNG/noodeu-13-favoris.png",
+      "format": "png",
+      "width": 1448,
+      "height": 1086,
+      "alpha": true,
+      "alt": "Livre avec un marque-page",
+      "decorative": true,
+      "recommendedWidthCss": 280,
+      "bytes": 768975,
+      "sha256": "0a85e8b9d87f9e20363c943fea6a30b3193e181fc6dcc7e7de240e93c37ace50"
+    },
+    {
+      "id": "noodeu-14-duo-a-creer",
+      "path": "02_Illustrations_PNG/noodeu-14-duo-a-creer.png",
+      "format": "png",
+      "width": 1448,
+      "height": 1086,
+      "alpha": true,
+      "alt": "Un duo à former",
+      "decorative": true,
+      "recommendedWidthCss": 280,
+      "bytes": 527588,
+      "sha256": "7f8d166f3e0ebbcb8725c49a903dbad4ae9028c206cf9a2d39f25b5a242c1258"
+    },
+    {
+      "id": "noodeu-15-invitation-expiree",
+      "path": "02_Illustrations_PNG/noodeu-15-invitation-expiree.png",
+      "format": "png",
+      "width": 1448,
+      "height": 1086,
+      "alpha": true,
+      "alt": "Une invitation à renouveler",
+      "decorative": true,
+      "recommendedWidthCss": 280,
+      "bytes": 602748,
+      "sha256": "540acf2fc0b6b485b384c000bbced7e63e28f87bc33a662381f7fb02900f3f1f"
+    },
+    {
+      "id": "noodeu-16-reconnexion",
+      "path": "02_Illustrations_PNG/noodeu-16-reconnexion.png",
+      "format": "png",
+      "width": 1448,
+      "height": 1086,
+      "alpha": true,
+      "alt": "Connexion entre deux téléphones",
+      "decorative": true,
+      "recommendedWidthCss": 280,
+      "bytes": 588951,
+      "sha256": "931a16a0f687d61465a4efc6a3ebb87e70ec671c3486c5cf47b07a7f99fb68a6"
+    },
+    {
+      "id": "noodeu-17-pause",
+      "path": "02_Illustrations_PNG/noodeu-17-pause.png",
+      "format": "png",
+      "width": 1448,
+      "height": 1086,
+      "alpha": true,
+      "alt": "Un moment de pause",
+      "decorative": true,
+      "recommendedWidthCss": 280,
+      "bytes": 468731,
+      "sha256": "63b0e6b52ae2ac040107551ea014c54adc0590a9adabc1c76952f556ac90a187"
+    },
+    {
+      "id": "noodeu-18-rire-ensemble",
+      "path": "02_Illustrations_PNG/noodeu-18-rire-ensemble.png",
+      "format": "png",
+      "width": 1448,
+      "height": 1086,
+      "alpha": true,
+      "alt": "Deux bulles qui rient",
+      "decorative": true,
+      "recommendedWidthCss": 280,
+      "bytes": 558528,
+      "sha256": "97048b592c4fa32167fef5bedbad9472f7d6e5b688f6731310b12f41d3495eb3"
+    }
+  ]
+}

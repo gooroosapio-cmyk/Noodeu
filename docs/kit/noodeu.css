@@ -1,0 +1,47 @@
+:root {
+ --nd-ivory:#FFF8F0; --nd-plum:#48283D; --nd-coral:#FF716B; --nd-apricot:#F4C6AE;
+ --nd-muted:#705E6F; --nd-line:#E8D7CE; --nd-surface:#FFFFFF; --nd-selected:#FFE1D8;
+ --nd-success:#28734A; --nd-error:#A52C40;
+ --nd-font-body:"DM Sans",system-ui,sans-serif; --nd-font-heading:"Nunito Sans",system-ui,sans-serif;
+ --nd-radius-card:24px; --nd-radius-control:16px; --nd-space:8px;
+ --nd-shadow:0 8px 28px rgb(72 40 61 / 7%);
+ --nd-fast:160ms; --nd-normal:220ms;
+}
+.nd-root {color:var(--nd-plum);background:var(--nd-ivory);font:400 16px/1.5 var(--nd-font-body)}
+.nd-root *, .nd-root *::before, .nd-root *::after {box-sizing:border-box}
+.nd-root h1,.nd-root h2,.nd-root h3 {font-family:var(--nd-font-heading);line-height:1.15;letter-spacing:-.025em}
+.nd-root h1 {font-size:clamp(28px,7vw,36px)}
+.nd-container {width:min(100%,480px);margin:auto;padding:24px 20px}
+.nd-logo {display:block;width:150px;height:auto}
+.nd-illustration {display:block;max-width:100%;height:auto;object-fit:contain;pointer-events:none}
+.nd-icon {display:inline-block;width:24px;height:24px;flex:none;background:currentColor;mask:var(--nd-icon-url) center / contain no-repeat;-webkit-mask:var(--nd-icon-url) center / contain no-repeat}
+.nd-button {min-height:52px;padding:12px 20px;border:1px solid transparent;border-radius:999px;background:var(--nd-coral);color:var(--nd-plum);font:700 16px/1.3 var(--nd-font-body);display:inline-flex;align-items:center;justify-content:center;gap:10px;text-decoration:none;cursor:pointer;transition:transform var(--nd-fast),background var(--nd-fast)}
+.nd-button:active:not(:disabled){transform:scale(.98)}
+.nd-button--secondary {background:var(--nd-ivory);border-color:var(--nd-line)}
+.nd-button:disabled {cursor:default;background:#E8D7CE;color:#705E6F}
+.nd-button:focus-visible,.nd-nav a:focus-visible,.nd-chip:focus-visible {outline:3px solid var(--nd-plum);outline-offset:4px}
+.nd-card {background:var(--nd-surface);border:1px solid var(--nd-line);border-radius:var(--nd-radius-card);padding:24px;box-shadow:var(--nd-shadow)}
+.nd-card--warm {background:#FCE6D8}
+.nd-chip {min-height:44px;border:1px solid var(--nd-line);border-radius:999px;padding:8px 16px;background:var(--nd-surface);color:var(--nd-plum);font:inherit}
+.nd-chip[aria-pressed=true] {background:var(--nd-selected);border-color:var(--nd-plum)}
+.nd-empty {display:grid;justify-items:center;text-align:center;gap:16px;padding:32px 20px}
+.nd-empty h2,.nd-empty p {margin:0}
+.nd-nav {position:sticky;bottom:0;display:grid;grid-template-columns:repeat(5,minmax(0,1fr));padding:8px 4px calc(8px + env(safe-area-inset-bottom));gap:2px;background:var(--nd-ivory);border-top:1px solid var(--nd-line);z-index:20}
+.nd-nav a {display:flex;flex-direction:column;align-items:center;justify-content:flex-start;gap:5px;min-height:60px;padding:6px 1px;color:var(--nd-muted);text-decoration:none;font:500 11px/1.2 var(--nd-font-body);text-align:center;border-radius:16px;overflow-wrap:anywhere}
+.nd-nav a[aria-current=page] {background:var(--nd-selected);color:var(--nd-plum);font-weight:700}
+.nd-nav span:last-child {max-width:100%}
+.nd-story {min-height:min(620px,72svh);border-radius:28px;background:#FCE6D8;padding:28px 24px;display:flex;flex-direction:column;justify-content:space-between;gap:24px}
+.nd-story h2 {font-size:clamp(24px,7vw,32px)}
+.nd-story p {font-size:18px;line-height:1.45}
+.nd-status {display:flex;align-items:center;gap:8px;color:var(--nd-muted)}
+.nd-status-dot {width:9px;height:9px;border-radius:50%;background:var(--nd-success)}
+.nd-loading {display:inline-flex;align-items:center;gap:5px}
+.nd-loading i {width:7px;height:7px;background:currentColor;border-radius:50%;animation:nd-dot 1.2s ease-in-out infinite}
+.nd-loading i:nth-child(2){animation-delay:.15s}.nd-loading i:nth-child(3){animation-delay:.3s}
+.nd-enter {animation:nd-enter 220ms ease-out both}
+.nd-heart-pulse {animation:nd-heart 650ms ease-in-out 1}
+@keyframes nd-dot {0%,80%,100%{opacity:.35;transform:translateY(0)}40%{opacity:1;transform:translateY(-3px)}}
+@keyframes nd-enter {from{opacity:0;transform:translateY(6px)}to{opacity:1;transform:none}}
+@keyframes nd-heart {0%,100%{transform:scale(1)}50%{transform:scale(1.08)}}
+@media(prefers-reduced-motion:reduce){.nd-root *, .nd-root *::before,.nd-root *::after {animation:none!important;transition:none!important;scroll-behavior:auto!important}}
+@media(forced-colors:active){.nd-button,.nd-chip,.nd-card {border:1px solid ButtonText}.nd-icon{background:CanvasText}}

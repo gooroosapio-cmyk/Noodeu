@@ -1,0 +1,31 @@
+﻿ecran,nom,illustration,usage,note
+01,Bienvenue,02_Illustrations_PNG/noodeu-01-connexion-a-deux.png,Principale,Utiliser des contrôles HTML accessibles.
+02,Compte,02_Illustrations_PNG/noodeu-12-astuce.png,"Facultative, petite ou absente pendant la saisie",Utiliser des contrôles HTML accessibles.
+03,Vérification,02_Illustrations_PNG/noodeu-02-invitation.png,Principale,Utiliser des contrôles HTML accessibles.
+04,Inviter ou rejoindre,02_Illustrations_PNG/noodeu-02-invitation.png,Principale,Utiliser des contrôles HTML accessibles.
+05,Confirmer le duo,02_Illustrations_PNG/noodeu-03-duo-confirme.png,Principale,Utiliser des contrôles HTML accessibles.
+06,Accueil,02_Illustrations_PNG/noodeu-01-connexion-a-deux.png,Principale,Utiliser des contrôles HTML accessibles.
+07,Bibliothèques,02_Illustrations_PNG/noodeu-13-favoris.png,"Facultative, petite ou absente pendant la saisie",Utiliser des contrôles HTML accessibles.
+08,Famille,02_Illustrations_PNG/noodeu-04-portrait-en-mots.png,"Facultative, petite ou absente pendant la saisie",Utiliser des contrôles HTML accessibles.
+09,Fiche du jeu,02_Illustrations_PNG/noodeu-04-portrait-en-mots.png,"Facultative, petite ou absente pendant la saisie",Utiliser des contrôles HTML accessibles.
+10,Réglages de partie,02_Illustrations_PNG/noodeu-05-conversation.png,"Facultative, petite ou absente pendant la saisie",Utiliser des contrôles HTML accessibles.
+11,Préparation dans le jeu,02_Illustrations_PNG/noodeu-03-duo-confirme.png,"Facultative, petite ou absente pendant la saisie",Utiliser des contrôles HTML accessibles.
+12,Mon portrait,02_Illustrations_PNG/noodeu-04-portrait-en-mots.png,"Facultative, petite ou absente pendant la saisie",Utiliser des contrôles HTML accessibles.
+13,Portrait du partenaire,02_Illustrations_PNG/noodeu-04-portrait-en-mots.png,"Facultative, petite ou absente pendant la saisie",Utiliser des contrôles HTML accessibles.
+14,Réponse libre,02_Illustrations_PNG/noodeu-05-conversation.png,"Facultative, petite ou absente pendant la saisie",Utiliser des contrôles HTML accessibles.
+15,Choix / devinette,02_Illustrations_PNG/noodeu-06-quiz-devinette.png,"Facultative, petite ou absente pendant la saisie",Utiliser des contrôles HTML accessibles.
+16,Dessin,02_Illustrations_PNG/noodeu-07-dessin-creatif.png,"Facultative, petite ou absente pendant la saisie",Utiliser des contrôles HTML accessibles.
+17,Coopération,02_Illustrations_PNG/noodeu-08-cooperation.png,"Facultative, petite ou absente pendant la saisie",Utiliser des contrôles HTML accessibles.
+18,Attente,02_Illustrations_PNG/noodeu-09-attente-douce.png,Principale,Utiliser des contrôles HTML accessibles.
+19,Révélation,02_Illustrations_PNG/noodeu-10-revelation.png,"Facultative, petite ou absente pendant la saisie",Utiliser des contrôles HTML accessibles.
+20,Fin de partie,02_Illustrations_PNG/noodeu-11-fin-de-partie.png,Principale,Utiliser des contrôles HTML accessibles.
+21,Notre espace,02_Illustrations_PNG/noodeu-03-duo-confirme.png,"Facultative, petite ou absente pendant la saisie",Utiliser des contrôles HTML accessibles.
+22,Paramètres,,"Facultative, petite ou absente pendant la saisie",Utiliser des contrôles HTML accessibles.
+23,Reconnexion,02_Illustrations_PNG/noodeu-16-reconnexion.png,Principale,Utiliser des contrôles HTML accessibles.
+24,Pause,02_Illustrations_PNG/noodeu-17-pause.png,Principale,Utiliser des contrôles HTML accessibles.
+25,Astuces en story,02_Illustrations_PNG/noodeu-12-astuce.png,"Facultative, petite ou absente pendant la saisie",Rubrique personnelle : enregistrer pour soi; aucun partage au duo.
+26,Astuces enregistrées,02_Illustrations_PNG/noodeu-13-favoris.png,"Facultative, petite ou absente pendant la saisie",Rubrique personnelle : enregistrer pour soi; aucun partage au duo.
+27,Salon intégré au jeu,02_Illustrations_PNG/noodeu-05-conversation.png,"Facultative, petite ou absente pendant la saisie",Utiliser des contrôles HTML accessibles.
+28,Aperçu d’un vocal,,"Facultative, petite ou absente pendant la saisie",Utiliser des contrôles HTML accessibles.
+29,Notre espace sans duo,02_Illustrations_PNG/noodeu-14-duo-a-creer.png,Principale,Utiliser des contrôles HTML accessibles.
+30,Invitation expirée,02_Illustrations_PNG/noodeu-15-invitation-expiree.png,Principale,Utiliser des contrôles HTML accessibles.
