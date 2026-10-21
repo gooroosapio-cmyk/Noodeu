@@ -24,7 +24,7 @@ Interprétation signalée : la réponse « 1c » a été lue comme **2C** (conne
 
 ## Décisions imposées par le cahier des charges ou le kit
 
-- Navigation : exactement cinq onglets (Accueil, Bibliothèques, Astuces, Espace, Paramètres). Le jeu et le salon n'en font pas partie.
+- Navigation : exactement cinq onglets (Accueil, Bibliothèques, Astuces, Espace, Réglages). Le jeu et le salon n'en font pas partie.
 - Parcours d'un jeu : sélection → règles et réglages → salon (préparation) → partie → résultat → rejouer / autre jeu / accueil.
 - Astuces : rubrique strictement personnelle (aucun partage au duo).
 - Pas d'IA appelée pendant les parties, pas de paiement, pas de service payant supplémentaire.
@@ -78,3 +78,4 @@ Essai d'un onglet « Salon » remplaçant « Espace » annulé à la demande de 
 - Carte principale de l'accueil : les deux éléments (ma photo et le bouton « + » ou la photo de l'autre) et le texte sont **centrés**.
 - Accueil réorganisé en rubriques : carte du duo (ou de l'invitation) → « En ce moment » (partie ouverte) → « Tes favoris » → « À découvrir » / « Pour votre prochaine partie ». Pas de rubrique qui répète les onglets.
 - Bibliothèques : seulement le **champ de recherche** et un bouton **« Filtres » déroulant** (Afficher tous/favoris, familles, durée, niveau, tri ; appliqué immédiatement, « Réinitialiser » et « Fermer »). Sous-titre, puces rapides, tri séparé et compteur visibles supprimés (le nombre de résultats reste annoncé aux lecteurs d'écran).
+- 5e onglet renommé **« Réglages »** (plus court que « Paramètres ») ; `/reglages`, et `/parametres` redirige.

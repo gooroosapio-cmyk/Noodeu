@@ -57,4 +57,4 @@ Contrôles : défilement horizontal, contenu masqué sous la navigation, erreurs
 10. Cloche : la demande de partie et les messages apparaissent ; « Tout marquer comme lu ».
 11. Espace → Gérer le duo → Terminer ce duo : l'autre est prévenu, l'historique reste consultable ;
     inviter un troisième compte C : C ne voit rien de l'ancien duo.
-12. Paramètres → Mon profil : ajouter une photo, recadrer, enregistrer ; elle apparaît chez l'autre membre.
+12. Réglages → Mon profil : ajouter une photo, recadrer, enregistrer ; elle apparaît chez l'autre membre.

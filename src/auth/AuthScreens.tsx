@@ -136,7 +136,7 @@ export function AuthForm({ mode }: { mode: "signup" | "login" }) {
       setError(t("auth.emailRequired"));
       return;
     }
-    await supabase.auth.resetPasswordForEmail(email.trim(), { redirectTo: `${window.location.origin}/parametres/profil` });
+    await supabase.auth.resetPasswordForEmail(email.trim(), { redirectTo: `${window.location.origin}/reglages/profil` });
     setInfo(t("auth.resetSent"));
   }
 

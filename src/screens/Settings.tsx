@@ -46,7 +46,7 @@ export function Settings() {
       <section className="section">
         <h2 className="t-section">{t("settings.profile")}</h2>
         <div className="group">
-          <Link className="group__row" to="/parametres/profil">
+          <Link className="group__row" to="/reglages/profil">
             <Avatar name={profile.display_name} path={profile.avatar_path} size={44} me />
             <span className="list-row__body"><span className="t-card">{profile.display_name}</span><span className="t-meta">{t("settings.editProfile")}</span></span>
             <span className="chev"><Icon name="arrow-right" size={20} /></span>
@@ -283,7 +283,7 @@ export function ProfileEdit() {
   }
 
   return (
-    <SubPage backTo="/parametres" title={t("profile.title")}>
+    <SubPage backTo="/reglages" title={t("profile.title")}>
       <main className="page page--bare page--narrow">
         <section className="card stack stack--4">
           <h2 className="t-card">{t("profile.photo")}</h2>

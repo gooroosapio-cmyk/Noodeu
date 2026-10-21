@@ -10,7 +10,7 @@ export const fr = {
   "nav.librariesShort": "Biblio.",
   "nav.tips": "Astuces",
   "nav.space": "Espace",
-  "nav.settings": "Paramètres",
+  "nav.settings": "Réglages",
 
   "top.profile": "Mon profil",
   "top.notifications": "Notifications",
@@ -313,7 +313,7 @@ export const fr = {
   "invite.alreadyDuo": "Tu as déjà un duo actif. Termine-le depuis l'Espace avant d'en commencer un autre.",
   "invite.paired": "Votre duo est confirmé !",
 
-  "settings.title": "Paramètres",
+  "settings.title": "Réglages",
   "settings.profile": "Profil",
   "settings.editProfile": "Modifier mon profil",
   "settings.preferences": "Préférences",

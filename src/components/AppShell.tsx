@@ -20,7 +20,7 @@ const tabs: { to: string; label: string; short?: string; icon: IconName }[] = [
   { to: "/bibliotheques", label: t("nav.libraries"), short: t("nav.librariesShort"), icon: "library" },
   { to: "/astuces", label: t("nav.tips"), icon: "bulb" },
   { to: "/espace", label: t("nav.space"), icon: "heart" },
-  { to: "/parametres", label: t("nav.settings"), icon: "settings" },
+  { to: "/reglages", label: t("nav.settings"), icon: "settings" },
 ];
 
 function BottomNav() {
@@ -68,7 +68,7 @@ export function TopBar({ onOpenNotifications, showBell = true }: { onOpenNotific
             {notificationsUnread > 0 && <span className="badge-count" aria-hidden="true">{notificationsUnread > 9 ? "9+" : notificationsUnread}</span>}
           </button>
         )}
-        <Link className="avatar-link" to="/parametres/profil" aria-label={t("top.profile")}>
+        <Link className="avatar-link" to="/reglages/profil" aria-label={t("top.profile")}>
           <Avatar name={profile?.display_name ?? ""} path={profile?.avatar_path} size={40} me />
         </Link>
       </div>
