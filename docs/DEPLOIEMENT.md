@@ -27,8 +27,9 @@ Avant d'ouvrir l'application au public, il faut brancher un fournisseur d'e-mail
 ## 2. Vercel (en place depuis le 21 octobre 2026)
 
 - Adresse : **https://noodeu.vercel.app** (projet Vercel « noodeu », relié au dépôt GitHub).
-- Chaque envoi sur la branche `ccr-7a7de876-azitw6` est mis en production automatiquement
-  (c'est actuellement la seule branche du dépôt, donc la branche de production).
+- Chaque envoi sur la branche de travail `ccr-7a7de876-azitw6` crée une **prévisualisation** (accès réservé au compte Vercel).
+  La version publique `noodeu.vercel.app` n'est mise à jour que par une mise en production explicite.
+  Plus tard, fusionner le travail dans une branche `main` permettra une mise en production automatique.
 - Les adresses de prévisualisation générées par Vercel demandent une connexion à Vercel ; `noodeu.vercel.app` est public.
 - Un second projet « noodeu-wup1 », relié au même dépôt, existe aussi : il semble être un doublon et peut être supprimé
   depuis le tableau de bord Vercel.

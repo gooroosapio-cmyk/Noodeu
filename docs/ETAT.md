@@ -1,6 +1,6 @@
 # État du projet — 21 octobre 2026
 
-En ligne : **https://noodeu.vercel.app** (Vercel, mise en production automatique à chaque envoi).
+En ligne : **https://noodeu.vercel.app** (Vercel ; mise en production explicite, voir DEPLOIEMENT.md).
 
 ## Ce qui fonctionne et a été testé
 
