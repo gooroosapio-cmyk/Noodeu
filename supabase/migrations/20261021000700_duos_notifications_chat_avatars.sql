@@ -173,13 +173,15 @@ language sql stable security definer set search_path = '' as $$
                                  where r.couple_id = m.couple_id and r.user_id = auth.uid()), '-infinity')
 $$;
 
--- Ancien salon éphémère : vide, remplacé par le chat du duo.
-drop function public.send_session_message(uuid, uuid, text);
-drop table public.session_messages;
+-- Ancien salon éphémère : remplacé par le chat du duo. La table (vide) est conservée mais n'est plus
+-- utilisable ; sa suppression définitive se fera par une migration séparée, après accord.
+revoke execute on function public.send_session_message(uuid, uuid, text) from authenticated;
+revoke all on public.session_messages from authenticated;
 
 create or replace function private.purge_session(p_session uuid, p_keep_answers boolean) returns void
 language plpgsql security definer set search_path = '' as $$
 begin
+  delete from public.session_messages where session_id = p_session;
   if not p_keep_answers then
     delete from public.session_answers where session_id = p_session;
   end if;
