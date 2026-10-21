@@ -42,3 +42,10 @@ Avant d'ouvrir l'application au public, il faut brancher un fournisseur d'e-mail
 
 - Ouvrir le site sur deux téléphones avec deux comptes et dérouler le parcours de `docs/TESTS.md` (section « recette manuelle »).
 - Installer l'application depuis le navigateur (« Ajouter à l'écran d'accueil »).
+
+## 4. Comptes administrateurs
+
+Un compte devient administrateur quand son identifiant figure dans la table `public.app_admins`
+(ajout depuis l'éditeur SQL de Supabase). Premier administrateur ajouté le 21 octobre 2026 : le compte de la
+porteuse ou du porteur du projet. Aucun mot de passe n'est conservé dans le dépôt.
+Le rôle donne aujourd'hui accès en lecture aux contenus non publiés ; l'interface d'administration arrive à l'étape 7.
