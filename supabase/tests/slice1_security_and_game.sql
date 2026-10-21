@@ -74,6 +74,20 @@ begin
 end $$;
 
 do $$
+begin
+  perform t.login('00000000-0000-4000-a000-00000000000a');
+  perform t.ok(public.get_invitation_status() #>> '{outgoing,claimer_name}' = 'Test B', 'A voit le prénom de B qui demande à rejoindre');
+  perform t.logout();
+  perform t.login('00000000-0000-4000-a000-00000000000b');
+  perform t.ok(public.get_invitation_status() #>> '{incoming,inviter_name}' = 'Test A', 'B voit le prénom de A');
+  perform t.ok((public.get_invitation_status() -> 'outgoing') = 'null'::jsonb, 'B n''a pas d''invitation envoyée');
+  perform t.logout();
+  perform t.login('00000000-0000-4000-a000-00000000000c');
+  perform t.ok(public.get_invitation_status() = '{"incoming": null, "outgoing": null}'::jsonb, 'C ne voit rien');
+  perform t.logout();
+end $$;
+
+do $$
 declare inv uuid := (select v::uuid from t.ids where k = 'inv_a'); r1 jsonb; r2 jsonb;
 begin
   perform t.login('00000000-0000-4000-a000-00000000000a');
