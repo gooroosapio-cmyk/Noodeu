@@ -15,6 +15,11 @@ import { ProfileEdit, Settings } from "./screens/Settings";
 import { Tips } from "./screens/Tips";
 import { SessionScreen } from "./game/SessionScreen";
 
+/** Ancienne adresse « Notre espace » : redirigée vers l'Espace (paramètres conservés). */
+function LegacySpace() {
+  return <Navigate to={`/espace${useLocation().search}`} replace />;
+}
+
 function UpdatePrompt() {
   const { needRefresh: [needRefresh], updateServiceWorker } = useRegisterSW();
   if (!needRefresh) return null;
@@ -82,7 +87,8 @@ export const router = createBrowserRouter([
               { path: "/accueil", element: <Home /> },
               { path: "/bibliotheques", element: <Libraries /> },
               { path: "/astuces", element: <Tips /> },
-              { path: "/notre-espace", element: <OurSpace /> },
+              { path: "/espace", element: <OurSpace /> },
+              { path: "/notre-espace", element: <LegacySpace /> },
               { path: "/parametres", element: <Settings /> },
             ],
           },

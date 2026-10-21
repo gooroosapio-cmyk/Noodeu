@@ -7,7 +7,7 @@ import { useOnline } from "../lib/useOnline";
 import { useAuth } from "../auth/AuthProvider";
 import { useDuo } from "../duo/DuoProvider";
 import { SubPage } from "../components/AppShell";
-import { Alert, DemoTag, Icon, Illustration, Loading, PageLoading, Sheet, useToast } from "../components/ui";
+import { Alert, DemoTag, Icon, Illustration, Loading, PageLoading, useToast } from "../components/ui";
 import type { Category, Game } from "../lib/types";
 import {
   applyFilters, countFilters, emptyFilters, matchesDuration, mechanicIllustration, normalizeText, useCatalog,
@@ -78,55 +78,61 @@ function availableOptions(games: Game[], categories: Category[]) {
   return { family, duration, level };
 }
 
-function FilterSheet({ games, categories, applied, onApply, onClose }: {
-  games: Game[]; categories: Category[]; applied: Filters; onApply: (f: Filters) => void; onClose: () => void;
+/** Filtre déroulant sous la recherche : chaque choix s'applique immédiatement. */
+function FilterPanel({ id, games, categories, state, update, onClose }: {
+  id: string; games: Game[]; categories: Category[]; state: LibState; update: (p: Partial<LibState>) => void; onClose: () => void;
 }) {
-  // Brouillon : rien n'est appliqué tant que « Voir les N jeux » n'est pas touché.
-  const [draft, setDraft] = useState<Filters>(applied);
   const opts = availableOptions(games, categories);
-  const n = applyFilters(games, draft).length;
   const groups: { key: keyof Filters; title: string; options: { id: string; label: string }[]; hint?: string }[] = [
     { key: "family", title: t("filters.family"), options: opts.family },
     { key: "duration", title: t("filters.duration"), options: opts.duration, hint: t("filters.durationRule") },
     { key: "level", title: t("filters.level"), options: opts.level },
   ].filter((g) => g.options.length >= 2) as never;
 
-  function toggle(key: keyof Filters, id: string) {
-    setDraft((d) => {
-      const list = d[key] as string[];
-      return { ...d, [key]: list.includes(id) ? list.filter((x) => x !== id) : [...list, id] };
-    });
+  function toggle(key: keyof Filters, value: string) {
+    const list = state.filters[key] as string[];
+    update({ filters: { ...state.filters, [key]: list.includes(value) ? list.filter((x) => x !== value) : [...list, value] } });
   }
 
   return (
-    <Sheet
-      side
-      title={<h2 className="t-section">{t("filters.title")}</h2>}
-      onClose={onClose}
-      footer={
-        <div className="sheet__foot">
-          <button className="btn btn--secondary btn--auto" onClick={() => setDraft(emptyFilters)}>{t("filters.reset")}</button>
-          <button className="btn" disabled={n === 0} onClick={() => onApply(draft)}>
-            {n === 0 ? t("filters.applyNone") : n === 1 ? t("filters.applyOne") : t("filters.apply", { n })}
-          </button>
+    <div id={id} className="filter-panel" role="region" aria-label={t("lib.filters")}
+      onKeyDown={(e) => { if (e.key === "Escape") { e.stopPropagation(); onClose(); } }}>
+      <fieldset>
+        <legend>{t("lib.show")}</legend>
+        <div className="chips">
+          <button type="button" className="chip" aria-pressed={state.quick === "all"} onClick={() => update({ quick: "all" })}>{t("lib.all")}</button>
+          <button type="button" className="chip" aria-pressed={state.quick === "favorites"} onClick={() => update({ quick: "favorites" })}><Icon name="star" size={16} />{t("lib.favorites")}</button>
         </div>
-      }
-    >
+      </fieldset>
       {groups.map((g) => (
         <fieldset key={g.key}>
           <legend>{g.title}</legend>
           <div className="chips">
-            {g.options.map((o) => (
-              <button key={o.id} type="button" className="chip" role="checkbox" aria-checked={(draft[g.key] as string[]).includes(o.id)} onClick={() => toggle(g.key, o.id)}>
-                {(draft[g.key] as string[]).includes(o.id) && <Icon name="check" size={16} />}
-                {o.label}
-              </button>
-            ))}
+            {g.options.map((o) => {
+              const on = (state.filters[g.key] as string[]).includes(o.id);
+              return (
+                <button key={o.id} type="button" className="chip" role="checkbox" aria-checked={on} onClick={() => toggle(g.key, o.id)}>
+                  {on && <Icon name="check" size={16} />}{o.label}
+                </button>
+              );
+            })}
           </div>
           {g.hint && <p className="t-meta">{g.hint}</p>}
         </fieldset>
       ))}
-    </Sheet>
+      <label className="filter-panel__sort">
+        <span className="t-small">{t("lib.sort")}</span>
+        <select className="input" value={state.sort} onChange={(e) => update({ sort: e.target.value as Sort })}>
+          <option value="recommended">{t("lib.sortRecommended")}</option>
+          <option value="shortest">{t("lib.sortShortest")}</option>
+          <option value="alpha">{t("lib.sortAlpha")}</option>
+        </select>
+      </label>
+      <div className="row row--between">
+        <button type="button" className="btn btn--quiet btn--auto btn--sm" onClick={() => update({ quick: "all", filters: emptyFilters, sort: "recommended" })}>{t("filters.reset")}</button>
+        <button type="button" className="btn btn--secondary btn--auto btn--sm" onClick={onClose}>{t("lib.closeFilters")}</button>
+      </div>
+    </div>
   );
 }
 
@@ -134,7 +140,7 @@ export function Libraries() {
   const { userId } = useAuth();
   const cat = useCatalog(userId);
   const [state, setState] = useState<LibState>(loadState);
-  const [sheet, setSheet] = useState(false);
+  const [open, setOpen] = useState(false);
   const filterBtn = useRef<HTMLButtonElement>(null);
   const update = (patch: Partial<LibState>) => setState((s) => ({ ...s, ...patch }));
 
@@ -173,61 +179,31 @@ export function Libraries() {
 
   if (cat.loading) return <PageLoading />;
 
-  const active = countFilters(state.filters);
-  const summary: { key: keyof Filters; id: string; label: string }[] = [
-    ...state.filters.family.map((id) => ({ key: "family" as const, id, label: catTitle.get(id) ?? id })),
-    ...state.filters.duration.map((id) => ({ key: "duration" as const, id, label: durationLabels[id] })),
-    ...state.filters.level.map((id) => ({ key: "level" as const, id, label: levelLabels[id] })),
-  ];
-  const remove = (key: keyof Filters, id: string) =>
-    update({ filters: { ...state.filters, [key]: (state.filters[key] as string[]).filter((x) => x !== id) } });
+  const active = countFilters(state.filters) + (state.quick === "favorites" ? 1 : 0);
+  const closePanel = () => { setOpen(false); filterBtn.current?.focus(); };
 
   return (
-    <main className="page">
-      <div className="page-header">
-        <h1 className="t-page">{t("lib.title")}</h1>
-        <p>{t("lib.subtitle")}</p>
-      </div>
+    <main className="page page--tight">
+      <h1 className="t-page">{t("lib.title")}</h1>
       {cat.error && (
         <Alert>{t("lib.error")} <button className="btn btn--quiet btn--auto btn--sm" onClick={() => void cat.reload()}>{t("common.retry")}</button></Alert>
       )}
-      <div className="stack">
+      <div className="lib-tools">
         <div className="toolbar">
           <div className="search">
             <Icon name="search" size={20} />
             <label htmlFor="search" className="sr-only">{t("lib.search")}</label>
-            <input id="search" className="input" type="search" placeholder={t("lib.search")} value={state.query} onChange={(e) => update({ query: e.target.value })} enterKeyHint="search" />
+            <input id="search" className="input" type="search" placeholder={t("lib.searchShort")} value={state.query} onChange={(e) => update({ query: e.target.value })} enterKeyHint="search" />
           </div>
-          <button ref={filterBtn} className="btn btn--secondary btn--auto" onClick={() => setSheet(true)} aria-label={active ? t("lib.filtersCount", { n: active }) : t("lib.filters")}>
-            <Icon name="filter" size={20} />{t("lib.filters")}{active > 0 && <span className="tag" style={{ minHeight: 22 }} aria-hidden="true">{active}</span>}
+          <button ref={filterBtn} className="btn btn--secondary btn--auto filter-btn" aria-expanded={open} aria-controls="lib-filters"
+            onClick={() => setOpen((o) => !o)} aria-label={active ? t("lib.filtersCount", { n: active }) : t("lib.filters")}>
+            <Icon name="filter" size={20} /><span className="filter-btn__label">{t("lib.filters")}</span>
+            {active > 0 && <span className="tag" style={{ minHeight: 22 }} aria-hidden="true">{active}</span>}
+            <Icon name="chevron-down" size={18} />
           </button>
         </div>
-        <div className="row row--between row--wrap">
-          <div className="chips" role="group" aria-label={t("lib.title")}>
-            <button className="chip" aria-pressed={state.quick === "all"} onClick={() => update({ quick: "all" })}>{t("lib.all")}</button>
-            <button className="chip" aria-pressed={state.quick === "favorites"} onClick={() => update({ quick: "favorites" })}><Icon name="star" size={18} />{t("lib.favorites")}</button>
-          </div>
-          <label className="row t-small" style={{ gap: 8 }}>
-            <span className="sr-only">Trier</span>
-            <select className="input" style={{ minHeight: 44, width: "auto", paddingBlock: 8 }} value={state.sort} onChange={(e) => update({ sort: e.target.value as Sort })}>
-              <option value="recommended">Recommandés</option>
-              <option value="shortest">Plus courts</option>
-              <option value="alpha">A à Z</option>
-            </select>
-          </label>
-        </div>
-        {summary.length > 0 && (
-          <div className="chips" aria-label={t("lib.filters")}>
-            {summary.slice(0, 2).map((s) => (
-              <button key={`${s.key}-${s.id}`} className="chip chip--remove" onClick={() => remove(s.key, s.id)} aria-label={t("lib.removeFilter", { label: s.label })}>
-                {s.label}<Icon name="close" size={16} />
-              </button>
-            ))}
-            {summary.length > 2 && <button className="chip" onClick={() => setSheet(true)}>+{summary.length - 2}</button>}
-            <button className="btn btn--quiet btn--auto btn--sm" onClick={() => update({ filters: emptyFilters })}>{t("lib.clearAll")}</button>
-          </div>
-        )}
-        <p className="t-meta" aria-live="polite">{t("lib.results", { n: shown.length })}</p>
+        {open && <FilterPanel id="lib-filters" games={cat.games} categories={cat.categories} state={state} update={update} onClose={closePanel} />}
+        <p className="sr-only" aria-live="polite">{t("lib.results", { n: shown.length })}</p>
       </div>
 
       {shown.length === 0 ? (
@@ -245,10 +221,6 @@ export function Libraries() {
         </div>
       )}
 
-      {sheet && (
-        <FilterSheet games={cat.games} categories={cat.categories} applied={state.filters}
-          onApply={(f) => { update({ filters: f }); setSheet(false); }} onClose={() => setSheet(false)} />
-      )}
     </main>
   );
 }

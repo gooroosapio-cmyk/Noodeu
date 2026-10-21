@@ -75,7 +75,7 @@ export function Settings() {
             <summary>{t("settings.privacyRules")}<Icon name="chevron-down" /></summary>
             <div><p className="t-small">{t("settings.privacyText")}</p></div>
           </details>
-          <Link className="group__row" to="/notre-espace">
+          <Link className="group__row" to="/espace">
             <Icon name="users" />
             <span className="grow">{t("settings.duos")}</span>
             <span className="chev"><Icon name="arrow-right" size={20} /></span>

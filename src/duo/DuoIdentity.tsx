@@ -9,12 +9,12 @@ import type { DuoSummary } from "./DuoProvider";
  * Identité du duo : vraie photo de l'utilisateur, puis vraie photo de l'autre membre
  * ou un vrai bouton « + » qui ouvre l'invitation. Jamais une image décorative.
  */
-export function DuoIdentity({ duo, online = false, size = 52, showStatus = true }: { duo: DuoSummary | null; online?: boolean; size?: number; showStatus?: boolean }) {
+export function DuoIdentity({ duo, online = false, size = 52, showStatus = true, center = false }: { duo: DuoSummary | null; online?: boolean; size?: number; showStatus?: boolean; center?: boolean }) {
   const { profile } = useAuth();
   const me = profile?.display_name ?? "";
   const partner = duo?.partner;
   return (
-    <div className="duo-id">
+    <div className={center ? "duo-id duo-id--center" : "duo-id"}>
       <div className="duo-id__pair">
         <Avatar name={me} path={profile?.avatar_path} size={size} me />
         <span className="duo-id__link" aria-hidden="true" />
@@ -31,7 +31,7 @@ export function DuoIdentity({ duo, online = false, size = 52, showStatus = true 
         {showStatus && partner && duo?.active && online && (
           <span className="status"><span className="status-dot" aria-hidden="true" />{t("duo.online")}</span>
         )}
-        {showStatus && duo && !duo.active && <span className="tag tag--archived" style={{ justifySelf: "start" }}>{t("duo.archived")}</span>}
+        {showStatus && duo && !duo.active && <span className="tag tag--archived" style={{ justifySelf: center ? "center" : "start" }}>{t("duo.archived")}</span>}
       </div>
     </div>
   );

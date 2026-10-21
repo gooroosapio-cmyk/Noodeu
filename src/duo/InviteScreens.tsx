@@ -18,7 +18,7 @@ export function InvitePage() {
   const [justPaired, setJustPaired] = useState(false);
 
   useEffect(() => {
-    if (active && justPaired) navigate("/notre-espace", { replace: true });
+    if (active && justPaired) navigate("/espace", { replace: true });
   }, [active, justPaired, navigate]);
 
   return (
@@ -31,7 +31,7 @@ export function InvitePage() {
         {active ? (
           <>
             <Alert kind="info">{t("invite.alreadyDuo")}</Alert>
-            <Link className="btn btn--secondary" to="/notre-espace">{t("nav.space")}</Link>
+            <Link className="btn btn--secondary" to="/espace">{t("nav.space")}</Link>
           </>
         ) : (
           <>

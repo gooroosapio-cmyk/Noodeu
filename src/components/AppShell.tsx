@@ -19,7 +19,7 @@ const tabs: { to: string; label: string; short?: string; icon: IconName }[] = [
   { to: "/accueil", label: t("nav.home"), icon: "home" },
   { to: "/bibliotheques", label: t("nav.libraries"), short: t("nav.librariesShort"), icon: "library" },
   { to: "/astuces", label: t("nav.tips"), icon: "bulb" },
-  { to: "/notre-espace", label: t("nav.space"), icon: "heart" },
+  { to: "/espace", label: t("nav.space"), icon: "heart" },
   { to: "/parametres", label: t("nav.settings"), icon: "settings" },
 ];
 
@@ -59,10 +59,8 @@ export function TopBar({ onOpenNotifications, showBell = true }: { onOpenNotific
   const { notificationsUnread } = useDuo();
   return (
     <header className="topbar">
-      <div className="topbar__left">
-        <Link className="avatar-link" to="/parametres/profil" aria-label={t("top.profile")}>
-          <Avatar name={profile?.display_name ?? ""} path={profile?.avatar_path} size={40} me />
-        </Link>
+      <Link className="topbar__logo" to="/accueil" aria-label={t("top.home")}><Logo width={104} /></Link>
+      <div className="topbar__actions">
         {showBell && (
           <button className="icon-btn" onClick={onOpenNotifications}
             aria-label={notificationsUnread ? t("top.notificationsUnread", { n: notificationsUnread }) : t("top.notifications")}>
@@ -70,8 +68,10 @@ export function TopBar({ onOpenNotifications, showBell = true }: { onOpenNotific
             {notificationsUnread > 0 && <span className="badge-count" aria-hidden="true">{notificationsUnread > 9 ? "9+" : notificationsUnread}</span>}
           </button>
         )}
+        <Link className="avatar-link" to="/parametres/profil" aria-label={t("top.profile")}>
+          <Avatar name={profile?.display_name ?? ""} path={profile?.avatar_path} size={40} me />
+        </Link>
       </div>
-      <Link className="topbar__logo" to="/accueil" aria-label={t("top.home")}><Logo width={104} /></Link>
     </header>
   );
 }
