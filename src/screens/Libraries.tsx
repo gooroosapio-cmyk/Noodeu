@@ -290,7 +290,7 @@ export function GameSheet() {
     setError(null);
     const res = await rpc<{ session_id: string }>("create_session", { p_game: game!.id });
     setBusy(false);
-    if (res.ok) navigate("/salon");
+    if (res.ok) navigate(`/partie/${res.session_id}`);
     else setError(errorMessage(res.error));
   }
 
@@ -336,7 +336,7 @@ export function GameSheet() {
           ) : other ? (
             <>
               <Alert kind="info">{t("sheet.otherInProgress", { title: other.title })}</Alert>
-              <Link className="btn" to={other.status === "lobby" ? "/salon" : `/partie/${other.id}`}>{t("sheet.goToOther")}</Link>
+              <Link className="btn" to={`/partie/${other.id}`}>{t("sheet.goToOther")}</Link>
             </>
           ) : (
             <button className="btn" disabled={busy || !online} onClick={prepare}>{busy ? t("common.sending") : t("sheet.prepare")}<Icon name="arrow-right" /></button>

@@ -1,5 +1,5 @@
 import { createContext, useContext, useLayoutEffect, useRef, useState, type ReactNode } from "react";
-import { Link, NavLink, Outlet, useLocation } from "react-router";
+import { Link, NavLink, Outlet } from "react-router";
 import { t } from "../i18n";
 import { useAuth } from "../auth/AuthProvider";
 import { useDuo } from "../duo/DuoProvider";
@@ -19,7 +19,7 @@ const tabs: { to: string; label: string; short?: string; icon: IconName }[] = [
   { to: "/accueil", label: t("nav.home"), icon: "home" },
   { to: "/bibliotheques", label: t("nav.libraries"), short: t("nav.librariesShort"), icon: "library" },
   { to: "/astuces", label: t("nav.tips"), icon: "bulb" },
-  { to: "/salon", label: t("nav.space"), icon: "users" },
+  { to: "/notre-espace", label: t("nav.space"), icon: "heart" },
   { to: "/parametres", label: t("nav.settings"), icon: "settings" },
 ];
 
@@ -79,15 +79,13 @@ export function TopBar({ onOpenNotifications, showBell = true }: { onOpenNotific
 /** Pages principales connectées : en-tête, contenu, navigation basse et discussion flottante. */
 export function AppShell() {
   const [panel, setPanel] = useState<"chat" | "notifications" | null>(null);
-  // Sur l'onglet Salon, la discussion est déjà affichée dans la page : pas de bulle en double.
-  const onSalon = useLocation().pathname === "/salon";
   return (
     <ShellContext.Provider value={{ openChat: () => setPanel("chat") }}>
       <div className="shell">
         <TopBar onOpenNotifications={() => setPanel("notifications")} />
         <Outlet />
         <BottomNav />
-        {panel === null && !onSalon && <ChatLauncher onOpen={() => setPanel("chat")} />}
+        {panel === null && <ChatLauncher onOpen={() => setPanel("chat")} />}
         {panel === "chat" && <ChatPanel onClose={() => setPanel(null)} />}
         {panel === "notifications" && <NotificationCenter onClose={() => setPanel(null)} onOpenChat={() => setPanel("chat")} />}
       </div>

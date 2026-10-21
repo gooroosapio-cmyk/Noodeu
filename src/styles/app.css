@@ -319,7 +319,6 @@ legend { padding: 0; margin-bottom: var(--s-2); font-weight: 600; }
 .bubble { max-width: 82%; padding: var(--s-2) var(--s-3); border-radius: 18px; background: var(--c-surface); border: 1px solid var(--c-border); justify-self: start; overflow-wrap: anywhere; }
 .bubble--me { background: var(--c-accent-soft); border-color: transparent; justify-self: end; }
 .bubble__meta { font: 400 0.75rem/1rem var(--f-body); color: var(--c-text-2); margin-top: 2px; }
-.chat-inline { max-height: min(50dvh, 420px); min-height: 160px; overflow-y: auto; padding: var(--s-4); overscroll-behavior: contain; }
 .composer { display: flex; gap: var(--s-2); align-items: flex-end; padding: var(--s-3) var(--gutter) var(--s-4); border-top: 1px solid var(--c-border); }
 .composer textarea { resize: none; min-height: 48px; max-height: 128px; }
 .composer .icon-btn { background: var(--c-accent); min-width: 48px; min-height: 48px; }

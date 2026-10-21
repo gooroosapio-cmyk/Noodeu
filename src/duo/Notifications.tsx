@@ -37,18 +37,16 @@ export function NotificationCenter({ onClose, onOpenChat }: { onClose: () => voi
       case "invitation_accepted":
       case "duo_ended":
         onClose();
-        navigate(n.couple_id ? `/salon?duo=${n.couple_id}` : "/salon");
+        navigate(n.couple_id ? `/notre-espace?duo=${n.couple_id}` : "/notre-espace");
         return;
       case "game_proposed":
-        if (d.session_id && openSession?.id === d.session_id) { onClose(); navigate(openSession.status === "lobby" ? "/salon" : `/partie/${d.session_id}`); }
+        if (d.session_id && openSession?.id === d.session_id) { onClose(); navigate(`/partie/${d.session_id}`); }
         else toast(t("notif.stale"));
         return;
       case "message":
         onClose();
-        if (n.couple_id && active?.id === n.couple_id) {
-          if (window.location.pathname === "/salon") navigate("/salon"); else onOpenChat();
-        }
-        else navigate(n.couple_id ? `/salon?duo=${n.couple_id}` : "/salon");
+        if (n.couple_id && active?.id === n.couple_id) onOpenChat();
+        else navigate(n.couple_id ? `/notre-espace?duo=${n.couple_id}` : "/notre-espace");
         return;
       default:
         onClose();

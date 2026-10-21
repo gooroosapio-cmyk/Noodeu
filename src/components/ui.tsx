@@ -175,7 +175,7 @@ export function Sheet({ title, onClose, children, footer, side = false, tall = f
           {headerExtra}
           <button className="icon-btn icon-btn--soft" onClick={onClose} aria-label={closeLabel}><Icon name={closeIcon} /></button>
         </div>
-        <div className="sheet__body" data-scroll>{children}</div>
+        <div className="sheet__body">{children}</div>
         {footer}
       </div>
     </div>

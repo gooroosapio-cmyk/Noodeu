@@ -8,7 +8,7 @@ const messages: Record<string, string> = {
   revoked: "Cette invitation a été annulée. Demande un nouveau code.",
   already_used: "Cette invitation a déjà été utilisée.",
   expired: "Cette invitation a expiré. Demande un nouveau code à la personne qui t'invite.",
-  you_are_already_paired: "Tu as déjà un duo actif. Termine-le depuis le Salon avant d'en commencer un autre.",
+  you_are_already_paired: "Tu as déjà un duo actif. Termine-le depuis Notre espace avant d'en commencer un autre.",
   inviter_already_paired: "La personne qui t'invite a déjà un duo actif.",
   already_paired: "L'un de vous a déjà un duo actif.",
   too_many_attempts: "Trop d'essais d'affilée. Patiente un quart d'heure avant de réessayer.",

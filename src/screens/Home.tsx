@@ -76,11 +76,11 @@ export function Home() {
           <DuoIdentity duo={active} online={duo.partnerOnline} />
           {openSession && <p className="t-small">{sessionLabel}</p>}
           {openSession ? (
-            <Link className="btn" to={openSession.status === "lobby" ? "/salon" : `/partie/${openSession.id}`}>{sessionAction}<Icon name="arrow-right" /></Link>
+            <Link className="btn" to={`/partie/${openSession.id}`}>{sessionAction}<Icon name="arrow-right" /></Link>
           ) : (
             <Link className="btn" to="/bibliotheques">{t("home.choose")}<Icon name="arrow-right" /></Link>
           )}
-          <Link className="btn btn--quiet btn--sm" to="/salon">{t("home.space")}</Link>
+          <Link className="btn btn--quiet btn--sm" to="/notre-espace">{t("home.space")}</Link>
         </section>
       ) : invitations.outgoing?.status === "claimed" ? (
         <PendingRequest />

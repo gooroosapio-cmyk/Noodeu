@@ -6,8 +6,8 @@ import { errorMessage } from "../lib/errors";
 import { useAuth } from "../auth/AuthProvider";
 import { useDuo, type DuoSummary } from "../duo/DuoProvider";
 import { DuoIdentity } from "../duo/DuoIdentity";
-import { InlineChat, MessageList } from "../duo/Chat";
-import { SessionLobby } from "../game/SessionLobby";
+import { MessageList } from "../duo/Chat";
+import { useShell } from "../components/AppShell";
 import { Avatar } from "../components/Avatar";
 import { Alert, ConfirmDialog, Icon, Loading, PageLoading, Sheet, formatDate, useToast } from "../components/ui";
 import type { ChatMessage } from "../lib/types";
@@ -90,9 +90,9 @@ function ArchivedMessages({ coupleId, partnerName }: { coupleId: string; partner
   );
 }
 
-/** Onglet Salon : le duo, sa partie (salon d'attente compris), sa discussion et son historique. */
-export function Salon() {
+export function OurSpace() {
   const duo = useDuo();
+  const { openChat } = useShell();
   const toast = useToast();
   const navigate = useNavigate();
   const [params, setParams] = useSearchParams();
@@ -149,9 +149,17 @@ export function Salon() {
             ))}
           </ul>
           {selected.active ? (
-            <button className="btn btn--quiet btn--sm" aria-haspopup="dialog" onClick={() => setManage(true)}>
-              <Icon name="settings" size={20} />{t("duo.manage")}
-            </button>
+            <div className="stack">
+              {duo.openSession ? (
+                <Link className="btn" to={`/partie/${duo.openSession.id}`}>{duo.openSession.status === "ended" ? t("home.seeResults") : t("home.resume")}</Link>
+              ) : (
+                <Link className="btn" to="/bibliotheques">{t("home.choose")}</Link>
+              )}
+              <button className="btn btn--secondary" onClick={openChat}><Icon name="chat" />{t("space.openChat")}</button>
+              <button className="btn btn--quiet btn--sm" aria-haspopup="dialog" onClick={() => setManage(true)}>
+                <Icon name="settings" size={20} />{t("duo.manage")}
+              </button>
+            </div>
           ) : (
             <div className="stack">
               <Alert kind="info">{t("space.archiveBanner")}</Alert>
@@ -167,33 +175,6 @@ export function Salon() {
               )}
             </div>
           )}
-        </section>
-      )}
-
-      {selected?.active && (
-        <section className="section">
-          <h2 className="t-section">{t("salon.game")}</h2>
-          {duo.openSession?.status === "lobby" ? (
-            <SessionLobby sessionId={duo.openSession.id} />
-          ) : duo.openSession ? (
-            <div className="card stack">
-              <p className="t-card">{duo.openSession.status === "ended" ? t("home.ended", { title: duo.openSession.title })
-                : duo.openSession.status === "paused" ? t("home.paused", { title: duo.openSession.title }) : t("home.inProgress", { title: duo.openSession.title })}</p>
-              <Link className="btn" to={`/partie/${duo.openSession.id}`}>{duo.openSession.status === "ended" ? t("home.seeResults") : t("home.resume")}<Icon name="arrow-right" /></Link>
-            </div>
-          ) : (
-            <div className="card stack">
-              <p className="t-small muted">{t("salon.noGame")}</p>
-              <Link className="btn" to="/bibliotheques">{t("home.choose")}<Icon name="arrow-right" /></Link>
-            </div>
-          )}
-        </section>
-      )}
-
-      {selected?.active && (
-        <section className="section">
-          <h2 className="t-section">{t("salon.chat")}</h2>
-          <InlineChat />
         </section>
       )}
 

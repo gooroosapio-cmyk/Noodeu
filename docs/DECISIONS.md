@@ -24,7 +24,7 @@ Interprétation signalée : la réponse « 1c » a été lue comme **2C** (conne
 
 ## Décisions imposées par le cahier des charges ou le kit
 
-- Navigation : exactement cinq onglets (Accueil, Bibliothèques, Astuces, Salon, Paramètres). Le jeu et le salon n'en font pas partie.
+- Navigation : exactement cinq onglets (Accueil, Bibliothèques, Astuces, Notre espace, Paramètres). Le jeu et le salon n'en font pas partie.
 - Parcours d'un jeu : sélection → règles et réglages → salon (préparation) → partie → résultat → rejouer / autre jeu / accueil.
 - Astuces : rubrique strictement personnelle (aucun partage au duo).
 - Pas d'IA appelée pendant les parties, pas de paiement, pas de service payant supplémentaire.
@@ -64,11 +64,9 @@ Le cahier « Noodeu — Prompt complet de refonte UI/UX » prime sur les choix a
 - Ancienne table du salon (`session_messages`, vide) : mise hors service, pas supprimée ; suppression possible
   par une migration séparée avec ton accord.
 
-## Onglet « Salon » (remplace « Notre espace »)
+## Salon : page distincte (confirmé)
 
-Demande : « La logique de salon se retrouve dans notre espace renommé salon ».
-- Le 4e onglet s'appelle **Salon** (`/salon`, icône duo). L'ancienne adresse `/notre-espace` redirige vers `/salon` en gardant ses paramètres.
-- Le Salon regroupe : choix et gestion du duo, **partie en attente** (joueurs, réglages, « Je suis disponible », quitter), reprise d'une partie en cours, **discussion du duo intégrée**, historique et archives.
-- Préparer une partie depuis Bibliothèques mène au Salon ; `/partie/:id` en statut « attente » redirige vers le Salon. L'écran de jeu s'ouvre chez chacun quand la base démarre la partie.
-- La bulle de discussion flottante reste sur les autres onglets mais est masquée dans le Salon (la discussion y est déjà affichée).
-- Aucun changement de base : la logique d'attente reste entièrement côté serveur (mêmes RPC).
+Essai d'un onglet « Salon » remplaçant « Notre espace » annulé à la demande de l'utilisatrice ou de l'utilisateur :
+« Reste sur ta logique de base onglet notre espace et le salon une page distincte pour patienter avant le début du jeu ».
+- 4e onglet : **Notre espace** (duo, discussion, historique).
+- **Salon de la partie** : page distincte `/partie/:id` (hors onglets) où l'on patiente avant le début du jeu.
