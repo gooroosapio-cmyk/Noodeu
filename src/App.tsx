@@ -10,10 +10,15 @@ import { Alert, EmptyState, NetworkBanner, PageLoading, ToastProvider } from "./
 import { AppShell } from "./components/AppShell";
 import { Home } from "./screens/Home";
 import { GameSheet, Libraries } from "./screens/Libraries";
-import { OurSpace } from "./screens/OurSpace";
+import { Salon } from "./screens/Salon";
 import { ProfileEdit, Settings } from "./screens/Settings";
 import { Tips } from "./screens/Tips";
 import { SessionScreen } from "./game/SessionScreen";
+
+/** Ancienne adresse « Notre espace » : redirigée vers le Salon (paramètres conservés). */
+function LegacySpace() {
+  return <Navigate to={`/salon${useLocation().search}`} replace />;
+}
 
 function UpdatePrompt() {
   const { needRefresh: [needRefresh], updateServiceWorker } = useRegisterSW();
@@ -82,7 +87,8 @@ export const router = createBrowserRouter([
               { path: "/accueil", element: <Home /> },
               { path: "/bibliotheques", element: <Libraries /> },
               { path: "/astuces", element: <Tips /> },
-              { path: "/notre-espace", element: <OurSpace /> },
+              { path: "/salon", element: <Salon /> },
+              { path: "/notre-espace", element: <LegacySpace /> },
               { path: "/parametres", element: <Settings /> },
             ],
           },

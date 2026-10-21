@@ -1,5 +1,5 @@
 import { useEffect, useMemo, useState } from "react";
-import { Link, useNavigate, useParams } from "react-router";
+import { Link, Navigate, useNavigate, useParams } from "react-router";
 import { fill, t } from "../i18n";
 import { errorMessage } from "../lib/errors";
 import { rpc } from "../lib/supabase";
@@ -59,11 +59,12 @@ export function SessionScreen() {
     );
   }
 
+  // Le salon d'attente d'une partie se trouve dans l'onglet Salon.
+  if (s.state.session.status === "lobby" && !s.state.session.read_only) return <Navigate to="/salon" replace />;
   const st = s.state;
   const me = st.players.find((p) => p.is_me);
   const partner = st.players.find((p) => !p.is_me);
   const partnerName = partner?.display_name || "?";
-  const partnerHere = Boolean(partner?.user_id && s.present.includes(partner.user_id));
   const live = ["lobby", "playing", "paused", "ended"].includes(st.session.status) && !st.session.read_only;
   const canPause = st.session.status === "playing" || st.session.status === "paused";
 
@@ -93,7 +94,6 @@ export function SessionScreen() {
         {s.channel === "down" && online && <Alert kind="info"><Loading label={t("net.reconnecting")} /></Alert>}
         {actionError && <Alert>{actionError}</Alert>}
 
-        {st.session.status === "lobby" && <Lobby st={st} me={me} partner={partner} partnerHere={partnerHere} busy={busy} online={online} run={run} onChat={() => setChat(true)} />}
         {st.session.status === "playing" && <Playing st={st} partnerName={partnerName} partner={partner} busy={busy} online={online} run={run} />}
         {st.session.status === "paused" && (
           <section className="empty enter">
@@ -128,61 +128,6 @@ export function SessionScreen() {
       )}
       {chat && <ChatPanel inGame onClose={() => setChat(false)} />}
     </SubPage>
-  );
-}
-
-function Lobby({ st, me, partner, partnerHere, busy, online, run, onChat }: {
-  st: SessionState; me?: Player; partner?: Player; partnerHere: boolean; busy: boolean; online: boolean; run: Run; onChat: () => void;
-}) {
-  const settings = st.game.config.settings ?? {};
-  return (
-    <section className="stack stack--6 enter">
-      <div className="page-header">
-        <h1 className="t-page">{t("game.lobbyTitle")}</h1>
-        <p>{t("game.lobbyText")}</p>
-      </div>
-      <div className="card" style={{ gap: 0, paddingBlock: 4 }}>
-        {[me, partner].filter(Boolean).map((p) => (
-          <div className="player" key={p!.seat}>
-            <Avatar name={p!.display_name} path={p!.avatar_path} size={44} me={p!.is_me} />
-            <div className="grow stack" style={{ gap: 2 }}>
-              <span className="t-card">{p!.is_me ? `${p!.display_name} (${t("game.you")})` : p!.display_name}</span>
-              <span className="status">
-                {p!.ready ? <Icon name="check" size={16} /> : <Icon name="clock" size={16} />}
-                {p!.ready ? t("game.isReady") : t("game.isNotReady")}
-                {!p!.is_me && partnerHere && <> · {t("game.here")}</>}
-              </span>
-            </div>
-          </div>
-        ))}
-      </div>
-
-      <div className="card card--soft stack stack--4">
-        <h2 className="t-section">{t("sheet.howTo")}</h2>
-        <ol className="how">{st.game.rules.how_to.map((x) => <li key={x}>{x}</li>)}</ol>
-        <p className="row t-small"><Icon name="lock" size={18} />{st.game.rules.privacy}</p>
-      </div>
-
-      {Object.entries(settings).map(([key, def]) => (
-        <fieldset key={key}>
-          <legend>{def.label}</legend>
-          <div className="chips">
-            {def.options.map((opt) => (
-              <button key={String(opt)} className="chip" aria-pressed={st.session.settings[key] === opt} disabled={busy || !online}
-                onClick={() => run("update_session_settings", { p_settings: { [key]: opt } })}>{String(opt)}</button>
-            ))}
-          </div>
-          <p className="t-meta">{t("game.settingsReset")}</p>
-        </fieldset>
-      ))}
-
-      <button className="btn btn--secondary" onClick={onChat}><Icon name="chat" />{t("game.chat")}</button>
-      <div className="action-bar">
-        <button className="btn" disabled={busy || !online} onClick={() => run("set_ready", { p_ready: !me?.ready })}>
-          {busy ? t("common.sending") : me?.ready ? t("game.notReady") : t("game.ready")}
-        </button>
-      </div>
-    </section>
   );
 }
 

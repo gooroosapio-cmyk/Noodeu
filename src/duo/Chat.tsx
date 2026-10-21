@@ -28,7 +28,9 @@ export function ChatLauncher({ onOpen, withNav = true }: { onOpen: () => void; w
 export function MessageList({ messages, myId, myName, partnerName }: { messages: ChatMessage[]; myId: string | null; myName: string; partnerName: string }) {
   const endRef = useRef<HTMLDivElement>(null);
   useEffect(() => {
-    endRef.current?.scrollIntoView({ block: "end" });
+    // On fait défiler le conteneur de la discussion, jamais la page entière.
+    const box = endRef.current?.closest<HTMLElement>("[data-scroll]");
+    if (box) box.scrollTop = box.scrollHeight;
   }, [messages.length]);
   return (
     <div role="log" aria-live="polite" className="stack stack--2">
@@ -50,17 +52,16 @@ export function MessageList({ messages, myId, myName, partnerName }: { messages:
   );
 }
 
-/** Discussion du duo actif. Réduire conserve le brouillon (indexé par duo) et ne quitte pas la partie. */
-export function ChatPanel({ onClose, inGame = false }: { onClose: () => void; inGame?: boolean }) {
-  const { active, messages, sendMessage, markChatRead } = useDuo();
-  const { userId, profile } = useAuth();
+/** Zone de saisie : brouillon propre à chaque duo, envoi idempotent, échec et « Réessayer » sans doublon. */
+function ChatComposer({ autoFocus = false }: { autoFocus?: boolean }) {
+  const { active, messages, sendMessage } = useDuo();
   const online = useOnline();
   const coupleId = active?.id ?? null;
   const [draft, setDraft] = useState("");
   const [error, setError] = useState<string | null>(null);
   const partnerName = active?.partner?.name || "?";
 
-  // Brouillon propre à chaque duo : jamais envoyé à une autre personne.
+  // Brouillon indexé par duo : jamais envoyé à une autre personne.
   useEffect(() => {
     if (!coupleId) return;
     try {
@@ -77,9 +78,6 @@ export function ChatPanel({ onClose, inGame = false }: { onClose: () => void; in
       /* stockage indisponible */
     }
   }, [draft, coupleId]);
-  useEffect(() => {
-    if (coupleId) void markChatRead();
-  }, [coupleId, messages.length, markChatRead]);
 
   async function submit(e?: FormEvent) {
     e?.preventDefault();
@@ -90,6 +88,86 @@ export function ChatPanel({ onClose, inGame = false }: { onClose: () => void; in
     setError(res.ok ? null : errorMessage(res.error));
   }
 
+  const failed = messages.filter((m) => m.failed);
+  return (
+    <>
+      {(error || failed.length > 0) && (
+        <div style={{ padding: "8px var(--gutter) 0" }}>
+          <Alert>
+            {error ?? t("chat.failed")}{" "}
+            {failed.length > 0 && (
+              <button className="btn btn--quiet btn--auto btn--sm" onClick={() => failed.forEach((m) => void sendMessage(m.body, m.client_id))}>
+                {t("common.retry")}
+              </button>
+            )}
+          </Alert>
+        </div>
+      )}
+      <form className="composer" onSubmit={submit}>
+        <label htmlFor={`chat-input-${autoFocus ? "panel" : "inline"}`} className="sr-only">{t("chat.placeholder", { name: partnerName })}</label>
+        <textarea
+          id={`chat-input-${autoFocus ? "panel" : "inline"}`}
+          className="input"
+          rows={1}
+          maxLength={1000}
+          placeholder={t("chat.placeholder", { name: partnerName })}
+          value={draft}
+          data-autofocus={autoFocus || undefined}
+          onChange={(e) => {
+            setDraft(e.target.value);
+            e.target.style.height = "auto";
+            e.target.style.height = `${Math.min(e.target.scrollHeight, 128)}px`;
+          }}
+          onKeyDown={(e) => {
+            if (e.key === "Enter" && !e.shiftKey) {
+              e.preventDefault();
+              void submit();
+            }
+          }}
+        />
+        <button className="icon-btn" type="submit" disabled={!online || !draft.trim()} aria-label={t("chat.send")}>
+          <Icon name="send" />
+        </button>
+      </form>
+    </>
+  );
+}
+
+/** Tant que la discussion est affichée, les messages reçus sont marqués comme lus. */
+function useMarkRead() {
+  const { active, messages, markChatRead } = useDuo();
+  const coupleId = active?.id ?? null;
+  useEffect(() => {
+    if (coupleId) void markChatRead();
+  }, [coupleId, messages.length, markChatRead]);
+}
+
+/** Discussion intégrée à la page Salon. */
+export function InlineChat() {
+  const { active, messages } = useDuo();
+  const { userId, profile } = useAuth();
+  useMarkRead();
+  if (!active) return null;
+  const partnerName = active.partner?.name || "?";
+  return (
+    <section className="card" style={{ padding: 0, gap: 0, overflow: "hidden" }} aria-label={t("chat.with", { name: partnerName })}>
+      <div data-scroll className="chat-inline">
+        {messages.length === 0 ? <p className="muted center">{t("chat.empty")}</p> : (
+          <MessageList messages={messages} myId={userId} myName={profile?.display_name ?? ""} partnerName={partnerName} />
+        )}
+      </div>
+      <ChatComposer />
+    </section>
+  );
+}
+
+/** Discussion du duo actif en panneau. Réduire conserve le brouillon et ne quitte pas la partie. */
+export function ChatPanel({ onClose, inGame = false }: { onClose: () => void; inGame?: boolean }) {
+  const { active, messages } = useDuo();
+  const { userId, profile } = useAuth();
+  useMarkRead();
+  const partnerName = active?.partner?.name || "?";
+
   if (!active) {
     return (
       <Sheet title={<h2 className="t-section">{t("chat.noDuoTitle")}</h2>} onClose={onClose}>
@@ -99,7 +177,6 @@ export function ChatPanel({ onClose, inGame = false }: { onClose: () => void; in
     );
   }
 
-  const failed = messages.filter((m) => m.failed);
   return (
     <Sheet
       tall
@@ -116,48 +193,7 @@ export function ChatPanel({ onClose, inGame = false }: { onClose: () => void; in
           </div>
         </div>
       }
-      footer={
-        <>
-          {(error || failed.length > 0) && (
-            <div style={{ padding: "8px var(--gutter) 0" }}>
-              <Alert>
-                {error ?? t("chat.failed")}{" "}
-                {failed.length > 0 && (
-                  <button className="btn btn--quiet btn--auto btn--sm" onClick={() => failed.forEach((m) => void sendMessage(m.body, m.client_id))}>
-                    {t("common.retry")}
-                  </button>
-                )}
-              </Alert>
-            </div>
-          )}
-          <form className="composer" onSubmit={submit}>
-            <label htmlFor="chat-input" className="sr-only">{t("chat.placeholder", { name: partnerName })}</label>
-            <textarea
-              id="chat-input"
-              className="input"
-              rows={1}
-              maxLength={1000}
-              placeholder={t("chat.placeholder", { name: partnerName })}
-              value={draft}
-              data-autofocus
-              onChange={(e) => {
-                setDraft(e.target.value);
-                e.target.style.height = "auto";
-                e.target.style.height = `${Math.min(e.target.scrollHeight, 128)}px`;
-              }}
-              onKeyDown={(e) => {
-                if (e.key === "Enter" && !e.shiftKey) {
-                  e.preventDefault();
-                  void submit();
-                }
-              }}
-            />
-            <button className="icon-btn" type="submit" disabled={!online || !draft.trim()} aria-label={t("chat.send")}>
-              <Icon name="send" />
-            </button>
-          </form>
-        </>
-      }
+      footer={<ChatComposer autoFocus />}
     >
       {messages.length === 0 ? <p className="muted center">{t("chat.empty")}</p> : (
         <MessageList messages={messages} myId={userId} myName={profile?.display_name ?? ""} partnerName={partnerName} />

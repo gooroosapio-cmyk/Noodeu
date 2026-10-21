@@ -35,7 +35,7 @@ listes en 2 colonnes dès 768 px et 3 dès 1024 px.
 | AppShell, TopBar, BottomNav, SubPage | `components/AppShell.tsx` | en-tête (photo + cloche à gauche, logo à droite), 5 onglets, sous-pages avec retour |
 | Avatar | `components/Avatar.tsx` | vraie photo (lien signé, stockage privé) ou initiale |
 | Sheet, ConfirmDialog, Toast, EmptyState, Alert, Loading | `components/ui.tsx` | fenêtres accessibles (focus gardé et rendu, Échap, bouton retour), confirmations, retours d'action |
-| DuoIdentity | `duo/DuoIdentity.tsx` | ma photo + photo de l'autre ou vrai bouton « + » (Accueil et Notre espace) |
+| DuoIdentity | `duo/DuoIdentity.tsx` | ma photo + photo de l'autre ou vrai bouton « + » (Accueil et Salon) |
 | ChatLauncher, ChatPanel, MessageList | `duo/Chat.tsx` | discussion du duo (bulle flottante, panneau, brouillon par duo) |
 | NotificationCenter | `duo/Notifications.tsx` | centre de notifications (cloche) |
 | InvitePanel, PendingRequest, JoinPanel | `duo/InviteScreens.tsx` | code, partage, copie, annulation ; double confirmation |
