@@ -53,8 +53,8 @@ Contrôles : défilement horizontal, contenu masqué sous la navigation, erreurs
 7. B termine : la découverte s'affiche chez les deux.
 8. Ouvrir la discussion (bulle) depuis les deux téléphones, écrire, réduire, rouvrir (le brouillon est conservé),
    couper le réseau d'un téléphone, envoyer (« Non envoyé »), le rétablir, « Réessayer » (pas de doublon).
+9. Un troisième compte C qui ouvre l'adresse de la partie doit voir « partie introuvable ».
 10. Cloche : la demande de partie et les messages apparaissent ; « Tout marquer comme lu ».
 11. Notre espace → Gérer le duo → Terminer ce duo : l'autre est prévenu, l'historique reste consultable ;
     inviter un troisième compte C : C ne voit rien de l'ancien duo.
 12. Paramètres → Mon profil : ajouter une photo, recadrer, enregistrer ; elle apparaît chez l'autre membre.
-9. Un troisième compte C qui ouvre l'adresse de la partie doit voir « partie introuvable ».
