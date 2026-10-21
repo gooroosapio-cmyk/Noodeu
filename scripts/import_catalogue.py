@@ -165,7 +165,9 @@ ENGINES["mood"]["config"]["draw"]["fixed"] = {"symbols": mood[:6], "energies": m
 playable = {g["id"] for g in games if g["engine"] in ENGINES and g["id"] not in rejected_ids}
 
 # ---------------------------------------------------------------------------
-# SQL : trois migrations compactes (JSON + jsonb_to_recordset), chacune autonome et idempotente
+# SQL : trois migrations compactes (JSON + jsonb_to_recordset), chacune autonome et idempotente.
+# Chaque section est une seule instruction : ni table temporaire, ni suppression (les entrées disparues d'une
+# banque sont marquées « retire »).
 # ---------------------------------------------------------------------------
 def compact(value):
     return q(json.dumps(value, ensure_ascii=False, separators=(",", ":"), sort_keys=True)) + "::jsonb"
@@ -174,20 +176,13 @@ def compact(value):
 def header(part):
     return (f"-- Import généré par scripts/import_catalogue.py — édition {VERSION} ({catalogue['date']}), partie {part}.\n"
             "-- Idempotent : relancer ne crée ni doublon ni nouvelle version si rien n'a changé. Les parties existantes\n"
-            "-- gardent leur copie de cartes et leur version de règles. Ne pas modifier à la main.\n\n"
-            "create temporary table if not exists import_log (kind text, id text, action text);\ntruncate import_log;\n\n")
+            "-- gardent leur copie de cartes et leur version de règles. Ne pas modifier à la main.\n\n")
 
 
-def footer(part, extra=""):
-    return f"""{extra}
-insert into public.catalogue_imports (content_version, report)
-select {q(VERSION)}, jsonb_build_object('partie', {q(part)},
-  'ajouts', coalesce(sum(n) filter (where action = 'added'), 0), 'mises_a_jour', coalesce(sum(n) filter (where action = 'updated'), 0),
-  'detail', coalesce(jsonb_object_agg(kind || ' ' || action, n) filter (where kind is not null), '{{}}'))
-from (select kind, action, count(*) n from import_log group by kind, action) x
-right join (select 1) one on true;
-drop table import_log;
-"""
+def report(part, section):
+    return (f"insert into public.catalogue_imports (content_version, report)\n"
+            f"select {q(VERSION)}, jsonb_build_object('partie', {q(part)}, 'section', {q(section)},\n"
+            f"  'ajouts', count(*) filter (where inserted), 'mises_a_jour', count(*) filter (where not inserted)) from up;\n\n")
 
 
 families = [{"id": FAMILY_SLUGS[int(k)], "title": v[0], "promise": v[1], "n": int(k)} for k, v in catalogue["families"].items()]
@@ -209,6 +204,7 @@ for idx, g in enumerate(games):
 version_rows = [{"id": g["id"], "rules": ENGINES[g["engine"]]["rules"], "config": dict(ENGINES[g["engine"]]["config"], mechanic=g["engine"])}
                 for g in games if g["id"] in playable]
 
+
 part1 = header("1/3 activités") + f"""with src as (select * from jsonb_to_recordset({compact(families)}) as x(id text, title text, promise text, n int)),
 up as (
   insert into public.game_categories (id, title, promise, sort, status, is_demo, family_no)
@@ -217,10 +213,8 @@ up as (
     status = excluded.status, family_no = excluded.family_no
   where (game_categories.title, game_categories.promise, game_categories.sort, game_categories.status, game_categories.family_no)
     is distinct from (excluded.title, excluded.promise, excluded.sort, excluded.status, excluded.family_no)
-  returning id, (xmax = 0) as inserted)
-insert into import_log select 'famille', id, case when inserted then 'added' else 'updated' end from up;
-
-with src as (select * from jsonb_to_recordset({compact(game_rows)}) as x(id text, cat text, mech text, title text, hook text,
+  returning (xmax = 0) as inserted)
+""" + report("1/3", "familles") + f"""with src as (select * from jsonb_to_recordset({compact(game_rows)}) as x(id text, cat text, mech text, title text, hook text,
   style text, dmin int, dmax int, sort int, impl text, adult boolean, diffs jsonb, thumb text, meta jsonb)),
 up as (
   insert into public.games (id, category_id, mechanic, title, promise, hook, style, duration_min, duration_max,
@@ -237,32 +231,25 @@ up as (
     is distinct from (excluded.category_id, excluded.mechanic, excluded.title, excluded.hook, excluded.style, excluded.sort,
          excluded.status, excluded.implementation, excluded.adult_available, excluded.difficulties, excluded.thumbnail,
          excluded.content_version, excluded.meta)
-  returning id, (xmax = 0) as inserted)
-insert into import_log select 'activite', id, case when inserted then 'added' else 'updated' end from up;
-
--- Versions de règles : nouvelle version publiée seulement si règles ou configuration ont changé.
-drop table if exists import_versions;
-create temporary table import_versions as
-  select * from jsonb_to_recordset({compact(version_rows)}) as x(id text, rules jsonb, config jsonb);
-with changed as (
-  select s.* from import_versions s join public.games g on g.id = s.id
+  returning (xmax = 0) as inserted)
+""" + report("1/3", "activités") + f"""-- Versions de règles : nouvelle version publiée seulement si règles ou configuration ont changé.
+with src as (select * from jsonb_to_recordset({compact(version_rows)}) as x(id text, rules jsonb, config jsonb)),
+changed as (
+  select s.* from src s join public.games g on g.id = s.id
   where not exists (select 1 from public.game_versions v where v.game_id = s.id and v.version = g.current_version
                     and v.rules = s.rules and v.config = s.config)),
 ins as (
   insert into public.game_versions (game_id, version, rules, config, published_at)
   select c.id, coalesce((select max(version) from public.game_versions where game_id = c.id), 0) + 1, c.rules, c.config, now()
-  from changed c returning game_id, version)
-update public.games g set current_version = ins.version from ins where g.id = ins.game_id;
-insert into import_log select 'version', id, 'checked' from import_versions;
-drop table import_versions;
-""" + footer("1/3 activités", """
--- La démo « Portrait en cinq mots » est remplacée par N2-005 (décision 3a) ; ses parties restent dans l'historique.
+  from changed c returning game_id, version),
+up as (update public.games g set current_version = ins.version from ins where g.id = ins.game_id returning true as inserted)
+""" + report("1/3", "versions de règles") + """-- La démo « Portrait en cinq mots » est remplacée par N2-005 (décision 3a) ; ses parties restent dans l'historique.
 update public.games set status = 'archived' where id = 'portrait-en-cinq-mots' and status <> 'archived';
 update public.game_categories set status = 'archived' where id = 'se-decouvrir' and status <> 'archived';
 insert into public.game_favorites (user_id, game_id, created_at)
   select user_id, 'N2-005', created_at from public.game_favorites where game_id = 'portrait-en-cinq-mots'
   on conflict do nothing;
-""")
+"""
 
 card_rows = []
 for gid, cards in decks.items():
@@ -281,26 +268,26 @@ up as (
     content_version = excluded.content_version
   where (game_cards.content, game_cards.adult, game_cards.topic_tags, game_cards.theme, game_cards.sort, game_cards.status)
     is distinct from (excluded.content, excluded.adult, excluded.topic_tags, excluded.theme, excluded.sort, 'published')
-  returning id, (xmax = 0) as inserted)
-insert into import_log select 'carte', id, case when inserted then 'added' else 'updated' end from up;
-""" + footer("2/3 cartes")
+  returning (xmax = 0) as inserted)
+""" + report("2/3", "cartes")
 
 bank_rows = {name: values for name, values in sorted(banks.items())}
-part3 = header("3/3 banques") + f"""drop table if exists import_banks;
-create temporary table import_banks as
+part3 = header("3/3 banques") + f"""with src as (
   select b.key as bank, (e.ordinality - 1)::int as idx, e.value
-  from jsonb_each({compact(bank_rows)}) b, jsonb_array_elements(b.value) with ordinality e;
-with up as (
+  from jsonb_each({compact(bank_rows)}) b, jsonb_array_elements(b.value) with ordinality e),
+retired as (
+  update public.content_banks c set content_version = 'retire', updated_at = now()
+  where c.bank in (select distinct bank from src) and c.content_version <> 'retire'
+    and not exists (select 1 from src i where i.bank = c.bank and i.idx = c.idx)
+  returning 1),
+up as (
   insert into public.content_banks (bank, idx, value, content_version)
-  select bank, idx, value, {q(VERSION)} from import_banks
+  select bank, idx, value, {q(VERSION)} from src
   on conflict (bank, idx) do update set value = excluded.value, content_version = excluded.content_version, updated_at = now()
-  where content_banks.value is distinct from excluded.value
-  returning bank, idx, (xmax = 0) as inserted)
-insert into import_log select 'banque', bank || ':' || idx, case when inserted then 'added' else 'updated' end from up;
-delete from public.content_banks c where c.bank in (select distinct bank from import_banks)
-  and not exists (select 1 from import_banks i where i.bank = c.bank and i.idx = c.idx);
-drop table import_banks;
-""" + footer("3/3 banques")
+  where content_banks.value is distinct from excluded.value or content_banks.content_version is distinct from excluded.content_version
+  returning (xmax = 0) as inserted)
+""" + report("3/3", "banques")
+
 
 old = os.path.join(ROOT, "supabase", "migrations", "20261022000200_catalogue_2_1_0_data.sql")
 if os.path.exists(old):
