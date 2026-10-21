@@ -30,9 +30,25 @@ begin
     raise exception 'ÉCHEC : % (attendu %, obtenu %)', msg, expected, res;
   end if;
 end $$;
+-- Comptages techniques (hors droits du joueur) : les tables de manches ne sont plus lisibles en direct.
+create function t.n_rounds(p uuid) returns int language sql security definer as $$
+  select count(*)::int from public.session_rounds where session_id = p $$;
+create function t.n_answers(p uuid) returns int language sql security definer as $$
+  select count(*)::int from public.session_answers where session_id = p $$;
+-- Vrai si l'appelant ne peut pas lire la table des réponses directement.
+create function t.answers_table_closed() returns boolean language plpgsql as $$
+begin
+  perform 1 from public.session_answers limit 1;
+  return false;
+exception when insufficient_privilege then
+  return true;
+end $$;
 grant execute on all functions in schema t to authenticated;
 
 create table t.ids (k text primary key, v text);
+-- La démo (remplacée par N2-005) est archivée ; on la republie le temps du test pour couvrir le moteur d'origine.
+update public.games set status = 'published' where id = 'portrait-en-cinq-mots';
+update public.game_categories set status = 'published' where id = 'se-decouvrir';
 grant all on t.ids to authenticated;
 
 insert into auth.users (id, email, raw_user_meta_data) values
@@ -168,7 +184,7 @@ begin
   perform t.login('00000000-0000-4000-a000-00000000000b');
   perform t.ok(public.set_ready(s, true) ->> 'status' = 'playing', 'B prêt : la partie démarre');
   perform t.ok(public.set_ready(s, true) ->> 'status' = 'playing', 'confirmation répétée sans effet');
-  perform t.ok((select count(*) from public.session_rounds where session_id = s) = 1, 'une seule manche créée');
+  perform t.ok(t.n_rounds(s) = 1, 'une seule manche créée');
   perform t.ok(jsonb_array_length((public.get_session_state(s) -> 'rounds' -> 0 -> 'card' -> 'words')) = 16, 'réglage appliqué : 16 mots');
   perform t.logout();
 end $$;
@@ -193,12 +209,12 @@ begin
   perform t.ok((public.submit_answer(s, 1, 'self', jsonb_build_object('words', five)) ->> 'repeated')::boolean, 'envoi répété idempotent');
   perform t.err(public.submit_answer(s, 1, 'self', jsonb_build_object('words', other)), 'already_submitted', 'pas de seconde réponse');
   perform t.ok((public.submit_answer(s, 1, 'guess', jsonb_build_object('words', other)) ->> 'ok')::boolean, 'A enregistre sa supposition');
-  perform t.ok((select count(*) from public.session_answers where session_id = s) = 2, 'deux réponses, aucun doublon');
+  perform t.ok(t.n_answers(s) = 2, 'deux réponses, aucun doublon');
   perform t.logout();
 
   -- Confidentialité avant révélation
   perform t.login('00000000-0000-4000-a000-00000000000b');
-  perform t.ok((select count(*) from public.session_answers where session_id = s) = 0, 'B ne lit pas les réponses de A dans la table');
+  perform t.ok(t.answers_table_closed(), 'B ne lit pas les réponses de A dans la table (accès direct fermé)');
   perform t.ok((select count(*) from jsonb_array_elements(public.get_session_state(s) -> 'rounds' -> 0 -> 'answers') a
                 where a -> 'payload' <> 'null'::jsonb) = 0, 'B ne reçoit aucun contenu de A via l''API');
   perform t.ok((select count(*) from jsonb_array_elements(public.get_session_state(s) -> 'rounds' -> 0 -> 'answers')) = 2,
@@ -256,7 +272,7 @@ begin
   perform t.ok((select count(*) from public.notifications where type = 'game_proposed') = 1, 'B a été prévenu de la partie proposée');
   perform t.ok(not (public.close_session(s) ->> 'kept')::boolean, 'sans accord des deux, rien n''est gardé');
   perform t.logout();
-  perform t.ok((select count(*) from public.session_answers where session_id = s) = 0, 'réponses effacées');
+  perform t.ok(t.n_answers(s) = 0, 'réponses effacées');
 end $$;
 
 -- Seconde partie gardée en souvenir, puis séparation
@@ -286,7 +302,7 @@ begin
   end loop;
   perform t.login('00000000-0000-4000-a000-00000000000a');
   perform t.ok((public.close_session(s) ->> 'kept')::boolean, 'souvenir gardé avec l''accord des deux');
-  perform t.ok((select count(*) from public.session_answers where session_id = s) = 4, 'réponses conservées');
+  perform t.ok(t.n_answers(s) = 4, 'réponses conservées');
   perform public.leave_couple();
   perform t.ok(private.my_couple_id() is null, 'séparation effective');
   perform t.ok((public.get_session_state(s) -> 'session' ->> 'read_only')::boolean, 'historique en lecture seule après séparation');

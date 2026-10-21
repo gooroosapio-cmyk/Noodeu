@@ -79,3 +79,35 @@ Essai d'un onglet « Salon » remplaçant « Espace » annulé à la demande de 
 - Accueil réorganisé en rubriques : carte du duo (ou de l'invitation) → « En ce moment » (partie ouverte) → « Tes favoris » → « À découvrir » / « Pour votre prochaine partie ». Pas de rubrique qui répète les onglets.
 - Bibliothèques : seulement le **champ de recherche** et un bouton **« Filtres » déroulant** (Afficher tous/favoris, familles, durée, niveau, tri ; appliqué immédiatement, « Réinitialiser » et « Fermer »). Sous-titre, puces rapides, tri séparé et compteur visibles supprimés (le nombre de résultats reste annoncé aux lecteurs d'écran).
 - 5e onglet renommé **« Réglages »** (plus court que « Paramètres ») ; `/reglages`, et `/parametres` redirige.
+
+## Édition 2.1.0 — 144 activités (cadrage du 21 octobre 2026)
+
+Réponses au QCM : 1b, 2b, 3a, 4 (variante), 5a, 6b, 7a, 8a (V1), 9a, 10a.
+
+| # | Décision |
+|---|---|
+| 1 | **Famille 1 (Complicité et confidences) d'abord**, entièrement (18 activités), puis famille par famille. |
+| 2 | Activités pas encore programmées : **visibles mais grisées, « Bientôt »**, non lançables (le serveur refuse aussi). |
+| 3 | La démo « Portrait en cinq mots » est **remplacée** par N2-005 « Cinq mots, vraiment toi » ; les parties passées restent dans l'historique. |
+| 4 | Bibliothèque : recherche + **puces visibles Tous / Ensemble / Duel** + panneau déroulant pour le reste (famille, mode, difficulté, mode muet, +18, favoris, tri). « Ensemble » = échange, création et coopération. |
+| 5 | +18 : **double accord** — l'interrupteur des Réglages autorise, puis les deux l'activent dans les options de la partie. |
+| 6 | **Solo autorisé** pour les casse-tête et la mémoire (familles 4 et 5 quand la fiche s'y prête) ; le reste se joue à deux. |
+| 7 | Direct obligatoire pour vitesse/mémoire ; tour par tour, casse-tête et histoires jouables chacun à son moment. |
+| 8 | V1 : **pas de micro** ; texte, toucher, sons synthétisés localement. |
+| 9 | Créations sauvegardées dans l'Espace **sur accord des deux**, export PNG, jamais publiées automatiquement. |
+| 10 | Historique : titre, date et résultat gardés ; réponses et contenus détaillés **effacés 24 h après la fin**, sauf « Garder ce souvenir » des deux. |
+
+Noms d'onglets : le kit écrit « Notre espace » et « Paramètres » ; les choix du projet (« Espace », « Réglages »)
+priment (consignes présentes > kit).
+
+### Architecture retenue
+
+- Les moteurs restent **côté base (PL/pgSQL)**, comme le moteur existant : transactions, verrou de partie,
+  idempotence, tests locaux complets. Les réponses de l'autre ne sortent qu'après la révélation.
+- Famille 1 : moteur générique « manches à étapes » (carte ou tirage par manche, étapes privées par siège ou par rôle,
+  étapes visibles immédiatement ou à la révélation, réactions après révélation). Chaque activité a sa configuration et
+  ses validations propres côté serveur.
+- Préférences de partie privées (+18, thèmes à éviter) stockées par joueur, illisibles par l'autre ; seule leur
+  combinaison filtre le tirage (`+18 si A et B`, exclusions = union).
+- Catalogue importé par un script idempotent (`scripts/import_catalogue.py`) qui produit une migration de données et
+  un rapport ; vignettes SVG copiées dans `public/assets/jeux/` (aucun appel à Drive).
