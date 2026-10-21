@@ -192,6 +192,10 @@ begin
   perform t.logout();
   perform t.ok((select count(*) from realtime.messages where payload::text like '%words%' or payload::text like '%portrait.%') = 0,
                'aucun mot ne transite par le temps réel');
+  -- Sur Supabase, les messages ne sont stockés que si le service Realtime a déjà créé la partition du jour.
+  if (select count(*) from realtime.messages where topic = 'session:' || s) = 0 then
+    raise notice 'Signaux temps réel non observables ici (partition Realtime absente) : vérification de contenu non concluante.';
+  end if;
 end $$;
 
 -- Pause : aucune réponse acceptée pendant la pause
