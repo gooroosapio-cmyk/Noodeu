@@ -313,7 +313,6 @@ function Results({ st, me, partner, busy, online, run, navigate }: {
   const round = st.rounds.find((r) => r.revealed);
   const words = new Map((round?.card.words ?? []).map((w) => [w.id, w]));
   const closedWithoutAnswers = st.session.status === "closed" && !round?.answers.length;
-  const meName = me?.display_name ?? "";
   const partnerName = partner?.display_name || "?";
 
   if (!round || closedWithoutAnswers) {
