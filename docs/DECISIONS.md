@@ -42,3 +42,24 @@ Interprétation signalée : la réponse « 1c » a été lue comme **2C** (conne
 - **Hors connexion** : seule l'interface est mise en cache. Aucune donnée de couple, réponse ou message n'est stockée hors ligne. Une partie n'est jamais simulée sans réseau.
 - **Brouillons** : la sélection en cours est gardée dans `sessionStorage` (survit au rafraîchissement, effacée à la fermeture de l'onglet).
 - **Écriture** : formulations neutres plutôt qu'écriture inclusive avec point médian ; les mots des jeux s'accordent selon la forme choisie par chaque personne (féminin, masculin ou les deux).
+
+## Refonte UI/UX (cahier du 21 octobre 2026)
+
+Le cahier « Noodeu — Prompt complet de refonte UI/UX » prime sur les choix antérieurs qu'il contredit :
+
+- **Vocabulaire « duo »** : deux joueurs ne forment pas forcément un couple. « Inviter quelqu'un », « Ton duo ».
+  Les tables gardent leurs noms techniques (`couples`) ; l'interface parle de duo.
+- **Un duo actif, plusieurs duos archivés** ; une même paire retrouve son espace après une nouvelle acceptation
+  des deux (nouvel « épisode », dates affichées). Terminer un duo : décision d'un seul membre, l'autre est prévenu.
+- **Discussion** (remplace la décision 4B « salon effacé à la fin de la partie ») : une seule messagerie, liée au duo,
+  accessible par la bulle flottante et depuis le jeu. Les messages restent consultables dans l'archive du duo,
+  en lecture seule. *À confirmer : souhaites-tu une durée de conservation limitée pour ces messages ?*
+  Messages vocaux : toujours à faire.
+- **Notifications** : centre interne (cloche), sans notification push pour l'instant.
+- **Google** : le bouton n'apparaît que si le fournisseur est activé dans Supabase (aucun faux bouton).
+- **Photo de profil** : stockage privé, lisible par soi et les personnes de ses duos ; recadrage dans le navigateur.
+- **Suppression de compte** : fonction serveur `delete-account` (termine le duo, efface photo et compte ;
+  l'historique commun reste chez l'autre avec la mention « Compte supprimé »).
+- **Couverture de duo** : non ajoutée (facultative dans le cahier) ; surface sobre à la place.
+- Ancienne table du salon (`session_messages`, vide) : mise hors service, pas supprimée ; suppression possible
+  par une migration séparée avec ton accord.

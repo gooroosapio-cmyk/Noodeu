@@ -1,44 +1,37 @@
-# État du projet — 21 octobre 2026
+# État du projet — 21 octobre 2026 (après la refonte UI/UX)
 
 En ligne : **https://noodeu.vercel.app** (Vercel ; mise en production explicite, voir DEPLOIEMENT.md).
 
-## Ce qui fonctionne et a été testé
+## Ce qui fonctionne et comment c'est vérifié
 
-| Élément | Comment c'est vérifié |
+| Élément | Vérification |
 |---|---|
-| Base de données : identité, couple, invitations, catalogue, parties, salon, temps réel | 6 migrations appliquées au projet Supabase ; code des fonctions en ligne **identique** à la version testée (comparaison d'empreintes) |
-| Association de deux comptes (invitation, double confirmation, expiration, révocation, essais répétés, cas d'erreur) | Tests SQL, **sur le vrai projet Supabase** et en local |
-| Partie complète de « Portrait en cinq mots » entre deux comptes | Tests SQL (deux comptes simulés au niveau de la base) |
-| Un troisième compte n'accède à rien | Tests SQL |
-| Réponses secrètes jusqu'à la révélation (table, API, temps réel) | Tests SQL ; voir la réserve sur le temps réel ci-dessous |
-| Aucun doublon après actions répétées | Tests SQL |
-| Séparation : historique en lecture seule | Tests SQL |
-| Logique d'affichage du jeu (accord des mots, mots retrouvés) | `npm test` (5 tests) |
-| Écrans sur petits écrans 320 / 390 / 430 px : aucun défilement horizontal, aucune erreur | `tests/visual/render-check.mjs` (15 écrans × 3 largeurs, données simulées) |
-| Kit visuel Complicité intégré | 101 fichiers vérifiés par SHA-256 |
-| Compilation de production + PWA (manifeste, service worker) | `npm run build` |
+| Base : identité, duos, invitations, catalogue, parties, temps réel (6 migrations) + duos par épisodes, notifications, discussion, photos (migration 7) | 50 fonctions en ligne **identiques** à la version testée (empreintes comparées) |
+| Invitation : code non prédictible, double confirmation, expiration, annulation, nouveau code invalidant l'ancien, essais limités | Tests SQL en local **et sur le projet Supabase** |
+| A–B archivé, A–C actif, C n'accède à rien de A–B (table, adresse directe, canal temps réel, photo), reprise A–B dans le même espace avec un nouvel épisode | Tests SQL sur Supabase |
+| Réponses secrètes avant révélation ; aucun doublon après actions répétées ; partie clôturée à la fin d'un duo | Tests SQL sur Supabase |
+| Discussion : envoi idempotent, non-lus réels, archive en lecture seule | Tests SQL sur Supabase |
+| Notifications personnelles (demande, acceptation, refus, fin de duo, partie proposée, messages) | Tests SQL sur Supabase |
+| Interface : 23 écrans × 320/360/390/430/768/1440 px + écran bas (390×560) : aucun défilement horizontal, rien sous la barre de navigation, aucune erreur | `tests/visual/render-check.mjs` (données simulées) |
+| Texte agrandi à 200 % à 320 et 390 px : aucun débordement | idem, `ZOOM=2` |
+| Contrastes de la palette | calcul WCAG (voir DESIGN.md) |
+| Logique de jeu | `npm test` |
 
-## Ce qui n'a PAS encore pu être testé
+## Ce qui n'a PAS pu être testé par moi
 
-- **Une vraie partie entre deux navigateurs.** Mon environnement de travail ne peut pas joindre l'API Supabase :
-  le réseau la refuse. L'interface n'a donc jamais parlé au vrai serveur. La logique serveur est testée, et les
-  écrans le sont avec des données simulées, mais le branchement des deux reste à vérifier, par exemple sur l'adresse de test Vercel.
-- **Le temps réel en conditions réelles.** Le projet Supabase étant neuf, son service temps réel n'avait pas encore
-  préparé son stockage du jour : les signaux émis pendant le test n'y étaient pas observables. Le contenu des signaux
-  ne comporte par construction aucune réponse. Le test local l'a vérifié. Sans temps réel, l'application relit l'état toutes les 4 s.
-- La reprise après fermeture de l'application et la présence en ligne sur de vrais téléphones.
-- La réception des e-mails de confirmation (dépend du réglage d'adresse du site dans Supabase).
+Mon environnement ne peut joindre ni l'API Supabase ni le site en ligne. Restent donc à vérifier **sur de vrais appareils** :
+- une partie et une discussion entre deux téléphones (le temps réel en conditions réelles) ;
+- l'envoi d'une photo de profil (stockage) ;
+- la suppression de compte (fonction serveur déployée, jamais exécutée : l'essayer effacerait un compte) ;
+- le bouton Google (il apparaîtra seul quand le fournisseur sera activé dans Supabase) ;
+- le comportement en mode application installée (PWA) et clavier ouvert sur un vrai téléphone.
 
-## Limites connues et étapes suivantes
+## Limites connues et suites
 
-- **Contenu de démonstration** : les règles de « Portrait en cinq mots » sont déduites des maquettes et la liste de
-  30 mots est provisoire, en attendant le manuel « Famille 01 — Se découvrir ».
-- Messages vocaux du salon, mécanique de dessin et vocal dans les jeux : **à faire** (décisions 4D et 5D).
-- Astuces : écran d'attente ; import des 500 stories en brouillon et carrousel : **étape 6**.
-- Notifications push : **à faire** (décision 12B).
-- Suppression de compte : nécessite une fonction serveur dédiée ; **à faire** (le bouton l'annonce honnêtement).
-- Administration des contenus et import contrôlé : **étape 7**.
-- Connexion Google : code prêt, à activer après configuration (voir DEPLOIEMENT.md).
-- Envoi d'e-mails en volume : nécessite un fournisseur SMTP (à décider).
-- Les parties terminées dont personne ne relance de partie restent « terminées » (salon ouvert) jusqu'à la partie
-  suivante ; un nettoyage automatique est à prévoir.
+- Contenu de jeu **de démonstration** (règles déduites des maquettes, 30 mots provisoires). Ses consignes publiées
+  emploient encore « ton ou ta partenaire » : une version 2 neutre sera publiée avec le contenu validé.
+- Astuces : écran d'attente ; import des 500 stories en brouillon et carrousel : étape suivante.
+- Messages vocaux, dessin, notifications push : à faire.
+- Couverture de duo, signalement/blocage : non implémentés (facultatifs dans le cahier).
+- Administration des contenus : à faire.
+- Sur 320 px avec texte à 200 %, les libellés de navigation se coupent sur plusieurs lignes (pas de chevauchement).

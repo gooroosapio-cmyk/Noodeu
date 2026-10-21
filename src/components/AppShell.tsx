@@ -1,4 +1,4 @@
-import { createContext, useContext, useState, type ReactNode } from "react";
+import { createContext, useContext, useLayoutEffect, useRef, useState, type ReactNode } from "react";
 import { Link, NavLink, Outlet } from "react-router";
 import { t } from "../i18n";
 import { useAuth } from "../auth/AuthProvider";
@@ -24,8 +24,21 @@ const tabs: { to: string; label: string; short?: string; icon: IconName }[] = [
 ];
 
 function BottomNav() {
+  const ref = useRef<HTMLElement>(null);
+  // La barre peut grandir (texte agrandi) : l'espace réservé suit sa hauteur réelle.
+  useLayoutEffect(() => {
+    const el = ref.current;
+    if (!el) return;
+    const root = document.documentElement;
+    const ro = new ResizeObserver(() => root.style.setProperty("--nav-measured", `${el.offsetHeight}px`));
+    ro.observe(el);
+    return () => {
+      ro.disconnect();
+      root.style.removeProperty("--nav-measured");
+    };
+  }, []);
   return (
-    <nav className="nav" aria-label={t("nav.label")}>
+    <nav className="nav" aria-label={t("nav.label")} ref={ref}>
       {tabs.map((tab) => (
         <NavLink key={tab.to} to={tab.to} aria-label={tab.short ? tab.label : undefined}>
           <Icon name={tab.icon} size={24} />

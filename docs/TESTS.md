@@ -37,7 +37,9 @@ Sur le projet Supabase : coller le fichier dans l'éditeur SQL. Le résultat att
 ## 3. Vérification visuelle
 
 `npm run build && npx vite preview --port 4173` puis `node tests/visual/render-check.mjs`.
-Contrôle à 320, 390 et 430 px : défilement horizontal, erreurs JavaScript, nombre d'onglets, petites cibles tactiles.
+23 écrans (sans duo, invitation en attente, demande reçue, duo actif, archive, zéro résultat, filtres, chat,
+notifications, jeu…) à 320, 360, 390, 430, 768, 1440 px et 390×560 ; `ZOOM=2` pour le texte à 200 %.
+Contrôles : défilement horizontal, contenu masqué sous la navigation, erreurs JavaScript, cibles tactiles < 44 px.
 ⚠️ Ce script simule les réponses du serveur pour afficher les écrans : il ne teste **pas** la synchronisation.
 
 ## 4. Recette manuelle à deux téléphones (à faire après mise en ligne)
@@ -49,5 +51,10 @@ Contrôle à 320, 390 et 430 px : défilement horizontal, erreurs JavaScript, no
 5. A choisit ses 5 mots puis imagine ceux de B. **Vérifier que B ne voit rien des choix de A.**
 6. B ferme l'application en plein milieu, la rouvre : sa sélection en cours et l'état de la partie sont retrouvés.
 7. B termine : la découverte s'affiche chez les deux.
-8. Écrire dans le salon depuis les deux téléphones, couper le réseau d'un téléphone, le rétablir.
+8. Ouvrir la discussion (bulle) depuis les deux téléphones, écrire, réduire, rouvrir (le brouillon est conservé),
+   couper le réseau d'un téléphone, envoyer (« Non envoyé »), le rétablir, « Réessayer » (pas de doublon).
+10. Cloche : la demande de partie et les messages apparaissent ; « Tout marquer comme lu ».
+11. Notre espace → Gérer le duo → Terminer ce duo : l'autre est prévenu, l'historique reste consultable ;
+    inviter un troisième compte C : C ne voit rien de l'ancien duo.
+12. Paramètres → Mon profil : ajouter une photo, recadrer, enregistrer ; elle apparaît chez l'autre membre.
 9. Un troisième compte C qui ouvre l'adresse de la partie doit voir « partie introuvable ».

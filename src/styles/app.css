@@ -40,7 +40,8 @@
   /* Hauteurs réservées */
   --topbar-h: 64px;
   --nav-h: 72px;
-  --nav-total: calc(var(--nav-h) + env(safe-area-inset-bottom));
+  /* Hauteur réelle mesurée par l'application (elle grandit avec la taille du texte). */
+  --nav-total: var(--nav-measured, calc(var(--nav-h) + env(safe-area-inset-bottom)));
   --chat-size: 56px;
   color-scheme: light;
 }
@@ -259,6 +260,9 @@ legend { padding: 0; margin-bottom: var(--s-2); font-weight: 600; }
   color: var(--c-text-2); font: 500 0.75rem/1rem var(--f-body);
 }
 .nav a .icon { align-self: center; }
+.nav a > span { max-width: 100%; overflow-wrap: normal; }
+/* Texte très agrandi : on autorise la coupure plutôt que le chevauchement. */
+@media (max-width: 439px) { .nav a > span { overflow-wrap: anywhere; } }
 .nav a[aria-current="page"] { background: var(--c-accent-soft); color: var(--c-text); font-weight: 600; }
 .nav__short { display: none; }
 @media (max-width: 439px) { .nav__full--long { display: none; } .nav__short { display: inline; } }
@@ -323,12 +327,11 @@ legend { padding: 0; margin-bottom: var(--s-2); font-weight: 600; }
 /* ---------- Jeu ---------- */
 .progress { height: 6px; border-radius: 3px; background: var(--c-border); overflow: hidden; }
 .progress > span { display: block; height: 100%; background: var(--c-accent); transition: width var(--t-panel); }
-.word-grid { list-style: none; margin: 0; padding: 0; display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: var(--s-2); }
-@media (min-width: 560px) { .word-grid { grid-template-columns: repeat(3, minmax(0, 1fr)); } }
+.word-grid { list-style: none; margin: 0; padding: 0; display: grid; grid-template-columns: repeat(auto-fill, minmax(min(100%, 8.5rem), 1fr)); gap: var(--s-2); }
 .word {
   min-height: 52px; padding: var(--s-2) var(--s-3); border-radius: var(--r-control); border: 1px solid var(--c-border-control);
   background: var(--c-surface); display: flex; align-items: center; justify-content: center; gap: var(--s-2);
-  font: 600 1rem/1.25rem var(--f-body); text-align: center; cursor: pointer; width: 100%;
+  font: 600 1rem/1.25rem var(--f-body); text-align: center; cursor: pointer; width: 100%; overflow-wrap: anywhere; hyphens: auto;
 }
 .word[aria-pressed="true"] { background: var(--c-accent-soft); border-color: var(--c-focus); }
 .word__check { width: 22px; height: 22px; border-radius: 50%; background: var(--c-focus); color: #fff; display: none; place-items: center; flex: none; }

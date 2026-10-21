@@ -17,15 +17,15 @@ Usage des illustrations dans l'application :
 
 | Illustration | Écran |
 |---|---|
-| 01 connexion à deux | Bienvenue, accueil (proposition de jeu) |
-| 02 invitation | Créer une invitation |
-| 03 duo confirmé | Confirmer avant de rejoindre |
+| 01 connexion à deux | Accueil public uniquement |
+| 02 invitation | (plus utilisée ; le code d'invitation est l'élément principal) |
+| 03 duo confirmé | (plus utilisée ; la confirmation montre la vraie initiale ou photo) |
 | 04 portrait en mots | Vignette et fiche « Portrait en cinq mots » |
 | 09 attente douce | Attente du partenaire, demande envoyée |
 | 11 fin de partie | Fin de partie |
 | 12 astuce | Astuces (en attente de publication) |
-| 13 favoris | Recherche sans résultat, favoris vides |
-| 14 duo à créer | Accueil et Notre espace sans duo |
+| 13 favoris | (plus utilisée : zéro résultat sans grande illustration) |
+| 14 duo à créer | Plus utilisée comme faux profil : remplacée par le composant DuoIdentity (vraie photo + vrai bouton +) |
 | 15 invitation expirée | Code expiré |
 | 16 reconnexion | Partie injoignable, profil injoignable |
 | 17 pause | Pause, partie quittée |
@@ -38,3 +38,5 @@ License 1.1, incluse dans chaque paquet). Elles sont servies par l'application, 
 
 Les 30 maquettes PNG (`Noodeu_Complicite_30_Ecrans_PNG_V2.zip`) ont servi de références de composition ; elles ne sont
 pas intégrées comme images. Correction appliquée : aucun bouton « Partager au duo » dans Astuces.
+
+Voir aussi `docs/DESIGN.md` (inventaire des images après la refonte, rôles décoratifs/informatifs).

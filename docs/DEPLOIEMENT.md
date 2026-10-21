@@ -19,10 +19,28 @@ Avant d'ouvrir l'application au public, il faut brancher un fournisseur d'e-mail
 
 ### Connexion Google (décision 2C)
 
-1. Dans Google Cloud Console, créer un identifiant « OAuth client ID » de type application web.
-2. Ajouter l'adresse de rappel indiquée par Supabase (Authentication → Providers → Google).
-3. Coller l'identifiant et le secret **dans Supabase uniquement** (jamais dans le dépôt).
-4. Passer `VITE_AUTH_GOOGLE=true` dans les variables d'environnement du site.
+Le code est prêt ; le bouton apparaît **automatiquement** dès que le fournisseur est activé dans Supabase.
+
+1. Google Cloud Console → « APIs et services » → « Écran de consentement OAuth » : type Externe, nom « Noodeu »,
+   adresse de contact, domaine autorisé `supabase.co` (et ton futur domaine).
+2. « Identifiants » → « Créer des identifiants » → « ID client OAuth » → Application Web.
+   - Origines JavaScript autorisées : `https://noodeu.vercel.app`
+   - URI de redirection autorisés : `https://uqyrjdaonqqkkpzyjfcg.supabase.co/auth/v1/callback`
+3. Supabase → Authentication → Sign In / Providers → Google : activer, coller l'ID client et le code secret
+   (**uniquement là**, jamais dans le dépôt ni dans Vercel).
+4. Vérifier que `https://noodeu.vercel.app/**` figure dans les Redirect URLs (section 1).
+5. Tester : connexion réussie, annulation sur l'écran Google, puis lien d'invitation ouvert avant la connexion
+   (la page « Rejoindre » doit se rouvrir après le retour, sans accepter automatiquement le duo).
+
+### Sécurité des mots de passe
+
+Supabase recommande d'activer **Authentication → Passwords → Leaked password protection** (refus des mots de
+passe connus pour avoir fuité). Réglage à faire dans le tableau de bord.
+
+### Fonction serveur
+
+`supabase/functions/delete-account` est déployée (suppression de compte). Elle utilise les clés serveur fournies
+automatiquement par Supabase ; aucune clé secrète n'est à configurer.
 
 ## 2. Vercel (en place depuis le 21 octobre 2026)
 
