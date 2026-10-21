@@ -584,9 +584,9 @@ $$;
 create or replace function private.round_complete(p_session uuid, p_round int, cfg jsonb, card jsonb) returns boolean
 language sql stable security definer set search_path = '' as $$
   select not exists (
-    select 1 from jsonb_array_elements(cfg -> 'steps') st, unnest(private.step_seats(st, card)) seat
+    select 1 from jsonb_array_elements(cfg -> 'steps') st, unnest(private.step_seats(st, card)) as x(seat_no)
     where not exists (select 1 from public.session_answers a
-                      where a.session_id = p_session and a.round_no = p_round and a.step = st ->> 'key' and a.seat = seat))
+                      where a.session_id = p_session and a.round_no = p_round and a.step = st ->> 'key' and a.seat = x.seat_no))
 $$;
 
 create or replace function private.compute_result(s public.game_sessions, cfg jsonb) returns jsonb
@@ -852,6 +852,24 @@ begin
   if cur_step is null then return jsonb_build_object('ok', false, 'error', 'unknown_step'); end if;
   if not (r.seat = any(private.step_seats(cur_step, rnd.card))) then return jsonb_build_object('ok', false, 'error', 'not_your_turn'); end if;
 
+  if p_skip then
+    if not coalesce((cur_step ->> 'skippable')::boolean, false) then return jsonb_build_object('ok', false, 'error', 'invalid_answer'); end if;
+    normalized := null;
+  else
+    begin
+      normalized := private.validate_step(cur_step, rnd.card, p_payload, p_session, p_round, r.seat);
+    exception when raise_exception then
+      return jsonb_build_object('ok', false, 'error', 'invalid_answer');
+    end;
+  end if;
+
+  -- La même réponse renvoyée (double clic, réseau) n'a qu'un effet, quel que soit l'état de la partie.
+  select * into prev from public.session_answers a
+    where a.session_id = p_session and a.round_no = p_round and a.step = p_step and a.seat = r.seat;
+  if prev.id is not null and prev.skipped = p_skip and prev.payload is not distinct from normalized then
+    return jsonb_build_object('ok', true, 'repeated', true);
+  end if;
+
   if is_after then
     -- Étapes après révélation (réaction, combinaison commune…) : possibles aussi sur l'écran de fin.
     if (r.s).status not in ('playing', 'ended') or rnd.revealed_at is null or rnd.revealed_at > now() then
@@ -881,23 +899,7 @@ begin
     end if;
   end if;
 
-  if p_skip then
-    if not coalesce((cur_step ->> 'skippable')::boolean, false) then return jsonb_build_object('ok', false, 'error', 'invalid_answer'); end if;
-    normalized := null;
-  else
-    begin
-      normalized := private.validate_step(cur_step, rnd.card, p_payload, p_session, p_round, r.seat);
-    exception when raise_exception then
-      return jsonb_build_object('ok', false, 'error', 'invalid_answer');
-    end;
-  end if;
-
-  select * into prev from public.session_answers a
-    where a.session_id = p_session and a.round_no = p_round and a.step = p_step and a.seat = r.seat;
   if prev.id is not null then
-    if prev.skipped = p_skip and prev.payload is not distinct from normalized then
-      return jsonb_build_object('ok', true, 'repeated', true);
-    end if;
     -- Seules certaines étapes après révélation acceptent une révision (ex. : combinaison commune, révision = 1).
     max_rev := coalesce((cur_step ->> 'revisions')::int, 0);
     if not is_after or prev.revision >= max_rev then
