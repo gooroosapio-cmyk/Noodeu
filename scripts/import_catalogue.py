@@ -170,7 +170,15 @@ playable = {g["id"] for g in games if g["engine"] in ENGINES and g["id"] not in 
 # banque sont marquées « retire »).
 # ---------------------------------------------------------------------------
 def compact(value):
-    return q(json.dumps(value, ensure_ascii=False, separators=(",", ":"), sort_keys=True)) + "::jsonb"
+    """JSON compact, un élément de liste par ligne (fichiers relisibles et transmissibles par morceaux)."""
+    if isinstance(value, list):
+        body = "[\n" + ",\n".join(json.dumps(v, ensure_ascii=False, separators=(",", ":"), sort_keys=True) for v in value) + "\n]"
+    elif isinstance(value, dict):
+        body = "{\n" + ",\n".join(json.dumps(k, ensure_ascii=False) + ":" + json.dumps(v, ensure_ascii=False, separators=(",", ":"), sort_keys=True)
+                                   for k, v in sorted(value.items())) + "\n}"
+    else:
+        body = json.dumps(value, ensure_ascii=False, separators=(",", ":"), sort_keys=True)
+    return q(body) + "::jsonb"
 
 
 def header(part):
@@ -205,6 +213,14 @@ version_rows = [{"id": g["id"], "rules": ENGINES[g["engine"]]["rules"], "config"
                 for g in games if g["id"] in playable]
 
 
+DEMO_SQL = """-- La démo « Portrait en cinq mots » est remplacée par N2-005 (décision 3a) ; ses parties restent dans l'historique.
+update public.games set status = 'archived' where id = 'portrait-en-cinq-mots' and status <> 'archived';
+update public.game_categories set status = 'archived' where id = 'se-decouvrir' and status <> 'archived';
+insert into public.game_favorites (user_id, game_id, created_at)
+  select user_id, 'N2-005', created_at from public.game_favorites where game_id = 'portrait-en-cinq-mots'
+  on conflict do nothing;
+"""
+
 part1 = header("1/3 activités") + f"""with src as (select * from jsonb_to_recordset({compact(families)}) as x(id text, title text, promise text, n int)),
 up as (
   insert into public.game_categories (id, title, promise, sort, status, is_demo, family_no)
@@ -232,7 +248,9 @@ up as (
          excluded.status, excluded.implementation, excluded.adult_available, excluded.difficulties, excluded.thumbnail,
          excluded.content_version, excluded.meta)
   returning (xmax = 0) as inserted)
-""" + report("1/3", "activités") + f"""-- Versions de règles : nouvelle version publiée seulement si règles ou configuration ont changé.
+""" + report("1/3", "activités") + DEMO_SQL
+
+part1b = header("1/3 versions de règles") + f"""-- Versions de règles : nouvelle version publiée seulement si règles ou configuration ont changé.
 with src as (select * from jsonb_to_recordset({compact(version_rows)}) as x(id text, rules jsonb, config jsonb)),
 changed as (
   select s.* from src s join public.games g on g.id = s.id
@@ -243,13 +261,7 @@ ins as (
   select c.id, coalesce((select max(version) from public.game_versions where game_id = c.id), 0) + 1, c.rules, c.config, now()
   from changed c returning game_id, version),
 up as (update public.games g set current_version = ins.version from ins where g.id = ins.game_id returning true as inserted)
-""" + report("1/3", "versions de règles") + """-- La démo « Portrait en cinq mots » est remplacée par N2-005 (décision 3a) ; ses parties restent dans l'historique.
-update public.games set status = 'archived' where id = 'portrait-en-cinq-mots' and status <> 'archived';
-update public.game_categories set status = 'archived' where id = 'se-decouvrir' and status <> 'archived';
-insert into public.game_favorites (user_id, game_id, created_at)
-  select user_id, 'N2-005', created_at from public.game_favorites where game_id = 'portrait-en-cinq-mots'
-  on conflict do nothing;
-"""
+""" + report("1/3", "versions de règles")
 
 card_rows = []
 for gid, cards in decks.items():
@@ -258,7 +270,8 @@ for gid, cards in decks.items():
     for i, c in enumerate(cards):
         card_rows.append({"id": c["id"], "g": gid, "c": {"text": c["text"], "choices": c.get("choices", []), "format": c.get("format")},
                           "a": bool(c["adult"]), "t": c.get("topic_tags", []), "th": c.get("theme") or "", "s": i})
-part2 = header("2/3 cartes") + f"""with src as (select * from jsonb_to_recordset({compact(card_rows)}) as x(id text, g text, c jsonb, a boolean, t jsonb, th text, s int)),
+def cards_part(gid, rows):
+    return header(f"2/3 cartes {gid}") + f"""with src as (select * from jsonb_to_recordset({compact(rows)}) as x(id text, g text, c jsonb, a boolean, t jsonb, th text, s int)),
 up as (
   insert into public.game_cards (id, game_id, kind, content, content_level, adult, topic_tags, theme, sort, status, is_demo, content_version)
   select id, g, 'question', c, case when a then 'intime' else 'standard' end, a, array(select jsonb_array_elements_text(t)), th, s,
@@ -269,8 +282,10 @@ up as (
   where (game_cards.content, game_cards.adult, game_cards.topic_tags, game_cards.theme, game_cards.sort, game_cards.status)
     is distinct from (excluded.content, excluded.adult, excluded.topic_tags, excluded.theme, excluded.sort, 'published')
   returning (xmax = 0) as inserted)
-""" + report("2/3", "cartes")
+""" + report("2/3", f"cartes {gid}")
 
+
+card_parts = {gid: cards_part(gid, [r for r in card_rows if r["g"] == gid]) for gid in sorted({r["g"] for r in card_rows})}
 bank_rows = {name: values for name, values in sorted(banks.items())}
 part3 = header("3/3 banques") + f"""with src as (
   select b.key as bank, (e.ordinality - 1)::int as idx, e.value
@@ -293,8 +308,14 @@ old = os.path.join(ROOT, "supabase", "migrations", "20261022000200_catalogue_2_1
 if os.path.exists(old):
     os.remove(old)
 sql = ""
-for name, body in (("20261022000200_catalogue_2_1_0_activites.sql", part1), ("20261022000210_catalogue_2_1_0_cartes.sql", part2),
-                   ("20261022000220_catalogue_2_1_0_banques.sql", part3)):
+for old_name in ("20261022000210_catalogue_2_1_0_cartes.sql",):
+    if os.path.exists(os.path.join(ROOT, "supabase", "migrations", old_name)):
+        os.remove(os.path.join(ROOT, "supabase", "migrations", old_name))
+outputs = [("20261022000200_catalogue_2_1_0_activites.sql", part1), ("20261022000201_catalogue_2_1_0_versions.sql", part1b)]
+outputs += [(f"2026102200021{i}_catalogue_2_1_0_cartes_{gid.lower().replace('-', '_')}.sql", body)
+            for i, (gid, body) in enumerate(sorted(card_parts.items()))]
+outputs += [("20261022000220_catalogue_2_1_0_banques.sql", part3)]
+for name, body in outputs:
     with open(os.path.join(ROOT, "supabase", "migrations", name), "w", encoding="utf-8") as f:
         f.write(body)
     sql += body
