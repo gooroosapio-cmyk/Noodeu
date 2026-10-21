@@ -1,5 +1,7 @@
 # État du projet — 21 octobre 2026
 
+En ligne : **https://noodeu.vercel.app** (Vercel, mise en production automatique à chaque envoi).
+
 ## Ce qui fonctionne et a été testé
 
 | Élément | Comment c'est vérifié |

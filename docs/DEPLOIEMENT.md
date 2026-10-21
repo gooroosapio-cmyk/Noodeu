@@ -6,7 +6,7 @@ Les migrations de `supabase/migrations/` sont appliquées au projet `uqyrjdaonqq
 
 Réglages à faire dans le tableau de bord Supabase (**Authentication → URL Configuration**) une fois l'adresse du site connue :
 
-- **Site URL** : l'adresse de production (par exemple `https://noodeu.vercel.app`) ;
+- **Site URL** : `https://noodeu.vercel.app` ;
 - **Redirect URLs** : la même adresse suivie de `/**`, plus `http://localhost:5173/**` pour le développement.
 
 Sans ce réglage, les liens de confirmation d'e-mail renvoient vers une adresse par défaut.
@@ -24,7 +24,14 @@ Avant d'ouvrir l'application au public, il faut brancher un fournisseur d'e-mail
 3. Coller l'identifiant et le secret **dans Supabase uniquement** (jamais dans le dépôt).
 4. Passer `VITE_AUTH_GOOGLE=true` dans les variables d'environnement du site.
 
-## 2. Vercel
+## 2. Vercel (en place depuis le 21 octobre 2026)
+
+- Adresse : **https://noodeu.vercel.app** (projet Vercel « noodeu », relié au dépôt GitHub).
+- Chaque envoi sur la branche `ccr-7a7de876-azitw6` est mis en production automatiquement
+  (c'est actuellement la seule branche du dépôt, donc la branche de production).
+- Les adresses de prévisualisation générées par Vercel demandent une connexion à Vercel ; `noodeu.vercel.app` est public.
+- Un second projet « noodeu-wup1 », relié au même dépôt, existe aussi : il semble être un doublon et peut être supprimé
+  depuis le tableau de bord Vercel.
 
 - Framework : Vite. Commande de build : `npm run build`. Dossier publié : `dist`.
 - Variables d'environnement : `VITE_SUPABASE_URL`, `VITE_SUPABASE_PUBLISHABLE_KEY`, `VITE_AUTH_GOOGLE`.
