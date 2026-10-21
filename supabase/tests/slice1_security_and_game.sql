@@ -230,24 +230,31 @@ begin
   perform t.logout();
 end $$;
 
--- Salon : envoi idempotent, invisible pour un tiers, effacé à la clôture
+-- Chat du duo : envoi idempotent, non-lus réels, invisible pour un tiers ; clôture de partie sans souvenir
 do $$
 declare s uuid := (select v::uuid from t.ids where k = 's1'); cid uuid := gen_random_uuid();
 begin
   perform t.login('00000000-0000-4000-a000-00000000000a');
-  perform public.send_session_message(s, cid, 'Coucou');
-  perform public.send_session_message(s, cid, 'Coucou');
-  perform t.ok((select count(*) from public.session_messages where session_id = s) = 1, 'message répété enregistré une fois');
+  perform public.send_duo_message(cid, 'Coucou');
+  perform public.send_duo_message(cid, 'Coucou');
+  perform t.ok((select count(*) from public.duo_messages) = 1, 'message répété enregistré une fois');
+  perform t.ok(public.get_chat_unread() = 0, 'mes propres messages ne sont pas des non-lus');
   perform public.set_keep_memory(s, true);
   perform t.logout();
 
   perform t.login('00000000-0000-4000-a000-00000000000c');
-  perform t.ok((select count(*) from public.session_messages) = 0, 'C ne lit pas le salon');
+  perform t.ok((select count(*) from public.duo_messages) = 0, 'C ne lit pas le chat');
+  perform t.ok((select count(*) from public.notifications) = 0, 'C ne lit aucune notification des autres');
   perform t.logout();
 
   perform t.login('00000000-0000-4000-a000-00000000000b');
+  perform t.ok(public.get_chat_unread() = 1, 'B a un message non lu');
+  perform t.ok((select count(*) from public.notifications where type = 'message' and read_at is null) = 1, 'B a une notification de message');
+  perform public.mark_chat_read((select v::uuid from t.ids where k = 'couple'));
+  perform t.ok(public.get_chat_unread() = 0, 'lecture enregistrée');
+  perform t.ok((select count(*) from public.notifications where type = 'message' and read_at is null) = 0, 'notification de message lue');
+  perform t.ok((select count(*) from public.notifications where type = 'game_proposed') = 1, 'B a été prévenu de la partie proposée');
   perform t.ok(not (public.close_session(s) ->> 'kept')::boolean, 'sans accord des deux, rien n''est gardé');
-  perform t.ok((select count(*) from public.session_messages where session_id = s) = 0, 'salon effacé');
   perform t.logout();
   perform t.ok((select count(*) from public.session_answers where session_id = s) = 0, 'réponses effacées');
 end $$;
@@ -284,6 +291,115 @@ begin
   perform t.ok(private.my_couple_id() is null, 'séparation effective');
   perform t.ok((public.get_session_state(s) -> 'session' ->> 'read_only')::boolean, 'historique en lecture seule après séparation');
   perform t.err(public.create_session('portrait-en-cinq-mots'), 'no_couple', 'plus de nouvelle partie sans couple');
+  perform t.logout();
+end $$;
+
+-- ===== 4. Duos : archive A–B, nouveau duo A–C, isolement, reprise de A–B =========
+create function t.pair(inviter uuid, claimer uuid) returns uuid language plpgsql as $f$
+declare code text; inv uuid; res jsonb;
+begin
+  perform t.login(inviter);
+  res := public.create_invitation(); code := res ->> 'code'; inv := (res ->> 'id')::uuid;
+  perform t.logout();
+  perform t.login(claimer);
+  perform t.ok((public.claim_invitation(code) ->> 'ok')::boolean, 'demande pour rejoindre');
+  perform t.logout();
+  perform t.login(inviter);
+  res := public.respond_to_claim(inv, true);
+  perform t.logout();
+  if not (res ->> 'ok')::boolean then raise exception 'ÉCHEC : association %', res; end if;
+  return (res ->> 'couple_id')::uuid;
+end $f$;
+
+do $$
+declare ab uuid := (select v::uuid from t.ids where k = 'couple'); ac uuid; ab2 uuid; code text; res jsonb;
+begin
+  -- B a été prévenu de la fin du duo par A
+  perform t.login('00000000-0000-4000-a000-00000000000b');
+  perform t.ok((select count(*) from public.notifications where type = 'duo_ended') = 1, 'B prévenu de la fin du duo');
+  perform t.ok(jsonb_array_length(public.get_my_duos()) = 1 and not (public.get_my_duos() -> 0 ->> 'active')::boolean, 'B voit A–B archivé');
+  perform t.err(public.send_duo_message(gen_random_uuid(), 'encore là ?'), 'no_couple', 'archive : écriture impossible');
+  perform t.logout();
+
+  -- A invite C
+  ac := t.pair('00000000-0000-4000-a000-00000000000a', '00000000-0000-4000-a000-00000000000c');
+  perform t.ok(ac <> ab, 'A–C est un nouveau duo');
+  perform t.login('00000000-0000-4000-a000-00000000000a');
+  perform t.ok(jsonb_array_length(public.get_my_duos()) = 2, 'A retrouve A–B (archivé) et A–C (actif)');
+  perform t.ok((public.get_my_duos() -> 0 ->> 'active')::boolean and (public.get_my_duos() -> 0 ->> 'id')::uuid = ac, 'A–C en tête, actif');
+  perform t.ok((select count(*) from public.game_favorites) >= 0, 'favoris personnels toujours lisibles');
+  perform public.send_duo_message(gen_random_uuid(), 'Salut C');
+  perform t.logout();
+
+  perform t.login('00000000-0000-4000-a000-00000000000c');
+  perform t.ok(jsonb_array_length(public.get_my_duos()) = 1, 'C ne voit que son duo avec A');
+  perform t.ok((select count(*) from public.duo_messages where couple_id = ab) = 0, 'C ne lit pas les messages A–B');
+  perform t.ok((select count(*) from public.duo_messages) = 1, 'C lit le message de son duo');
+  perform t.ok((select count(*) from public.game_sessions where couple_id = ab) = 0, 'C ne voit pas les parties A–B');
+  perform t.ok((select count(*) from public.profiles where display_name = 'Test B') = 0, 'C ne voit pas le profil de B');
+  perform t.err(public.get_session_state((select v::uuid from t.ids where k = 's2')), 'session_not_found', 'C ne lit pas une partie A–B par adresse directe');
+  perform t.ok(not private.can_join_topic('couple:' || ab), 'C ne peut pas écouter le canal A–B');
+  perform t.logout();
+
+  perform t.login('00000000-0000-4000-a000-00000000000b');
+  perform t.ok((select count(*) from public.duo_messages where couple_id = ac) = 0, 'B ne lit pas les messages A–C');
+  perform t.ok((select count(*) from public.profiles where display_name = 'Test C') = 0, 'B ne voit pas le profil de C');
+  -- B tente de reprendre avec A pendant que A est en duo avec C
+  res := public.create_invitation(); code := res ->> 'code';
+  perform t.logout();
+  perform t.login('00000000-0000-4000-a000-00000000000a');
+  perform t.err(public.claim_invitation(code), 'you_are_already_paired', 'A doit d''abord terminer A–C');
+  perform public.leave_couple();
+  perform t.ok((public.claim_invitation(code) ->> 'ok')::boolean, 'A demande à reprendre avec B');
+  perform t.logout();
+end $$;
+
+do $$
+declare ab uuid := (select v::uuid from t.ids where k = 'couple'); inv uuid;
+begin
+  perform t.login('00000000-0000-4000-a000-00000000000b');
+  select id into inv from public.invitations where inviter_id = auth.uid() and status = 'claimed';
+  perform t.ok((public.respond_to_claim(inv, true) ->> 'couple_id')::uuid = ab, 'A–B retrouve le même espace');
+  perform t.ok((select count(*) from public.duo_episodes where couple_id = ab) = 2, 'un nouvel épisode est créé');
+  perform t.ok((select count(*) from public.duo_messages where couple_id = ab) = 1, 'l''historique A–B est retrouvé');
+  perform t.ok((select count(*) from public.duo_messages where body = 'Salut C') = 0, 'aucun mélange avec A–C');
+  perform t.logout();
+  perform t.login('00000000-0000-4000-a000-00000000000c');
+  perform t.ok((select count(*) from public.notifications where type = 'duo_ended') = 1, 'C prévenu de la fin de A–C');
+  perform t.ok((select count(*) from public.duo_messages) = 1, 'C garde la lecture de son archive');
+  perform t.logout();
+end $$;
+
+-- Code régénéré : l'ancien ne fonctionne plus
+do $$
+declare old text; fresh text;
+begin
+  perform t.login('00000000-0000-4000-a000-00000000000d');
+  old := public.create_invitation() ->> 'code';
+  fresh := public.regenerate_invitation() ->> 'code';
+  perform t.ok(old <> fresh, 'nouveau code différent');
+  perform t.logout();
+  delete from private.invitation_attempts;
+  perform t.login('00000000-0000-4000-a000-00000000000c');
+  perform t.err(public.preview_invitation(old), 'revoked', 'ancien code invalidé');
+  perform t.ok((public.preview_invitation(fresh) ->> 'ok')::boolean, 'nouveau code valide');
+  perform t.logout();
+end $$;
+
+-- Photos : chacun écrit dans son dossier ; un tiers ne lit pas la photo
+insert into storage.objects (bucket_id, name, owner) values ('avatars', '00000000-0000-4000-a000-00000000000b/p.webp', '00000000-0000-4000-a000-00000000000b');
+do $$
+begin
+  perform t.login('00000000-0000-4000-a000-00000000000c');
+  perform t.ok((select count(*) from storage.objects where bucket_id = 'avatars') = 0, 'C ne voit pas la photo de B');
+  begin
+    insert into storage.objects (bucket_id, name) values ('avatars', '00000000-0000-4000-a000-00000000000b/x.webp');
+    raise exception 'ÉCHEC : C a écrit dans le dossier de B';
+  exception when insufficient_privilege then null;
+  end;
+  perform t.logout();
+  perform t.login('00000000-0000-4000-a000-00000000000a');
+  perform t.ok((select count(*) from storage.objects where bucket_id = 'avatars') = 1, 'A voit la photo de B');
   perform t.logout();
 end $$;
 
