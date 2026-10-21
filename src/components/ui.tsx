@@ -94,6 +94,35 @@ export function NetworkBanner() {
   return <div className="net-banner" role="status">{online ? t("net.back") : t("net.offline")}</div>;
 }
 
+// Registre des fenêtres ouvertes : une seule entrée d'historique pour toute la pile,
+// afin que le bouton « retour » du téléphone ferme d'abord la fenêtre du dessus.
+const sheetStack: (() => void)[] = [];
+let historyPushed = false;
+if (typeof window !== "undefined") {
+  window.addEventListener("popstate", () => {
+    if (!historyPushed || !sheetStack.length) return;
+    historyPushed = false;
+    sheetStack[sheetStack.length - 1]();
+  });
+}
+function registerSheet(close: () => void) {
+  sheetStack.push(close);
+  if (!historyPushed) {
+    history.pushState({ noodeuSheet: true }, "");
+    historyPushed = true;
+  }
+  return () => {
+    const i = sheetStack.indexOf(close);
+    if (i >= 0) sheetStack.splice(i, 1);
+    // Différé : si une autre fenêtre s'ouvre aussitôt (remplacement), elle réutilise l'entrée.
+    setTimeout(() => {
+      if (sheetStack.length || !historyPushed) return;
+      historyPushed = false;
+      if (history.state?.noodeuSheet) history.back();
+    }, 0);
+  };
+}
+
 /**
  * Fenêtre (feuille basse sur mobile, panneau latéral possible sur grand écran).
  * Garde le focus à l'intérieur, se ferme avec Échap ou le bouton retour, rend le focus au déclencheur.
@@ -106,13 +135,14 @@ export function Sheet({ title, onClose, children, footer, side = false, tall = f
   const titleId = useRef(`sheet-${Math.random().toString(36).slice(2)}`).current;
   const closeRef = useRef(onClose);
   closeRef.current = onClose;
+  const topClose = useRef<(() => void) | null>(null);
 
   useEffect(() => {
     const opener = document.activeElement as HTMLElement | null;
     const first = ref.current?.querySelector<HTMLElement>("[data-autofocus]") ?? ref.current;
     first?.focus();
     const onKey = (e: KeyboardEvent) => {
-      if (e.key === "Escape") closeRef.current();
+      if (e.key === "Escape" && sheetStack[sheetStack.length - 1] === topClose.current) closeRef.current();
       if (e.key !== "Tab" || !ref.current) return;
       const items = [...ref.current.querySelectorAll<HTMLElement>("a[href], button:not([disabled]), input:not([disabled]), textarea:not([disabled]), select, [tabindex]:not([tabindex='-1'])")];
       if (!items.length) return;
@@ -120,19 +150,19 @@ export function Sheet({ title, onClose, children, footer, side = false, tall = f
       if (e.shiftKey && document.activeElement === a) { e.preventDefault(); z.focus(); }
       else if (!e.shiftKey && document.activeElement === z) { e.preventDefault(); a.focus(); }
     };
-    // Le bouton « retour » du téléphone ferme d'abord la fenêtre.
-    history.pushState({ noodeuSheet: true }, "");
-    const onPop = () => closeRef.current();
-    window.addEventListener("popstate", onPop);
+    const close = () => closeRef.current();
+    topClose.current = close;
+    const unregister = registerSheet(close);
     document.addEventListener("keydown", onKey);
     document.body.style.overflow = "hidden";
     document.body.classList.add("has-sheet");
     return () => {
-      window.removeEventListener("popstate", onPop);
+      unregister();
       document.removeEventListener("keydown", onKey);
-      document.body.style.overflow = "";
-      document.body.classList.remove("has-sheet");
-      if (history.state?.noodeuSheet) history.back();
+      if (!sheetStack.length) {
+        document.body.style.overflow = "";
+        document.body.classList.remove("has-sheet");
+      }
       opener?.focus?.();
     };
   }, []);
@@ -153,8 +183,8 @@ export function Sheet({ title, onClose, children, footer, side = false, tall = f
 }
 
 /** Confirmation explicite d'une action importante. */
-export function ConfirmDialog({ title, text, confirmLabel, danger = false, busy = false, onConfirm, onCancel, children }: {
-  title: string; text: ReactNode; confirmLabel: string; danger?: boolean; busy?: boolean; onConfirm: () => void; onCancel: () => void; children?: ReactNode;
+export function ConfirmDialog({ title, text, confirmLabel, danger = false, busy = false, disabled = false, onConfirm, onCancel, children }: {
+  title: string; text: ReactNode; confirmLabel: string; danger?: boolean; busy?: boolean; disabled?: boolean; onConfirm: () => void; onCancel: () => void; children?: ReactNode;
 }) {
   return (
     <Sheet
@@ -163,7 +193,7 @@ export function ConfirmDialog({ title, text, confirmLabel, danger = false, busy 
       footer={
         <div className="sheet__foot">
           <button className="btn btn--secondary btn--auto" onClick={onCancel} data-autofocus>{t("common.cancel")}</button>
-          <button className={`btn ${danger ? "btn--danger-solid" : ""}`} disabled={busy} onClick={onConfirm}>{busy ? t("common.sending") : confirmLabel}</button>
+          <button className={`btn ${danger ? "btn--danger-solid" : ""}`} disabled={busy || disabled} onClick={onConfirm}>{busy ? t("common.sending") : confirmLabel}</button>
         </div>
       }
     >

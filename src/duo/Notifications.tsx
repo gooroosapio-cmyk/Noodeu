@@ -58,10 +58,12 @@ export function NotificationCenter({ onClose, onOpenChat }: { onClose: () => voi
       side
       title={<h2 className="t-section">{t("notif.title")}</h2>}
       onClose={onClose}
-      headerExtra={notificationsUnread > 0 ? (
-        <button className="btn btn--quiet btn--auto btn--sm" onClick={() => void markNotificationsRead()}>{t("notif.markAll")}</button>
-      ) : null}
     >
+      {notificationsUnread > 0 && (
+        <div className="row" style={{ justifyContent: "flex-end", marginTop: -8 }}>
+          <button className="btn btn--quiet btn--auto btn--sm" onClick={() => void markNotificationsRead()}><Icon name="check" size={18} />{t("notif.markAll")}</button>
+        </div>
+      )}
       {notifications.length === 0 ? (
         <p className="muted center" style={{ padding: "24px 0" }}>{t("notif.empty")}</p>
       ) : (

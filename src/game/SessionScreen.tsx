@@ -5,28 +5,34 @@ import { errorMessage } from "../lib/errors";
 import { rpc } from "../lib/supabase";
 import { useOnline } from "../lib/useOnline";
 import { useAuth } from "../auth/AuthProvider";
-import { useCouple } from "../couple/CoupleProvider";
-import { Alert, Avatar, Icon, Illustration, Loading, PageLoading } from "../components/ui";
+import { useDuo } from "../duo/DuoProvider";
+import { ChatPanel } from "../duo/Chat";
+import { SubPage } from "../components/AppShell";
+import { Avatar } from "../components/Avatar";
+import { Alert, ConfirmDialog, Icon, Illustration, Loading, PageLoading } from "../components/ui";
 import type { Player, Round, SessionState } from "../lib/types";
 import { answerOf, nextStep, portraitReveal, toggleWord, wordLabel } from "./portrait";
 import { useDraft, useSession } from "./useSession";
-import { Salon } from "./Salon";
+
+type Run = (fn: string, args?: Record<string, unknown>) => Promise<{ ok: boolean }>;
 
 export function SessionScreen() {
   const { sessionId = "" } = useParams();
   const { userId } = useAuth();
-  const { refresh: refreshCouple } = useCouple();
+  const duo = useDuo();
   const online = useOnline();
   const s = useSession(sessionId, userId);
-  const [salonOpen, setSalonOpen] = useState(false);
+  const [chat, setChat] = useState(false);
+  const [confirmQuit, setConfirmQuit] = useState(false);
   const [actionError, setActionError] = useState<string | null>(null);
   const [busy, setBusy] = useState(false);
   const navigate = useNavigate();
 
   const status = s.state?.session.status;
   useEffect(() => {
-    void refreshCouple();
-  }, [status, refreshCouple]);
+    void duo.refresh();
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [status]);
 
   async function run(fn: string, args: Record<string, unknown> = {}) {
     if (busy) return { ok: false as const, error: "busy" };
@@ -38,21 +44,18 @@ export function SessionScreen() {
     return res;
   }
 
-  function openSalon(open: boolean) {
-    setSalonOpen(open);
-    s.setSalonOpen(open);
-  }
-
   if (s.loading && !s.state) return <PageLoading />;
   if (!s.state) {
     return (
-      <main className="page page--bare">
-        <div className="empty">
-          <Illustration name="16-reconnexion" />
-          <h2>{s.error ? t("game.notFound") : t("net.reconnecting")}</h2>
-          {s.error ? <Link className="btn" to="/accueil">{t("game.home")}</Link> : <button className="btn" onClick={() => void s.load()}>{t("common.retry")}</button>}
-        </div>
-      </main>
+      <SubPage backTo="/accueil">
+        <main className="page page--bare">
+          <div className="empty">
+            <Illustration name="16-reconnexion" />
+            <h2 className="t-section">{s.error ? t("game.notFound") : t("net.reconnecting")}</h2>
+            {s.error ? <Link className="btn btn--auto" to="/accueil">{t("game.home")}</Link> : <button className="btn btn--auto" onClick={() => void s.load()}>{t("common.retry")}</button>}
+          </div>
+        </main>
+      </SubPage>
     );
   }
 
@@ -61,140 +64,120 @@ export function SessionScreen() {
   const partner = st.players.find((p) => !p.is_me);
   const partnerName = partner?.display_name || "?";
   const partnerHere = Boolean(partner?.user_id && s.present.includes(partner.user_id));
-  const active = ["lobby", "playing", "paused", "ended"].includes(st.session.status) && !st.session.read_only;
+  const live = ["lobby", "playing", "paused", "ended"].includes(st.session.status) && !st.session.read_only;
+  const canPause = st.session.status === "playing" || st.session.status === "paused";
 
   return (
-    <main className="page page--bare">
-      <header className="topbar">
-        <Link className="icon-btn" to="/accueil"><Icon name="arrow-left" label={t("game.home")} /></Link>
-        <strong className="topbar__title">{st.game.title}</strong>
-        <div className="topbar__actions">
-          {active && (
-            <button className="icon-btn" onClick={() => openSalon(true)} aria-label={`${t("game.salon")}${s.unread ? ` (${s.unread})` : ""}`}>
+    <SubPage
+      backTo="/accueil"
+      title={st.game.title}
+      actions={
+        <>
+          {live && (
+            <button className="icon-btn icon-btn--soft" onClick={() => setChat(true)}
+              aria-label={duo.chatUnread ? t("chat.openUnread", { n: duo.chatUnread }) : t("game.chat")}>
               <Icon name="chat" />
-              <span aria-hidden="true">{s.unread ? s.unread : ""}</span>
+              {duo.chatUnread > 0 && <span className="badge-count" aria-hidden="true">{duo.chatUnread}</span>}
             </button>
           )}
-          {(st.session.status === "playing" || st.session.status === "paused") && (
-            <button className="icon-btn" disabled={busy || !online} onClick={() => run("set_paused", { p_paused: st.session.status === "playing" })}>
+          {canPause && (
+            <button className="icon-btn icon-btn--soft" disabled={busy || !online} onClick={() => run("set_paused", { p_paused: st.session.status === "playing" })}
+              aria-label={st.session.status === "paused" ? t("game.resume") : t("game.pause")}>
               <Icon name={st.session.status === "paused" ? "play" : "pause"} />
-              <span className="icon-btn__label">{st.session.status === "paused" ? t("game.resume") : t("game.pause")}</span>
             </button>
           )}
-        </div>
-      </header>
+        </>
+      }
+    >
+      <main className="page page--bare page--read">
+        {s.channel === "down" && online && <Alert kind="info"><Loading label={t("net.reconnecting")} /></Alert>}
+        {actionError && <Alert>{actionError}</Alert>}
 
-      {s.channel === "down" && online && <Alert kind="info"><Loading label={t("net.reconnecting")} /></Alert>}
-      {actionError && <Alert>{actionError}</Alert>}
+        {st.session.status === "lobby" && <Lobby st={st} me={me} partner={partner} partnerHere={partnerHere} busy={busy} online={online} run={run} onChat={() => setChat(true)} />}
+        {st.session.status === "playing" && <Playing st={st} partnerName={partnerName} partner={partner} busy={busy} online={online} run={run} />}
+        {st.session.status === "paused" && (
+          <section className="empty enter">
+            <Illustration name="17-pause" />
+            <h2 className="t-section">{t("game.pausedTitle")}</h2>
+            <p>{st.session.paused_by === userId ? t("game.pausedByYou") : t("game.pausedBy", { name: partnerName })}</p>
+            <button className="btn btn--auto" disabled={busy || !online} onClick={() => run("set_paused", { p_paused: false })}>{t("game.resume")}</button>
+          </section>
+        )}
+        {(st.session.status === "ended" || st.session.status === "closed") && <Results st={st} me={me} partner={partner} busy={busy} online={online} run={run} navigate={navigate} />}
+        {st.session.status === "abandoned" && (
+          <section className="empty">
+            <Illustration name="17-pause" />
+            <h2 className="t-section">{t("game.abandoned")}</h2>
+            <Link className="btn btn--auto" to="/accueil">{t("game.home")}</Link>
+          </section>
+        )}
 
-      {st.session.status === "lobby" && (
-        <Lobby st={st} me={me} partner={partner} partnerHere={partnerHere} busy={busy} online={online} run={run} onOpenSalon={() => openSalon(true)} />
-      )}
-      {st.session.status === "playing" && <Playing st={st} partnerName={partnerName} partner={partner} busy={busy} online={online} run={run} />}
-      {st.session.status === "paused" && (
-        <section className="empty enter">
-          <Illustration name="17-pause" />
-          <h2>{t("game.pausedTitle")}</h2>
-          <p>{st.session.paused_by === userId ? t("game.pausedByYou") : t("game.pausedBy", { name: partnerName })}</p>
-          <button className="btn" disabled={busy || !online} onClick={() => run("set_paused", { p_paused: false })}>{t("game.resume")}</button>
-        </section>
-      )}
-      {(st.session.status === "ended" || st.session.status === "closed") && (
-        <Results st={st} me={me} partner={partner} busy={busy} online={online} run={run} navigate={navigate} />
-      )}
-      {st.session.status === "abandoned" && (
-        <section className="empty">
-          <Illustration name="17-pause" />
-          <h2>{t("game.abandoned")}</h2>
-          <Link className="btn" to="/accueil">{t("game.home")}</Link>
-        </section>
-      )}
+        {["lobby", "playing", "paused"].includes(st.session.status) && !st.session.read_only && (
+          <button className="btn btn--quiet" disabled={busy} onClick={() => setConfirmQuit(true)}>{t("game.quit")}</button>
+        )}
+      </main>
 
-      {["lobby", "playing", "paused"].includes(st.session.status) && !st.session.read_only && (
-        <button
-          className="btn btn--ghost"
-          disabled={busy}
-          onClick={async () => {
-            if (!window.confirm(t("game.quitConfirm"))) return;
+      {confirmQuit && (
+        <ConfirmDialog title={t("game.quitTitle")} text={t("game.quitText", { name: partnerName })} confirmLabel={t("game.quit")} danger busy={busy}
+          onCancel={() => setConfirmQuit(false)}
+          onConfirm={async () => {
             const res = await run("abandon_session");
+            setConfirmQuit(false);
             if (res.ok) navigate("/accueil");
-          }}
-        >
-          {t("game.quit")}
-        </button>
+          }} />
       )}
-
-      {salonOpen && (
-        <Salon
-          myId={userId}
-          partnerName={partnerName}
-          myName={me?.display_name ?? ""}
-          messages={s.messages}
-          onSend={s.sendMessage}
-          onClose={() => openSalon(false)}
-          online={online}
-        />
-      )}
-    </main>
+      {chat && <ChatPanel inGame onClose={() => setChat(false)} />}
+    </SubPage>
   );
 }
 
-type Run = (fn: string, args?: Record<string, unknown>) => Promise<{ ok: boolean }>;
-
-function Lobby({ st, me, partner, partnerHere, busy, online, run, onOpenSalon }: {
-  st: SessionState; me?: Player; partner?: Player; partnerHere: boolean; busy: boolean; online: boolean; run: Run; onOpenSalon: () => void;
+function Lobby({ st, me, partner, partnerHere, busy, online, run, onChat }: {
+  st: SessionState; me?: Player; partner?: Player; partnerHere: boolean; busy: boolean; online: boolean; run: Run; onChat: () => void;
 }) {
   const settings = st.game.config.settings ?? {};
   return (
-    <section className="stack stack--lg enter">
-      <div className="page-head">
-        <h1>{t("game.lobbyTitle")}</h1>
+    <section className="stack stack--6 enter">
+      <div className="page-header">
+        <h1 className="t-page">{t("game.lobbyTitle")}</h1>
         <p>{t("game.lobbyText")}</p>
       </div>
-      <div className="card card--flat" style={{ gap: 0 }}>
+      <div className="card" style={{ gap: 0, paddingBlock: 4 }}>
         {[me, partner].filter(Boolean).map((p) => (
-          <div className="player-row" key={p!.seat}>
-            <Avatar name={p!.display_name} me={p!.is_me} />
-            <div style={{ flex: 1 }}>
-              <div className="player-row__name">{p!.is_me ? `${p!.display_name} (${t("game.you")})` : p!.display_name}</div>
-              <div className="status">
-                <span className={`status-dot ${p!.ready ? "status-dot--on" : ""}`} />
+          <div className="player" key={p!.seat}>
+            <Avatar name={p!.display_name} path={p!.avatar_path} size={44} me={p!.is_me} />
+            <div className="grow stack" style={{ gap: 2 }}>
+              <span className="t-card">{p!.is_me ? `${p!.display_name} (${t("game.you")})` : p!.display_name}</span>
+              <span className="status">
+                {p!.ready ? <Icon name="check" size={16} /> : <Icon name="clock" size={16} />}
                 {p!.ready ? t("game.isReady") : t("game.isNotReady")}
-                {!p!.is_me && partnerHere && <> · {t("presence.inGame")}</>}
-              </div>
+                {!p!.is_me && partnerHere && <> · {t("game.here")}</>}
+              </span>
             </div>
           </div>
         ))}
       </div>
 
-      <div className="card card--warm">
-        <h3>{t("sheet.howTo")}</h3>
+      <div className="card card--soft stack stack--4">
+        <h2 className="t-section">{t("sheet.howTo")}</h2>
         <ol className="how">{st.game.rules.how_to.map((x) => <li key={x}>{x}</li>)}</ol>
-        <p className="row small"><Icon name="lock" size={18} /> {st.game.rules.privacy}</p>
+        <p className="row t-small"><Icon name="lock" size={18} />{st.game.rules.privacy}</p>
       </div>
 
       {Object.entries(settings).map(([key, def]) => (
-        <fieldset key={key} className="stack">
-          <legend style={{ fontWeight: 700, marginBottom: 8 }}>{def.label}</legend>
+        <fieldset key={key}>
+          <legend>{def.label}</legend>
           <div className="chips">
             {def.options.map((opt) => (
-              <button
-                key={String(opt)}
-                className="chip"
-                aria-pressed={st.session.settings[key] === opt}
-                disabled={busy || !online}
-                onClick={() => run("update_session_settings", { p_settings: { [key]: opt } })}
-              >
-                {String(opt)}
-              </button>
+              <button key={String(opt)} className="chip" aria-pressed={st.session.settings[key] === opt} disabled={busy || !online}
+                onClick={() => run("update_session_settings", { p_settings: { [key]: opt } })}>{String(opt)}</button>
             ))}
           </div>
-          <p className="muted small">{t("game.settingsReset")}</p>
+          <p className="t-meta">{t("game.settingsReset")}</p>
         </fieldset>
       ))}
 
-      <button className="btn btn--soft" onClick={onOpenSalon}><Icon name="chat" />{t("salon.title")}</button>
-      <div className="sticky-actions">
+      <button className="btn btn--secondary" onClick={onChat}><Icon name="chat" />{t("game.chat")}</button>
+      <div className="action-bar">
         <button className="btn" disabled={busy || !online} onClick={() => run("set_ready", { p_ready: !me?.ready })}>
           {busy ? t("common.sending") : me?.ready ? t("game.notReady") : t("game.ready")}
         </button>
@@ -211,36 +194,30 @@ function Playing({ st, partnerName, partner, busy, online, run }: {
   const mySeat = st.my_seat ?? 0;
   if (!round) return <Loading />;
   const step = nextStep(round, steps, mySeat);
-  if (step) {
-    return <PortraitStep key={`${round.round_no}-${step}`} st={st} round={round} stepKey={step} partnerName={partnerName} partner={partner} busy={busy} online={online} run={run} />;
-  }
-  const partnerSeat = mySeat === 1 ? 2 : 1;
+  if (step) return <PortraitStep key={`${round.round_no}-${step}`} st={st} round={round} stepKey={step} partnerName={partnerName} partner={partner} busy={busy} online={online} run={run} />;
   return (
-    <section className="stack stack--lg enter" aria-live="polite">
-      <Illustration name="09-attente-douce" className="illustration--hero" />
-      <div className="page-head center">
-        <h1>{t("game.sentTitle")}</h1>
+    <section className="stack stack--6 enter" aria-live="polite">
+      <Illustration name="09-attente-douce" className="public__art" />
+      <div className="page-header center">
+        <h1 className="t-page">{t("game.sentTitle")}</h1>
         <p>{t("game.waitingPartner", { name: partnerName })}</p>
       </div>
-      <div className="card card--flat" style={{ gap: 0 }}>
+      <div className="card" style={{ gap: 0, paddingBlock: 4 }}>
         {st.players.map((p) => {
           const done = steps.every((k) => answerOf(round, k, p.seat));
           return (
-            <div className="player-row" key={p.seat}>
-              <Avatar name={p.display_name} me={p.is_me} />
-              <div style={{ flex: 1 }}>
-                <div className="player-row__name">{p.display_name}</div>
-                <div className="status">
-                  {done ? <><Icon name="check" size={16} /> {t("game.sent")}</> : <Loading label={t("game.preparing")} />}
-                </div>
+            <div className="player" key={p.seat}>
+              <Avatar name={p.display_name} path={p.avatar_path} size={44} me={p.is_me} />
+              <div className="grow stack" style={{ gap: 2 }}>
+                <span className="t-card">{p.display_name}</span>
+                <span className="status">{done ? <><Icon name="check" size={16} />{t("game.sent")}</> : <Loading label={t("game.preparing")} />}</span>
               </div>
             </div>
           );
         })}
       </div>
-      <Alert kind="info"><Icon name="lock" size={18} /> {st.game.rules.privacy}</Alert>
-      <p className="center muted small">{t("game.noRush")}</p>
-      {steps.every((k) => answerOf(round, k, partnerSeat)) && <Loading />}
+      <Alert kind="info"><Icon name="lock" size={18} />{st.game.rules.privacy}</Alert>
+      <p className="center t-meta">{t("game.noRush")}</p>
     </section>
   );
 }
@@ -254,55 +231,71 @@ function PortraitStep({ st, round, stepKey, partnerName, partner, busy, online, 
   const me = st.players.find((p) => p.is_me);
   const form = stepCfg.about === "self" ? me?.word_form ?? "n" : partner?.word_form ?? "n";
   const [selection, setSelection, clearDraft] = useDraft(`${st.session.id}.${round.round_no}.${stepKey}`);
+  const [confirmSkip, setConfirmSkip] = useState(false);
   const index = cfg.steps.findIndex((x) => x.key === stepKey);
+  const total = cfg.steps.length + 1;
   const valid = useMemo(() => selection.filter((id) => round.card.words.some((w) => w.id === id)), [selection, round]);
   const vars = { partner: partnerName };
 
   async function submit(skip: boolean) {
-    if (skip && !window.confirm(t("game.skipConfirm"))) return;
     const res = await run("submit_answer", { p_round: round.round_no, p_step: stepKey, p_payload: skip ? null : { words: valid }, p_skip: skip });
     if (res.ok) clearDraft();
   }
 
   return (
-    <section className="stack stack--lg enter">
-      <div className="stack">
-        <div className="row" style={{ justifyContent: "space-between" }}>
-          <strong>{index + 1} · {texts.title}</strong>
-          <span className="muted small">{t("game.step", { n: index + 1, total: cfg.steps.length + 1 })}</span>
+    <section className="stack stack--6 enter">
+      <div className="stack stack--2">
+        <div className="row row--between">
+          <span className="t-small strong">{texts.title}</span>
+          <span className="t-meta">{t("game.step", { n: index + 1, total })}</span>
         </div>
-        <div className="progress" aria-hidden="true"><span style={{ width: `${((index + 1) / (cfg.steps.length + 1)) * 100}%` }} /></div>
+        <div className="progress" role="progressbar" aria-valuemin={1} aria-valuemax={total} aria-valuenow={index + 1} aria-label={t("game.step", { n: index + 1, total })}>
+          <span style={{ width: `${((index + 1) / total) * 100}%` }} />
+        </div>
       </div>
-      <div className="page-head">
-        <h1>{fill(texts.prompt, vars)}</h1>
+      <div className="page-header">
+        <h1 className="t-page">{fill(texts.prompt, vars)}</h1>
         <p>{fill(texts.hint, vars)}</p>
       </div>
-      <div className="word-grid" role="group" aria-label={fill(texts.hint, vars)}>
+      <ul className="word-grid" aria-label={fill(texts.hint, vars)}>
         {round.card.words.map((w) => {
           const on = valid.includes(w.id);
           return (
-            <button
-              key={w.id}
-              className="word"
-              aria-pressed={on}
-              disabled={!on && valid.length >= cfg.pick}
-              onClick={() => setSelection(toggleWord(valid, w.id, cfg.pick))}
-            >
-              <span>{wordLabel(w, form)}</span>
-              <span className="word__check" aria-hidden="true"><Icon name="check" size={14} /></span>
-            </button>
+            <li key={w.id}>
+              <button className="word" aria-pressed={on} disabled={!on && valid.length >= cfg.pick} onClick={() => setSelection(toggleWord(valid, w.id, cfg.pick))}>
+                <span>{wordLabel(w, form)}</span>
+                <span className="word__check" aria-hidden="true"><Icon name="check" size={14} /></span>
+              </button>
+            </li>
           );
         })}
-      </div>
-      <p className="center" aria-live="polite"><strong>{t("game.selected", { n: valid.length, max: cfg.pick })}</strong></p>
-      <p className="center muted small row" style={{ justifyContent: "center" }}><Icon name="lock" size={16} /> {t("game.privateHint")}</p>
-      <div className="sticky-actions">
-        <button className="btn" disabled={busy || !online || valid.length !== cfg.pick} onClick={() => submit(false)}>
-          {busy ? t("common.sending") : texts.confirm} <Icon name="arrow-right" />
+      </ul>
+      <p className="t-meta row" style={{ justifyContent: "center" }}><Icon name="lock" size={16} />{t("game.privateHint")}</p>
+      <div className="action-bar">
+        <p className="center t-small strong" aria-live="polite">{t("game.selected", { n: valid.length, max: cfg.pick })}</p>
+        <button className="btn" disabled={busy || !online || valid.length !== cfg.pick} onClick={() => void submit(false)}>
+          {busy ? t("common.sending") : texts.confirm}<Icon name="arrow-right" />
         </button>
-        <button className="btn btn--secondary" disabled={busy || !online} onClick={() => submit(true)}>{t("game.skip")}</button>
+        <button className="btn btn--quiet" disabled={busy || !online} onClick={() => setConfirmSkip(true)}>{t("game.skip")}</button>
       </div>
+      {confirmSkip && (
+        <ConfirmDialog title={t("game.skipTitle")} text={t("game.skipText")} confirmLabel={t("game.skip")}
+          onCancel={() => setConfirmSkip(false)} onConfirm={() => { setConfirmSkip(false); void submit(true); }} />
+      )}
     </section>
+  );
+}
+
+function WordList({ ids, found, words, form, label }: { ids: string[]; found: string[]; words: Map<string, Round["card"]["words"][number]>; form: Player["word_form"]; label: string }) {
+  return (
+    <ul className="word-grid" aria-label={label}>
+      {ids.map((id) => (
+        <li key={id} className={`word word--static ${found.includes(id) ? "word--match" : ""}`}>
+          {found.includes(id) && <Icon name="check" size={16} label={t("portrait.matchLabel")} />}
+          {words.get(id) ? wordLabel(words.get(id)!, form) : id}
+        </li>
+      ))}
+    </ul>
   );
 }
 
@@ -312,78 +305,55 @@ function Results({ st, me, partner, busy, online, run, navigate }: {
   const [view, setView] = useState<"partner" | "mine" | "end">("partner");
   const round = st.rounds.find((r) => r.revealed);
   const words = new Map((round?.card.words ?? []).map((w) => [w.id, w]));
-  const closedWithoutAnswers = st.session.status === "closed" && !round?.answers.length;
   const partnerName = partner?.display_name || "?";
 
-  if (!round || closedWithoutAnswers) {
+  if (!round || (st.session.status === "closed" && !round.answers.length)) {
     return (
       <section className="empty">
         <Illustration name="11-fin-de-partie" />
-        <h2>{t("game.closed")}</h2>
-        <p>{t("space.notKept")}</p>
-        <Link className="btn" to="/accueil">{t("game.home")}</Link>
+        <h2 className="t-section">{t("game.closed")}</h2>
+        <p>{t("game.notKept")}</p>
+        <Link className="btn btn--auto" to="/accueil">{t("game.home")}</Link>
       </section>
     );
   }
 
-  function PortraitCard({ about, guesser }: { about?: Player; guesser?: Player }) {
+  function Portrait({ about, guesser }: { about?: Player; guesser?: Player }) {
     if (!about) return null;
     const r = portraitReveal(round!, about.seat);
     const name = about.display_name || "?";
     return (
-      <div className="stack stack--lg enter">
-        <div className="page-head">
-          <span className="muted small" style={{ letterSpacing: ".12em", textTransform: "uppercase" }}>3 · {t("game.revealTitle")}</span>
-          <h1>{about.is_me ? t("portrait.revealMine") : t("portrait.revealPartner", { name })}</h1>
+      <div className="stack stack--4 enter">
+        <div className="page-header">
+          <span className="t-meta" style={{ letterSpacing: ".08em", textTransform: "uppercase" }}>{t("game.revealTitle")}</span>
+          <h1 className="t-page">{about.is_me ? t("portrait.revealMine") : t("portrait.revealPartner", { name })}</h1>
           {r.chosen && r.guessed && <p>{t("portrait.found", { n: r.found.length })}</p>}
         </div>
         <div className="card stack">
-          <h3 className="row"><Avatar name={name} me={about.is_me} /> {about.is_me ? t("portrait.chosenByMe") : t("portrait.chosenBy", { name })}</h3>
-          {r.chosen ? (
-            <ul className="word-grid list" aria-label={t("portrait.chosenBy", { name })}>
-              {r.chosen.map((id) => (
-                <li key={id} className={`word word--static ${r.found.includes(id) ? "word--match" : ""}`}>
-                  {r.found.includes(id) && <Icon name="check" size={16} label={t("portrait.matchLabel")} />}
-                  {words.get(id) ? wordLabel(words.get(id)!, about.word_form) : id}
-                </li>
-              ))}
-            </ul>
-          ) : <p className="muted">{t("portrait.noAnswer", { name })}</p>}
+          <h2 className="t-card row"><Avatar name={name} path={about.avatar_path} size={36} me={about.is_me} />{about.is_me ? t("portrait.chosenByMe") : t("portrait.chosenBy", { name })}</h2>
+          {r.chosen ? <WordList ids={r.chosen} found={r.found} words={words} form={about.word_form} label={t("portrait.chosenBy", { name })} /> : <p className="muted">{t("portrait.noAnswer", { name })}</p>}
         </div>
         {guesser && (
           <div className="card stack">
-            <h3 className="row"><Avatar name={guesser.display_name} me={guesser.is_me} /> {guesser.is_me ? t("portrait.guessedByMe") : t("portrait.guessedBy", { name: guesser.display_name })}</h3>
-            {r.guessed ? (
-              <ul className="word-grid list">
-                {r.guessed.map((id) => (
-                  <li key={id} className={`word word--static ${r.found.includes(id) ? "word--match" : ""}`}>
-                    {r.found.includes(id) && <Icon name="check" size={16} label={t("portrait.matchLabel")} />}
-                    {words.get(id) ? wordLabel(words.get(id)!, about.word_form) : id}
-                  </li>
-                ))}
-              </ul>
-            ) : <p className="muted">{t("portrait.noAnswer", { name: guesser.display_name })}</p>}
+            <h2 className="t-card row"><Avatar name={guesser.display_name} path={guesser.avatar_path} size={36} me={guesser.is_me} />{guesser.is_me ? t("portrait.guessedByMe") : t("portrait.guessedBy", { name: guesser.display_name })}</h2>
+            {r.guessed ? <WordList ids={r.guessed} found={r.found} words={words} form={about.word_form} label={t("portrait.guessedBy", { name: guesser.display_name })} /> : <p className="muted">{t("portrait.noAnswer", { name: guesser.display_name })}</p>}
           </div>
         )}
-        <div className="card card--warm"><h3>{t("portrait.discuss")}</h3></div>
+        <div className="card card--soft"><p className="t-card">{t("portrait.discuss")}</p></div>
       </div>
     );
   }
 
-  if (view === "partner") {
+  if (view !== "end") {
     return (
       <>
-        <PortraitCard about={partner} guesser={me} />
-        <button className="btn" onClick={() => setView("mine")}>{t("portrait.revealMine")} <Icon name="arrow-right" /></button>
-      </>
-    );
-  }
-  if (view === "mine") {
-    return (
-      <>
-        <PortraitCard about={me} guesser={partner} />
-        <button className="btn" onClick={() => setView("end")}>{t("common.continue")} <Icon name="arrow-right" /></button>
-        <button className="btn btn--ghost" onClick={() => setView("partner")}>{t("portrait.revealPartner", { name: partnerName })}</button>
+        {view === "partner" ? <Portrait about={partner} guesser={me} /> : <Portrait about={me} guesser={partner} />}
+        <div className="action-bar">
+          <button className="btn" onClick={() => setView(view === "partner" ? "mine" : "end")}>
+            {view === "partner" ? t("portrait.revealMine") : t("common.continue")}<Icon name="arrow-right" />
+          </button>
+          {view === "mine" && <button className="btn btn--quiet" onClick={() => setView("partner")}>{t("portrait.revealPartner", { name: partnerName })}</button>}
+        </div>
       </>
     );
   }
@@ -391,53 +361,35 @@ function Results({ st, me, partner, busy, online, run, navigate }: {
   const ended = st.session.status === "ended" && !st.session.read_only;
   const bothKeep = st.players.every((p) => p.keep_memory);
   return (
-    <section className="stack stack--lg enter">
-      <Illustration name="11-fin-de-partie" className="illustration--hero" />
-      <div className="page-head center">
-        <h1>{t("game.endTitle")}</h1>
+    <section className="stack stack--6 enter">
+      <Illustration name="11-fin-de-partie" className="public__art" />
+      <div className="page-header center">
+        <h1 className="t-page">{t("game.endTitle")}</h1>
         <p>{t("game.endText", { title: st.game.title })}</p>
       </div>
       {ended && (
-        <div className="card stack">
-          <label className="switch">
-            <span>{t("game.keepMemory")}</span>
-            <input
-              type="checkbox"
-              role="switch"
-              checked={Boolean(me?.keep_memory)}
-              disabled={busy || !online}
-              onChange={(e) => run("set_keep_memory", { p_keep: e.target.checked })}
-            />
+        <div className="group">
+          <label className="switch-row">
+            <span className="switch-row__text">
+              <span>{t("game.keepMemory")}</span>
+              <span className="t-meta">{bothKeep ? t("game.keepBoth") : me?.keep_memory ? t("game.keepWaiting", { name: partnerName }) : t("game.keepMemoryHint")}</span>
+            </span>
+            <input className="switch" type="checkbox" role="switch" checked={Boolean(me?.keep_memory)} disabled={busy || !online}
+              onChange={(e) => run("set_keep_memory", { p_keep: e.target.checked })} />
           </label>
-          <p className="muted small">{bothKeep ? t("game.keepBoth") : me?.keep_memory ? t("game.keepWaiting", { name: partnerName }) : t("game.keepMemoryHint")}</p>
         </div>
       )}
       {ended && (
-        <>
-          <button
-            className="btn"
-            disabled={busy || !online}
-            onClick={async () => {
-              const res = await rpc<{ session_id: string }>("create_session", { p_game: st.session.game_id });
-              if (res.ok) navigate(`/partie/${res.session_id}`);
-            }}
-          >
-            {t("game.replay")}
-          </button>
-          <button
-            className="btn btn--secondary"
-            disabled={busy || !online}
-            onClick={async () => {
-              await run("close_session");
-              navigate("/bibliotheques");
-            }}
-          >
-            {t("game.otherGame")}
-          </button>
-        </>
+        <div className="stack">
+          <button className="btn" disabled={busy || !online} onClick={async () => {
+            const res = await rpc<{ session_id: string }>("create_session", { p_game: st.session.game_id });
+            if (res.ok) navigate(`/partie/${res.session_id}`);
+          }}>{t("game.replay")}</button>
+          <button className="btn btn--secondary" disabled={busy || !online} onClick={async () => { await run("close_session"); navigate("/bibliotheques"); }}>{t("game.otherGame")}</button>
+        </div>
       )}
-      <Link className="btn btn--ghost" to="/accueil">{t("game.home")}</Link>
-      <button className="btn btn--ghost" onClick={() => setView("partner")}>{t("portrait.revealPartner", { name: partnerName })}</button>
+      <Link className="btn btn--quiet" to="/accueil">{t("game.home")}</Link>
+      <button className="btn btn--quiet" onClick={() => setView("partner")}>{t("portrait.revealPartner", { name: partnerName })}</button>
     </section>
   );
 }
