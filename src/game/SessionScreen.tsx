@@ -67,7 +67,7 @@ export function SessionScreen() {
     <main className="page page--bare">
       <header className="topbar">
         <Link className="icon-btn" to="/accueil"><Icon name="arrow-left" label={t("game.home")} /></Link>
-        <strong style={{ textAlign: "center", flex: 1 }}>{st.game.title}</strong>
+        <strong className="topbar__title">{st.game.title}</strong>
         <div className="topbar__actions">
           {active && (
             <button className="icon-btn" onClick={() => openSalon(true)} aria-label={`${t("game.salon")}${s.unread ? ` (${s.unread})` : ""}`}>
@@ -78,7 +78,7 @@ export function SessionScreen() {
           {(st.session.status === "playing" || st.session.status === "paused") && (
             <button className="icon-btn" disabled={busy || !online} onClick={() => run("set_paused", { p_paused: st.session.status === "playing" })}>
               <Icon name={st.session.status === "paused" ? "play" : "pause"} />
-              <span>{st.session.status === "paused" ? t("game.resume") : t("game.pause")}</span>
+              <span className="icon-btn__label">{st.session.status === "paused" ? t("game.resume") : t("game.pause")}</span>
             </button>
           )}
         </div>

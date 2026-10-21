@@ -6,7 +6,7 @@ import { AuthProvider, useAuth } from "./auth/AuthProvider";
 import { AuthForm, Onboarding, Welcome, needsOnboarding } from "./auth/AuthScreens";
 import { CoupleProvider } from "./couple/CoupleProvider";
 import { InvitePage } from "./couple/InviteScreens";
-import { Alert, Icon, NetworkBanner, PageLoading, type IconName } from "./components/ui";
+import { Alert, EmptyState, Icon, NetworkBanner, PageLoading, type IconName } from "./components/ui";
 import { Home } from "./screens/Home";
 import { GameSheet, Libraries } from "./screens/Libraries";
 import { OurSpace, Settings, Tips } from "./screens/OtherTabs";
@@ -27,7 +27,8 @@ function BottomNav() {
       {tabs.map((tab) => (
         <NavLink key={tab.to} to={tab.to}>
           <Icon name={tab.icon} />
-          <span>{tab.label}</span>
+          {/* Césures douces : coupure propre des libellés longs sur les écrans de 320 px. */}
+          <span>{tab.label.replace("Bibliothèques", "Biblio\u00ADthèques").replace("Paramètres", "Para\u00ADmètres")}</span>
         </NavLink>
       ))}
     </nav>
@@ -58,10 +59,20 @@ function Root() {
 
 /** Espace connecté : redirige vers l'accueil public si besoin, en gardant la destination. */
 function RequireAuth({ withNav }: { withNav: boolean }) {
-  const { loading, session, profile } = useAuth();
+  const { loading, session, profile, profileError, refreshProfile, signOut } = useAuth();
   const location = useLocation();
   if (loading) return <PageLoading />;
   if (!session) return <Navigate to={`/?next=${encodeURIComponent(location.pathname + location.search)}`} replace />;
+  if (!profile && profileError) {
+    return (
+      <main className="page page--bare">
+        <EmptyState illustration="16-reconnexion" title={t("net.reconnecting")} text={t("net.offline")}>
+          <button className="btn" onClick={() => void refreshProfile()}>{t("common.retry")}</button>
+          <button className="btn btn--ghost" onClick={() => void signOut()}>{t("settings.logout")}</button>
+        </EmptyState>
+      </main>
+    );
+  }
   if (!profile) return <PageLoading />;
   if (needsOnboarding(profile)) return <Onboarding />;
   return (

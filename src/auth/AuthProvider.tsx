@@ -46,7 +46,8 @@ export function AuthProvider({ children }: { children: ReactNode }) {
       .select("id, display_name, word_form, intimate_opt_in, reduced_motion")
       .eq("id", userId)
       .maybeSingle();
-    setProfileError(Boolean(error));
+    // Erreur réseau ou profil absent : l'interface propose de réessayer au lieu d'attendre indéfiniment.
+    setProfileError(Boolean(error) || !data);
     if (data) setProfile(data as Profile);
   }, [userId]);
 

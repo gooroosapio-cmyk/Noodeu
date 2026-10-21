@@ -152,7 +152,7 @@ fieldset { border: 0; margin: 0; padding: 0; display: grid; gap: 8px; }
 .nav a {
   display: flex; flex-direction: column; align-items: center; justify-content: flex-start; gap: 4px;
   min-height: 56px; padding: 6px 1px; border-radius: 16px; text-decoration: none; text-align: center;
-  color: var(--nd-muted); font: 500 11px/1.2 var(--nd-font-body); overflow-wrap: anywhere;
+  color: var(--nd-muted); font: 500 11px/1.2 var(--nd-font-body); hyphens: manual; overflow-wrap: normal;
 }
 .nav a[aria-current="page"] { background: var(--nd-selected); color: var(--nd-plum); font-weight: 700; }
 @media (min-width: 560px) { .nav { left: 50%; transform: translateX(-50%); width: 520px; border-inline: 1px solid var(--nd-line); border-radius: 20px 20px 0 0; } }
@@ -237,3 +237,9 @@ ol.how li::before { content: counter(how); width: 32px; height: 32px; border-rad
 }
 html.reduced-motion *, html.reduced-motion *::before, html.reduced-motion *::after { animation: none !important; transition: none !important; }
 @media (forced-colors: active) { .btn, .chip, .card, .word { border: 1px solid ButtonText; } .icon { background: CanvasText; } }
+
+/* Retouches petits écrans (vérifiées à 320 px) */
+.topbar__title { flex: 1; min-width: 0; text-align: center; font-weight: 700; font-size: 15px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+@media (max-width: 360px) { .icon-btn { position: relative; } .icon-btn__label { position: absolute; inset: 0; width: 1px; height: 1px; overflow: hidden; clip: rect(0 0 0 0); white-space: nowrap; } }
+.card--warm ol.how li::before { background: var(--nd-surface); }
+.page > *, .stack > * { min-width: 0; }
