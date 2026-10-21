@@ -43,7 +43,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     }
     const { data, error } = await supabase
       .from("profiles")
-      .select("id, display_name, word_form, intimate_opt_in, reduced_motion")
+      .select("id, display_name, word_form, intimate_opt_in, reduced_motion, avatar_path")
       .eq("id", userId)
       .maybeSingle();
     // Erreur réseau ou profil absent : l'interface propose de réessayer au lieu d'attendre indéfiniment.
@@ -71,6 +71,12 @@ export function AuthProvider({ children }: { children: ReactNode }) {
   );
 
   const signOut = useCallback(async () => {
+    // Nettoyage des données privées locales (brouillons, liens de photo) à la déconnexion.
+    try {
+      for (const k of Object.keys(sessionStorage)) if (k.startsWith("noodeu.")) sessionStorage.removeItem(k);
+    } catch {
+      /* stockage indisponible */
+    }
     await supabase.removeAllChannels();
     await supabase.auth.signOut();
     setProfile(null);

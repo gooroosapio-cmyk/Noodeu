@@ -1,4 +1,4 @@
-import { useEffect, useRef, useState, type CSSProperties, type ReactNode } from "react";
+import { createContext, useCallback, useContext, useEffect, useRef, useState, type CSSProperties, type ReactNode } from "react";
 import { t } from "../i18n";
 import { useOnline } from "../lib/useOnline";
 
@@ -17,10 +17,8 @@ export function Icon({ name, size = 22, label }: { name: IconName; size?: number
   return <span className="icon" style={style} role={label ? "img" : undefined} aria-label={label} aria-hidden={label ? undefined : true} />;
 }
 
-export function Logo({ variant = "couleur", width = 140 }: { variant?: "couleur" | "prune" | "blanc"; width?: number }) {
-  return (
-    <img className="logo" src={`${BASE}/01_Logos/noodeu-logo-${variant}.svg`} width={width} height={Math.round((width * 190) / 830)} alt="Noodeu" />
-  );
+export function Logo({ width = 104, variant = "couleur" }: { width?: number; variant?: "couleur" | "prune" | "blanc" }) {
+  return <img className="logo" src={`${BASE}/01_Logos/noodeu-logo-${variant}.svg`} width={width} height={Math.round((width * 190) / 830)} alt="Noodeu" />;
 }
 
 export type IllustrationName =
@@ -29,20 +27,13 @@ export type IllustrationName =
   | "11-fin-de-partie" | "12-astuce" | "13-favoris" | "14-duo-a-creer" | "15-invitation-expiree" | "16-reconnexion"
   | "17-pause" | "18-rire-ensemble";
 
-/** Illustration du kit : WebP léger (alpha conservé) avec repli sur le PNG source. */
+/** Illustration du kit (décorative par défaut). WebP léger avec repli sur le PNG source. */
 export function Illustration({ name, alt = "", className = "", eager = false }: { name: IllustrationName; alt?: string; className?: string; eager?: boolean }) {
   return (
     <picture>
       <source srcSet={`${BASE}/02_Illustrations_WEBP/noodeu-${name}.webp`} type="image/webp" />
-      <img
-        className={`illustration ${className}`}
-        src={`${BASE}/02_Illustrations_PNG/noodeu-${name}.png`}
-        width={1448}
-        height={1086}
-        alt={alt}
-        loading={eager ? "eager" : "lazy"}
-        decoding="async"
-      />
+      <img className={`illustration ${className}`} src={`${BASE}/02_Illustrations_PNG/noodeu-${name}.png`} width={1448} height={1086}
+        alt={alt} loading={eager ? "eager" : "lazy"} decoding="async" />
     </picture>
   );
 }
@@ -57,14 +48,21 @@ export function Loading({ label = t("common.loading") }: { label?: string }) {
 }
 
 export function PageLoading() {
-  return <div className="page center" style={{ paddingTop: 80 }}><Loading /></div>;
+  return (
+    <div className="page" aria-busy="true">
+      <span className="sr-only" role="status">{t("common.loading")}</span>
+      <div className="skeleton" style={{ height: 32, width: "60%" }} />
+      <div className="skeleton" style={{ height: 140 }} />
+      <div className="skeleton" style={{ height: 96 }} />
+    </div>
+  );
 }
 
 export function EmptyState({ illustration, title, text, children }: { illustration?: IllustrationName; title: string; text?: string; children?: ReactNode }) {
   return (
     <section className="empty">
       {illustration && <Illustration name={illustration} />}
-      <h2>{title}</h2>
+      <h2 className="t-section">{title}</h2>
       {text && <p>{text}</p>}
       {children}
     </section>
@@ -75,16 +73,10 @@ export function Alert({ kind = "error", children }: { kind?: "error" | "info" | 
   return <div className={`alert alert--${kind}`} role={kind === "error" ? "alert" : "status"}>{children}</div>;
 }
 
-export function DemoBadge() {
-  return <span className="badge badge--demo" title={t("common.demoHint")}>{t("common.demo")}</span>;
+export function DemoTag() {
+  return <span className="tag tag--demo" title={t("common.demoHint")}>{t("common.demo")}</span>;
 }
 
-export function Avatar({ name, me = false }: { name: string; me?: boolean }) {
-  const initial = (name.trim()[0] ?? "?").toUpperCase();
-  return <span className={`avatar ${me ? "avatar--me" : ""}`} aria-hidden="true">{initial}</span>;
-}
-
-/** Bandeau de connexion : honnête sur l'état du réseau. */
 export function NetworkBanner() {
   const online = useOnline();
   const [showBack, setShowBack] = useState(false);
@@ -102,36 +94,119 @@ export function NetworkBanner() {
   return <div className="net-banner" role="status">{online ? t("net.back") : t("net.offline")}</div>;
 }
 
-/** Feuille modale accessible (salon, confirmations). Ferme avec Échap. */
-export function Sheet({ title, onClose, children, footer, labelledBy }: { title?: ReactNode; onClose: () => void; children: ReactNode; footer?: ReactNode; labelledBy?: string }) {
+/**
+ * Fenêtre (feuille basse sur mobile, panneau latéral possible sur grand écran).
+ * Garde le focus à l'intérieur, se ferme avec Échap ou le bouton retour, rend le focus au déclencheur.
+ */
+export function Sheet({ title, onClose, children, footer, side = false, tall = false, headerExtra, closeLabel = t("common.close"), closeIcon = "close" }: {
+  title: ReactNode; onClose: () => void; children: ReactNode; footer?: ReactNode; side?: boolean; tall?: boolean;
+  headerExtra?: ReactNode; closeLabel?: string; closeIcon?: IconName;
+}) {
   const ref = useRef<HTMLDivElement>(null);
+  const titleId = useRef(`sheet-${Math.random().toString(36).slice(2)}`).current;
+  const closeRef = useRef(onClose);
+  closeRef.current = onClose;
+
   useEffect(() => {
-    const prev = document.activeElement as HTMLElement | null;
-    ref.current?.focus();
-    const onKey = (e: KeyboardEvent) => e.key === "Escape" && onClose();
+    const opener = document.activeElement as HTMLElement | null;
+    const first = ref.current?.querySelector<HTMLElement>("[data-autofocus]") ?? ref.current;
+    first?.focus();
+    const onKey = (e: KeyboardEvent) => {
+      if (e.key === "Escape") closeRef.current();
+      if (e.key !== "Tab" || !ref.current) return;
+      const items = [...ref.current.querySelectorAll<HTMLElement>("a[href], button:not([disabled]), input:not([disabled]), textarea:not([disabled]), select, [tabindex]:not([tabindex='-1'])")];
+      if (!items.length) return;
+      const [a, z] = [items[0], items[items.length - 1]];
+      if (e.shiftKey && document.activeElement === a) { e.preventDefault(); z.focus(); }
+      else if (!e.shiftKey && document.activeElement === z) { e.preventDefault(); a.focus(); }
+    };
+    // Le bouton « retour » du téléphone ferme d'abord la fenêtre.
+    history.pushState({ noodeuSheet: true }, "");
+    const onPop = () => closeRef.current();
+    window.addEventListener("popstate", onPop);
     document.addEventListener("keydown", onKey);
     document.body.style.overflow = "hidden";
+    document.body.classList.add("has-sheet");
     return () => {
+      window.removeEventListener("popstate", onPop);
       document.removeEventListener("keydown", onKey);
       document.body.style.overflow = "";
-      prev?.focus();
+      document.body.classList.remove("has-sheet");
+      if (history.state?.noodeuSheet) history.back();
+      opener?.focus?.();
     };
-  }, [onClose]);
+  }, []);
+
   return (
-    <div className="sheet-backdrop" onClick={(e) => e.target === e.currentTarget && onClose()}>
-      <div className="sheet" role="dialog" aria-modal="true" aria-labelledby={labelledBy} tabIndex={-1} ref={ref}>
+    <div className={`sheet-backdrop ${side ? "sheet-backdrop--side" : ""}`} onClick={(e) => e.target === e.currentTarget && onClose()}>
+      <div className={`sheet ${tall ? "sheet--tall" : ""}`} role="dialog" aria-modal="true" aria-labelledby={titleId} tabIndex={-1} ref={ref}>
         <div className="sheet__head">
-          <div>{title}</div>
-          <button className="icon-btn" onClick={onClose}><Icon name="close" label={t("common.close")} /></button>
+          <div className="sheet__title" id={titleId}>{title}</div>
+          {headerExtra}
+          <button className="icon-btn icon-btn--soft" onClick={onClose} aria-label={closeLabel}><Icon name={closeIcon} /></button>
         </div>
         <div className="sheet__body">{children}</div>
-        {footer && <div className="sheet__foot">{footer}</div>}
+        {footer}
       </div>
     </div>
   );
 }
 
+/** Confirmation explicite d'une action importante. */
+export function ConfirmDialog({ title, text, confirmLabel, danger = false, busy = false, onConfirm, onCancel, children }: {
+  title: string; text: ReactNode; confirmLabel: string; danger?: boolean; busy?: boolean; onConfirm: () => void; onCancel: () => void; children?: ReactNode;
+}) {
+  return (
+    <Sheet
+      title={<h2 className="t-section">{title}</h2>}
+      onClose={onCancel}
+      footer={
+        <div className="sheet__foot">
+          <button className="btn btn--secondary btn--auto" onClick={onCancel} data-autofocus>{t("common.cancel")}</button>
+          <button className={`btn ${danger ? "btn--danger-solid" : ""}`} disabled={busy} onClick={onConfirm}>{busy ? t("common.sending") : confirmLabel}</button>
+        </div>
+      }
+    >
+      <div className="t-body">{text}</div>
+      {children}
+    </Sheet>
+  );
+}
+
+const ToastContext = createContext<(message: string) => void>(() => undefined);
+
+/** Messages brefs confirmant une action réellement aboutie. */
+export function ToastProvider({ children }: { children: ReactNode }) {
+  const [items, setItems] = useState<{ id: number; message: string }[]>([]);
+  const show = useCallback((message: string) => {
+    const id = Date.now() + Math.random();
+    setItems((prev) => [...prev, { id, message }]);
+    setTimeout(() => setItems((prev) => prev.filter((i) => i.id !== id)), 3200);
+  }, []);
+  return (
+    <ToastContext.Provider value={show}>
+      {children}
+      <div className="toast-region" role="status" aria-live="polite">
+        {items.map((i) => <div key={i.id} className="toast">{i.message}</div>)}
+      </div>
+    </ToastContext.Provider>
+  );
+}
+
+export function useToast() {
+  return useContext(ToastContext);
+}
+
 export function formatDate(iso: string, withTime = false) {
   const d = new Date(iso);
   return d.toLocaleDateString("fr-FR", withTime ? { day: "numeric", month: "long", hour: "2-digit", minute: "2-digit" } : { day: "numeric", month: "long", year: "numeric" });
+}
+
+export function relativeDate(iso: string) {
+  const diff = (Date.now() - new Date(iso).getTime()) / 1000;
+  if (diff < 60) return "à l'instant";
+  if (diff < 3600) return `il y a ${Math.floor(diff / 60)} min`;
+  if (diff < 86400) return `il y a ${Math.floor(diff / 3600)} h`;
+  if (diff < 7 * 86400) return `il y a ${Math.floor(diff / 86400)} j`;
+  return new Date(iso).toLocaleDateString("fr-FR", { day: "numeric", month: "short" });
 }

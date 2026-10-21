@@ -6,6 +6,7 @@ export interface Profile {
   word_form: WordForm;
   intimate_opt_in: boolean;
   reduced_motion: boolean;
+  avatar_path: string | null;
 }
 
 export type SessionStatus = "lobby" | "playing" | "paused" | "ended" | "closed" | "abandoned";
@@ -58,6 +59,7 @@ export interface Player {
   is_me: boolean;
   display_name: string;
   word_form: WordForm;
+  avatar_path?: string | null;
   ready: boolean;
   keep_memory: boolean;
 }

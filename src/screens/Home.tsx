@@ -1,83 +1,120 @@
+import { useState } from "react";
 import { Link } from "react-router";
 import { t } from "../i18n";
 import { useAuth } from "../auth/AuthProvider";
-import { useCouple } from "../couple/CoupleProvider";
-import { PendingRequest } from "../couple/InviteScreens";
-import { Alert, Avatar, Icon, Illustration, Logo, PageLoading } from "../components/ui";
+import { useDuo } from "../duo/DuoProvider";
+import { DuoIdentity } from "../duo/DuoIdentity";
+import { PendingRequest, useInviteActions } from "../duo/InviteScreens";
+import { Alert, ConfirmDialog, Icon, PageLoading, Sheet, formatDate } from "../components/ui";
 import { GameCard } from "./Libraries";
 import { useCatalog } from "./catalog";
 
+function PendingInvitationCard() {
+  const { out, share, copy, revoke } = useInviteActions();
+  const [menu, setMenu] = useState(false);
+  const [confirm, setConfirm] = useState(false);
+  if (!out) return null;
+  return (
+    <section className="card stack stack--4">
+      <DuoIdentity duo={null} showStatus={false} />
+      <div className="stack stack--2">
+        <h2 className="t-card">{t("home.pendingTitle")}</h2>
+        <p className="t-meta">{t("home.pendingUntil", { date: formatDate(out.expires_at, true) })}</p>
+      </div>
+      <div className="row">
+        <button className="btn grow" onClick={() => void share()}><Icon name="share" />{t("home.share")}</button>
+        <button className="icon-btn icon-btn--soft" aria-haspopup="dialog" aria-label={t("home.moreActions")} onClick={() => setMenu(true)} style={{ minWidth: 52, minHeight: 52 }}>
+          <Icon name="chevron-down" />
+        </button>
+      </div>
+      {menu && (
+        <Sheet title={<h2 className="t-section">{t("home.pendingTitle")}</h2>} onClose={() => setMenu(false)}>
+          <p className="code-box">{out.code}</p>
+          <button className="btn btn--secondary" onClick={() => { void copy(); setMenu(false); }}><Icon name="copy" />{t("home.copy")}</button>
+          <button className="btn btn--danger" onClick={() => { setMenu(false); setConfirm(true); }}>{t("home.cancelInvite")}</button>
+        </Sheet>
+      )}
+      {confirm && (
+        <ConfirmDialog title={t("home.cancelInvite")} text={t("invite.revokeText")} confirmLabel={t("home.cancelInvite")} danger
+          onCancel={() => setConfirm(false)} onConfirm={() => { setConfirm(false); void revoke(); }} />
+      )}
+    </section>
+  );
+}
+
 export function Home() {
   const { profile, userId } = useAuth();
-  const couple = useCouple();
+  const duo = useDuo();
   const cat = useCatalog(userId);
+
+  if (duo.loading) return <PageLoading />;
+  const { active, invitations, openSession } = duo;
   const name = profile?.display_name ?? "";
 
-  if (couple.loading) return <PageLoading />;
-
-  const open = couple.openSession;
-  const openLabel = !open ? "" : open.status === "lobby" ? t("home.resumeLobby") : open.status === "ended" ? t("home.resumeEnded") : t("home.resume");
-  const openStatus = !open ? "" : open.status === "paused" ? t("home.paused") : open.status === "lobby" ? t("home.waitingLobby") : t("home.inProgress");
+  let sessionLabel = "", sessionAction = "";
+  if (openSession) {
+    const map = {
+      lobby: [t("home.lobby", { title: openSession.title }), t("home.joinLobby")],
+      playing: [t("home.inProgress", { title: openSession.title }), t("home.resume")],
+      paused: [t("home.paused", { title: openSession.title }), t("home.resume")],
+      ended: [t("home.ended", { title: openSession.title }), t("home.seeResults")],
+    } as const;
+    [sessionLabel, sessionAction] = map[openSession.status];
+  }
 
   return (
     <main className="page">
-      <div className="topbar">
-        <Logo width={140} />
-        <Link to="/parametres" aria-label={t("nav.settings")}><Avatar name={name} me /></Link>
-      </div>
-      <div className="page-head">
-        <h1>{t("home.hello", { name })}</h1>
-        <p>{t("home.subtitle")}</p>
+      <div className="page-header">
+        <h1 className="t-page">{t("home.hello", { name })}</h1>
+        <p>{active ? t("home.subtitleDuo") : t("home.subtitleSolo")}</p>
       </div>
 
-      {couple.error && <Alert>{t("net.offline")}</Alert>}
+      {duo.error && <Alert>{t("net.loadError")}</Alert>}
 
-      {couple.coupleId && couple.partner && (
-        <div className="duo">
-          <div className="avatars"><Avatar name={name} me /><Avatar name={couple.partner.name} /></div>
-          <div>
-            <strong>{name} & {couple.partner.name}</strong>
-            <div className="status">
-              <span className={`status-dot ${couple.partnerOnline ? "status-dot--on" : ""}`} />
-              {couple.partnerOnline ? t("presence.online") : t("presence.offline")}
-            </div>
+      {active ? (
+        <section className="card stack stack--4">
+          <DuoIdentity duo={active} online={duo.partnerOnline} />
+          {openSession && <p className="t-small">{sessionLabel}</p>}
+          {openSession ? (
+            <Link className="btn" to={`/partie/${openSession.id}`}>{sessionAction}<Icon name="arrow-right" /></Link>
+          ) : (
+            <Link className="btn" to="/bibliotheques">{t("home.choose")}<Icon name="arrow-right" /></Link>
+          )}
+          <Link className="btn btn--quiet btn--sm" to="/notre-espace">{t("home.space")}</Link>
+        </section>
+      ) : invitations.outgoing?.status === "claimed" ? (
+        <PendingRequest />
+      ) : invitations.outgoing && !invitations.outgoing.expired ? (
+        <PendingInvitationCard />
+      ) : invitations.incoming ? (
+        <section className="card stack stack--3">
+          <DuoIdentity duo={null} showStatus={false} />
+          <p className="t-card">{t("home.waitingAnswer", { name: invitations.incoming.inviter_name })}</p>
+          <Link className="btn btn--secondary" to="/rejoindre">{t("common.continue")}</Link>
+        </section>
+      ) : (
+        <section className="card stack stack--4">
+          <DuoIdentity duo={null} showStatus={false} />
+          <div className="stack stack--2">
+            <h2 className="t-card">{t("home.soloTitle")}</h2>
+            <p className="t-small muted">{t("home.soloText")}</p>
           </div>
-        </div>
-      )}
-
-      {open && (
-        <section className="card card--warm enter">
-          <span className="badge">{openStatus}</span>
-          <h2>{open.title}</h2>
-          <Link className="btn" to={`/partie/${open.id}`}>{openLabel} <Icon name="arrow-right" /></Link>
-        </section>
-      )}
-
-      {!couple.coupleId && couple.invitations.outgoing?.status === "claimed" && <PendingRequest />}
-
-      {!couple.coupleId && couple.invitations.outgoing?.status !== "claimed" && (
-        <section className="card card--warm">
-          <Illustration name="14-duo-a-creer" className="illustration--card" eager />
-          <h2>{t("home.inviteTitle")}</h2>
-          <p>{t("home.inviteText")}</p>
-          <Link className="btn" to="/inviter"><Icon name="plus" />{t("home.invite")}</Link>
-        </section>
-      )}
-
-      {couple.coupleId && !open && (
-        <section className="card card--warm">
-          <Illustration name="01-connexion-a-deux" className="illustration--card" eager />
-          <h2>{t("home.playTitle")}</h2>
-          <Link className="btn" to="/bibliotheques">{t("home.choose")} <Icon name="arrow-right" /></Link>
+          <Link className="btn" to="/inviter">{t("home.invite")}</Link>
+          <Link className="btn btn--quiet btn--sm" to="/rejoindre">{t("home.haveCode")}</Link>
         </section>
       )}
 
       {cat.games.length > 0 && (
-        <section className="stack">
-          <h2>{t("home.ideas")}</h2>
-          {cat.games.slice(0, 3).map((g) => (
-            <GameCard key={g.id} game={g} favorite={cat.favorites.has(g.id)} onToggleFavorite={() => void cat.toggleFavorite(g.id)} />
-          ))}
+        <section className="section">
+          <div className="section__head">
+            <h2 className="t-section">{active ? t("home.ideasDuo") : t("home.ideas")}</h2>
+            <Link className="btn btn--quiet btn--auto btn--sm" to="/bibliotheques">{t("home.seeGames")}</Link>
+          </div>
+          <div className="stack grid-2">
+            {cat.games.slice(0, 3).map((g) => (
+              <GameCard key={g.id} game={g} favorite={cat.favorites.has(g.id)} onToggleFavorite={() => cat.toggleFavorite(g.id)} />
+            ))}
+          </div>
         </section>
       )}
     </main>
