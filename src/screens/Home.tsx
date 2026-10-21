@@ -6,8 +6,8 @@ import { useDuo } from "../duo/DuoProvider";
 import { DuoIdentity } from "../duo/DuoIdentity";
 import { PendingRequest, useInviteActions } from "../duo/InviteScreens";
 import { Alert, ConfirmDialog, Icon, Illustration, PageLoading, Sheet, formatDate } from "../components/ui";
-import { GameCard } from "./Libraries";
-import { mechanicIllustration, useCatalog } from "./catalog";
+import { GameCard, GameThumb } from "./Libraries";
+import { useCatalog } from "./catalog";
 
 function PendingInvitationCard() {
   const { out, share, copy, revoke } = useInviteActions();
@@ -63,7 +63,8 @@ export function Home() {
   }
   const sessionGame = openSession ? cat.games.find((g) => g.id === openSession.game_id) : undefined;
   const favorites = cat.games.filter((g) => cat.favorites.has(g.id)).slice(0, 3);
-  const discover = cat.games.filter((g) => !cat.favorites.has(g.id)).slice(0, 3);
+  // Suggestions : uniquement des activités jouables dès maintenant.
+  const discover = cat.games.filter((g) => !cat.favorites.has(g.id) && g.implementation === "playable").slice(0, 3);
   const card = (g: (typeof cat.games)[number]) => (
     <GameCard key={g.id} game={g} favorite={cat.favorites.has(g.id)} onToggleFavorite={() => cat.toggleFavorite(g.id)} />
   );
@@ -110,9 +111,9 @@ export function Home() {
         <section className="section" aria-labelledby="home-now">
           <h2 className="t-section" id="home-now">{t("home.now")}</h2>
           <div className="card now-card">
-            <div className="game-card__thumb" aria-hidden="true">
-              <Illustration name={(sessionGame && mechanicIllustration[sessionGame.mechanic]) ?? "01-connexion-a-deux"} />
-            </div>
+            {sessionGame ? <GameThumb game={sessionGame} /> : (
+              <div className="game-card__thumb" aria-hidden="true"><Illustration name="01-connexion-a-deux" /></div>
+            )}
             <div className="stack" style={{ gap: 2 }}>
               <span className="t-meta">{sessionLabel}</span>
               <span className="t-card">{openSession.title}</span>

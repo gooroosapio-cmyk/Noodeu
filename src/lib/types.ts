@@ -84,19 +84,28 @@ export interface SessionState {
   rounds: Round[];
 }
 
+export type GameStyle = "echange" | "duel" | "cooperation" | "creation";
+
 export interface Game {
   id: string;
   category_id: string;
   mechanic: string;
   title: string;
   promise: string;
-  style: "echange" | "duel" | "cooperation";
+  hook: string;
+  style: GameStyle;
   duration_min: number;
   duration_max: number;
   content_level: "standard" | "intime";
-  current_version: number;
+  current_version: number | null;
   sort: number;
   is_demo: boolean;
+  /** playable : jouable ; coming_soon : visible grisé « Bientôt », non lançable. */
+  implementation: "playable" | "coming_soon";
+  adult_available: boolean;
+  mute_ok: boolean;
+  difficulties: string[];
+  thumbnail: string | null;
 }
 
 export interface Category {
@@ -105,6 +114,7 @@ export interface Category {
   promise: string;
   sort: number;
   is_demo: boolean;
+  family_no: number | null;
 }
 
 export interface ChatMessage {
