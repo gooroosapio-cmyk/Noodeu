@@ -148,6 +148,8 @@ export const fr = {
   "portrait.revealPartner": "Le portrait de {name}",
   "portrait.revealMine": "Mon portrait",
   "portrait.chosenBy": "Les mots choisis par {name}",
+  "portrait.chosenByMe": "Les mots que tu as choisis",
+  "portrait.guessedByMe": "Ce que tu avais imaginé",
   "portrait.guessedBy": "Ce que {name} avait imaginé",
   "portrait.found": "{n} mot(s) retrouvé(s)",
   "portrait.noAnswer": "{name} a passé cette étape.",
