@@ -97,7 +97,8 @@ def sample(kind, step, card, seat, state, round_no):
     return None
 
 
-playable = sql("select id from public.games where implementation = 'playable' and id like 'N2-%' order by sort").split("\n")
+playable = sql("""select g.id from public.games g join public.game_categories gc on gc.id = g.category_id
+                  where g.implementation = 'playable' and gc.family_no = 1 order by g.sort""").split("\n")
 index = {}
 for gid in playable:
     sql(f"update public.game_sessions set status = 'abandoned' where status in ('lobby','playing','paused','ended')")

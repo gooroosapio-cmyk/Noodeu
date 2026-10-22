@@ -470,3 +470,48 @@ button.scene-cell { cursor: pointer; }
 .drawpad { display: grid; gap: var(--s-2); }
 .drawpad__tools { display: grid; gap: var(--s-2); }
 @media (prefers-reduced-motion: reduce) { .enter { animation: none !important; } }
+
+/* ---------- Moteur plateau (famille 2 : mots) ---------- */
+.board-turn { display: inline-flex; align-items: center; gap: var(--s-1); margin: 0; padding: 2px var(--s-3); border-radius: var(--r-pill); background: var(--c-surface-soft); font: 500 0.875rem/1.25rem var(--f-body); }
+.board-turn--me { background: var(--c-accent-soft); font-weight: 700; }
+.board-log { list-style: none; margin: 0; padding: 0; }
+.letter-row { display: flex; flex-wrap: wrap; gap: var(--s-2); align-items: center; }
+.letter-row--word { min-height: 52px; padding: var(--s-2); border: 1px dashed var(--c-border-control); border-radius: var(--r-control); }
+.letter {
+  display: inline-grid; place-items: center; width: 44px; height: 48px; border-radius: 10px; border: 1px solid var(--c-border-control);
+  background: var(--c-surface); font: 700 1.25rem/1 var(--f-heading); text-transform: uppercase; color: var(--c-text);
+}
+.letter--empty { background: var(--c-surface-soft); border-style: dashed; }
+.letter--btn { cursor: pointer; }
+.letter--btn[aria-pressed="true"] { outline: 3px solid var(--c-focus); outline-offset: 1px; background: var(--c-accent-soft); }
+.letter--found { background: var(--c-success-soft); border-color: var(--c-success); }
+.letter--center { border-width: 2px; border-color: var(--c-focus); }
+.letter-grid { display: grid; gap: 4px; width: min(100%, 22rem); margin-inline: auto; }
+.letter-grid__row { display: grid; grid-template-columns: repeat(6, 1fr); gap: 4px; }
+.letter-grid .letter { width: 100%; height: auto; aspect-ratio: 1; min-height: 44px; font-size: 1.125rem; }
+.keyboard { display: grid; grid-template-columns: repeat(auto-fill, minmax(44px, 1fr)); gap: var(--s-1); }
+.key { min-height: 44px; border-radius: 8px; border: 1px solid var(--c-border-control); background: var(--c-surface); font: 700 1rem/1 var(--f-body); cursor: pointer; color: var(--c-text); }
+.key:disabled { opacity: 0.35; cursor: default; }
+.frag { min-height: 44px; min-width: 44px; padding: var(--s-2) var(--s-3); border-radius: 10px; border: 1px solid var(--c-border-control); background: var(--c-surface); font: 600 1rem/1.25rem var(--f-body); cursor: pointer; color: var(--c-text); }
+.frag--on, .frag[aria-pressed="true"] { background: var(--c-accent-soft); border-color: var(--c-focus); }
+.frag--theirs { border-style: dashed; }
+.frag-list { list-style: none; margin: 0; padding: 0; display: flex; flex-wrap: wrap; gap: var(--s-2); }
+.chain { list-style: none; margin: 0; padding: 0; display: flex; flex-wrap: wrap; gap: var(--s-1) var(--s-2); align-items: center; }
+.chain li { padding: 2px var(--s-3); border-radius: var(--r-pill); background: var(--c-surface-soft); font-weight: 600; }
+.chain li + li::before { content: "→ "; color: var(--c-text-2); font-weight: 400; }
+.chain__restart { border: 1px dashed var(--c-border-control); }
+.pair { display: flex; flex-wrap: wrap; align-items: center; justify-content: center; gap: var(--s-3); text-align: center; }
+.cat-table { display: grid; gap: var(--s-1); }
+.cat-table__row { display: grid; grid-template-columns: minmax(6rem, 1fr) 1fr 1fr; gap: var(--s-2); padding: var(--s-2) 0; border-bottom: 1px solid var(--c-border); overflow-wrap: anywhere; }
+.clue-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(min(100%, 6.5rem), 1fr)); gap: var(--s-2); }
+.clue-card { min-height: 56px; display: grid; place-items: center; gap: 2px; padding: var(--s-2); border-radius: 10px; border: 1px solid var(--c-border-control); background: var(--c-surface); font: 600 0.9375rem/1.25rem var(--f-body); color: var(--c-text); overflow-wrap: anywhere; text-align: center; }
+.clue-card:not(:disabled) { cursor: pointer; }
+.clue-card--target { border-color: var(--c-success); border-width: 2px; }
+.clue-card--trap { border-color: var(--c-danger); border-width: 2px; }
+.clue-card--open.clue-card--target { background: var(--c-success-soft); }
+.clue-card--open.clue-card--trap { background: var(--c-danger-soft); }
+.clue-card--open.clue-card--neutral { background: var(--c-surface-soft); }
+.rebus { display: flex; justify-content: center; gap: var(--s-4); align-items: center; }
+.rebus__item { margin: 0; display: grid; justify-items: center; gap: var(--s-1); padding: var(--s-3); border-radius: var(--r-card); background: var(--c-surface); border: 1px solid var(--c-border); }
+.rebus__item + .rebus__item::before { content: ""; }
+details.card > summary { cursor: pointer; min-height: 44px; display: flex; align-items: center; }

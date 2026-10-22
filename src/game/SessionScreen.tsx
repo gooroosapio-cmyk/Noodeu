@@ -14,6 +14,7 @@ import type { Player, Round, SessionState } from "../lib/types";
 import { answerOf, nextStep, portraitReveal, toggleWord, wordLabel } from "./portrait";
 import { useDraft, useSession } from "./useSession";
 import { OptionsSheet, RoundsPlaying, RoundsResults, hasOptions, isRounds } from "./rounds/RoundsGame";
+import { BoardPlaying, BoardResults, isBoard } from "./board/BoardGame";
 
 type Run = (fn: string, args?: Record<string, unknown>) => Promise<{ ok: boolean }>;
 
@@ -41,7 +42,7 @@ export function SessionScreen() {
     setBusy(true);
     setActionError(null);
     const res = await s.act(fn, args);
-    if (!res.ok && res.error !== "stale_round") setActionError(errorMessage(res.error));
+    if (!res.ok && res.error !== "stale_round" && fn !== "play_move") setActionError(errorMessage(res.error));
     setBusy(false);
     return res;
   }
@@ -69,6 +70,7 @@ export function SessionScreen() {
   const live = ["lobby", "playing", "paused", "ended"].includes(st.session.status) && !st.session.read_only;
   const canPause = st.session.status === "playing" || st.session.status === "paused";
   const rounds = isRounds(st);
+  const board = isBoard(st);
   const common = { st, run, busy, online };
   const showOptions = rounds && hasOptions(st) && ["lobby", "playing", "paused"].includes(st.session.status) && !st.session.read_only;
 
@@ -105,7 +107,7 @@ export function SessionScreen() {
 
         {st.session.status === "lobby" && <Lobby st={st} me={me} partner={partner} partnerHere={partnerHere} busy={busy} online={online} run={run} onChat={() => setChat(true)}
           onOptions={showOptions ? () => setOptions(true) : undefined} />}
-        {st.session.status === "playing" && (rounds ? <RoundsPlaying {...common} /> : <Playing st={st} partnerName={partnerName} partner={partner} busy={busy} online={online} run={run} />)}
+        {st.session.status === "playing" && (board ? <BoardPlaying {...common} /> : rounds ? <RoundsPlaying {...common} /> : <Playing st={st} partnerName={partnerName} partner={partner} busy={busy} online={online} run={run} />)}
         {st.session.status === "paused" && (
           <section className="empty enter">
             <Illustration name="17-pause" />
@@ -114,7 +116,9 @@ export function SessionScreen() {
             <button className="btn btn--auto" disabled={busy || !online} onClick={() => run("set_paused", { p_paused: false })}>{t("game.resume")}</button>
           </section>
         )}
-        {(st.session.status === "ended" || st.session.status === "closed") && (rounds
+        {(st.session.status === "ended" || st.session.status === "closed") && (board
+          ? <BoardResults c={common} navigate={navigate} />
+          : rounds
           ? <RoundsResults c={common} navigate={navigate} />
           : <Results st={st} me={me} partner={partner} busy={busy} online={online} run={run} navigate={navigate} />)}
         {st.session.status === "abandoned" && (

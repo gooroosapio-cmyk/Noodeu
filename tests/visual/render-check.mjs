@@ -127,6 +127,12 @@ for (const gid of playable) {
   allScreens.push({ name: `50-${gid}-jeu`, path: `/partie/${SESSION}`, scenario: st("play") });
   allScreens.push({ name: `51-${gid}-revelation`, path: `/partie/${SESSION}`, scenario: st("reveal") });
 }
+// Famille 2 (plateau) : début de manche, après un coup, manche finie, partie finie.
+for (const gid of Object.keys(fixture("index_board.json"))) {
+  for (const [k, label] of [["b0", "debut"], ["b1", "coup"], ["b2", "manche-finie"], ["b3", "fin"]]) {
+    allScreens.push({ name: `53-${gid}-${label}`, path: `/partie/${SESSION}`, scenario: { ...duo, state: fixture(`${gid}-${k}.json`) } });
+  }
+}
 allScreens.push({ name: "52-N2-001-salon-options", path: `/partie/${SESSION}`, scenario: { ...duo, state: fixture("N2-001-lobby.json") },
   action: async (page) => page.getByRole("button", { name: "Options" }).first().click() });
 const ONLY = process.env.ONLY;
