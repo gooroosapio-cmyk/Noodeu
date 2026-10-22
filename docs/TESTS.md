@@ -76,3 +76,9 @@ Contrôles : défilement horizontal, contenu masqué sous la navigation, erreurs
 - `src/game/rounds/logic.test.ts` : tour de chacun, attente, révision, libellés accordés, budget.
 
 Non testé à ce stade : partie réelle entre deux appareils distincts en ligne, réseau lent, lecteur d'écran réel.
+
+## Partenaire automatique de test (22 octobre 2026)
+
+- `supabase/tests/slice3_test_autoplayer.sql` : sans inscription rien ne se passe ; avec inscription, le partenaire est
+  prêt dès la création, l'identité du joueur est rendue après chaque action du robot, et les 18 activités se jouent
+  jusqu'à la fin (révélation, étapes après révélation, capsule fermée) avec un seul joueur humain.

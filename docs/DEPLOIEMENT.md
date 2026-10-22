@@ -79,3 +79,19 @@ Cette migration n'a donc pas été appliquée en ligne. Elle :
 Pour l'appliquer : l'éditeur SQL du tableau de bord Supabase (coller le fichier), ou approuver la demande de l'outil.
 Tant qu'elle manque : les options +18 et « Arrêter ici ensemble » répondent par une erreur, et une réponse révélée
 reste lisible en direct par l'autre membre du duo (sauf la capsule, protégée par la migration 140).
+
+État au 22 octobre 2026 (soir) : nouvelle tentative, de nouveau bloquée en attente de confirmation. Toujours à appliquer.
+
+## Partenaire automatique de test (temporaire) — `20261022000300_test_autoplayer.sql`
+
+Pour tester seul, un compte inscrit dans `private.test_autoplayers` est toujours prêt dans le salon et répond tout
+seul à ses étapes (réponses de test valides, mêmes fonctions et validations que l'application), et reprend les
+préférences de partie (+18, thèmes à éviter) de l'autre joueur. Inscrit en ligne : le compte de démonstration
+« Kalou » (inscription faite à la main sur la base ; l'adresse n'est pas écrite dans le dépôt).
+
+## Audit final — à faire avant l'ouverture
+
+- [ ] Vider `private.test_autoplayers` (le partenaire automatique ne fait alors plus rien), puis retirer le mécanisme
+      (`bump_session` d'origine) par une migration.
+- [ ] Supprimer le compte de démonstration « Kalou » (et son duo) depuis Supabase → Authentication.
+- [ ] Vérifier que la migration de confidentialité 150 est appliquée et planifier `purge_expired_sessions` (pg_cron).
