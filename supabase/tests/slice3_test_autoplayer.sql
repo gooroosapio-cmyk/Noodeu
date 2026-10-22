@@ -50,7 +50,8 @@ declare
   guard int;
   rd public.session_rounds;
 begin
-  for g in select id from public.games where implementation = 'playable' and id like 'N2-%' order by sort loop
+  for g in select g2.id from public.games g2 join public.game_categories gc on gc.id = g2.category_id
+           where g2.implementation = 'playable' and gc.family_no = 1 order by g2.sort loop
     perform t3.as_user('00000000-0000-4000-a000-0000000000a1');
     s := (public.create_session(g.id) ->> 'session_id')::uuid;
     perform t3.ok((select ready_at is not null from public.session_players where session_id = s and seat = 2), g.id || ' : robot prêt dans le salon');
