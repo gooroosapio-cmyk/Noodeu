@@ -295,7 +295,7 @@ legend { padding: 0; margin-bottom: var(--s-2); font-weight: 600; }
 @media (min-width: 560px) { .now-card { grid-template-columns: auto minmax(0, 1fr) auto; } .now-card__cta { grid-column: auto; width: auto; } }
 .chips { display: flex; flex-wrap: wrap; gap: var(--s-2); }
 .chip {
-  min-height: 44px; padding: var(--s-2) var(--s-4); border-radius: var(--r-pill);
+  min-height: 44px; min-width: 44px; justify-content: center; padding: var(--s-2) var(--s-4); border-radius: var(--r-pill);
   border: 1px solid var(--c-border-control); background: var(--c-surface); cursor: pointer;
   display: inline-flex; align-items: center; gap: var(--s-2); font: 500 0.9375rem/1.25rem var(--f-body);
 }

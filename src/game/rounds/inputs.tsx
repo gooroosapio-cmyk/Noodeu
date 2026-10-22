@@ -5,7 +5,7 @@ import { DrawingPad, type Stroke } from "../../components/Drawing";
 import type { Player, WordForm } from "../../lib/types";
 import elements from "../elements.json";
 import {
-  answerOf, basketCost, fixed, itemLabel, list, move, toggleIn,
+  answerOf, basketCost, fixed, fixedObjects, itemLabel, list, move, toggleIn,
   type RRound, type StepDef,
 } from "./logic";
 
@@ -215,7 +215,7 @@ function PickInput(p: InputProps) {
 function ObjectsInput(p: InputProps) {
   const prm = p.step.params ?? {};
   const objects = list<string>(p.round.card, "objects");
-  const backgrounds = list<{ name: string; hex: string }>(p.round.card, "backgrounds");
+  const backgrounds = fixedObjects<{ name: string; hex: string }>(p.round.card, "backgrounds");
   const count = Number(prm.count), capMax = Number(prm.caption_max);
   const [sel, setSel] = useState<number[]>([]);
   const [caps, setCaps] = useState<Record<number, string>>({});
@@ -238,8 +238,8 @@ function ObjectsInput(p: InputProps) {
         <legend>{t("rounds.background")}</legend>
         <div className="chips" role="radiogroup">
           {backgrounds.map((b, i) => (
-            <button key={b.i} type="button" role="radio" aria-checked={bg === i} className="swatch swatch--labelled" style={{ background: b.v.hex }} onClick={() => setBg(i)}>
-              <span className="sr-only">{b.v.name}</span>
+            <button key={b.name} type="button" role="radio" aria-checked={bg === i} className="swatch swatch--labelled" style={{ background: b.hex }} onClick={() => setBg(i)}>
+              <span className="sr-only">{b.name}</span>
             </button>
           ))}
         </div>
@@ -388,7 +388,7 @@ function PlaceInput(p: InputProps) {
   }
   return (
     <>
-      <p className="t-small">{picked === null ? t("rounds.placePick") : t("rounds.placeCell", { label: objects[picked].v })}</p>
+      {picked !== null && <p className="t-small strong" aria-live="polite">{t("rounds.placeCell", { label: objects[picked].v })}</p>}
       <ul className="tile-grid tile-grid--small">
         {objects.map((o, i) => (
           <li key={o.i}>
@@ -439,8 +439,8 @@ function LightInput(p: InputProps) {
 }
 
 function GiftInput(p: InputProps) {
-  const papers = list<{ name: string; hex: string }>(p.round.card, "papers");
-  const ribbons = list<{ name: string; hex: string }>(p.round.card, "ribbons");
+  const papers = fixedObjects<{ name: string; hex: string }>(p.round.card, "papers");
+  const ribbons = fixedObjects<{ name: string; hex: string }>(p.round.card, "ribbons");
   const objects = list<string>(p.round.card, "objects");
   const prompts = list<string>(p.round.card, "prompts");
   const [paper, setPaper] = useState(0);
@@ -453,12 +453,12 @@ function GiftInput(p: InputProps) {
       {prompts.length > 0 && <p className="t-small muted">{t("rounds.ideas")} {prompts.map((x) => x.v).join(" · ")}</p>}
       <fieldset><legend>{t("rounds.paper")}</legend>
         <div className="chips" role="radiogroup">{papers.map((x, i) => (
-          <button key={x.i} type="button" role="radio" aria-checked={paper === i} className="swatch swatch--labelled" style={{ background: x.v.hex }} onClick={() => setPaper(i)}><span className="sr-only">{x.v.name}</span></button>
+          <button key={x.name} type="button" role="radio" aria-checked={paper === i} className="swatch swatch--labelled" style={{ background: x.hex }} onClick={() => setPaper(i)}><span className="sr-only">{x.name}</span></button>
         ))}</div>
       </fieldset>
       <fieldset><legend>{t("rounds.ribbon")}</legend>
         <div className="chips" role="radiogroup">{ribbons.map((x, i) => (
-          <button key={x.i} type="button" role="radio" aria-checked={ribbon === i} className="chip" onClick={() => setRibbon(i)}>{x.v.name}</button>
+          <button key={x.name} type="button" role="radio" aria-checked={ribbon === i} className="chip" onClick={() => setRibbon(i)}>{x.name}</button>
         ))}</div>
       </fieldset>
       <fieldset><legend>{t("rounds.compartment1")}</legend>

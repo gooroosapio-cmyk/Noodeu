@@ -142,6 +142,12 @@ export function fixed(card: RoundCard, key: string): string[] {
   return Array.isArray(l) ? (l as unknown[]).map((x) => itemLabel(x)) : [];
 }
 
+/** Liste fixe d'objets ({ name, hex }…) : couleurs de fond, papiers, rubans. */
+export function fixedObjects<V>(card: RoundCard, key: string): V[] {
+  const l = card[key];
+  return Array.isArray(l) ? (l as V[]) : [];
+}
+
 /** Coût total d'un panier (« Douze jetons d'envie »). */
 export function basketCost(card: RoundCard, items: number[]): number {
   const acts = list<{ cost: number }>(card, "activities");

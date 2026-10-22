@@ -1,0 +1,128 @@
+{
+ "N2-001": {
+  "title": "On se raconte",
+  "status": [
+   "playing",
+   true
+  ]
+ },
+ "N2-002": {
+  "title": "Deux options, ton choix",
+  "status": [
+   "playing",
+   true
+  ]
+ },
+ "N2-003": {
+  "title": "Déjà vécu ?",
+  "status": [
+   "playing",
+   true
+  ]
+ },
+ "N2-004": {
+  "title": "Je mise sur ton choix",
+  "status": [
+   "playing",
+   true
+  ]
+ },
+ "N2-005": {
+  "title": "Cinq mots, vraiment toi",
+  "status": [
+   "ended",
+   true
+  ]
+ },
+ "N2-006": {
+  "title": "Le portrait en objets",
+  "status": [
+   "ended",
+   true
+  ]
+ },
+ "N2-007": {
+  "title": "La météo intérieure",
+  "status": [
+   "ended",
+   true
+  ]
+ },
+ "N2-008": {
+  "title": "Tes cinq priorités du moment",
+  "status": [
+   "ended",
+   true
+  ]
+ },
+ "N2-009": {
+  "title": "Le compliment précis",
+  "status": [
+   "ended",
+   true
+  ]
+ },
+ "N2-010": {
+  "title": "Je t’ai bien compris",
+  "status": [
+   "playing",
+   true
+  ]
+ },
+ "N2-011": {
+  "title": "La frise de tes moments",
+  "status": [
+   "ended",
+   true
+  ]
+ },
+ "N2-012": {
+  "title": "La capsule à rouvrir",
+  "status": [
+   "ended",
+   false
+  ]
+ },
+ "N2-013": {
+  "title": "Douze jetons d’envie",
+  "status": [
+   "ended",
+   true
+  ]
+ },
+ "N2-014": {
+  "title": "Votre coin tranquille",
+  "status": [
+   "ended",
+   true
+  ]
+ },
+ "N2-015": {
+  "title": "La roue des petits gestes",
+  "status": [
+   "ended",
+   true
+  ]
+ },
+ "N2-121": {
+  "title": "La carte de tes goûts",
+  "status": [
+   "ended",
+   true
+  ]
+ },
+ "N2-122": {
+  "title": "La boîte à surprises",
+  "status": [
+   "ended",
+   true
+  ]
+ },
+ "N2-123": {
+  "title": "Le mini-fanzine à deux",
+  "status": [
+   "ended",
+   true
+  ]
+ }
+}

@@ -4,7 +4,7 @@ import { Icon } from "../../components/ui";
 import { DrawingView, type Stroke } from "../../components/Drawing";
 import type { Player } from "../../lib/types";
 import { ItemTile } from "./inputs";
-import { answerOf, fixed, itemLabel, list, type RAnswer, type RRound, type StepDef } from "./logic";
+import { answerOf, fixed, fixedObjects, itemLabel, list, type RAnswer, type RRound, type StepDef } from "./logic";
 
 type P = Record<string, unknown>;
 const EXTRA: Record<string, string> = { depends: "Ça dépend", neither: "Aucun des deux" };
@@ -44,9 +44,9 @@ export function AnswerView({ step, answer, round, owner }: { step: StepDef; answ
     }
     case "objects": {
       const objects = list<string>(card, "objects");
-      const bgs = list<{ hex: string }>(card, "backgrounds");
+      const bgs = fixedObjects<{ name: string; hex: string }>(card, "backgrounds");
       return (
-        <ul className="object-board" style={{ background: bgs[Number(p.bg)]?.v.hex }}>
+        <ul className="object-board" style={{ background: bgs[Number(p.bg)]?.hex }}>
           {((p.items as { i: number; caption?: string }[]) ?? []).map((o) => (
             <li key={o.i}><ItemTile label={objects[o.i]?.v ?? ""} size={48} />{o.caption && <p className="t-small">{o.caption}</p>}</li>
           ))}
@@ -176,8 +176,8 @@ export function PageView({ round, payload, label }: { round: RRound; payload: P;
 /** Boîte à surprises : celui qui reçoit ouvre les compartiments un par un (choix local, sans effet réseau). */
 function GiftView({ round, payload, owner }: { round: RRound; payload: P; owner: Player }) {
   const [opened, setOpened] = useState(owner.is_me ? 3 : 0);
-  const papers = list<{ name: string; hex: string }>(round.card, "papers");
-  const ribbons = list<{ name: string; hex: string }>(round.card, "ribbons");
+  const papers = fixedObjects<{ name: string; hex: string }>(round.card, "papers");
+  const ribbons = fixedObjects<{ name: string; hex: string }>(round.card, "ribbons");
   const objects = list<string>(round.card, "objects");
   const parts = [
     { key: "o", node: typeof payload.object === "number" ? <ItemTile label={objects[payload.object]?.v ?? ""} size={48} /> : <p className="muted t-small">{t("rounds.emptyCompartment")}</p> },
@@ -185,8 +185,8 @@ function GiftView({ round, payload, owner }: { round: RRound; payload: P; owner:
     { key: "d", node: Array.isArray(payload.drawing) ? <DrawingView strokes={payload.drawing as Stroke[]} label={t("rounds.drawingOf", { name: owner.display_name })} /> : <p className="muted t-small">{t("rounds.emptyCompartment")}</p> },
   ];
   return (
-    <div className="gift" style={{ borderColor: ribbons[Number(payload.ribbon)]?.v.hex, background: papers[Number(payload.paper)]?.v.hex }}>
-      <p className="t-meta">{papers[Number(payload.paper)]?.v.name} · {ribbons[Number(payload.ribbon)]?.v.name}</p>
+    <div className="gift" style={{ borderColor: ribbons[Number(payload.ribbon)]?.hex, background: papers[Number(payload.paper)]?.hex }}>
+      <p className="t-meta">{papers[Number(payload.paper)]?.name} · {ribbons[Number(payload.ribbon)]?.name}</p>
       {parts.slice(0, opened).map((x) => <div key={x.key} className="gift__part enter">{x.node}</div>)}
       {opened < 3 && <button className="btn btn--secondary btn--auto" onClick={() => setOpened(opened + 1)}>{t("rounds.openNext", { n: opened + 1 })}</button>}
     </div>

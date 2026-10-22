@@ -4,7 +4,13 @@
 // Usage : npm run build && npx vite preview --port 4173 &  puis  node tests/visual/render-check.mjs [dossier]
 // Variables : ONLY=<motif d'écran>, WIDTHS=320,390, ZOOM=2 (texte à 200 %), PW_CHROMIUM=<chemin du navigateur>
 import { chromium } from "@playwright/test";
-import { mkdirSync } from "node:fs";
+import { mkdirSync, readFileSync } from "node:fs";
+
+// États réels produits par la base locale (tests/visual/make_fixtures.py) : catalogue 2.1.0 et parties de la famille 1.
+const FIX = new URL("./fixtures/", import.meta.url);
+const fixture = (name) => JSON.parse(readFileSync(new URL(name, FIX), "utf8"));
+const catalogue = fixture("catalogue.json");
+const playable = Object.keys(fixture("index.json"));
 
 const BASE = "http://localhost:4173";
 const OUT = process.argv[2] ?? "test-results/visual";
@@ -67,10 +73,13 @@ async function setup(page, scenario) {
     if (p.endsWith("/rpc/get_chat_unread")) return json(scenario.unread ?? 0);
     if (p.endsWith("/notifications")) return json(scenario.notifications ?? []);
     if (p.endsWith("/duo_messages")) return json(scenario.duos?.length ? messages : []);
-    if (p.endsWith("/game_categories")) return json([{ id: "se-decouvrir", title: "Se découvrir", promise: "Même après des années, il reste des surprises.", sort: 1, is_demo: true }]);
-    if (p.endsWith("/games")) return json([game, { ...game, id: "g2", title: "Deux vérités, une invention et un titre long pour tester", duration_min: 8, duration_max: 12, promise: "Repère l'invention parmi trois affirmations de l'autre personne." }]);
-    if (p.endsWith("/game_versions")) return json([{ rules }]);
-    if (p.endsWith("/game_favorites")) return json([{ game_id: game.id }]);
+    if (p.endsWith("/game_categories")) return json(catalogue.categories);
+    if (p.endsWith("/games")) return json(catalogue.games);
+    if (p.endsWith("/game_versions")) {
+      const id = (url.searchParams.get("game_id") ?? "").replace(/^eq\./, "");
+      return json(catalogue.rules[id] ? [{ rules: catalogue.rules[id] }] : [{ rules }]);
+    }
+    if (p.endsWith("/game_favorites")) return json([{ game_id: "N2-005" }, { game_id: "N2-061" }]);
     if (p.endsWith("/game_sessions")) return json(scenario.history ?? []);
     return json({});
   });
@@ -90,7 +99,9 @@ const allScreens = [
   { name: "04b-rejoindre", path: "/rejoindre", scenario: solo },
   { name: "07-bibliotheques", path: "/bibliotheques", scenario: duo },
   { name: "07b-filtres", path: "/bibliotheques", scenario: duo, action: async (page) => page.getByRole("button", { name: /^Filtres/ }).click() },
-  { name: "09-fiche", path: "/bibliotheques/portrait-en-cinq-mots", scenario: duo },
+  { name: "09-fiche", path: "/bibliotheques/N2-001", scenario: duo },
+  { name: "09b-fiche-bientot", path: "/bibliotheques/N2-061", scenario: duo },
+  { name: "07c-biblio-duel", path: "/bibliotheques", scenario: duo, action: async (page) => page.getByRole("button", { name: "Duel", exact: true }).click() },
   { name: "11-salon", path: `/partie/${SESSION}`, scenario: { ...duo, state: sessionState("lobby") } },
   { name: "12-mon-portrait", path: `/partie/${SESSION}`, scenario: { ...duo, state: sessionState("playing") } },
   { name: "18-attente", path: `/partie/${SESSION}`, scenario: { ...duo, state: sessionState("playing", [
@@ -110,6 +121,14 @@ const allScreens = [
   { name: "30-chat", path: "/accueil", scenario: duo, action: async (page) => page.getByRole("button", { name: /Ouvrir la discussion/ }).last().click() },
   { name: "31-notifications", path: "/accueil", scenario: duo, action: async (page) => page.getByRole("button", { name: /Notifications/ }).click() },
 ];
+// Famille 1 : salon (avec options), écran de jeu et révélation, à partir d'états réels.
+for (const gid of playable) {
+  const st = (kind) => ({ ...duo, state: fixture(`${gid}-${kind}.json`) });
+  allScreens.push({ name: `50-${gid}-jeu`, path: `/partie/${SESSION}`, scenario: st("play") });
+  allScreens.push({ name: `51-${gid}-revelation`, path: `/partie/${SESSION}`, scenario: st("reveal") });
+}
+allScreens.push({ name: "52-N2-001-salon-options", path: `/partie/${SESSION}`, scenario: { ...duo, state: fixture("N2-001-lobby.json") },
+  action: async (page) => page.getByRole("button", { name: "Options" }).first().click() });
 const ONLY = process.env.ONLY;
 const screens = ONLY ? allScreens.filter((s) => s.name.includes(ONLY)) : allScreens;
 const sizes = (process.env.WIDTHS ?? "320,360,390,430,768,1440").split(",").map((w) => ({ width: Number(w), height: Number(w) >= 768 ? 900 : 780 }));
@@ -152,6 +171,8 @@ for (const size of sizes) {
       const navLabels = [...document.querySelectorAll(".nav a")].map((a) => a.innerText.replace(/\s+/g, " ").trim());
       return { overflow, culprits, small, hidden, navLabels };
     });
+    // L'écran d'erreur du routeur intercepte les exceptions : on le détecte explicitement.
+    if (await page.getByText("Unexpected Application Error").count()) errors.push(await page.locator("h3, pre").first().innerText().catch(() => "erreur de rendu"));
     const bad = report.overflow > 0 || errors.length || report.hidden;
     if (bad) problems++;
     console.log(`${size.width}x${size.height}${zoom !== 1 ? ` texte×${zoom}` : ""} ${s.name}: débordement=${report.overflow}px masqué-sous-nav=${report.hidden} erreurs=${errors.length}`
