@@ -34,21 +34,21 @@ Généré par `scripts/import_catalogue.py`. Colonnes : moteur livré, contenu i
 | N2-028 | Rimes en relais | 2 | cooperation | livré | oui | oui | oui | oui | SQL + visuel |
 | N2-029 | Un indice, trois cibles | 2 | cooperation | livré | oui | oui | oui | oui | SQL + visuel |
 | N2-030 | La phrase coupée | 2 | cooperation | livré | oui | oui | oui | oui | SQL + visuel |
-| N2-031 | Dessine, je devine | 3 | cooperation | à faire (« Bientôt ») | oui | oui | — | — | — |
-| N2-032 | Complète mon gribouillis | 3 | cooperation | à faire (« Bientôt ») | oui | oui | — | — | — |
-| N2-033 | Le dessin dicté | 3 | cooperation | à faire (« Bientôt ») | oui | oui | — | — | — |
-| N2-034 | Le personnage plié | 3 | cooperation | à faire (« Bientôt ») | oui | oui | — | — | — |
-| N2-035 | La mosaïque à deux | 3 | cooperation | à faire (« Bientôt ») | oui | oui | — | — | — |
-| N2-036 | Sept pièces, une silhouette | 3 | cooperation | à faire (« Bientôt ») | oui | oui | — | — | — |
-| N2-037 | Puzzle de poche | 3 | cooperation | à faire (« Bientôt ») | oui | oui | — | — | — |
-| N2-038 | Le portrait en gommettes | 3 | echange | à faire (« Bientôt ») | oui | oui | — | — | — |
-| N2-039 | Votre petit emblème | 3 | cooperation | à faire (« Bientôt ») | oui | oui | — | — | — |
-| N2-040 | Dix traits et pas un de plus | 3 | cooperation | à faire (« Bientôt ») | oui | oui | — | — | — |
-| N2-041 | Le miroir créatif | 3 | cooperation | à faire (« Bientôt ») | oui | oui | — | — | — |
-| N2-042 | La palette commune | 3 | cooperation | à faire (« Bientôt ») | oui | oui | — | — | — |
-| N2-043 | L’affiche improbable | 3 | cooperation | à faire (« Bientôt ») | oui | oui | — | — | — |
-| N2-044 | La bande dessinée muette | 3 | cooperation | à faire (« Bientôt ») | oui | oui | — | — | — |
-| N2-045 | L’île en tuiles | 3 | cooperation | à faire (« Bientôt ») | oui | oui | — | — | — |
+| N2-031 | Dessine, je devine | 3 | cooperation | livré | oui | oui | oui | oui | SQL + visuel |
+| N2-032 | Complète mon gribouillis | 3 | cooperation | livré | oui | oui | oui | oui | SQL + visuel |
+| N2-033 | Le dessin dicté | 3 | cooperation | livré | oui | oui | oui | oui | SQL + visuel |
+| N2-034 | Le personnage plié | 3 | cooperation | livré | oui | oui | oui | oui | SQL + visuel |
+| N2-035 | La mosaïque à deux | 3 | cooperation | livré | oui | oui | oui | oui | SQL + visuel |
+| N2-036 | Sept pièces, une silhouette | 3 | cooperation | livré | oui | oui | oui | oui | SQL + visuel |
+| N2-037 | Puzzle de poche | 3 | cooperation | livré | oui | oui | oui | oui | SQL + visuel |
+| N2-038 | Le portrait en gommettes | 3 | echange | livré | oui | oui | oui | oui | SQL + visuel |
+| N2-039 | Votre petit emblème | 3 | cooperation | livré | oui | oui | oui | oui | SQL + visuel |
+| N2-040 | Dix traits et pas un de plus | 3 | cooperation | livré | oui | oui | oui | oui | SQL + visuel |
+| N2-041 | Le miroir créatif | 3 | cooperation | livré | oui | oui | oui | oui | SQL + visuel |
+| N2-042 | La palette commune | 3 | cooperation | livré | oui | oui | oui | oui | SQL + visuel |
+| N2-043 | L’affiche improbable | 3 | cooperation | livré | oui | oui | oui | oui | SQL + visuel |
+| N2-044 | La bande dessinée muette | 3 | cooperation | livré | oui | oui | oui | oui | SQL + visuel |
+| N2-045 | L’île en tuiles | 3 | cooperation | livré | oui | oui | oui | oui | SQL + visuel |
 | N2-046 | Les paires cachées | 4 | duel | à faire (« Bientôt ») | oui | oui | — | — | — |
 | N2-047 | Qu’est-ce qui a bougé ? | 4 | duel | à faire (« Bientôt ») | oui | oui | — | — | — |
 | N2-048 | Les cinq différences | 4 | duel | à faire (« Bientôt ») | oui | oui | — | — | — |
@@ -130,9 +130,9 @@ Généré par `scripts/import_catalogue.py`. Colonnes : moteur livré, contenu i
 | N2-124 | Le mot à rallonge | 2 | cooperation | livré | oui | oui | oui | oui | SQL + visuel |
 | N2-125 | Les mots qui se croisent | 2 | cooperation | livré | oui | oui | oui | oui | SQL + visuel |
 | N2-126 | Les rébus en morceaux | 2 | cooperation | livré | oui | oui | oui | oui | SQL + visuel |
-| N2-127 | La constellation sonore | 3 | creation | à faire (« Bientôt ») | oui | oui | — | — | — |
-| N2-128 | Le flipbook de poche | 3 | creation | à faire (« Bientôt ») | oui | oui | — | — | — |
-| N2-129 | Le petit métier à tisser | 3 | creation | à faire (« Bientôt ») | oui | oui | — | — | — |
+| N2-127 | La constellation sonore | 3 | creation | livré | oui | oui | oui | oui | SQL + visuel |
+| N2-128 | Le flipbook de poche | 3 | creation | livré | oui | oui | oui | oui | SQL + visuel |
+| N2-129 | Le petit métier à tisser | 3 | creation | livré | oui | oui | oui | oui | SQL + visuel |
 | N2-130 | La silhouette juste | 4 | duel | à faire (« Bientôt ») | oui | oui | — | — | — |
 | N2-131 | Qui passe devant ? | 4 | duel | à faire (« Bientôt ») | oui | oui | — | — | — |
 | N2-132 | La vitrine tournante | 4 | duel | à faire (« Bientôt ») | oui | oui | — | — | — |

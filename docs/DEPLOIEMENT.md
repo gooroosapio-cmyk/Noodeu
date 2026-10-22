@@ -103,3 +103,11 @@ Migrations appliquées en ligne : `board_engine_core`, `board_family2_rules`, `b
 règles et des niveaux identiques entre la base en ligne et la base de test locale.
 Les coups des jeux de mots (indices, propositions) sont conservés avec la partie ; leur effacement automatique sera
 ajouté avec la tâche d'effacement à 24 h (migration 150, toujours en attente d'accord).
+
+## Famille 3 (22 octobre 2026)
+
+Migrations appliquées en ligne : `board_family3_rules`, `board_family3_bot`, `board_dispatch`, `famille3_contenus`
+(fichiers `20261022030010`, `…030020`, `…030000`, `…030030`). Empreintes identiques à la base de test locale.
+Écart assumé avec la fiche du tangram : rotation par quarts de tour sur grille (au lieu de 45°), pour garder un
+contrôle exact par surfaces ; le carré du kit reste réalisable. Les créations s'enregistrent en PNG dans le
+navigateur (rien n'est envoyé ailleurs) et se gardent dans l'Espace si les deux joueurs sont d'accord.

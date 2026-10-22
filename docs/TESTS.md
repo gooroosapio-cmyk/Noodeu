@@ -94,3 +94,18 @@ Non testé à ce stade : partie réelle entre deux appareils distincts en ligne,
   bout (un joueur + le partenaire automatique), avec résultat et toutes les manches terminées.
 - `tests/visual/make_fixtures_board.py` + `render-check.mjs` (écrans 53-) : pour chaque activité, début de manche,
   après un coup, manche finie et partie finie, à partir d'états réels, de 320 à 1440 px.
+
+## Famille 3 — Dessin et création (22 octobre 2026)
+
+- `supabase/tests/slice5_family3_creation.sql` : objet à dessiner invisible pour l'autre et absent de l'état public ;
+  pas de proposition sans dessin ; trait hors cadre refusé ; budget de dix traits (la gomme coûte un trait) ;
+  miroir limité à la moitié gauche ; maison sans chemin et tuile isolée refusées ; tangram contrôlé par surfaces
+  (carré reformé = réussite, pièce déplacée = plus résolu), retournement réservé au parallélogramme, sortie du
+  plateau refusée ; portrait en gommettes et bande du personnage plié invisibles pour l'autre avant la fin ;
+  modèle du dessin dicté réservé au guide ; puis les 18 activités jouées jusqu'au bout avec le partenaire de test.
+- `tests/visual/make_fixtures_board.py 3` + `render-check.mjs` (écrans 53-) : début, après un coup, manche finie,
+  partie finie pour les 18 activités ; écran 54- : l'export « Enregistrer en image » produit un vrai fichier PNG.
+- Correctif trouvé par ces captures : Chrome n'affichait pas les images d'éléments placées dans un dessin dont
+  l'unité est minuscule ; elles sont désormais tracées dans un repère de 100 unités mis à l'échelle.
+- Limite connue : sur un écran de 320 px, les cases de la mosaïque 8 × 8 font environ 34 px (au-dessus du minimum
+  WCAG de 24 px, sous la cible confortable de 44 px).

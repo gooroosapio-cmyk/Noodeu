@@ -39,9 +39,12 @@ export function Strokes({ strokes, mirror = false, opacity = 1, gray = false }: 
 
 /** Gommette ou objet posé (image du kit) dans un repère 0..1. */
 export function Placed({ label, x, y, r = 0, size = 0.18 }: { label: string; x: number; y: number; r?: number; size?: number }) {
+  // Image dessinée dans un repère de 100 unités puis mise à l'échelle : Chrome n'affiche pas une image SVG
+  // dont la taille locale est inférieure à une unité.
   return (
-    <image href={elementSrc(label)} x={x - size / 2} y={y - size / 2} width={size} height={size}
-      transform={r ? `rotate(${r} ${x} ${y})` : undefined} preserveAspectRatio="xMidYMid meet" />
+    <g transform={`translate(${x} ${y}) rotate(${r}) scale(${size / 100})`}>
+      <image href={elementSrc(label)} x={-50} y={-50} width={100} height={100} preserveAspectRatio="xMidYMid meet" />
+    </g>
   );
 }
 

@@ -133,6 +133,14 @@ for (const gid of [...Object.keys(fixture("index_board.json")), ...Object.keys(f
     allScreens.push({ name: `53-${gid}-${label}`, path: `/partie/${SESSION}`, scenario: { ...duo, state: fixture(`${gid}-${k}.json`) } });
   }
 }
+// Export d'une création en image : un vrai fichier PNG doit être proposé au téléchargement.
+allScreens.push({ name: "54-N2-128-export-png", path: `/partie/${SESSION}`, scenario: { ...duo, state: fixture("N2-128-b3.json") },
+  action: async (page) => {
+    const [dl] = await Promise.all([page.waitForEvent("download", { timeout: 8000 }), page.getByRole("button", { name: "Enregistrer en image" }).first().click()]);
+    const name = dl.suggestedFilename();
+    if (!name.endsWith(".png")) throw new Error(`export inattendu : ${name}`);
+    console.log(`export PNG : ${name}`);
+  } });
 allScreens.push({ name: "52-N2-001-salon-options", path: `/partie/${SESSION}`, scenario: { ...duo, state: fixture("N2-001-lobby.json") },
   action: async (page) => page.getByRole("button", { name: "Options" }).first().click() });
 const ONLY = process.env.ONLY;
@@ -153,7 +161,7 @@ for (const size of sizes) {
     await page.goto(BASE + s.path, { waitUntil: "networkidle" });
     if (zoom !== 1) await page.addStyleTag({ content: `html { font-size: ${zoom * 100}%; }` });
     if (s.action) { await s.action(page); }
-    await page.waitForTimeout(350);
+    await page.waitForTimeout(Number(process.env.WAIT ?? 350));
     await page.screenshot({ path: `${OUT}/${size.width}x${size.height}${zoom !== 1 ? `-z${zoom}` : ""}-${s.name}.png`, fullPage: false });
     const report = await page.evaluate(() => {
       const overflow = document.documentElement.scrollWidth - window.innerWidth;

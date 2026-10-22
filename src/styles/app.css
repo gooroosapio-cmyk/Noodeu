@@ -524,7 +524,7 @@ details.card > summary { cursor: pointer; min-height: 44px; display: flex; align
 .mini { width: 72px; height: 72px; flex: none; border: 1px solid var(--c-border); border-radius: 8px; background: #fff; }
 .swatch--sm { display: inline-block; width: 18px; height: 18px; border-width: 1px; cursor: inherit; flex: none; }
 .side-by-side > * { flex: 1 1 140px; min-width: 0; }
-.pixel-grid { display: grid; grid-template-columns: repeat(8, 1fr); gap: 2px; width: min(100%, 22rem); }
+.pixel-grid { display: grid; grid-template-columns: repeat(8, 1fr); gap: 2px; width: min(100%, 25rem); }
 .pixel { aspect-ratio: 1; min-height: 36px; border: 1px solid var(--c-border-control); border-radius: 4px; background: #FFF9F2; cursor: pointer; padding: 0; }
 .pad-keys { display: grid; grid-template-columns: repeat(4, minmax(44px, 1fr)); gap: var(--s-1); max-width: 22rem; }
 .key--wide { grid-column: span 2; padding: 0 var(--s-2); font-size: 0.9375rem; }
