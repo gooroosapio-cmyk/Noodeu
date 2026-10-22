@@ -53,6 +53,10 @@ if missing:
     print("moteurs encore à faire :", ", ".join(missing))
 
 levels = []
+# Banques supplémentaires utilisées par les moteurs de la famille (non référencées par les fiches).
+for bank in getattr(importlib.import_module(f"engines_family{FAMILY}"), "EXTRA_BANKS", []):
+    for i, v in enumerate(load(f"data/banques/{bank}.json")):
+        levels.append({"bank": bank, "idx": i, "value": v})
 for g in games:
     path = g["content_path"]
     if path.startswith("data/niveaux/"):
@@ -65,7 +69,7 @@ versions = [{"id": g["id"], "rules": ENGINES[g["engine"]]["rules"], "config": di
 
 sql = (f"-- Import généré par scripts/import_lot.py — famille {FAMILY}, édition {VERSION}. Idempotent ; ne pas modifier à la main.\n\n")
 if levels:
-    sql += f"""-- Niveaux (avec solutions) : côté serveur uniquement.
+    sql += f"""-- Niveaux (avec solutions) et banques propres aux moteurs : côté serveur uniquement.
 with src as (select * from jsonb_to_recordset({compact(levels)}) as x(bank text, idx int, value jsonb)),
 up as (
   insert into public.content_banks (bank, idx, value, content_version)

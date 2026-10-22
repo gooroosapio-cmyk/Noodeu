@@ -75,7 +75,7 @@ begin
   perform t.ok((select count(*) from public.games g join public.game_categories gc on gc.id = g.category_id where g.implementation = 'playable' and gc.family_no = 1) = 18, '18 activités jouables (famille 1)');
   perform t.ok((select count(distinct category_id) from public.games where id like 'N2-%') = 8, '8 familles');
   perform t.ok(not exists (select 1 from public.games where id = 'portrait-en-cinq-mots'), 'ancienne démo retirée du catalogue public');
-  perform t.err(public.create_session('N2-031'), 'game_unavailable', 'une activité « Bientôt » ne se lance pas');
+  perform t.err(public.create_session('N2-061'), 'game_unavailable', 'une activité « Bientôt » ne se lance pas');
   perform t.ok((select count(*) from public.game_cards) = 0, 'cartes illisibles en direct');
   perform t.ok((select count(*) from public.content_banks) = 0, 'banques illisibles en direct');
   perform t.logout();
