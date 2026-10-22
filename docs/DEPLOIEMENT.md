@@ -67,3 +67,15 @@ Un compte devient administrateur quand son identifiant figure dans la table `pub
 (ajout depuis l'éditeur SQL de Supabase). Premier administrateur ajouté le 21 octobre 2026 : le compte de la
 porteuse ou du porteur du projet. Aucun mot de passe n'est conservé dans le dépôt.
 Le rôle donne aujourd'hui accès en lecture aux contenus non publiés ; l'interface d'administration arrive à l'étape 7.
+
+## Migration en attente d'accord : `20261022000150_catalogue_144_engine_privacy.sql`
+
+L'outil de migration Supabase demande une confirmation explicite pour les instructions `delete` et `revoke`.
+Cette migration n'a donc pas été appliquée en ligne. Elle :
+- ferme la lecture directe des tables de manches et de réponses (tout passe par `get_session_state`) ;
+- ajoute les options privées +18 / thèmes à éviter (`set_session_prefs`) et la sortie commune (`finish_session`) ;
+- ajoute l'effacement des réponses 24 h après la fin (`purge_expired_sessions`), à planifier avec pg_cron.
+
+Pour l'appliquer : l'éditeur SQL du tableau de bord Supabase (coller le fichier), ou approuver la demande de l'outil.
+Tant qu'elle manque : les options +18 et « Arrêter ici ensemble » répondent par une erreur, et une réponse révélée
+reste lisible en direct par l'autre membre du duo (sauf la capsule, protégée par la migration 140).

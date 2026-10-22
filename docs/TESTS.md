@@ -58,3 +58,21 @@ Contrôles : défilement horizontal, contenu masqué sous la navigation, erreurs
 11. Espace → Gérer le duo → Terminer ce duo : l'autre est prévenu, l'historique reste consultable ;
     inviter un troisième compte C : C ne voit rien de l'ancien duo.
 12. Réglages → Mon profil : ajouter une photo, recadrer, enregistrer ; elle apparaît chez l'autre membre.
+
+## Édition 2.1.0 — famille 1 (22 octobre 2026)
+
+- `supabase/tests/slice2_family1_engines.sql` : catalogue (144 activités, 18 jouables, 8 familles), activité « Bientôt »
+  non lançable, tables de cartes et banques illisibles en direct, préférences privées (+18 refusé sans l'accord des
+  Réglages, thèmes exclus réunis et jamais tirés, préférences de l'autre illisibles), réponses cachées avant révélation,
+  réponse renvoyée sans effet, réponse modifiée refusée, double clic sur « carte suivante », pas de carte répétée, sortie
+  commune sans dévoiler la carte en cours, retrait immédiat d'une carte +18 non révélée, rôles alternés et score sur
+  cartes ordinaires, relance unique, ordre et visibilité immédiate (écoute), capsule (date, champ non partagé jamais
+  montré), budget et révision unique, moitié de scène, dessin hors cadre refusé, compte extérieur, effacement à 24 h.
+- `tests/visual/make_fixtures.py` : joue les 18 activités sur la base locale avec les vraies fonctions (tirage,
+  validation, révélation) pour deux comptes fictifs, et enregistre les états obtenus.
+- `tests/visual/render-check.mjs` : bibliothèque 144, fiches (jouable et « Bientôt »), salon avec options, et pour
+  chaque activité l'écran de jeu et la révélation, de 320 à 1440 px, écran bas et texte à 200 %. L'écran d'erreur du
+  routeur est détecté comme une erreur.
+- `src/game/rounds/logic.test.ts` : tour de chacun, attente, révision, libellés accordés, budget.
+
+Non testé à ce stade : partie réelle entre deux appareils distincts en ligne, réseau lent, lecteur d'écran réel.

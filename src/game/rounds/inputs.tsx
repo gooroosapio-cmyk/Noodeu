@@ -296,8 +296,8 @@ function FriseInput(p: InputProps) {
       <ol className="stack" style={{ listStyle: "none", padding: 0, margin: 0 }}>
         {order.map((i, k) => (
           <li key={i} className="card stack stack--2">
-            <div className="row row--between">
-              <span className="t-card">{k + 1}. {prompts[i].v}</span>
+            <div className="row row--between row--wrap">
+              <span className="t-card grow">{k + 1}. {prompts[i].v}</span>
               <span className="row" style={{ gap: 0 }}>
                 <button className="icon-btn" aria-label={t("rounds.up", { label: prompts[i].v })} disabled={k === 0} onClick={() => setOrder(move(order, k, k - 1))}><Icon name="chevron-up" size={18} /></button>
                 <button className="icon-btn" aria-label={t("rounds.down", { label: prompts[i].v })} disabled={k === order.length - 1} onClick={() => setOrder(move(order, k, k + 1))}><Icon name="chevron-down" size={18} /></button>
