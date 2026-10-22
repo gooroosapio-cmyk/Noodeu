@@ -77,6 +77,7 @@ export interface SessionState {
     read_only: boolean;
     created_at: string;
     ended_at: string | null;
+    result?: Record<string, unknown>;
   };
   my_seat: number | null;
   game: { title: string; mechanic: string; rules: GameRules; config: GameConfig };

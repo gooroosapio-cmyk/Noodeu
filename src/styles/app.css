@@ -408,3 +408,65 @@ html.reduced-motion *, html.reduced-motion *::before, html.reduced-motion *::aft
 @media (forced-colors: active) { .btn, .chip, .card, .word, .switch { border: 1px solid ButtonText; } .icon { background: CanvasText; } }
 
 .plain-list { list-style: none; margin: 0; padding: 0; display: grid; gap: var(--s-1); }
+
+/* ---------- Moteur des manches (édition 2.1.0) ---------- */
+.play-card { display: grid; gap: var(--s-3); padding: var(--s-5) var(--s-4); background: var(--c-surface); border: 1px solid var(--c-border); border-radius: var(--r-card); box-shadow: 0 6px 18px rgba(67, 38, 62, 0.06); }
+.play-card__text { font: 600 1.25rem/1.6rem var(--f-heading); margin: 0; overflow-wrap: anywhere; }
+.tag--adult { background: var(--c-text); color: var(--c-bg); font-weight: 700; }
+.choice-list { display: grid; gap: var(--s-2); }
+.choice-card {
+  display: block; width: 100%; min-height: 52px; padding: var(--s-3) var(--s-4); text-align: left; cursor: pointer;
+  background: var(--c-surface); border: 1.5px solid var(--c-border-control); border-radius: var(--r-control);
+  font: 500 1rem/1.45 var(--f-body); color: var(--c-text);
+}
+.choice-card[aria-checked="true"], .choice-card[aria-pressed="true"] { background: var(--c-accent-soft); border-color: var(--c-focus); font-weight: 600; }
+.choice-card[aria-checked="true"]::before, .choice-card[aria-pressed="true"]::before { content: "✓ "; }
+.choice-card--quiet { background: var(--c-surface-soft); }
+.choice-card:disabled { opacity: 0.5; cursor: not-allowed; }
+.choice-card.row { display: flex; }
+.item-tile { display: inline-flex; flex-direction: column; align-items: center; gap: 2px; font: 500 0.8125rem/1.1rem var(--f-body); text-align: center; overflow-wrap: anywhere; }
+.item-tile img { display: block; }
+.tile-grid { list-style: none; margin: 0; padding: 0; display: grid; grid-template-columns: repeat(auto-fill, minmax(5.5rem, 1fr)); gap: var(--s-2); }
+.tile-grid--small { grid-template-columns: repeat(auto-fill, minmax(4.5rem, 1fr)); }
+.tile-btn {
+  width: 100%; min-height: 72px; padding: var(--s-2); display: grid; place-items: center; cursor: pointer; color: var(--c-text);
+  background: var(--c-surface); border: 1.5px solid var(--c-border-control); border-radius: var(--r-control);
+}
+.tile-btn[aria-pressed="true"] { background: var(--c-accent-soft); border-color: var(--c-focus); box-shadow: inset 0 0 0 2px var(--c-focus); }
+.tile-btn:disabled { opacity: 0.45; cursor: not-allowed; }
+.swatch { width: 44px; height: 44px; border-radius: 50%; border: 2px solid var(--c-border-control); cursor: pointer; padding: 0; }
+.swatch[aria-checked="true"] { outline: 3px solid var(--c-focus); outline-offset: 2px; }
+.word__rank { display: grid; place-items: center; width: 24px; height: 24px; border-radius: 50%; background: var(--c-focus); color: #fff; font: 700 0.8125rem/1 var(--f-body); }
+.word--own { border-style: dashed; }
+.rank-list { list-style: none; margin: 0; padding: 0; display: grid; gap: var(--s-2); }
+.rank-list__item { display: flex; align-items: center; gap: var(--s-2); padding: var(--s-1) var(--s-2); background: var(--c-surface); border: 1px solid var(--c-border); border-radius: var(--r-control); min-height: 48px; }
+.rank-list__n { display: grid; place-items: center; width: 28px; height: 28px; border-radius: 50%; background: var(--c-accent-soft); font-weight: 700; flex: none; }
+.answer-block { display: grid; gap: var(--s-2); padding: var(--s-3); background: var(--c-surface); border: 1px solid var(--c-border); border-radius: var(--r-control); }
+.answer-text { margin: 0; white-space: pre-wrap; overflow-wrap: anywhere; line-height: 1.5; }
+.object-board { list-style: none; margin: 0; padding: var(--s-3); display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: var(--s-2); border-radius: var(--r-control); }
+.object-board li { display: grid; justify-items: center; gap: var(--s-1); text-align: center; background: rgba(255, 255, 255, 0.7); border-radius: 12px; padding: var(--s-2); }
+.timeline { list-style: none; margin: 0; padding: 0 0 0 var(--s-4); border-left: 3px solid var(--c-accent-soft); display: grid; gap: var(--s-3); }
+.timeline li { display: grid; gap: 2px; }
+.scene-grid { display: grid; gap: 4px; padding: 4px; background: var(--c-surface-soft); border-radius: var(--r-control); }
+.scene-grid__row { display: grid; grid-template-columns: repeat(6, minmax(0, 1fr)); gap: 4px; }
+.scene-cell { min-height: 48px; aspect-ratio: 1; display: grid; place-items: center; background: var(--c-surface); border: 1px dashed var(--c-border); border-radius: 8px; padding: 0; color: var(--c-text); }
+button.scene-cell { cursor: pointer; }
+.scene-cell--mine { border: 2px solid var(--c-border-control); }
+.scene-cell:disabled { opacity: 0.55; cursor: default; }
+.scene-cell .item-tile span { display: none; }
+.zine-page { position: relative; width: 100%; aspect-ratio: 3 / 4; max-width: 360px; background: #fff; border: 1px solid var(--c-border-control); border-radius: var(--r-control); overflow: hidden; touch-action: manipulation; }
+.zine-page__drawing { position: absolute; inset: 0; width: 100%; height: 100%; }
+.zine-sticker { position: absolute; transform: translate(-50%, -50%); background: none; border: 0; padding: 4px; min-width: 44px; min-height: 44px; cursor: pointer; }
+.zine-page--view .zine-sticker { cursor: default; }
+.zine-sticker .item-tile span { font-size: 0.6875rem; }
+.zones { display: grid; grid-template-columns: repeat(auto-fit, minmax(min(100%, 9rem), 1fr)); gap: var(--s-2); }
+.zones__col { display: grid; gap: var(--s-2); align-content: start; padding: var(--s-2); background: var(--c-surface-soft); border-radius: var(--r-control); }
+.gift { display: grid; gap: var(--s-3); padding: var(--s-4); border: 4px solid; border-radius: var(--r-card); }
+.gift__part { background: rgba(255, 255, 255, 0.85); border-radius: 12px; padding: var(--s-3); }
+.fields-view { display: grid; gap: var(--s-2); margin: 0; }
+.fields-view dd { margin: 0; white-space: pre-wrap; }
+.drawing { display: block; width: 100%; max-width: 360px; aspect-ratio: 1; background: #fff; border: 1px solid var(--c-border); border-radius: var(--r-control); }
+.drawing--pad { touch-action: none; cursor: crosshair; border: 2px solid var(--c-border-control); }
+.drawpad { display: grid; gap: var(--s-2); }
+.drawpad__tools { display: grid; gap: var(--s-2); }
+@media (prefers-reduced-motion: reduce) { .enter { animation: none !important; } }

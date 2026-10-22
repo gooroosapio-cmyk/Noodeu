@@ -13,6 +13,7 @@ import { Alert, ConfirmDialog, Icon, Illustration, Loading, PageLoading } from "
 import type { Player, Round, SessionState } from "../lib/types";
 import { answerOf, nextStep, portraitReveal, toggleWord, wordLabel } from "./portrait";
 import { useDraft, useSession } from "./useSession";
+import { OptionsSheet, RoundsPlaying, RoundsResults, hasOptions, isRounds } from "./rounds/RoundsGame";
 
 type Run = (fn: string, args?: Record<string, unknown>) => Promise<{ ok: boolean }>;
 
@@ -23,6 +24,7 @@ export function SessionScreen() {
   const online = useOnline();
   const s = useSession(sessionId, userId);
   const [chat, setChat] = useState(false);
+  const [options, setOptions] = useState(false);
   const [confirmQuit, setConfirmQuit] = useState(false);
   const [actionError, setActionError] = useState<string | null>(null);
   const [busy, setBusy] = useState(false);
@@ -66,6 +68,9 @@ export function SessionScreen() {
   const partnerHere = Boolean(partner?.user_id && s.present.includes(partner.user_id));
   const live = ["lobby", "playing", "paused", "ended"].includes(st.session.status) && !st.session.read_only;
   const canPause = st.session.status === "playing" || st.session.status === "paused";
+  const rounds = isRounds(st);
+  const common = { st, run, busy, online };
+  const showOptions = rounds && hasOptions(st) && ["lobby", "playing", "paused"].includes(st.session.status) && !st.session.read_only;
 
   return (
     <SubPage
@@ -78,6 +83,11 @@ export function SessionScreen() {
               aria-label={duo.chatUnread ? t("chat.openUnread", { n: duo.chatUnread }) : t("game.chat")}>
               <Icon name="chat" />
               {duo.chatUnread > 0 && <span className="badge-count" aria-hidden="true">{duo.chatUnread}</span>}
+            </button>
+          )}
+          {showOptions && (
+            <button className="icon-btn icon-btn--soft" onClick={() => setOptions(true)} aria-label={t("rounds.options")}>
+              <Icon name="settings" />
             </button>
           )}
           {canPause && (
@@ -93,8 +103,9 @@ export function SessionScreen() {
         {s.channel === "down" && online && <Alert kind="info"><Loading label={t("net.reconnecting")} /></Alert>}
         {actionError && <Alert>{actionError}</Alert>}
 
-        {st.session.status === "lobby" && <Lobby st={st} me={me} partner={partner} partnerHere={partnerHere} busy={busy} online={online} run={run} onChat={() => setChat(true)} />}
-        {st.session.status === "playing" && <Playing st={st} partnerName={partnerName} partner={partner} busy={busy} online={online} run={run} />}
+        {st.session.status === "lobby" && <Lobby st={st} me={me} partner={partner} partnerHere={partnerHere} busy={busy} online={online} run={run} onChat={() => setChat(true)}
+          onOptions={showOptions ? () => setOptions(true) : undefined} />}
+        {st.session.status === "playing" && (rounds ? <RoundsPlaying {...common} /> : <Playing st={st} partnerName={partnerName} partner={partner} busy={busy} online={online} run={run} />)}
         {st.session.status === "paused" && (
           <section className="empty enter">
             <Illustration name="17-pause" />
@@ -103,7 +114,9 @@ export function SessionScreen() {
             <button className="btn btn--auto" disabled={busy || !online} onClick={() => run("set_paused", { p_paused: false })}>{t("game.resume")}</button>
           </section>
         )}
-        {(st.session.status === "ended" || st.session.status === "closed") && <Results st={st} me={me} partner={partner} busy={busy} online={online} run={run} navigate={navigate} />}
+        {(st.session.status === "ended" || st.session.status === "closed") && (rounds
+          ? <RoundsResults c={common} navigate={navigate} />
+          : <Results st={st} me={me} partner={partner} busy={busy} online={online} run={run} navigate={navigate} />)}
         {st.session.status === "abandoned" && (
           <section className="empty">
             <Illustration name="17-pause" />
@@ -127,14 +140,16 @@ export function SessionScreen() {
           }} />
       )}
       {chat && <ChatPanel inGame onClose={() => setChat(false)} />}
+      {options && <OptionsSheet c={common} onClose={() => setOptions(false)} />}
     </SubPage>
   );
 }
 
-function Lobby({ st, me, partner, partnerHere, busy, online, run, onChat }: {
-  st: SessionState; me?: Player; partner?: Player; partnerHere: boolean; busy: boolean; online: boolean; run: Run; onChat: () => void;
+function Lobby({ st, me, partner, partnerHere, busy, online, run, onChat, onOptions }: {
+  st: SessionState; me?: Player; partner?: Player; partnerHere: boolean; busy: boolean; online: boolean; run: Run; onChat: () => void; onOptions?: () => void;
 }) {
-  const settings = st.game.config.settings ?? {};
+  // Moteur 2.1.0 : les réglages passent par la fenêtre d'options (avec les préférences privées).
+  const settings = onOptions ? {} : st.game.config.settings ?? {};
   return (
     <section className="stack stack--6 enter">
       <div className="page-header">
@@ -176,6 +191,9 @@ function Lobby({ st, me, partner, partnerHere, busy, online, run, onChat }: {
         </fieldset>
       ))}
 
+      {onOptions && (
+        <button className="btn btn--secondary" onClick={onOptions}><Icon name="settings" />{t("rounds.options")}</button>
+      )}
       <button className="btn btn--secondary" onClick={onChat}><Icon name="chat" />{t("game.chat")}</button>
       <div className="action-bar">
         <button className="btn" disabled={busy || !online} onClick={() => run("set_ready", { p_ready: !me?.ready })}>
