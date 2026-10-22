@@ -49,21 +49,21 @@ Généré par `scripts/import_catalogue.py`. Colonnes : moteur livré, contenu i
 | N2-043 | L’affiche improbable | 3 | cooperation | livré | oui | oui | oui | oui | SQL + visuel |
 | N2-044 | La bande dessinée muette | 3 | cooperation | livré | oui | oui | oui | oui | SQL + visuel |
 | N2-045 | L’île en tuiles | 3 | cooperation | livré | oui | oui | oui | oui | SQL + visuel |
-| N2-046 | Les paires cachées | 4 | duel | à faire (« Bientôt ») | oui | oui | — | — | — |
-| N2-047 | Qu’est-ce qui a bougé ? | 4 | duel | à faire (« Bientôt ») | oui | oui | — | — | — |
-| N2-048 | Les cinq différences | 4 | duel | à faire (« Bientôt ») | oui | oui | — | — | — |
-| N2-049 | L’objet aperçu | 4 | duel | à faire (« Bientôt ») | oui | oui | — | — | — |
-| N2-050 | La chasse au détail | 4 | duel | à faire (« Bientôt ») | oui | oui | — | — | — |
-| N2-051 | Le plateau disparu | 4 | duel | à faire (« Bientôt ») | oui | oui | — | — | — |
-| N2-052 | La suite lumineuse | 4 | duel | à faire (« Bientôt ») | oui | oui | — | — | — |
-| N2-053 | Le rythme en écho | 4 | duel | à faire (« Bientôt ») | oui | oui | — | — | — |
-| N2-054 | Le panier dans l’ordre | 4 | duel | à faire (« Bientôt ») | oui | oui | — | — | — |
-| N2-055 | Le plan de mémoire | 4 | duel | à faire (« Bientôt ») | oui | oui | — | — | — |
-| N2-056 | Le pixel retenu | 4 | duel | à faire (« Bientôt ») | oui | oui | — | — | — |
-| N2-057 | Le tri sans hésiter | 4 | duel | à faire (« Bientôt ») | oui | oui | — | — | — |
-| N2-058 | Le bon signal | 4 | duel | à faire (« Bientôt ») | oui | oui | — | — | — |
-| N2-059 | Le curseur juste | 4 | duel | à faire (« Bientôt ») | oui | oui | — | — | — |
-| N2-060 | Deux mémoires, un plateau | 4 | cooperation | à faire (« Bientôt ») | oui | oui | — | — | — |
+| N2-046 | Les paires cachées | 4 | duel | livré | oui | oui | oui | oui | SQL + visuel |
+| N2-047 | Qu’est-ce qui a bougé ? | 4 | duel | livré | oui | oui | oui | oui | SQL + visuel |
+| N2-048 | Les cinq différences | 4 | duel | livré | oui | oui | oui | oui | SQL + visuel |
+| N2-049 | L’objet aperçu | 4 | duel | livré | oui | oui | oui | oui | SQL + visuel |
+| N2-050 | La chasse au détail | 4 | duel | livré | oui | oui | oui | oui | SQL + visuel |
+| N2-051 | Le plateau disparu | 4 | duel | livré | oui | oui | oui | oui | SQL + visuel |
+| N2-052 | La suite lumineuse | 4 | duel | livré | oui | oui | oui | oui | SQL + visuel |
+| N2-053 | Le rythme en écho | 4 | duel | livré | oui | oui | oui | oui | SQL + visuel |
+| N2-054 | Le panier dans l’ordre | 4 | duel | livré | oui | oui | oui | oui | SQL + visuel |
+| N2-055 | Le plan de mémoire | 4 | duel | livré | oui | oui | oui | oui | SQL + visuel |
+| N2-056 | Le pixel retenu | 4 | duel | livré | oui | oui | oui | oui | SQL + visuel |
+| N2-057 | Le tri sans hésiter | 4 | duel | livré | oui | oui | oui | oui | SQL + visuel |
+| N2-058 | Le bon signal | 4 | duel | livré | oui | oui | oui | oui | SQL + visuel |
+| N2-059 | Le curseur juste | 4 | duel | livré | oui | oui | oui | oui | SQL + visuel |
+| N2-060 | Deux mémoires, un plateau | 4 | cooperation | livré | oui | oui | oui | oui | SQL + visuel |
 | N2-061 | Sudoku d’objets | 5 | cooperation | à faire (« Bientôt ») | oui | oui | — | — | — |
 | N2-062 | L’image en nombres | 5 | cooperation | à faire (« Bientôt ») | oui | oui | — | — | — |
 | N2-063 | Tout éteindre | 5 | cooperation | à faire (« Bientôt ») | oui | oui | — | — | — |
@@ -133,9 +133,9 @@ Généré par `scripts/import_catalogue.py`. Colonnes : moteur livré, contenu i
 | N2-127 | La constellation sonore | 3 | creation | livré | oui | oui | oui | oui | SQL + visuel |
 | N2-128 | Le flipbook de poche | 3 | creation | livré | oui | oui | oui | oui | SQL + visuel |
 | N2-129 | Le petit métier à tisser | 3 | creation | livré | oui | oui | oui | oui | SQL + visuel |
-| N2-130 | La silhouette juste | 4 | duel | à faire (« Bientôt ») | oui | oui | — | — | — |
-| N2-131 | Qui passe devant ? | 4 | duel | à faire (« Bientôt ») | oui | oui | — | — | — |
-| N2-132 | La vitrine tournante | 4 | duel | à faire (« Bientôt ») | oui | oui | — | — | — |
+| N2-130 | La silhouette juste | 4 | duel | livré | oui | oui | oui | oui | SQL + visuel |
+| N2-131 | Qui passe devant ? | 4 | duel | livré | oui | oui | oui | oui | SQL + visuel |
+| N2-132 | La vitrine tournante | 4 | duel | livré | oui | oui | oui | oui | SQL + visuel |
 | N2-133 | Allume la galerie | 5 | cooperation | à faire (« Bientôt ») | oui | oui | — | — | — |
 | N2-134 | Les diagonales tranquilles | 5 | cooperation | à faire (« Bientôt ») | oui | oui | — | — | — |
 | N2-135 | Les tours à déplacer | 5 | cooperation | à faire (« Bientôt ») | oui | oui | — | — | — |

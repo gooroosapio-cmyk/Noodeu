@@ -104,6 +104,16 @@ règles et des niveaux identiques entre la base en ligne et la base de test loca
 Les coups des jeux de mots (indices, propositions) sont conservés avec la partie ; leur effacement automatique sera
 ajouté avec la tâche d'effacement à 24 h (migration 150, toujours en attente d'accord).
 
+## Famille 4 (22 octobre 2026)
+
+Migrations : `board_family4_rules` (tirage, règles, robot de test et aiguillage, fichier `20261022040010`) et
+`famille4_contenus` (`…040030`). Ce qu'il faut mémoriser n'est envoyé qu'à l'écran concerné et retiré au coup
+« seen » ; les réponses sont notées sur le serveur et restent cachées jusqu'aux deux réponses.
+Limites assumées : pour les jeux purement visuels (différences, chasse au détail, silhouette, superpositions,
+aperçu zoomé), l'image à observer est forcément transmise à l'écran ; un joueur qui inspecte le code de la page
+peut en déduire la réponse. Recharger la page pendant une observation relance son compte à rebours.
+Aucun temps de réaction n'est comparé entre deux appareils.
+
 ## Famille 3 (22 octobre 2026)
 
 Migrations appliquées en ligne : `board_family3_rules`, `board_family3_bot`, `board_dispatch`, `famille3_contenus`

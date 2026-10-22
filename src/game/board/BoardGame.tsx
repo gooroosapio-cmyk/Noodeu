@@ -1,5 +1,5 @@
 /* eslint-disable @typescript-eslint/no-explicit-any */
-// Moteur « plateau » (famille 2) : l'état public vient de la base, la part privée de l'appelant aussi.
+// Moteur « plateau » (familles 2 à 4) : l'état public vient de la base, la part privée de l'appelant aussi.
 // L'écran ne décide de rien : chaque coup part au serveur, qui l'accepte ou le refuse avec une raison.
 import { useEffect, useState, type ComponentType, type ReactNode } from "react";
 import { Link } from "react-router";
@@ -7,6 +7,7 @@ import { t, type MessageKey } from "../../i18n";
 import { Alert, Icon, Illustration, Loading } from "../../components/ui";
 import type { Player, SessionState } from "../../lib/types";
 import { CREATION_VIEWS, CreationSolution, isCreationMech } from "./CreationGames";
+import { MEMORY_VIEWS, MemorySolution, isMemoryMech } from "./MemoryGames";
 
 type Run = (fn: string, args?: Record<string, unknown>) => Promise<{ ok: boolean; error?: string; info?: any }>;
 interface Common { st: SessionState; run: Run; busy: boolean; online: boolean }
@@ -567,6 +568,7 @@ const VIEWS: Record<string, ComponentType<V>> = {
   semantic_intruder: Intruder, telegram: Telegram, rhymes: Rhymes, clue_grid: ClueGrid, sentence_order: Sentence,
   word_growth: Growth, cross_letters: Cross, rebus: Rebus,
   ...CREATION_VIEWS,
+  ...MEMORY_VIEWS,
 };
 
 // ---------------------------------------------------------------------------
@@ -575,6 +577,7 @@ const VIEWS: Record<string, ComponentType<V>> = {
 function Solution({ round, st }: { round: BRound; st: SessionState }) {
   const c = round.card, s = round.solution ?? {};
   if (isCreationMech(c.mech)) return <CreationSolution c={c} s={s} players={st.players} title={st.game.title} />;
+  if (isMemoryMech(c.mech)) return <MemorySolution c={c} s={s} players={st.players} />;
   const line = (k: MessageKey, vars: Record<string, string | number>) => <p>{t(k, vars)}</p>;
   switch (c.mech) {
     case "taboo": return line("board.sol.word", { w: s.target ?? "" });
@@ -702,7 +705,8 @@ export function BoardResults({ c, navigate }: { c: Common; navigate: (to: string
       ))}
       {!creation && rounds.map((r) => (
         <details key={r.round_no} className="card">
-          <summary className="strong">{t("board.roundOf", { n: r.round_no, total: c.st.session.total_rounds })} · {r.card.success ? "✓" : "—"}</summary>
+          <summary className="strong">{t("board.roundOf", { n: r.round_no, total: c.st.session.total_rounds })} · {r.card.scores
+            ? c.st.players.map((p) => `${nameOf(p)} ${r.card.scores[p.seat] ?? 0}`).join(" · ") : r.card.success ? "✓" : "—"}</summary>
           <Solution round={r} st={c.st} />
         </details>
       ))}

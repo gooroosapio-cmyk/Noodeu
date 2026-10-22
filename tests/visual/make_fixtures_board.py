@@ -1,5 +1,5 @@
 #!/usr/bin/env python3
-"""États RÉELS des 18 activités de la famille 2 (moteur plateau) pour la vérification visuelle.
+"""États RÉELS des 18 activités d'une famille du moteur plateau (2 par défaut) pour la vérification visuelle.
 
 Produits par les vraies fonctions de la base locale (tirage, coups validés, secrets) : Maya joue,
 Alex est le partenaire automatique de test. À lancer après make_fixtures.py, sur une base fraîche.
@@ -42,7 +42,7 @@ begin
     return jsonb_build_object('type', 'submit', 'payload', '{"word": "lien"}'::jsonb);
   else
     mv := private.board_bot_any(m, c || jsonb_build_object('last', jsonb_build_object('seat', 3 - seat)), sec, seat);
-    if mv is null and m in ('pixel_art', 'emblem', 'flipbook', 'weaving') and not coalesce(c -> 'validated' ? seat::text, false)
+    if mv is null and m in ('pixel_art', 'emblem', 'flipbook', 'weaving', 'split_memory') and not coalesce(c -> 'validated' ? seat::text, false)
        and (m <> 'emblem' or (c -> 'slots' ? '1' and c -> 'slots' ? '2')) then
       mv := '{"type": "validate"}';
     end if;
@@ -60,6 +60,7 @@ begin
                  (select secret from private.round_secrets where session_id = s and round_no = g.current_round), 1);
   if mv is null then return false; end if;
   r := public.play_move(s, g.current_round, gen_random_uuid(), mv ->> 'type', coalesce(mv -> 'payload', '{}'));
+  if r ->> 'error' = 'wait' then perform pg_sleep(1.25); return true; end if;
   return coalesce((r ->> 'ok')::boolean, false);
 end $$;""")
 sql(f"insert into private.test_autoplayers (user_id) values ('{PARTNER}') on conflict do nothing")

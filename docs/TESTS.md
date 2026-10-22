@@ -95,6 +95,18 @@ Non testé à ce stade : partie réelle entre deux appareils distincts en ligne,
 - `tests/visual/make_fixtures_board.py` + `render-check.mjs` (écrans 53-) : pour chaque activité, début de manche,
   après un coup, manche finie et partie finie, à partir d'états réels, de 320 à 1440 px.
 
+## Famille 4 — Mémoire et observation (22 octobre 2026)
+
+- `supabase/tests/slice6_family4_memory.sql` : faces des paires inconnues avant retournement, paire ratée visible
+  1,2 s (champ « miss ») sans troisième retournement ; objets à mémoriser absents de l'état public, visibles du seul
+  joueur pendant l'observation puis retirés ; réponse impossible avant la fin de l'observation ; nombre d'objets
+  imposé ; réponse de l'un cachée à l'autre ; score calculé sur le serveur ; chaque joueur ne voit que sa moitié du
+  plateau (deux mémoires) ; une seule aide ; suite lumineuse arrêtée après deux erreurs ; curseur hors de 0..100
+  refusé ; puis les 18 activités jouées jusqu'au bout avec le partenaire de test.
+- `tests/visual/make_fixtures_board.py 4` + `render-check.mjs` (écrans 53-) aux largeurs 320 et 390 px.
+- Correctifs trouvés par ces captures : numéros des disques superposés tracés au-dessus de tout, du côté visible ;
+  comparaison des motifs du « pixel retenu » en grille adaptable (débordement à 390 px).
+
 ## Famille 3 — Dessin et création (22 octobre 2026)
 
 - `supabase/tests/slice5_family3_creation.sql` : objet à dessiner invisible pour l'autre et absent de l'état public ;
