@@ -95,3 +95,11 @@ préférences de partie (+18, thèmes à éviter) de l'autre joueur. Inscrit en 
       (`bump_session` d'origine) par une migration.
 - [ ] Supprimer le compte de démonstration « Kalou » (et son duo) depuis Supabase → Authentication.
 - [ ] Vérifier que la migration de confidentialité 150 est appliquée et planifier `purge_expired_sessions` (pg_cron).
+
+## Famille 2 (22 octobre 2026)
+
+Migrations appliquées en ligne : `board_engine_core`, `board_family2_rules`, `board_family2_bot`, `famille2_contenus`
+(fichiers `20261022000400`, `…410`, `…420`, `20261022020030`). Contrôle : empreintes des fonctions, des versions de
+règles et des niveaux identiques entre la base en ligne et la base de test locale.
+Les coups des jeux de mots (indices, propositions) sont conservés avec la partie ; leur effacement automatique sera
+ajouté avec la tâche d'effacement à 24 h (migration 150, toujours en attente d'accord).

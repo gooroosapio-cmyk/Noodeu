@@ -82,3 +82,15 @@ Non testé à ce stade : partie réelle entre deux appareils distincts en ligne,
 - `supabase/tests/slice3_test_autoplayer.sql` : sans inscription rien ne se passe ; avec inscription, le partenaire est
   prêt dès la création, l'identité du joueur est rendue après chaque action du robot, et les 18 activités se jouent
   jusqu'à la fin (révélation, étapes après révélation, capsule fermée) avec un seul joueur humain.
+
+## Famille 2 — Mots et répartie (22 octobre 2026)
+
+- `supabase/tests/slice4_family2_board.sql` : moteur plateau. Le mot à deviner n'apparaît jamais dans l'état public ;
+  l'autre joueur ne voit ni la part privée ni la solution avant la fin de la manche ; lecture directe des secrets
+  refusée ; coup hors tour refusé ; mot interdit (même au pluriel) et mot cible refusés dans un indice ; un coup
+  refusé ne change rien ; même coup envoyé deux fois = un seul effet ; manche périmée et manche finie refusées ;
+  rôles inversés ; anagrammes (lettres et longueur contrôlées) ; lettre déjà essayée sans erreur ; indice tiré du
+  plateau refusé ; grille du bac invisible pour l'autre avant confirmation ; puis les 18 activités jouées jusqu'au
+  bout (un joueur + le partenaire automatique), avec résultat et toutes les manches terminées.
+- `tests/visual/make_fixtures_board.py` + `render-check.mjs` (écrans 53-) : pour chaque activité, début de manche,
+  après un coup, manche finie et partie finie, à partir d'états réels, de 320 à 1440 px.

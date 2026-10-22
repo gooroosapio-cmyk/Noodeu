@@ -19,21 +19,21 @@ Généré par `scripts/import_catalogue.py`. Colonnes : moteur livré, contenu i
 | N2-013 | Douze jetons d’envie | 1 | echange | livré | oui | oui | oui | oui | SQL |
 | N2-014 | Votre coin tranquille | 1 | echange | livré | oui | oui | oui | oui | SQL |
 | N2-015 | La roue des petits gestes | 1 | echange | livré | oui | oui | oui | oui | SQL |
-| N2-016 | Le mot interdit | 2 | cooperation | à faire (« Bientôt ») | oui | oui | — | — | — |
-| N2-017 | L’anagramme partagée | 2 | cooperation | à faire (« Bientôt ») | oui | oui | — | — | — |
-| N2-018 | La lettre et la case | 2 | duel | à faire (« Bientôt ») | oui | oui | — | — | — |
-| N2-019 | La chaîne des dernières lettres | 2 | cooperation | à faire (« Bientôt ») | oui | oui | — | — | — |
-| N2-020 | Le mot en commun | 2 | cooperation | à faire (« Bientôt ») | oui | oui | — | — | — |
-| N2-021 | L’échelle de mots | 2 | cooperation | à faire (« Bientôt ») | oui | oui | — | — | — |
-| N2-022 | Les mots cachés | 2 | cooperation | à faire (« Bientôt ») | oui | oui | — | — | — |
-| N2-023 | Le mot masqué | 2 | cooperation | à faire (« Bientôt ») | oui | oui | — | — | — |
-| N2-024 | Les syllabes en vrac | 2 | cooperation | à faire (« Bientôt ») | oui | oui | — | — | — |
-| N2-025 | Le marché des lettres | 2 | duel | à faire (« Bientôt ») | oui | oui | — | — | — |
-| N2-026 | Le mot intrus | 2 | duel | à faire (« Bientôt ») | oui | oui | — | — | — |
-| N2-027 | Le télégramme | 2 | cooperation | à faire (« Bientôt ») | oui | oui | — | — | — |
-| N2-028 | Rimes en relais | 2 | cooperation | à faire (« Bientôt ») | oui | oui | — | — | — |
-| N2-029 | Un indice, trois cibles | 2 | cooperation | à faire (« Bientôt ») | oui | oui | — | — | — |
-| N2-030 | La phrase coupée | 2 | cooperation | à faire (« Bientôt ») | oui | oui | — | — | — |
+| N2-016 | Le mot interdit | 2 | cooperation | livré | oui | oui | oui | oui | SQL + visuel |
+| N2-017 | L’anagramme partagée | 2 | cooperation | livré | oui | oui | oui | oui | SQL + visuel |
+| N2-018 | La lettre et la case | 2 | duel | livré | oui | oui | oui | oui | SQL + visuel |
+| N2-019 | La chaîne des dernières lettres | 2 | cooperation | livré | oui | oui | oui | oui | SQL + visuel |
+| N2-020 | Le mot en commun | 2 | cooperation | livré | oui | oui | oui | oui | SQL + visuel |
+| N2-021 | L’échelle de mots | 2 | cooperation | livré | oui | oui | oui | oui | SQL + visuel |
+| N2-022 | Les mots cachés | 2 | cooperation | livré | oui | oui | oui | oui | SQL + visuel |
+| N2-023 | Le mot masqué | 2 | cooperation | livré | oui | oui | oui | oui | SQL + visuel |
+| N2-024 | Les syllabes en vrac | 2 | cooperation | livré | oui | oui | oui | oui | SQL + visuel |
+| N2-025 | Le marché des lettres | 2 | duel | livré | oui | oui | oui | oui | SQL + visuel |
+| N2-026 | Le mot intrus | 2 | duel | livré | oui | oui | oui | oui | SQL + visuel |
+| N2-027 | Le télégramme | 2 | cooperation | livré | oui | oui | oui | oui | SQL + visuel |
+| N2-028 | Rimes en relais | 2 | cooperation | livré | oui | oui | oui | oui | SQL + visuel |
+| N2-029 | Un indice, trois cibles | 2 | cooperation | livré | oui | oui | oui | oui | SQL + visuel |
+| N2-030 | La phrase coupée | 2 | cooperation | livré | oui | oui | oui | oui | SQL + visuel |
 | N2-031 | Dessine, je devine | 3 | cooperation | à faire (« Bientôt ») | oui | oui | — | — | — |
 | N2-032 | Complète mon gribouillis | 3 | cooperation | à faire (« Bientôt ») | oui | oui | — | — | — |
 | N2-033 | Le dessin dicté | 3 | cooperation | à faire (« Bientôt ») | oui | oui | — | — | — |
@@ -127,9 +127,9 @@ Généré par `scripts/import_catalogue.py`. Colonnes : moteur livré, contenu i
 | N2-121 | La carte de tes goûts | 1 | creation | livré | oui | oui | oui | oui | SQL |
 | N2-122 | La boîte à surprises | 1 | creation | livré | oui | oui | oui | oui | SQL |
 | N2-123 | Le mini-fanzine à deux | 1 | creation | livré | oui | oui | oui | oui | SQL |
-| N2-124 | Le mot à rallonge | 2 | cooperation | à faire (« Bientôt ») | oui | oui | — | — | — |
-| N2-125 | Les mots qui se croisent | 2 | cooperation | à faire (« Bientôt ») | oui | oui | — | — | — |
-| N2-126 | Les rébus en morceaux | 2 | cooperation | à faire (« Bientôt ») | oui | oui | — | — | — |
+| N2-124 | Le mot à rallonge | 2 | cooperation | livré | oui | oui | oui | oui | SQL + visuel |
+| N2-125 | Les mots qui se croisent | 2 | cooperation | livré | oui | oui | oui | oui | SQL + visuel |
+| N2-126 | Les rébus en morceaux | 2 | cooperation | livré | oui | oui | oui | oui | SQL + visuel |
 | N2-127 | La constellation sonore | 3 | creation | à faire (« Bientôt ») | oui | oui | — | — | — |
 | N2-128 | Le flipbook de poche | 3 | creation | à faire (« Bientôt ») | oui | oui | — | — | — |
 | N2-129 | Le petit métier à tisser | 3 | creation | à faire (« Bientôt ») | oui | oui | — | — | — |
