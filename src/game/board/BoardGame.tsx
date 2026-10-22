@@ -6,6 +6,7 @@ import { Link } from "react-router";
 import { t, type MessageKey } from "../../i18n";
 import { Alert, Icon, Illustration, Loading } from "../../components/ui";
 import type { Player, SessionState } from "../../lib/types";
+import { CREATION_VIEWS, CreationSolution, isCreationMech } from "./CreationGames";
 
 type Run = (fn: string, args?: Record<string, unknown>) => Promise<{ ok: boolean; error?: string; info?: any }>;
 interface Common { st: SessionState; run: Run; busy: boolean; online: boolean }
@@ -565,6 +566,7 @@ const VIEWS: Record<string, ComponentType<V>> = {
   word_ladder: Ladder, word_search: WordSearch, masked_word: Masked, syllables: Syllables, letter_market: Market,
   semantic_intruder: Intruder, telegram: Telegram, rhymes: Rhymes, clue_grid: ClueGrid, sentence_order: Sentence,
   word_growth: Growth, cross_letters: Cross, rebus: Rebus,
+  ...CREATION_VIEWS,
 };
 
 // ---------------------------------------------------------------------------
@@ -572,6 +574,7 @@ const VIEWS: Record<string, ComponentType<V>> = {
 // ---------------------------------------------------------------------------
 function Solution({ round, st }: { round: BRound; st: SessionState }) {
   const c = round.card, s = round.solution ?? {};
+  if (isCreationMech(c.mech)) return <CreationSolution c={c} s={s} players={st.players} title={st.game.title} />;
   const line = (k: MessageKey, vars: Record<string, string | number>) => <p>{t(k, vars)}</p>;
   switch (c.mech) {
     case "taboo": return line("board.sol.word", { w: s.target ?? "" });
@@ -648,7 +651,7 @@ export function BoardPlaying(c: Common) {
   return (
     <section className="stack stack--5" key={round.round_no}>
       <div className="row row--between">
-        <span className="t-meta">{t("rounds.cardOf", { n: round.round_no, total })}</span>
+        <span className="t-meta">{t("board.roundOf", { n: round.round_no, total })}</span>
         {turnBased && !card.done && <Turn mine={mine} other={nameOf(partner)} />}
       </div>
       {card.done ? <RoundEnd c={c} round={round} /> : View ? <View c={card} priv={round.private} me={me} partner={partner} play={play} busy={c.busy || !c.online} mine={mine} /> : null}
@@ -668,6 +671,10 @@ export function BoardResults({ c, navigate }: { c: Common; navigate: (to: string
   const result = c.st.session.result as { points?: Record<string, number>; common?: number; rounds?: number; success?: number } | undefined;
   const ended = c.st.session.status === "ended" && !c.st.session.read_only;
   const rounds = roundsOf(c.st).filter((r) => r.revealed);
+  const creation = Boolean((c.st.game.config as unknown as { creation?: boolean }).creation);
+  const me = c.st.players.find((p) => p.is_me);
+  const partner = c.st.players.find((p) => !p.is_me);
+  const bothKeep = c.st.players.every((p) => p.keep_memory);
   return (
     <section className="stack stack--6">
       <Illustration name="11-fin-de-partie" className="public__art" />
@@ -681,18 +688,36 @@ export function BoardResults({ c, navigate }: { c: Common; navigate: (to: string
           {c.st.players.map((p) => <p key={p.seat}>{nameOf(p)} : {result.points![String(p.seat)] ?? 0}</p>)}
         </div>
       )}
-      {result?.common !== undefined && (
+      {result?.common !== undefined && !creation && (
         <div className="card stack stack--2">
           <h2 className="t-card">{t("board.together")}</h2>
           <p>{t("board.resultCommon", { n: result.common, s: result.success ?? 0, r: result.rounds ?? rounds.length })}</p>
         </div>
       )}
-      {rounds.map((r) => (
+      {creation && rounds.map((r) => (
+        <section key={r.round_no} className="card stack stack--3">
+          <h2 className="t-card">{rounds.length > 1 ? t("cr.creationN", { n: r.round_no }) : t("cr.creation")}</h2>
+          <Solution round={r} st={c.st} />
+        </section>
+      ))}
+      {!creation && rounds.map((r) => (
         <details key={r.round_no} className="card">
-          <summary className="strong">{t("rounds.cardOf", { n: r.round_no, total: c.st.session.total_rounds })} · {r.card.success ? "✓" : "—"}</summary>
+          <summary className="strong">{t("board.roundOf", { n: r.round_no, total: c.st.session.total_rounds })} · {r.card.success ? "✓" : "—"}</summary>
           <Solution round={r} st={c.st} />
         </details>
       ))}
+      {ended && creation && (
+        <div className="group">
+          <label className="switch-row">
+            <span className="switch-row__text">
+              <span>{t("game.keepMemory")}</span>
+              <span className="t-meta">{bothKeep ? t("game.keepBoth") : me?.keep_memory ? t("game.keepWaiting", { name: nameOf(partner) }) : t("cr.keepHint")}</span>
+            </span>
+            <input className="switch" type="checkbox" role="switch" checked={Boolean(me?.keep_memory)} disabled={c.busy || !c.online}
+              onChange={(e) => c.run("set_keep_memory", { p_keep: e.target.checked })} />
+          </label>
+        </div>
+      )}
       {ended && (
         <div className="stack">
           <button className="btn" disabled={c.busy || !c.online} onClick={async () => { await c.run("close_session"); navigate(`/bibliotheques/${c.st.session.game_id}`); }}>{t("game.replay")}</button>

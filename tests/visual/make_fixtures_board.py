@@ -8,6 +8,9 @@ Pour chaque activité : début de manche (b0), après un coup de Maya (b1), manc
 import json
 import os
 import subprocess
+import sys
+
+FAMILY = int(sys.argv[1]) if len(sys.argv) > 1 else 2
 
 PG = ["psql", "-h", "/var/tmp/noodeu-pg", "-p", "54329", "-U", "postgres", "-d", "noodeu", "-At", "-v", "ON_ERROR_STOP=1"]
 ME = "11111111-1111-4111-8111-111111111111"
@@ -27,7 +30,7 @@ def as_me(q):
 # Coup « humain » valide (stratégie du robot ; solution directe pour les jeux libres où le robot attend).
 sql("""create schema if not exists fx;
 create or replace function fx.solve(m text, c jsonb, sec jsonb, seat int) returns jsonb language plpgsql as $$
-declare sol jsonb := sec -> 'solution';
+declare sol jsonb := sec -> 'solution'; mv jsonb;
 begin
   if (c ->> 'done')::boolean then return null; end if;
   case m
@@ -37,7 +40,13 @@ begin
   when 'convergence' then
     if c -> 'submitted' ? seat::text then return null; end if;
     return jsonb_build_object('type', 'submit', 'payload', '{"word": "lien"}'::jsonb);
-  else return private.board_bot(m, c || jsonb_build_object('last', jsonb_build_object('seat', 3 - seat)), sec, seat);
+  else
+    mv := private.board_bot_any(m, c || jsonb_build_object('last', jsonb_build_object('seat', 3 - seat)), sec, seat);
+    if mv is null and m in ('pixel_art', 'emblem', 'flipbook', 'weaving') and not coalesce(c -> 'validated' ? seat::text, false)
+       and (m <> 'emblem' or (c -> 'slots' ? '1' and c -> 'slots' ? '2')) then
+      mv := '{"type": "validate"}';
+    end if;
+    return mv;
   end case;
 end $$;
 create or replace function fx.step(s uuid) returns boolean language plpgsql as $$
@@ -55,8 +64,8 @@ begin
 end $$;""")
 sql(f"insert into private.test_autoplayers (user_id) values ('{PARTNER}') on conflict do nothing")
 
-games = sql("""select g.id from public.games g join public.game_categories gc on gc.id = g.category_id
-               where g.implementation = 'playable' and gc.family_no = 2 order by g.sort""").split("\n")
+games = sql(f"""select g.id from public.games g join public.game_categories gc on gc.id = g.category_id
+               where g.implementation = 'playable' and gc.family_no = {FAMILY} order by g.sort""").split("\n")
 index = {}
 for gid in games:
     sql("update public.game_sessions set status = 'abandoned' where status in ('lobby','playing','paused','ended')")
@@ -83,5 +92,5 @@ for gid in games:
     print(gid, index[gid])
 
 sql(f"delete from private.test_autoplayers where user_id = '{PARTNER}'")
-with open(os.path.join(OUT, "index_board.json"), "w", encoding="utf-8") as f:
+with open(os.path.join(OUT, "index_board.json" if FAMILY == 2 else f"index_board{FAMILY}.json"), "w", encoding="utf-8") as f:
     json.dump(index, f, ensure_ascii=False, indent=1)

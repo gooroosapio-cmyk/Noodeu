@@ -128,7 +128,7 @@ for (const gid of playable) {
   allScreens.push({ name: `51-${gid}-revelation`, path: `/partie/${SESSION}`, scenario: st("reveal") });
 }
 // Famille 2 (plateau) : début de manche, après un coup, manche finie, partie finie.
-for (const gid of Object.keys(fixture("index_board.json"))) {
+for (const gid of [...Object.keys(fixture("index_board.json")), ...Object.keys(fixture("index_board3.json"))]) {
   for (const [k, label] of [["b0", "debut"], ["b1", "coup"], ["b2", "manche-finie"], ["b3", "fin"]]) {
     allScreens.push({ name: `53-${gid}-${label}`, path: `/partie/${SESSION}`, scenario: { ...duo, state: fixture(`${gid}-${k}.json`) } });
   }
