@@ -104,6 +104,16 @@ règles et des niveaux identiques entre la base en ligne et la base de test loca
 Les coups des jeux de mots (indices, propositions) sont conservés avec la partie ; leur effacement automatique sera
 ajouté avec la tâche d'effacement à 24 h (migration 150, toujours en attente d'accord).
 
+## Remise à zéro de la base d'activités (23 octobre 2026)
+
+Migration `20261023000000_purge_activites.sql` : efface les parties (et en cascade réponses, manches, secrets, coups,
+messages, souvenirs gardés), les notifications de proposition de partie, les favoris, les activités avec leurs
+règles, cartes et niveaux. Les familles, le journal des imports et le code des moteurs restent.
+La protection des versions publiées (`game_versions_immutable`) est suspendue le temps de la remise à zéro, puis
+réactivée. En ligne, l'outil de migration n'exécute pas les suppressions : la migration se colle telle quelle dans
+l'éditeur SQL de Supabase.
+Les tests `supabase/tests/slice*.sql` portaient sur l'ancienne base : ils seront adaptés à la nouvelle.
+
 ## Famille 4 (22 octobre 2026)
 
 Migrations : `board_family4_rules` (tirage, règles, robot de test et aiguillage, fichier `20261022040010`) et

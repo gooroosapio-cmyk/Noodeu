@@ -247,7 +247,7 @@ export function Libraries() {
 
       {shown.length === 0 ? (
         <div className="card stack center">
-          <p className="t-card">{state.show === "favorites" && !countFilters(state.filters) && !state.query ? t("lib.emptyFavorites") : t("lib.noResults")}</p>
+          <p className="t-card">{cat.games.length === 0 ? t("lib.emptyCatalog") : state.show === "favorites" && !countFilters(state.filters) && !state.query ? t("lib.emptyFavorites") : t("lib.noResults")}</p>
           {(active > 0 || state.query || state.quick !== "all") && (
             <button className="btn btn--secondary btn--auto" onClick={() => update({ filters: emptyFilters, query: "", show: "all", quick: "all" })}>{t("lib.clearFilters")}</button>
           )}

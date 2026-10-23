@@ -136,6 +136,7 @@ export const fr = {
   "lib.closeFilters": "Fermer",
   "lib.favorites": "Favoris",
   "lib.results": "{n} jeu(x)",
+  "lib.emptyCatalog": "La bibliothèque se renouvelle : de nouvelles activités arrivent bientôt.",
   "lib.noResults": "Aucun jeu avec ces critères",
   "lib.clearFilters": "Effacer les filtres",
   "lib.clearAll": "Tout effacer",
