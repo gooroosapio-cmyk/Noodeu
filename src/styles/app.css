@@ -155,7 +155,7 @@ h1, h2, h3 { font-weight: 700; }
 .btn--auto { width: auto; }
 .btn--sm { min-height: 44px; padding: var(--s-2) var(--s-4); font-size: 0.9375rem; }
 .btn:disabled { cursor: default; background: #EBE5F2; color: #776B86; border-color: transparent; box-shadow: none; }
-.btn-google { background: #fff; border: 1px solid #747775; color: #1F1F1F; font-family: Roboto, var(--f-body); font-weight: 500; }
+.btn-google { box-shadow: none; background: #fff; border: 1px solid #747775; color: #1F1F1F; font-family: Roboto, var(--f-body); font-weight: 500; }
 .btn-google svg { width: 20px; height: 20px; }
 .icon-btn {
   position: relative; display: inline-flex; align-items: center; justify-content: center; gap: var(--s-1);
