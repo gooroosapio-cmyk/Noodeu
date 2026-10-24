@@ -72,7 +72,7 @@ end $$;
 do $$ begin
   perform t9.ok((select count(*) from public.games where category_id = 'nd-conversation-decouverte' and implementation = 'playable') = 8,
                 '8 jeux de conversation jouables');
-  perform t9.ok((select count(*) from public.content_banks where bank like 'conv_%') = 730, '730 cartes importées');
+  perform t9.ok((select count(*) from public.content_banks where bank like 'conv_%') = 359, '359 cartes importées (catalogue final)');
   perform t9.ok((select count(*) from public.content_banks where bank like 'conv_%' and not (value ? 'adult')) = 0, 'drapeau +18 sur chaque carte');
 end $$;
 
@@ -124,7 +124,7 @@ begin
   update public.profiles set intimate_opt_in = true, adult_confirmed_at = now(), max_intensity = 'hot' where id in ('00000000-0000-4000-a000-0000000000a9', '00000000-0000-4000-a000-0000000000b9');
   s := t9.start('N2-002', null, true);
   perform t9.ok(private.adult_allowed(s), 'deux accords +18 actifs');
-  perform t9.ok((select count(*) from public.content_banks where bank = 'conv_dilemma' and (value ->> 'adult')::boolean) = 30
+  perform t9.ok((select count(*) from public.content_banks where bank = 'conv_dilemma' and (value ->> 'adult')::boolean) = 20
                 and private.conv_draw(s, 'conv_dilemma') is not null, 'cartes +18 tirables');
   -- Carte en cours rendue adulte, A a déjà scellé : le retrait de B l'interrompt et efface tout.
   select value into adult_item from public.content_banks where bank = 'conv_dilemma' and (value ->> 'adult')::boolean limit 1;
@@ -234,8 +234,11 @@ end $$;
 do $$
 declare s uuid; m text; seat int; n int; done boolean;
 begin
+  update public.profiles set intimate_opt_in = true, adult_confirmed_at = now(), max_intensity = 'hot'
+    where id in ('00000000-0000-4000-a000-0000000000a9', '00000000-0000-4000-a000-0000000000b9');
   foreach m in array array['N2-003', 'N2-002', 'nd-qui-de-nous-deux', 'N2-004', 'nd-complete-phrase', 'nd-accord-desaccord', 'nd-action-verite', 'nd-deux-verites-mensonge'] loop
-    s := t9.start(m);
+    -- Complète la phrase et D'accord ou pas : banques presque entièrement +18 (À huis clos), accord des deux requis.
+    s := t9.start(m, null, m in ('nd-complete-phrase', 'nd-accord-desaccord'));
     n := 0;
     while (select status from public.game_sessions where id = s) = 'playing' and n < 400 loop
       done := false;

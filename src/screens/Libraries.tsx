@@ -1,8 +1,7 @@
 import { useEffect, useLayoutEffect, useMemo, useRef, useState } from "react";
-import { Link, useNavigate, useParams } from "react-router";
+import { Link, useParams } from "react-router";
 import { t, type MessageKey } from "../i18n";
-import { errorMessage } from "../lib/errors";
-import { rpc, supabase } from "../lib/supabase";
+import { supabase } from "../lib/supabase";
 import { useOnline } from "../lib/useOnline";
 import { useAuth } from "../auth/AuthProvider";
 import { useDuo } from "../duo/DuoProvider";
@@ -12,6 +11,7 @@ import type { Category, Game, GameRules } from "../lib/types";
 import { RulesSheet } from "../components/RulesSheet";
 import { ProgressBadge, useProgress } from "../parcours/Progress";
 import { HealthResources } from "../parcours/HealthResources";
+import { useLaunch } from "../game/launch";
 import {
   CATEGORY_BY_SHELF, DURATIONS, FORMATS, INTENSITIES, NO_FILTERS, SHELF_PATH, SHELVES, hasFilters, intensityRank, matchesFilters,
   normalizeText, shelfOf, useCatalog, useMyFilters, type Filters, type Shelf,
@@ -231,6 +231,7 @@ export function Libraries() {
   const byShelf = useMemo(() => {
     const m = new Map<Shelf, Game[]>(SHELVES.map((s) => [s, []]));
     for (const g of allowed) {
+      if (g.meta?.random) continue;
       const s = shelfOf(g);
       if (s) m.get(s)!.push(g);
     }
@@ -286,9 +287,10 @@ export function Libraries() {
       ) : (
         <>
           <div className="stack" style={{ gap: "var(--grid-gap)" }}>
-            {(["questions", "tests"] as const).map((s) => count(s) > 0 && (
-              <ShelfBanner key={s} shelf={s} title={shelfTitle(cat.categories, s)} text={t(`lib.bannerText.${s}`)} />
-            ))}
+            {count("questions") > 0 && <ShelfBanner shelf="questions" title={shelfTitle(cat.categories, "questions")} text={t("lib.bannerText.questions")} />}
+            {count("huisclos") > 0 && (intimate
+              ? <ShelfBanner shelf="huisclos" title={t("lib.shelf.huisclos")} text={t("lib.huisclosText")} />
+              : <HuisClosNotice enabled={false} />)}
           </div>
           {(["conversation", "minijeux"] as const).map((s) => count(s) > 0 && (
             <section key={s} className="section" aria-labelledby={`shelf-${s}`}>
@@ -299,36 +301,84 @@ export function Libraries() {
               <TileGrid games={byShelf.get(s)!} />
             </section>
           ))}
-          {count("huisclos") > 0 && (
-            <section className="section" aria-labelledby="shelf-huisclos">
-              <h2 className="t-section" id="shelf-huisclos">{t("lib.shelf.huisclos")}</h2>
-              {intimate ? <ShelfBanner shelf="huisclos" title={t("lib.shelf.huisclos")} text={t("lib.huisclosText")} /> : <HuisClosNotice enabled={false} />}
-            </section>
-          )}
         </>
       )}
     </main>
   );
 }
 
-/** Page d'une catégorie horizontale (Se découvrir, Mieux se comprendre, À huis clos) : liste de ses packs. */
-export function ShelfPage({ shelf }: { shelf: "questions" | "tests" | "huisclos" }) {
+const COUNTS = [5, 10, 20] as const;
+
+/** Questionnaire aléatoire : questions libres de la rubrique tirées au hasard, en 5, 10 ou 20 questions. */
+function RandomLauncher({ game }: { game: Game }) {
+  const { active } = useDuo();
+  const online = useOnline();
+  const { launch, busy, error, dialog } = useLaunch();
+  const [n, setN] = useState<number>(10);
+  return (
+    <section className="card card--lavender stack stack--3" aria-labelledby="rnd-title">
+      <div className="row" style={{ gap: "var(--s-3)" }}>
+        <Icon name="dices" size={28} />
+        <div className="stack" style={{ gap: 2 }}>
+          <h2 className="t-card" id="rnd-title">{t("lib.random.title")}</h2>
+          <p className="t-meta">{t("lib.random.text")}</p>
+        </div>
+      </div>
+      <div className="chips" role="radiogroup" aria-label={t("lib.random.count")}>
+        {COUNTS.map((c) => (
+          <button key={c} type="button" className="chip" role="radio" aria-checked={n === c} onClick={() => setN(c)}>{t("lib.random.n", { n: c })}</button>
+        ))}
+      </div>
+      {error && <Alert>{error}</Alert>}
+      {active
+        ? <button className="btn" disabled={busy || !online} onClick={() => void launch(game.id, game.title, { questions: n })}>{busy ? t("common.sending") : t("lib.random.go", { n })}<Icon name="arrow-right" /></button>
+        : <Link className="btn btn--secondary" to="/inviter">{t("duo.invite")}</Link>}
+      {dialog}
+    </section>
+  );
+}
+
+/** Page d'une rubrique (Se découvrir, À huis clos) : questionnaire aléatoire, packs de questions et questionnaires. */
+export function ShelfPage({ shelf: asked }: { shelf: "questions" | "tests" | "huisclos" }) {
+  // « Mieux se comprendre » a rejoint « Se découvrir » : l'ancienne adresse mène à la même page.
+  const shelf = asked === "tests" ? "questions" : asked;
   const { userId, profile } = useAuth();
   const cat = useCatalog(userId);
   const { cap } = useCap();
   if (cat.loading) return <PageLoading />;
   const games = cat.games.filter((g) => shelfOf(g) === shelf && intensityRank(g.intensity) <= cap);
+  const random = games.find((g) => g.meta?.random && g.implementation === "playable");
+  const packs = games.filter((g) => !g.meta?.random && g.mechanic !== "test_form");
+  const tests = games.filter((g) => g.mechanic === "test_form");
   const intimate = !!profile?.intimate_opt_in;
+  const open = shelf !== "huisclos" || intimate;
   return (
     <SubPage backTo="/bibliotheques" title={shelfTitle(cat.categories, shelf)}>
       <main className="page page--bare page--tight">
         <div className="page-header">
-          <h1 className="t-page">{t(shelf === "questions" ? "lib.choosePack" : "lib.chooseTest")}</h1>
+          <h1 className="t-page">{shelfTitle(cat.categories, shelf)}</h1>
           <p className="t-small muted">{shelf === "huisclos" ? t("lib.huisclosText") : categoryOf(cat.categories, shelf)?.promise}</p>
         </div>
         {cat.error && <Alert>{t("lib.error")}</Alert>}
         {shelf === "huisclos" && <HuisClosNotice enabled={intimate} />}
-        {(shelf !== "huisclos" || intimate) && (games.length ? <PackList games={games} /> : <div className="card stack center"><p className="t-card">{t("lib.emptyCatalog")}</p></div>)}
+        {open && (
+          <>
+            {random && <RandomLauncher game={random} />}
+            {packs.length > 0 && (
+              <section className="section" aria-labelledby="shelf-packs">
+                <h2 className="t-section" id="shelf-packs">{t("lib.choosePack")}</h2>
+                <PackList games={packs} />
+              </section>
+            )}
+            {tests.length > 0 && (
+              <section className="section" aria-labelledby="shelf-tests">
+                <h2 className="t-section" id="shelf-tests">{t("lib.chooseTest")}</h2>
+                <PackList games={tests} />
+              </section>
+            )}
+            {!packs.length && !tests.length && <div className="card stack center"><p className="t-card">{t("lib.emptyCatalog")}</p></div>}
+          </>
+        )}
         {shelf === "huisclos" && <HealthResources />}
       </main>
     </SubPage>
@@ -339,14 +389,12 @@ export function ShelfPage({ shelf }: { shelf: "questions" | "tests" | "huisclos"
 export function GameSheet() {
   const { gameId = "" } = useParams();
   const { userId } = useAuth();
-  const { active, openSession } = useDuo();
+  const { active } = useDuo();
   const cat = useCatalog(userId);
   const online = useOnline();
-  const navigate = useNavigate();
+  const { launch, busy, error, dialog, otherFor } = useLaunch();
   const [rules, setRules] = useState<GameRules | null>(null);
   const [showRules, setShowRules] = useState(false);
-  const [busy, setBusy] = useState(false);
-  const [error, setError] = useState<string | null>(null);
   const game = cat.games.find((g) => g.id === gameId);
 
   useEffect(() => {
@@ -364,7 +412,7 @@ export function GameSheet() {
     );
   }
 
-  const other = openSession && openSession.game_id !== game.id && openSession.status !== "ended" ? openSession : null;
+  const other = otherFor(game.id);
   const favorite = cat.favorites.has(game.id);
   const soon = game.implementation !== "playable";
   const catTitle = cat.categories.find((c) => c.id === game.category_id)?.title;
@@ -372,15 +420,7 @@ export function GameSheet() {
   const backTo = shelf === "questions" || shelf === "tests" || shelf === "huisclos" ? SHELF_PATH[shelf] : "/bibliotheques";
   const intime = game.content_level === "intime";
 
-  async function prepare() {
-    if (busy) return;
-    setBusy(true);
-    setError(null);
-    const res = await rpc<{ session_id: string }>("create_session", { p_game: game!.id });
-    setBusy(false);
-    if (res.ok) navigate(`/partie/${res.session_id}`);
-    else setError(errorMessage(res.error));
-  }
+  const prepare = () => void launch(game.id, game.title);
 
   return (
     <SubPage backTo={backTo} title={game.title} actions={
@@ -412,6 +452,7 @@ export function GameSheet() {
           </ul>
         )}
         {!soon && rules && <button className="btn btn--secondary" onClick={() => setShowRules(true)}><Icon name="book-open" size={20} />{t("sheet.seeRules")}</button>}
+        {dialog}
         {showRules && rules && <RulesSheet title={game.title} rules={rules} onClose={() => setShowRules(false)} />}
         {error && <Alert>{error}</Alert>}
         <div className="action-bar">
@@ -425,7 +466,8 @@ export function GameSheet() {
           ) : other ? (
             <>
               <Alert kind="info">{t("sheet.otherInProgress", { title: other.title })}</Alert>
-              <Link className="btn" to={`/partie/${other.id}`}>{t("sheet.goToOther")}</Link>
+              <button className="btn" disabled={busy || !online} onClick={prepare}>{t("launch.closeAndStart")}<Icon name="arrow-right" /></button>
+              <Link className="btn btn--secondary" to={`/partie/${other.id}`}>{t("sheet.goToOther")}</Link>
             </>
           ) : (
             <button className="btn" disabled={busy || !online} onClick={prepare}>{busy ? t("common.sending") : t("sheet.prepare")}<Icon name="arrow-right" /></button>

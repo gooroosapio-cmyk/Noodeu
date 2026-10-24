@@ -2,6 +2,7 @@
 // Jeux de conversation (catégorie 3) : cartes tirées par le serveur, réponses scellées, révélation commune,
 // « Continuer » des deux. L'écran ne reçoit jamais la réponse de l'autre avant la révélation.
 import { LaterButton } from "../Later";
+import { rpc } from "../../lib/supabase";
 import { IntensityTransition, useSessionMeta } from "../../parcours/meta";
 import { useEffect, useState } from "react";
 import { Link } from "react-router";
@@ -209,8 +210,9 @@ function TruthDare({ card, me, partner, busy, play }: { card: J; me: Player; par
 // ---------------------------------------------------------------------------
 // Deux vérités et un mensonge
 // ---------------------------------------------------------------------------
-function TwoTruths({ card, priv, me, partner, busy, play }: { card: J; priv: J; me: Player; partner?: Player; busy: boolean; play: (t: string, p?: Record<string, unknown>) => Promise<boolean> }) {
+function TwoTruths({ card, priv, me, partner, busy, play, sessionId }: { card: J; priv: J; me: Player; partner?: Player; busy: boolean; play: (t: string, p?: Record<string, unknown>) => Promise<boolean>; sessionId: string }) {
   const [texts, setTexts] = useState(["", "", ""]);
+  const [idea, setIdea] = useState<string | null>(null);
   const [lie, setLie] = useState<string | null>(null);
   const [truthOk, setTruthOk] = useState(false);
   const [guess, setGuess] = useState<string | null>(null);
@@ -224,6 +226,13 @@ function TwoTruths({ card, priv, me, partner, busy, play }: { card: J; priv: J; 
         if (ready) void play("publish_three", { confirmed_truths: true, lie_statement_id: lie, statements: texts.map((x, i) => ({ id: `s${i + 1}`, text: x.trim() })) });
       }}>
         <p className="t-small">{t("conv.tt.writeHint")}</p>
+        <div className="stack stack--2">
+          <button type="button" className="btn btn--quiet btn--sm btn--auto" disabled={busy} onClick={async () => {
+            const r = await rpc<{ text: string }>("get_two_truths_idea", { p_session: sessionId });
+            setIdea(r.ok ? (r as unknown as { text: string }).text : t("conv.tt.noIdea"));
+          }}><Icon name="sparkles" size={16} />{t("conv.tt.idea")}</button>
+          {idea && <p className="t-small card card--soft" aria-live="polite">{idea}</p>}
+        </div>
         {texts.map((x, i) => (
           <div key={i} className="field">
             <label className="field__label" htmlFor={`tt-${i}`}>{t("conv.tt.statement", { n: i + 1 })}</label>
@@ -354,7 +363,7 @@ function RoundView({ c, round }: { c: Common; round: CRound }) {
       ) : m === "nd_truth_dare" ? (
         <TruthDare card={card} me={me} partner={partner} busy={busy} play={play} />
       ) : m === "nd_two_truths" ? (
-        <TwoTruths card={card} priv={round.private} me={me} partner={partner} busy={busy} play={play} />
+        <TwoTruths card={card} priv={round.private} me={me} partner={partner} busy={busy} play={play} sessionId={c.st.session.id} />
       ) : card.locked?.[me.seat] ? (
         <Status card={card} me={me} partner={partner} />
       ) : (

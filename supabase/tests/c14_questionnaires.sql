@@ -50,18 +50,19 @@ end $$;
 -- ===== 1. Catalogue importé =====================================================
 do $$
 begin
-  perform t7.ok((select count(*) from public.game_categories where status = 'published') = 4, 'quatre catégories publiées');
+  perform t7.ok((select count(*) from public.game_categories where status = 'published') = 3, 'trois catégories publiées (« Mieux se comprendre » rejoint « Se découvrir »)');
   perform t7.ok((select count(*) from public.game_categories where status = 'archived') >= 8, 'anciennes familles archivées, pas effacées');
-  perform t7.ok((select count(*) from public.games where status = 'published') = 30, '30 activités');
-  perform t7.ok((select count(*) from public.games where implementation = 'playable' and mechanic in ('pack_conversation', 'test_form')) = 14, '14 jouables (7 packs + 7 tests)');
+  perform t7.ok((select count(*) from public.games where status = 'published') = 44, '44 activités (catalogue final : 15 nouvelles, cinq grands traits retiré)');
+  perform t7.ok((select count(*) from public.games where implementation = 'playable' and status = 'published' and mechanic in ('pack_conversation', 'test_form')) = 28, '28 jouables (22 packs + 6 tests)');
   perform t7.ok((select count(*) from public.games where category_id in ('nd-conversation-decouverte', 'nd-mini-jeux-interactifs')
                  and implementation = 'playable') = 16, 'les 16 jeux C3/C4 jouables (lots 2, 3 et 4 livrés)');
-  perform t7.ok((select count(*) from public.content_banks where bank like 'q\_%') = 370, '370 items (171 + 199)');
-  perform t7.ok((select count(*) from public.content_banks where bank = 'q_aron' and content_version = '4.0.0') = 36, 'Aron reste en 4.0.0');
-  perform t7.ok((select count(*) from public.content_banks where bank = 'q_usu_roadtrip' and content_version = '5.0.0') = 55, 'USU55 reste en 5.0.0');
-  perform t7.ok((select value ->> 'text_fr' from public.content_banks where bank = 'q_rice' and value ->> 'source_position' = '69') = '?',
-                'Rice 69 conservé tel quel');
-  perform t7.ok((select count(*) from public.games where content_level = 'intime') = 3, 'RICE100, QSI12 et SPN16 dans « À huis clos »');
+  perform t7.ok((select count(*) from public.content_banks where bank like 'q\_%') = 592, '592 items (catalogue final, banque des cinq grands traits conservée hors ligne)');
+  perform t7.ok((select count(*) from public.content_banks where bank = 'q_aron' and value ->> 'id' like 'C1-01-%') = 36, 'Aron : 36 entrées du catalogue final');
+  perform t7.ok((select count(*) from public.content_banks where bank = 'q_usu_roadtrip') = 53, 'Se retrouver : 53 entrées (deux redondances fusionnées)');
+  perform t7.ok((select count(*) from public.content_banks where bank = 'q_rice') = 72, 'test de pureté allégé : 72 items');
+  perform t7.ok((select count(*) from public.games where content_level = 'intime' and status = 'published') = 14,
+                'À huis clos : 3 tests, 8 packs, questionnaire aléatoire, D''accord ou pas, Complète la phrase');
+  perform t7.ok((select status from public.games where id = 'ND-Q-012') = 'archived', 'cinq grands traits retiré');
   perform t7.ok((select meta ->> 'namespace' from public.games where id = 'N2-078') = 'noodeu_c34_v1'
                 and (select meta ->> 'reference_code' from public.games where id = 'N2-078') = 'M07', 'M07 = bataille navale (namespace)');
   perform t7.as_user('00000000-0000-4000-a000-0000000000a7');
@@ -76,7 +77,7 @@ declare s uuid; c jsonb; st jsonb;
 begin
   s := t7.start('ND-Q-P01');
   c := t7.card(s);
-  perform t7.ok((c ->> 'index')::int = 0 and c -> 'item' ->> 'id' = 'ARON36-FR04-001', 'Aron commence à la première carte');
+  perform t7.ok((c ->> 'index')::int = 0 and c -> 'item' ->> 'id' = 'C1-01-001', 'Aron commence à la première carte');
   perform t7.ok((select total_rounds from public.game_sessions where id = s) = 12, 'séance limitée à la série en cours (12)');
   perform t7.err(t7.mv(s, 'answer', '{"choice": "share"}'), 'empty_answer', 'partager une réponse vide est refusé');
   perform t7.ok((t7.mv(s, 'answer', '{"choice": "share", "text": "Un secret de A"}') ->> 'ok')::boolean, 'A répond');
@@ -123,23 +124,23 @@ begin
   s := t7.start('ND-Q-022');
   c := t7.card(s);
   perform t7.ok(jsonb_array_length(c -> 'items') = 4 and not (c::text like '%reverse%'), 'items affichés, clé de cotation absente');
-  perform t7.err(t7.mv(s, 'save', '{"answers": {"CSI4-2007-FR03-01": 9}}'), 'invalid_option', 'valeur hors échelle refusée');
-  perform t7.mv(s, 'save', '{"answers": {"CSI4-2007-FR03-01": 0, "CSI4-2007-FR03-02": 0}, "page": 0}');
-  perform t7.mv(s, 'complete', '{"answers": {"CSI4-2007-FR03-03": 0, "CSI4-2007-FR03-04": null}, "share": true}');
+  perform t7.err(t7.mv(s, 'save', '{"answers": {"C2-03-001": 9}}'), 'invalid_option', 'valeur hors échelle refusée');
+  perform t7.mv(s, 'save', '{"answers": {"C2-03-001": 0, "C2-03-002": 0}, "page": 0}');
+  perform t7.mv(s, 'complete', '{"answers": {"C2-03-003": 0, "C2-03-004": null}, "share": true}');
   st := t7.state(s);
   perform t7.ok(st #>> '{rounds,0,private,result,status}' = 'incomplete' and st #> '{rounds,0,card,shared,1}' is null,
                 'une réponse passée empêche le calcul (pas de zéro implicite)');
   perform t7.as_user('00000000-0000-4000-a000-0000000000b7');
-  perform t7.mv(s, 'complete', '{"answers": {"CSI4-2007-FR03-01": 0, "CSI4-2007-FR03-02": 0, "CSI4-2007-FR03-03": 0, "CSI4-2007-FR03-04": 0}}');
+  perform t7.mv(s, 'complete', '{"answers": {"C2-03-001": 0, "C2-03-002": 0, "C2-03-003": 0, "C2-03-004": 0}}');
   st := t7.state(s);
   perform t7.ok(st #>> '{rounds,0,private,result,scores,satisfaction_relation}' = '0', 'zéro est une valeur valide (somme 0)');
   perform t7.ok(st #> '{rounds,0,card,shared,2}' is null, 'résultat non partagé par défaut');
   perform t7.ok((public.set_answer_shared(s, 1, true) ->> 'ok')::boolean, 'B partage son résultat après coup');
   perform t7.as_user('00000000-0000-4000-a000-0000000000a7');
   st := t7.state(s);
-  perform t7.ok(st #>> '{rounds,0,card,shared,2,satisfaction_relation}' = '0' and position('CSI4-2007-FR03-04' in (st -> 'rounds' -> 0 -> 'private')::text) > 0
-                and (st #> '{rounds,0,private,answers}') ? 'CSI4-2007-FR03-01', 'A voit le score partagé de B, jamais ses réponses');
-  perform t7.ok(position('"CSI4-2007-FR03-04": 0' in st::text) = 0, 'réponses de B absentes de l''état de A');
+  perform t7.ok(st #>> '{rounds,0,card,shared,2,satisfaction_relation}' = '0' and position('C2-03-004' in (st -> 'rounds' -> 0 -> 'private')::text) > 0
+                and (st #> '{rounds,0,private,answers}') ? 'C2-03-001', 'A voit le score partagé de B, jamais ses réponses');
+  perform t7.ok(position('"C2-03-004": 0' in st::text) = 0, 'réponses de B absentes de l''état de A');
 
   -- ECR-RS9 : moyennes avec inversions (items 1 à 4 inversés).
   s := t7.start('ND-Q-021');
@@ -183,14 +184,15 @@ begin
   perform public.set_ready(s, true);
   perform t7.ok((select status from public.game_sessions where id = s) = 'playing', 'démarre avec les deux accords');
   perform t7.as_user('00000000-0000-4000-a000-0000000000a7');
+  perform t7.err(t7.mv(s, 'save', jsonb_build_object('answers', jsonb_build_object(t7.card(s) #>> '{items,0,id}', true))), 'invalid_option',
+                 'pureté : Oui / Non seulement (plus de case à cocher)');
   for it in select * from jsonb_array_elements(t7.card(s) -> 'items') loop
-    ans := ans || jsonb_build_object(it ->> 'id', (it ->> 'position')::int <= 37);
+    ans := ans || jsonb_build_object(it ->> 'id', case when (it ->> 'position')::int <= 37 then 1 else 0 end);
   end loop;
   perform t7.mv(s, 'complete', jsonb_build_object('answers', ans));
   st := t7.state(s);
-  perform t7.ok((st #>> '{rounds,0,private,result,scores,purete}')::int = 63, 'Rice : 37 cases cochées → 63');
-  perform t7.ok(exists (select 1 from jsonb_array_elements(t7.card(s) -> 'items') i where i ->> 'text' = '?' and i ->> 'note' is not null),
-                'item 69 affiché « ? » avec sa réserve');
+  perform t7.ok(st #>> '{rounds,0,private,result,status}' = 'complete' and st #> '{rounds,0,private,result,scores}' = '{}'::jsonb,
+                'pureté : aucun score sur 100 (consigne du catalogue)');
   update public.game_sessions set status = 'abandoned' where id = s;
 end $$;
 
@@ -207,13 +209,13 @@ begin
   perform t7.ok((t7.card(s) ->> 'done')::boolean and t7.card(s) #>> '{answers,2,choice}' = 'share', 'le robot répond après A');
   perform public.end_pack_session(s);
   perform public.close_session(s);
-  s := (public.create_session('ND-Q-012') ->> 'session_id')::uuid;
+  s := (public.create_session('ND-Q-022') ->> 'session_id')::uuid;
   perform public.set_ready(s, true);
   for it in select * from jsonb_array_elements(t7.card(s) -> 'items') loop ans := ans || jsonb_build_object(it ->> 'id', 3); end loop;
   perform t7.mv(s, 'complete', jsonb_build_object('answers', ans, 'share', true));
-  perform t7.ok((select status from public.game_sessions where id = s) = 'ended', 'IPIP : fin quand les deux ont terminé');
+  perform t7.ok((select status from public.game_sessions where id = s) = 'ended', 'CSI : fin quand les deux ont terminé');
   perform t7.ok((select (result is not null) from public.game_sessions where id = s), 'résultat de session enregistré');
-  perform t7.ok((select card #>> '{shared,1,extraversion}' from public.session_rounds where session_id = s) = '30', 'IPIP : 10 × 3 = 30');
+  perform t7.ok((select card #>> '{shared,1,satisfaction_relation}' from public.session_rounds where session_id = s) = '12', 'CSI : 4 × 3 = 12');
 end $$;
 
 select 'TOUS LES TESTS CATÉGORIES 1 À 4 SONT PASSÉS' as resultat;

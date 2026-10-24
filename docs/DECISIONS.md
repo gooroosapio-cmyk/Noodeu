@@ -266,3 +266,43 @@ Accompagnement, engagement
 - Rappels doux : réglage personnel (1 à 3 par semaine, heures calmes, espacement de 48 h, aucun contenu intime, aucun rappel
   si la question du jour a déjà été tirée). La fonction d'envoi existe mais n'est pas planifiée : l'écran l'indique.
   La planification demande l'extension gratuite `pg_cron`, à activer avec l'accord du responsable.
+
+## Catalogue final du 24/10/2026 (27 octobre 2026)
+
+Sources : « Noodeu – Catalogue consolidé, 5 catégories » (805 entrées, PDF) et « Packs G05, G08, G09, G10 » (4 × 30 entrées).
+Lecture par `scripts/parse_catalogue_final.py` (effectifs identiques au sommaire pour les 41 sections), import par
+`scripts/import_catalogue_final.py` (migrations `20261027000100` à `20261027000120`). Aucun texte n'est réécrit.
+
+Cadrage (QCM du 27/10) :
+- Écrasement complet : les banques sont vidées puis remplies avec les identifiants du catalogue (C1-01-001…). Les parties
+  passées gardent le texte de leurs cartes ; favoris, « Plus tard », avis, cartes du jour et classements qui visaient une
+  question disparue sont effacés ; la progression des 7 packs réécrits repart de zéro.
+- G05, G08, G09, G10 s'ajoutent aux banques des jeux correspondants. Le catalogue n'ayant pas de banque pour ces quatre jeux,
+  elles deviennent leur contenu : Devine ma réponse (G05), Complète la phrase (G09), D'accord ou pas (G10) ; G08 devient
+  une réserve d'idées dans Deux vérités et un mensonge (les joueurs écrivent toujours leurs phrases).
+- Rubriques : « Mieux se comprendre » rejoint « Se découvrir » (packs puis questionnaires) ; « À huis clos » passe en
+  deuxième position ; puis Conversation, puis Mini-jeux. Les cinq grands traits (absents du catalogue final) sont retirés.
+- Questionnaire aléatoire (Se découvrir et À huis clos) : 5, 10 ou 20 questions libres de la rubrique, tirées une fois au
+  début de la partie ; jamais le protocole d'Aron ni un test ; +18 et intensité respectés ; aucune progression de pack.
+- Nouvelle partie alors qu'une autre est ouverte : une fenêtre propose de fermer l'autre (arrêt pour les deux, réponses
+  non gardées), au lieu de bloquer.
+
+Correspondances :
+- Se découvrir : C1-01 → 36 questions (séries de 12 conservées) ; C1-02 à C1-05 → rituels, place, projets, valeurs
+  (Vrai / Faux) ; C1-06 → conversations ; C1-07 → Se retrouver (53, deux redondances fusionnées par le catalogue) ;
+  nouveaux packs : C1-08 à C1-14 « 35 questions en séries de cinq » (séance = une série), C1-15 + C3-06 « Découverte et
+  complicité », C1-16 « Recul et quotidien », C2-07 « Émotions, sécurité et intimité », C2-08 « Réconfort, confiance ».
+- Questionnaires : C2-02 ECR-RS, C2-03 CSI-4, C2-04 AAIRS, C2-05 QSI, C2-06 SPN sur les grilles du catalogue, positions de
+  la clé de cotation conservées (vérifiées texte à texte) ; C2-01 test de pureté allégé à 72 items, Oui / Non, sans score
+  (consigne du catalogue).
+- À huis clos : C5-01 à C5-07 (7 packs), C3-07 à C3-09 (« Scénarios, personnages et défis absurdes »), tests de pureté,
+  qualité de la vie sexuelle et regard sur la sexualité, D'accord ou pas et Complète la phrase (banques G10 et G09 presque
+  entièrement +18 : accord des deux obligatoire).
+- Conversation : C3-01/C3-02 → Action ou vérité (39 vérités, 40 actions), C3-03 → Je n'ai jamais, C3-04 → Tu préfères
+  (choix A / B du catalogue), C3-05 → Qui de nous deux. Mini-jeux : C4-01 → Cite trois (24 consignes).
+- +18 : badge du catalogue repris tel quel. Les entrées G05/G08/G09/G10, sans badge, sont classées +18 quand le contexte
+  est intime ; un doute donne +18 et « à relire » (liste dans `docs/CLASSEMENT_A_RELIRE.md`).
+- Packs « Se découvrir » contenant des cartes +18 (Se retrouver, Ce qui compte pour nous, Découverte et complicité,
+  Émotions…) : ces cartes sont sautées sans l'accord des deux dans le salon, ainsi que les cartes au-delà du plafond
+  d'intensité ; l'ordre du pack est conservé. Un pack est « terminé » quand toutes ses cartes non +18 sont réalisées.
+- Thèmes de la question du jour : titres des packs (le catalogue ne donne pas de thème aux cartes de jeux).

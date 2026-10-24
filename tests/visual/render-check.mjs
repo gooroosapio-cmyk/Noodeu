@@ -10,6 +10,11 @@ import { mkdirSync, readFileSync } from "node:fs";
 const FIX = new URL("./fixtures/", import.meta.url);
 const fixture = (name) => JSON.parse(readFileSync(new URL(name, FIX), "utf8"));
 const catalogue = fixture("catalogue.json");
+// Catalogue final : questionnaire aléatoire de « Se découvrir » (bouton dédié, jamais listé comme un pack).
+if (!catalogue.games.some((g) => g.id === "ND-Q-RND1")) {
+  catalogue.games.push({ ...catalogue.games.find((g) => g.mechanic === "pack_conversation"), id: "ND-Q-RND1", title: "Questionnaire aléatoire",
+    sort: 0, meta: { random: true, code: "RND1" }, implementation: "playable" });
+}
 const playable = Object.keys(fixture("index.json"));
 
 const BASE = "http://localhost:4173";
@@ -142,6 +147,8 @@ const allScreens = [
     await page.getByRole("button", { name: /Afficher les filtres/ }).click();
     await page.getByRole("button", { name: "Discussion · plus long" }).click();
   } },
+  { name: "32-fermer-partie-ouverte", path: "/bibliotheques/ND-Q-P01", scenario: { ...duo, open: { id: SESSION, game_id: "N2-076", status: "lobby", title: "Morpion" } },
+    action: async (page) => page.getByRole("button", { name: "Fermer l'autre partie et lancer" }).click() },
   { name: "22b-profil", path: "/reglages/profil", scenario: duo },
   { name: "25-conseils", path: "/conseils", scenario: duo },
   { name: "30-chat", path: "/accueil", scenario: duo, action: async (page) => page.getByRole("button", { name: /Ouvrir la discussion/ }).last().click() },

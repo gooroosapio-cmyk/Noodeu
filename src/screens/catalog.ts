@@ -65,12 +65,13 @@ export const SHELVES: Shelf[] = ["questions", "tests", "conversation", "minijeux
 
 const SHELF_BY_CATEGORY: Record<string, Shelf> = {
   "nd-se-decouvrir": "questions",
-  "nd-mieux-se-comprendre": "tests",
+  "nd-mieux-se-comprendre": "questions", // rubrique fusionnée dans « Se découvrir »
   "nd-conversation-decouverte": "conversation",
   "nd-mini-jeux-interactifs": "minijeux",
 };
+// Première catégorie de chaque rayon (« Se découvrir » pour les questions, même avec l'ancienne catégorie fusionnée).
 export const CATEGORY_BY_SHELF: Partial<Record<Shelf, string>> = Object.fromEntries(
-  Object.entries(SHELF_BY_CATEGORY).map(([c, s]) => [s, c]),
+  Object.entries(SHELF_BY_CATEGORY).reverse().map(([c, s]) => [s, c]),
 );
 
 /** Une activité intime rejoint « À huis clos », quelle que soit sa catégorie. */

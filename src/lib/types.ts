@@ -127,7 +127,7 @@ export interface Game {
   difficulties: string[];
   thumbnail: string | null;
   /** Métadonnées éditoriales (nombre d'items, code de référence, statut des droits…). */
-  meta: { items?: number; code?: string; instrument?: string; reference_code?: string; rights_status?: string; duration_is_estimate?: boolean } | null;
+  meta: { items?: number; random?: boolean; code?: string; instrument?: string; reference_code?: string; rights_status?: string; duration_is_estimate?: boolean } | null;
   intensity: Intensity | null;
   formats: Format[];
   duration_kind: "rapide" | "discussion" | null;

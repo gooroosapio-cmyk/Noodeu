@@ -144,6 +144,7 @@ function PackPlaying({ c, round }: { c: Common; round: QRound }) {
       <IntensityTransition prev={prevItem ? meta[prevItem] : undefined} cur={meta[card.item.id]} />
       <article className="q-card">
         <div className="q-card__head">
+          {card.item.adult && <span className="nd-chip nd-chip--peach">+18</span>}
           <span className="nd-chip">{card.set_no ? t("q.pack.setChip", { s: card.set_no }) : t("q.pack.cardChip", { n: card.index + 1 })}</span>
           <Art name={ART_BY_PACK[(c.st.game.config as any).pack?.code ?? ""] ?? "c01-generic"} size={64} />
         </div>
@@ -267,6 +268,23 @@ function TestDone({ c, round }: { c: Common; round: QRound }) {
   const declined = Boolean(card.declined?.[me.seat]);
   const shared = Boolean(card.shared?.[me.seat]);
   const theirs = partner ? card.shared?.[partner.seat] : null;
+  // Questionnaire sans calcul (test de pureté allégé) : rien à partager, seules les réponses privées existent.
+  const noScore = Object.keys(card.axes ?? {}).length === 0;
+  if (noScore) {
+    return (
+      <div className="stack stack--4 enter" aria-live="polite">
+        <section className="card stack stack--3">
+          <div className="q-result-head">
+            <Art name="result-private" size={96} />
+            <h2 className="t-section">{declined ? t("q.test.youDeclined") : t("q.test.noScoreTitle")}</h2>
+            <p className="t-meta row"><Icon name="lock-keyhole" size={16} />{t("q.test.noScoreText")}</p>
+          </div>
+          {(card.reserves ?? []).map((r: string) => <p key={r} className="t-meta row"><Icon name="info" size={16} />{r}</p>)}
+        </section>
+        <p className="t-meta">{partner && (card.completed?.[partner.seat] || card.declined?.[partner.seat]) ? t("q.test.partnerFinished", { name: nameOf(partner) }) : t("q.test.partnerInProgress")}</p>
+      </div>
+    );
+  }
   return (
     <div className="stack stack--4 enter" aria-live="polite">
       <section className="card stack stack--3">
@@ -348,7 +366,7 @@ function TestPlaying({ c, round }: { c: Common; round: QRound }) {
           : <ScaleItem key={it.id} item={it} scale={card.scales?.[it.scale] ?? []} value={answers[it.id] as number | null | undefined} onChange={(v) => set(it.id, v)} disabled={busy} />)}
       </div>
       {err && <Alert>{err}</Alert>}
-      {last && (
+      {last && Object.keys(card.axes ?? {}).length > 0 && (
         <label className="switch-row card" style={{ paddingInline: 12 }}>
           <span className="switch-row__text"><span>{t("q.test.shareOnFinish")}</span><span className="t-meta">{t("q.test.shareHint")}</span></span>
           <input className="switch" type="checkbox" role="switch" checked={share} onChange={(e) => setShare(e.target.checked)} />

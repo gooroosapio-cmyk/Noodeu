@@ -200,8 +200,8 @@ function Lobby({ st, me, partner, partnerHere, busy, online, run, onChat, onOpti
   // Moteur 2.1.0 : les réglages passent par la fenêtre d'options (avec les préférences privées).
   const settings = onOptions ? {} : st.game.config.settings ?? {};
   // Questionnaires « À huis clos » : accord personnel de chacun, enregistré par le serveur avant le lancement.
-  const intimate = isQuestionnaireMech((st.game.config as unknown as { mechanic?: string }).mechanic)
-    && Boolean((st.game as unknown as { adult_available?: boolean }).adult_available);
+  // Activité « À huis clos » (questionnaire, pack ou jeu) : accord obligatoire de chacun avant le lancement.
+  const intimate = st.game.content_level === "intime";
   return (
     <section className="stack stack--5 enter">
       <h1 className="sr-only">{t("game.lobbyTitle")}</h1>
@@ -244,9 +244,8 @@ function Lobby({ st, me, partner, partnerHere, busy, online, run, onChat, onOpti
       </div>
 
       {intimate && <AdultConsent st={st} busy={busy} online={online} run={run} />}
-      {(isConversationMech((st.game.config as unknown as { mechanic?: string }).mechanic) || isWordMech((st.game.config as unknown as { mechanic?: string }).mechanic))
-        && Boolean((st.game as unknown as { adult_available?: boolean }).adult_available)
-        && <OptionalAdult st={st} busy={busy} online={online} run={run} />}
+      {/* Cartes +18 facultatives (jeux de conversation, packs avec quelques cartes +18) : désactivées par défaut. */}
+      {!intimate && Boolean(st.game.adult_available) && <OptionalAdult st={st} busy={busy} online={online} run={run} />}
 
       {Object.entries(settings).map(([key, def]) => (
         <fieldset key={key}>

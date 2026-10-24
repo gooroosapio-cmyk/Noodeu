@@ -59,7 +59,7 @@ end $$;
 
 -- ===== Classement =====
 do $$ begin
-  perform t11.ok((select count(*) from public.content_meta) >= 1000, 'questions classées');
+  perform t11.ok((select count(*) from public.content_meta) = 804, 'questions classées (catalogue final, hors tests standardisés)');
   perform t11.ok(not exists (select 1 from public.content_meta m join public.content_banks cb on cb.bank = m.bank and cb.value ->> 'id' = m.item_id
                              where coalesce((cb.value ->> 'adult')::boolean, false) <> m.adult), '+18 du classement = +18 du kit');
   perform t11.ok(not exists (select 1 from public.content_meta where bank like 'q_rice' or bank in ('q_ipip', 'q_qsi', 'q_spn', 'q_aairs', 'q_csi', 'q_ecrrs')),
@@ -155,8 +155,8 @@ begin
   perform t11.ok((public.save_for_later(s, 1) ->> 'ok')::boolean, 'double appel sans doublon');
   items := public.get_my_items();
   perform t11.ok(jsonb_array_length(items -> 'later') = 1 and items #>> '{later,0,view,text}' = t11.card(s) #>> '{item,text}', 'texte retrouvé');
-  insert into public.item_favorites (user_id, kind, bank, item_id) values (auth.uid(), 'question', 'conv_never', 'G02-J001');
-  insert into public.item_feedback (user_id, bank, item_id, value) values (auth.uid(), 'conv_never', 'G02-J001', 'trop_intime');
+  insert into public.item_favorites (user_id, kind, bank, item_id) values (auth.uid(), 'question', 'conv_never', 'C3-03-001');
+  insert into public.item_feedback (user_id, bank, item_id, value) values (auth.uid(), 'conv_never', 'C3-03-001', 'trop_intime');
   perform t11.as_user(t11.uid(s, 2));
   set local role authenticated;
   perform t11.ok((select count(*) from public.later_items) = 0 and (select count(*) from public.item_favorites) = 0
@@ -182,8 +182,8 @@ begin
   perform t11.ok(exists (select 1 from public.content_meta m where m.bank = d1 ->> 'bank' and m.item_id = d1 ->> 'item_id'
                          and m.standalone and not m.review and not m.adult), 'question autonome, relue, non +18 par défaut');
   perform t11.ok(public.get_daily() ->> 'item_id' = d1 ->> 'item_id', 'conservée pour la journée');
-  d3 := public.get_daily('theme', 'Repas et goûts');
-  perform t11.ok((select theme from public.content_meta where bank = d3 ->> 'bank' and item_id = d3 ->> 'item_id') = 'Repas et goûts', 'tirage thématique');
+  d3 := public.get_daily('theme', 'Recul et quotidien');
+  perform t11.ok((select theme from public.content_meta where bank = d3 ->> 'bank' and item_id = d3 ->> 'item_id') = 'Recul et quotidien', 'tirage thématique');
   perform t11.as_user('00000000-0000-4000-a000-0000000000a1');
   perform t11.ok(public.get_daily() ->> 'item_id' = d3 ->> 'item_id', 'changement de thème visible par les deux');
   -- Pas de répétition récente : 20 jours simulés.

@@ -3,7 +3,7 @@
 
 Usage : python3 scripts/classify_contents.py   (lit les banques de la base locale nd2 ou NOODEU_DB)
 Écrit :
-  - supabase/migrations/20261026000110_content_meta_data.sql : une ligne par question (identifiant de banque inchangé) ;
+  - supabase/migrations/20261027000120_content_meta_final.sql : une ligne par question (identifiant de banque inchangé) ;
   - docs/CLASSEMENT_A_RELIRE.md : les cas ambigus, avec la raison.
 
 Méthode : premier classement par règles explicites (drapeau +18 du kit, type de carte, banque, vocabulaire), sans
@@ -21,12 +21,15 @@ from pathlib import Path
 DB = os.environ.get("NOODEU_DB", "nd2")
 PG = ["psql", "-h", "/var/tmp/noodeu-pg", "-p", "54329", "-U", "postgres", "-d", DB, "-At", "-v", "ON_ERROR_STOP=1"]
 ROOT = Path(__file__).resolve().parent.parent
-OUT = ROOT / "supabase/migrations/20261026000110_content_meta_data.sql"
+OUT = ROOT / "supabase/migrations/20261027000120_content_meta_final.sql"
 REVIEW = ROOT / "docs/CLASSEMENT_A_RELIRE.md"
 
-BANKS = ["q_aron", "q_gottman_open", "q_usu_roadtrip", "q_gottman_rituals", "q_gottman_roles", "q_gottman_goals",
+OPEN_PACKS = ["q_gottman_open", "q_usu_roadtrip", "q_series", "q_complicite", "q_recul", "q_emotions", "q_reconfort",
+              "q_hc_envies", "q_hc_parler", "q_hc_corps", "q_hc_protection", "q_hc_plaisir", "q_hc_envies_plus",
+              "q_hc_intimite_plus", "q_hc_complements"]
+BANKS = ["q_aron"] + OPEN_PACKS + ["q_gottman_rituals", "q_gottman_roles", "q_gottman_goals",
          "q_gottman_values", "conv_never", "conv_dilemma", "conv_target", "conv_opinion", "conv_sentence", "conv_predict",
-         "conv_truth_dare", "cite_trois"]
+         "conv_truth_dare", "cite_trois", "conv_two_truths_ideas"]
 PACK_THEME = {"q_aron": "36 questions pour se rapprocher", "q_gottman_open": "Conversations à prendre le temps d'avoir",
               "q_usu_roadtrip": "Se retrouver", "q_gottman_rituals": "Nos petits rituels", "q_gottman_roles": "Notre place dans le couple",
               "q_gottman_goals": "Nos projets communs", "q_gottman_values": "Ce qui compte pour nous"}
@@ -72,10 +75,14 @@ def classify(bank: str, idx: int, v: dict):
     adult = bool(v.get("adult", False))
     theme = v.get("theme") or PACK_THEME.get(bank)
     notes = []
+    if v.get("review"):
+        notes.append("entrée sans badge dans son PDF, classée +18 par prudence : à confirmer")
 
     # Durée et formats selon la nature de la carte.
-    if bank in ("q_aron", "q_gottman_open", "q_usu_roadtrip"):
+    if bank == "q_aron" or bank in OPEN_PACKS:
         kind, mins, formats = "discussion", (5, 10), ["duo", "solo"]
+    elif bank == "conv_two_truths_ideas":
+        kind, mins, formats = "rapide", (1, 2), ["duo", "jeu"]
     elif bank.startswith("q_gottman_"):
         kind, mins, formats = "rapide", (1, 2), ["duo"] + (["rituel"] if bank == "q_gottman_rituals" else [])
     elif bank == "conv_truth_dare":
@@ -89,7 +96,7 @@ def classify(bank: str, idx: int, v: dict):
         kind, mins, formats = "rapide", (1, 2), ["duo", "jeu"]
 
     # Autonomie (question du jour) : jamais une question d'un parcours ordonné ni une consigne chronométrée.
-    standalone = bank in ("q_gottman_open", "q_usu_roadtrip", "conv_never", "conv_dilemma", "conv_target", "conv_opinion",
+    standalone = bank in OPEN_PACKS or bank in ("conv_never", "conv_dilemma", "conv_target", "conv_opinion",
                           "conv_sentence", "conv_predict") or (bank == "conv_truth_dare" and v.get("kind") == "truth")
 
     # Intensité.
@@ -119,7 +126,7 @@ def classify(bank: str, idx: int, v: dict):
         notes.append(f"plusieurs saisons détectées ({', '.join(seasons)})")
 
     long_text = None
-    if bank in ("q_gottman_open", "q_usu_roadtrip"):
+    if bank in OPEN_PACKS and not v.get("options_ordered"):
         long_text = FOLLOWUPS[zlib.crc32(item_id.encode()) % len(FOLLOWUPS)]
 
     rows.append([bank, item_id, intensity, adult, kind, mins[0], mins[1], formats, standalone, bool(notes),

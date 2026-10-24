@@ -66,7 +66,7 @@ export function Home() {
   const favorites = cat.games.filter((g) => cat.favorites.has(g.id)).slice(0, 3);
   // Suggestions : uniquement des activités jouables dès maintenant.
   // « À huis clos » n'est jamais suggéré sur l'accueil.
-  const discover = cat.games.filter((g) => !cat.favorites.has(g.id) && g.implementation === "playable" && g.content_level !== "intime").slice(0, 4);
+  const discover = cat.games.filter((g) => !cat.favorites.has(g.id) && g.implementation === "playable" && g.content_level !== "intime" && !g.meta?.random).slice(0, 4);
 
   return (
     <main className="page page--tight">

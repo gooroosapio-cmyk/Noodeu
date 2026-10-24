@@ -151,3 +151,10 @@ fuseau, thème, sans répétition, solo ; progression : passée différente de r
 rappels sans contenu, plafond et espacement ; réglages personnels illisibles et non modifiables par le partenaire).
 Recette visuelle : écrans `07c-filtres`, `20-pause-reprise`, `22c-majorite-18`, `22d-rappels`, question du jour sur
 `06*-accueil`, progression et « Mes questions » sur `21a-espace-duo`.
+
+Catalogue final : `supabase/tests/c16_catalogue_final.sql` (anciennes questions absentes, 805 + 120 entrées, rubriques,
+chaque activité a sa banque, aucun classement orphelin ; cartes +18 d'un pack sautées sans accord et ordre conservé ;
+questionnaire aléatoire : nombre choisi, rubrique, +18 et plafond respectés, même liste d'une carte à l'autre, aucune
+progression, « Plus tard » ; idées de Deux vérités jamais +18 sans accord). Tests c14 et c15 mis à jour (effectifs du
+catalogue final, test de pureté sans score). Recette visuelle : `08a-packs-c01` (rubrique fusionnée et questionnaire
+aléatoire), `07-bibliotheques` (À huis clos en deuxième), `32-fermer-partie-ouverte`.

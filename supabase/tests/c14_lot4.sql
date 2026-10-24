@@ -83,9 +83,9 @@ do $$ begin
                  '3 jeux jouables');
   perform t10.ok((select count(*) from public.content_banks where bank = 'hangman_words') = 288, '288 mots relus');
   perform t10.ok((select count(*) from public.content_banks where bank = 'petit_bac') = 134, 'index Petit bac de 134 entrées');
-  perform t10.ok((select count(*) from public.content_banks where bank = 'cite_trois') = 100
-                 and (select count(*) from public.content_banks where bank = 'cite_trois' and (value ->> 'adult')::boolean) = 30,
-                 '100 consignes dont 30 +18');
+  perform t10.ok((select count(*) from public.content_banks where bank = 'cite_trois') = 24
+                 and (select count(*) from public.content_banks where bank = 'cite_trois' and (value ->> 'adult')::boolean) = 14,
+                 '24 consignes du catalogue final dont 14 +18');
   perform t10.ok(not exists (select 1 from public.content_banks where bank = 'cite_trois'
                              and (value ? 'editorial_examples_not_for_runtime' or value ? 'judge_note_fr' or value::text ilike '%exemple%')),
                  'aucun exemple éditorial ni note de jugement importé');

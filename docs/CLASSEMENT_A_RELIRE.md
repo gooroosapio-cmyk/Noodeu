@@ -7,79 +7,86 @@ une correction manuelle en base (`source` différent de `regles-v1`) n'est jamai
 | Banque | Soft | Moyen | Hot | À relire |
 |---|---:|---:|---:|---:|
 | q_aron | 11 | 25 | 0 | 0 |
-| q_gottman_open | 29 | 1 | 0 | 0 |
-| q_usu_roadtrip | 50 | 4 | 1 | 1 |
+| q_gottman_open | 30 | 0 | 0 | 0 |
+| q_usu_roadtrip | 42 | 3 | 8 | 1 |
+| q_series | 27 | 7 | 1 | 1 |
+| q_complicite | 12 | 0 | 5 | 0 |
+| q_recul | 22 | 2 | 0 | 1 |
+| q_emotions | 5 | 2 | 9 | 2 |
+| q_reconfort | 18 | 2 | 0 | 0 |
+| q_hc_envies | 0 | 4 | 16 | 4 |
+| q_hc_parler | 0 | 5 | 15 | 5 |
+| q_hc_corps | 0 | 1 | 19 | 1 |
+| q_hc_protection | 0 | 8 | 12 | 8 |
+| q_hc_plaisir | 0 | 3 | 17 | 3 |
+| q_hc_envies_plus | 0 | 0 | 14 | 0 |
+| q_hc_intimite_plus | 0 | 1 | 10 | 1 |
+| q_hc_complements | 0 | 0 | 15 | 0 |
 | q_gottman_rituals | 12 | 1 | 0 | 0 |
 | q_gottman_roles | 6 | 1 | 0 | 0 |
 | q_gottman_goals | 10 | 0 | 0 | 0 |
-| q_gottman_values | 17 | 2 | 1 | 1 |
-| conv_never | 62 | 15 | 23 | 7 |
-| conv_dilemma | 65 | 17 | 18 | 12 |
-| conv_target | 68 | 12 | 20 | 10 |
-| conv_opinion | 64 | 12 | 24 | 6 |
-| conv_sentence | 64 | 8 | 28 | 2 |
-| conv_predict | 64 | 13 | 23 | 7 |
-| conv_truth_dare | 74 | 18 | 38 | 6 |
-| cite_trois | 68 | 7 | 25 | 5 |
+| q_gottman_values | 17 | 3 | 0 | 1 |
+| conv_never | 40 | 2 | 11 | 0 |
+| conv_dilemma | 34 | 1 | 19 | 1 |
+| conv_target | 29 | 2 | 22 | 2 |
+| conv_opinion | 0 | 4 | 26 | 4 |
+| conv_sentence | 7 | 1 | 22 | 9 |
+| conv_predict | 15 | 3 | 12 | 4 |
+| conv_truth_dare | 69 | 8 | 2 | 1 |
+| cite_trois | 9 | 2 | 13 | 1 |
+| conv_two_truths_ideas | 1 | 0 | 29 | 0 |
 
-Total : 1001 questions classées, 57 à relire.
+Total : 804 questions classées, 50 à relire.
 
 | Identifiant | Classement | Raison | Texte |
 |---|---|---|---|
-| USU_ROADTRIP55-FRTR01-037 | hot | vocabulaire intime (erotique) dans une carte non marquée +18 dans le kit | As-tu déjà fait un rêve érotique à mon sujet ? Quel était ce rêve ? |
-| GOTTMAN_VALUES20-FRTR01-005 | hot | vocabulaire intime (sexualit) dans une carte non marquée +18 dans le kit | Nous avons des points de vue semblables sur la place de la sexualité dans nos vies. |
-| G02-J079 | moyen · +18 | carte +18 surtout pratique (santé, limites, communication) : classée Moyen, à confirmer | Je n’ai jamais ressenti de la gêne après une première nuit ensemble sans savoir comment reprendre la conversation. |
-| G02-J080 | moyen · +18 | carte +18 surtout pratique (santé, limites, communication) : classée Moyen, à confirmer | Je n’ai jamais réalisé après coup que j’aurais aimé parler de nos attentes sexuelles plus tôt. |
-| G02-J088 | moyen · +18 | carte +18 surtout pratique (santé, limites, communication) : classée Moyen, à confirmer | Je n’ai jamais trouvé plus facile de parler de sexualité par message qu’en face à face. |
-| G02-J090 | moyen · +18 | carte +18 surtout pratique (santé, limites, communication) : classée Moyen, à confirmer | Je n’ai jamais demandé qu’on reprenne calmement une discussion sur le sexe au lieu de plaisanter pour l’éviter. |
-| G02-J097 | moyen · +18 | carte +18 surtout pratique (santé, limites, communication) : classée Moyen, à confirmer | Je n’ai jamais proposé de faire un dépistage des IST avant de commencer une vie sexuelle à deux. |
-| G02-J098 | moyen · +18 | carte +18 surtout pratique (santé, limites, communication) : classée Moyen, à confirmer | Je n’ai jamais laissé l’autre se charger seul de parler de contraception. |
-| G02-J100 | moyen · +18 | carte +18 surtout pratique (santé, limites, communication) : classée Moyen, à confirmer | Je n’ai jamais eu besoin de dire que notre vie sexuelle ne regardait pas nos proches. |
-| G03-T071 | moyen · +18 | carte +18 surtout pratique (santé, limites, communication) : classée Moyen, à confirmer | Pour aborder la sexualité entre nous, tu préfères… En parler au fil des échanges / Prévoir une conversation dédiée où l’on peut tout mettre à plat |
-| G03-T078 | moyen · +18 | carte +18 surtout pratique (santé, limites, communication) : classée Moyen, à confirmer | Pour découvrir un sujet lié à la sexualité, tu préfères… Choisir une ressource ensemble puis en parler / Te renseigner de ton côté puis partager ce que tu souhaites |
-| G03-T080 | moyen · +18 | carte +18 surtout pratique (santé, limites, communication) : classée Moyen, à confirmer | Après une conversation sur le sexe qui t’a mis mal à l’aise, tu préfères… Revenir sur le passage précis qui t’a gêné / Commencer par expliquer ce qui te mettrait plus en confiance pour la suite |
-| G03-T081 | moyen · +18 | carte +18 surtout pratique (santé, limites, communication) : classée Moyen, à confirmer | Dans une conversation sur la sexualité de ton partenaire, tu préfères… Connaître les grandes lignes de son passé sexuel / Parler surtout de ses envies et limites actuelles |
-| G03-T083 | moyen · +18 | carte +18 surtout pratique (santé, limites, communication) : classée Moyen, à confirmer | Pour préciser tes limites sexuelles, tu préfères… Commencer par ce que tu ne souhaites pas / Commencer par ce qui te met à l’aise puis préciser tes limites |
-| G03-T084 | moyen · +18 | carte +18 surtout pratique (santé, limites, communication) : classée Moyen, à confirmer | Pour clarifier l’exclusivité d’une relation sexuelle, tu préfères… Ouvrir la discussion dès que la relation devient intime / Convenir d’abord d’un moment pour dire clairement ce que chacun souhaite |
-| G03-T086 | moyen · +18 | carte +18 surtout pratique (santé, limites, communication) : classée Moyen, à confirmer | Pour parler du dépistage des IST, tu préfères… Prévoir ensemble quand vous allez vous renseigner / Faire chacun vos démarches puis partager les informations utiles à votre relation |
-| G03-T087 | moyen · +18 | carte +18 surtout pratique (santé, limites, communication) : classée Moyen, à confirmer | Pour discuter de contraception, tu préfères… Vous renseigner ensemble auprès d’un professionnel de santé / Préparer chacun vos questions puis en discuter et demander conseil si nécessaire |
-| G03-T088 | moyen · +18 | carte +18 surtout pratique (santé, limites, communication) : classée Moyen, à confirmer | Si tu n’es pas à l’aise pour raconter un détail de ton passé sexuel, tu préfères… Dire simplement que tu souhaites le garder privé / Expliquer pourquoi tu ne veux pas entrer dans ce détail, sans le raconter |
-| G03-T094 | moyen · +18 | carte +18 surtout pratique (santé, limites, communication) : classée Moyen, à confirmer | Pour garder notre intimité privée auprès des amis, tu préfères… Convenir à l’avance des sujets qui restent entre nous / Vérifier l’accord de l’autre avant de partager un élément personnel |
-| G03-T098 | moyen · +18 | carte +18 surtout pratique (santé, limites, communication) : classée Moyen, à confirmer | Après un moment intime qui t’a laissé des questions, tu préfères… Proposer un petit échange dès que vous êtes au calme / Demander un vrai moment à part pour en parler plus tranquillement |
-| G03-T099 | moyen · +18 | carte +18 surtout pratique (santé, limites, communication) : classée Moyen, à confirmer | Si un proche pose une question sur notre vie sexuelle, tu préfères… Répondre clairement que le sujet reste privé / Réorienter la conversation avec humour sans donner de détail |
-| G04-Q071 | moyen · +18 | carte +18 surtout pratique (santé, limites, communication) : classée Moyen, à confirmer | Qui de nous deux lancerait le premier une discussion sur nos envies sexuelles ? |
-| G04-Q075 | moyen · +18 | carte +18 surtout pratique (santé, limites, communication) : classée Moyen, à confirmer | Qui de nous deux utiliserait plus facilement les mots exacts pour parler de sexualité ? |
-| G04-Q076 | moyen · +18 | carte +18 surtout pratique (santé, limites, communication) : classée Moyen, à confirmer | Qui de nous deux commencerait plus volontiers une discussion sur le sexe par une plaisanterie ? |
-| G04-Q079 | moyen · +18 | carte +18 surtout pratique (santé, limites, communication) : classée Moyen, à confirmer | Qui de nous deux aurait le plus besoin d’un moment calme pour parler de sa vie sexuelle ? |
-| G04-Q080 | moyen · +18 | carte +18 surtout pratique (santé, limites, communication) : classée Moyen, à confirmer | Qui de nous deux voudrait préciser ce que signifie « être à l’aise » avant de poursuivre une conversation sur le sexe ? |
-| G04-Q084 | moyen · +18 | carte +18 surtout pratique (santé, limites, communication) : classée Moyen, à confirmer | Qui de nous deux rirait le plus facilement pour cacher sa gêne pendant une discussion sur le sexe ? |
-| G04-Q086 | moyen · +18 | carte +18 surtout pratique (santé, limites, communication) : classée Moyen, à confirmer | Qui de nous deux poserait le plus facilement une limite à ce qu’on raconte de notre intimité aux amis ? |
-| G04-Q089 | moyen · +18 | carte +18 surtout pratique (santé, limites, communication) : classée Moyen, à confirmer | Qui de nous deux demanderait plus volontiers qu’un message intime reste seulement dans notre conversation ? |
-| G04-Q093 | moyen · +18 | carte +18 surtout pratique (santé, limites, communication) : classée Moyen, à confirmer | Qui de nous deux penserait le plus vite à demander ce que l’autre souhaite garder privé de son passé sexuel ? |
-| G04-Q095 | moyen · +18 | carte +18 surtout pratique (santé, limites, communication) : classée Moyen, à confirmer | Qui de nous deux préférerait parler des attentes sexuelles avant une première nuit ensemble ? |
-| G10-O081 | moyen · +18 | carte +18 surtout pratique (santé, limites, communication) : classée Moyen, à confirmer | Parler de ses préférences sexuelles est plus facile par message qu’en face à face. |
-| G10-O083 | moyen · +18 | carte +18 surtout pratique (santé, limites, communication) : classée Moyen, à confirmer | Une conversation sur les envies sexuelles est plus utile à un moment calme qu’au lit. |
-| G10-O085 | moyen · +18 | carte +18 surtout pratique (santé, limites, communication) : classée Moyen, à confirmer | Il est plus facile de parler de ce qui plaît que de ce qu’on aimerait changer au lit. |
-| G10-O086 | moyen · +18 | carte +18 surtout pratique (santé, limites, communication) : classée Moyen, à confirmer | Une petite discussion après avoir fait l’amour peut prolonger la complicité. |
-| G10-O088 | moyen · +18 | carte +18 surtout pratique (santé, limites, communication) : classée Moyen, à confirmer | Dire qu’on manque d’expérience peut faciliter une première conversation sur la sexualité. |
-| G10-O099 | moyen · +18 | carte +18 surtout pratique (santé, limites, communication) : classée Moyen, à confirmer | Les mots tendres rendent une conversation sexuelle plus facile que l’humour. |
-| G09-P090 | moyen · +18 | carte +18 surtout pratique (santé, limites, communication) : classée Moyen, à confirmer | Après une conversation franche sur nos envies sexuelles, j’aimerais me sentir… |
-| G09-P096 | moyen · +18 | carte +18 surtout pratique (santé, limites, communication) : classée Moyen, à confirmer | Une chose intime que je préfère garder hors des conversations avec mes amis, c’est… |
-| G05-D073 | moyen · +18 | carte +18 surtout pratique (santé, limites, communication) : classée Moyen, à confirmer | Quel mot te gêne le plus à prononcer dans une conversation sur le sexe ? |
-| G05-D075 | moyen · +18 | carte +18 surtout pratique (santé, limites, communication) : classée Moyen, à confirmer | Quelle phrase t’aiderait à lancer une discussion sur notre vie sexuelle sans te sentir maladroit ? |
-| G05-D078 | moyen · +18 | carte +18 surtout pratique (santé, limites, communication) : classée Moyen, à confirmer | À quel moment trouves-tu le plus simple d’avoir une vraie conversation sur la sexualité ? |
-| G05-D089 | moyen · +18 | carte +18 surtout pratique (santé, limites, communication) : classée Moyen, à confirmer | Quand un échange sur le sexe devient gênant, qu’est-ce qui t’aiderait le plus à reprendre la conversation ? |
-| G05-D091 | moyen · +18 | carte +18 surtout pratique (santé, limites, communication) : classée Moyen, à confirmer | Quel aspect de ton passé sexuel préfères-tu garder privé ? |
-| G05-D099 | moyen · +18 | carte +18 surtout pratique (santé, limites, communication) : classée Moyen, à confirmer | Quelle limite aimerais-tu poser sur ce que tes amis peuvent savoir de ta vie sexuelle ? |
-| G05-D100 | moyen · +18 | carte +18 surtout pratique (santé, limites, communication) : classée Moyen, à confirmer | Quelle attitude te ferait sentir que tu peux parler de tes limites sexuelles sans être jugé ? |
-| G01-A030 | moyen | ton léger (invente) mais sujet sensible (argent) : Moyen ou Soft ? | Invente deux petites attentions qu'on pourrait s'offrir à distance sans dépenser d'argent. Choisis celle que tu préfères. |
-| G01-A041 | moyen · +18 | carte +18 surtout pratique (santé, limites, communication) : classée Moyen, à confirmer | Écris un sujet lié à la sexualité dont tu n'as pas encore osé me parler, puis une question simple pour ouvrir la discussion. |
-| G01-A045 | moyen · +18 | carte +18 surtout pratique (santé, limites, communication) : classée Moyen, à confirmer | Dis-moi comment tu préfères qu'on aborde le sexe avec toi : par une conversation directe, par l'humour ou autrement. Donne un exemple de phrase qui te mettrait à l'aise. |
-| G01-V075 | moyen · +18 | carte +18 surtout pratique (santé, limites, communication) : classée Moyen, à confirmer | Si tu devais choisir ce qui doit rester strictement entre nous dans nos échanges sur le sexe, que voudrais-tu garder privé ? |
-| G01-A053 | moyen · +18 | carte +18 surtout pratique (santé, limites, communication) : classée Moyen, à confirmer | Écris un message pour dire que tu aimerais parler de notre vie sexuelle, sans reproche ni sous-entendu. |
-| G01-A055 | moyen · +18 | carte +18 surtout pratique (santé, limites, communication) : classée Moyen, à confirmer | Écris une chose que tu ne veux pas voir partagée sur notre intimité, puis demande-moi ce que je voudrais garder privé. |
-| G07-C072 | moyen · +18 | carte +18 surtout pratique (santé, limites, communication) : classée Moyen, à confirmer | Donne trois mots qui peuvent apparaître dans une discussion sur le plaisir sexuel. |
-| G07-C082 | moyen · +18 | carte +18 surtout pratique (santé, limites, communication) : classée Moyen, à confirmer | Donne trois façons de commencer une discussion sur les envies sexuelles. |
-| G07-C086 | moyen · +18 | carte +18 surtout pratique (santé, limites, communication) : classée Moyen, à confirmer | Cite trois moments calmes où des adultes peuvent parler de leur vie sexuelle. |
-| G07-C090 | moyen · +18 | carte +18 surtout pratique (santé, limites, communication) : classée Moyen, à confirmer | Trouve trois phrases pour dire qu’on aimerait parler de sexualité plus tard. |
-| G07-C097 | moyen · +18 | carte +18 surtout pratique (santé, limites, communication) : classée Moyen, à confirmer | Cite trois détails qui peuvent faire préférer un lieu privé pour parler de sexualité. |
+| C1-07-037 | hot | vocabulaire intime (erotique) dans une carte non marquée +18 dans le kit | T’as déjà fait un rêve érotique à mon sujet ? |
+| C1-12-003 | moyen · +18 | carte +18 surtout pratique (santé, limites, communication) : classée Moyen, à confirmer | C’est quoi tes limites à ne jamais dépasser pendant les rapports sexuels ? |
+| C1-16-010 | moyen | ton léger (ridicule) mais sujet sensible (peur) : Moyen ou Soft ? | Y a une peur que t’as encore aujourd’hui et que tu trouves un peu ridicule ? |
+| C2-07-001 | moyen · +18 | carte +18 surtout pratique (santé, limites, communication) : classée Moyen, à confirmer | Tu te sens plus à l’aise pour parler de tes émotions ou de tes envies sexuelles ? |
+| C2-07-006 | moyen · +18 | carte +18 surtout pratique (santé, limites, communication) : classée Moyen, à confirmer | Tu te sens plus proche de l’autre après une conversation profonde ou après un moment intime ? |
+| C5-01-010 | moyen · +18 | carte +18 surtout pratique (santé, limites, communication) : classée Moyen, à confirmer | Quelle limite tu veux pouvoir poser sans avoir à raconter ton passé ni te justifier ? |
+| C5-01-013 | moyen · +18 | carte +18 surtout pratique (santé, limites, communication) : classée Moyen, à confirmer | Quelles conditions te permettent de parler de sexe sans te sentir obligé d’aller plus loin ? |
+| C5-01-014 | moyen · +18 | carte +18 surtout pratique (santé, limites, communication) : classée Moyen, à confirmer | Parler de tes parties génitales te met à l’aise, ou tu préfères commencer par des questions plus générales ? |
+| C5-01-020 | moyen · +18 | carte +18 surtout pratique (santé, limites, communication) : classée Moyen, à confirmer | À la fin de ce pack, quelle info sur tes limites tu veux garder pour toi, partager, ou préciser plus tard ? |
+| C5-02-001 | moyen · +18 | carte +18 surtout pratique (santé, limites, communication) : classée Moyen, à confirmer | Quel mot te semble le plus facile pour lancer une conversation sur votre sexualité ? |
+| C5-02-002 | moyen · +18 | carte +18 surtout pratique (santé, limites, communication) : classée Moyen, à confirmer | Tu préfères parler de sexe à voix haute, par écrit, ou en appel ? |
+| C5-02-003 | moyen · +18 | carte +18 surtout pratique (santé, limites, communication) : classée Moyen, à confirmer | À quel moment une discussion sexuelle a le plus de chances de bien se passer pour toi ? |
+| C5-02-007 | moyen · +18 | carte +18 surtout pratique (santé, limites, communication) : classée Moyen, à confirmer | Quels mots tu préfères pour parler de vulve, clitoris, pénis ? |
+| C5-02-018 | moyen · +18 | carte +18 surtout pratique (santé, limites, communication) : classée Moyen, à confirmer | Quand vos envies ne coïncident pas, quelle conversation te semblerait utile ? |
+| C5-03-020 | moyen · +18 | carte +18 surtout pratique (santé, limites, communication) : classée Moyen, à confirmer | Quel sujet sur ton corps t’aimerais mieux connaître avant d’en parler avec un partenaire ? |
+| C5-04-001 | moyen · +18 | carte +18 surtout pratique (santé, limites, communication) : classée Moyen, à confirmer | Comment tu lancerais une conversation sur les préservatifs avant que le moment devienne intime ? |
+| C5-04-002 | moyen · +18 | carte +18 surtout pratique (santé, limites, communication) : classée Moyen, à confirmer | Qu’est-ce qui te rendrait une discussion sur le dépistage plus simple ? |
+| C5-04-005 | moyen · +18 | carte +18 surtout pratique (santé, limites, communication) : classée Moyen, à confirmer | Si un préservatif gêne, irrite ou semble mal adapté, comment tu voudrais le signaler ? |
+| C5-04-010 | moyen · +18 | carte +18 surtout pratique (santé, limites, communication) : classée Moyen, à confirmer | Pour choisir une contraception, quels besoins personnels tu voudrais pouvoir faire entendre ? |
+| C5-04-012 | moyen · +18 | carte +18 surtout pratique (santé, limites, communication) : classée Moyen, à confirmer | En cas d’oubli contraceptif ou de préservatif qui se déchire, quel premier contact tu saurais chercher ? |
+| C5-04-014 | moyen · +18 | carte +18 surtout pratique (santé, limites, communication) : classée Moyen, à confirmer | Qu’aimerais-tu comprendre sur ce qu’un résultat de dépistage dit et ne dit pas ? |
+| C5-04-015 | moyen · +18 | carte +18 surtout pratique (santé, limites, communication) : classée Moyen, à confirmer | Comment tu voudrais parler d’une IST diagnostiquée sans juger ? |
+| C5-04-018 | moyen · +18 | carte +18 surtout pratique (santé, limites, communication) : classée Moyen, à confirmer | Quelles informations de santé te semblent utiles à partager, et quels détails tu veux garder privés ? |
+| C5-05-003 | moyen · +18 | carte +18 surtout pratique (santé, limites, communication) : classée Moyen, à confirmer | Qui t’a le plus appris à parler de sexualité ? |
+| C5-05-008 | moyen · +18 | carte +18 surtout pratique (santé, limites, communication) : classée Moyen, à confirmer | À ton avis, pourquoi le clitoris reste-t-il difficile à nommer dans certaines conversations ? |
+| C5-05-017 | moyen · +18 | carte +18 surtout pratique (santé, limites, communication) : classée Moyen, à confirmer | Que répondrais-tu à l’idée que demander un dépistage serait un manque de confiance ? |
+| C5-07-007 | moyen · +18 | carte +18 surtout pratique (santé, limites, communication) : classée Moyen, à confirmer | C’est quoi le pire timing pour parler de sexe selon toi ? |
+| C1-05-005 | moyen · +18 | carte +18 surtout pratique (santé, limites, communication) : classée Moyen, à confirmer | On a des points de vue proches sur la place de la sexualité dans nos vies. |
+| C3-04-006 | moyen · +18 | carte +18 surtout pratique (santé, limites, communication) : classée Moyen, à confirmer | Tu préfères… Parler de sexe par message / En face |
+| C3-05-015 | moyen · +18 | carte +18 surtout pratique (santé, limites, communication) : classée Moyen, à confirmer | Qui de nous deux est le plus susceptible de vouloir parler de sexe en premier ? |
+| C3-05-022 | moyen · +18 | carte +18 surtout pratique (santé, limites, communication) : classée Moyen, à confirmer | Qui de nous deux est le plus susceptible de vouloir parler de ses fantasmes ? |
+| PK-G10-007 | moyen · +18 | carte +18 surtout pratique (santé, limites, communication) : classée Moyen, à confirmer | Demander un dépistage, ce n’est pas un manque de confiance. |
+| PK-G10-013 | moyen · +18 | carte +18 surtout pratique (santé, limites, communication) : classée Moyen, à confirmer | Parler de ses limites, ça rend les rapports plus sereins. |
+| PK-G10-015 | moyen · +18 | carte +18 surtout pratique (santé, limites, communication) : classée Moyen, à confirmer | Le consentement peut être retiré à tout moment. |
+| PK-G10-028 | moyen · +18 | carte +18 surtout pratique (santé, limites, communication) : classée Moyen, à confirmer | Parler de ses envies par message, c’est parfois plus facile. |
+| PK-G09-002 | hot · +18 | entrée sans badge dans son PDF, classée +18 par prudence : à confirmer | Le truc qui me fait le plus kiffer c’est… |
+| PK-G09-006 | hot · +18 | entrée sans badge dans son PDF, classée +18 par prudence : à confirmer | Le truc que j’ose pas encore te dire c’est… |
+| PK-G09-012 | hot · +18 | entrée sans badge dans son PDF, classée +18 par prudence : à confirmer | Le truc le plus underrated qui me fait kiffer c’est… |
+| PK-G09-015 | moyen · +18 | carte +18 surtout pratique (santé, limites, communication) : classée Moyen, à confirmer | Ma limite la plus importante c’est… |
+| PK-G09-016 | hot · +18 | entrée sans badge dans son PDF, classée +18 par prudence : à confirmer | Le truc que j’aimerais qu’on essaie ensemble c’est… |
+| PK-G09-023 | hot · +18 | entrée sans badge dans son PDF, classée +18 par prudence : à confirmer | Ce qui me fait me sentir en sécurité c’est… |
+| PK-G09-025 | hot · +18 | entrée sans badge dans son PDF, classée +18 par prudence : à confirmer | Le truc le plus simple qui me fait fondre c’est… |
+| PK-G09-028 | hot · +18 | entrée sans badge dans son PDF, classée +18 par prudence : à confirmer | Quand je suis gêné·e, j’aimerais que tu… |
+| PK-G09-029 | hot · +18 | entrée sans badge dans son PDF, classée +18 par prudence : à confirmer | Le truc que j’aimerais qu’on fasse plus souvent c’est… |
+| PK-G05-010 | moyen · +18 | entrée sans badge dans son PDF, classée +18 par prudence : à confirmer; carte +18 surtout pratique (santé, limites, communication) : classée Moyen, à confirmer | Tu penses que je suis plus à l’aise pour parler de mes émotions ou de mes envies ? |
+| PK-G05-018 | moyen · +18 | carte +18 surtout pratique (santé, limites, communication) : classée Moyen, à confirmer | Tu penses que je suis plus à l’aise pour parler de sexe par message ou en face ? |
+| PK-G05-020 | hot · +18 | entrée sans badge dans son PDF, classée +18 par prudence : à confirmer | Tu dirais que je suis plutôt du genre à proposer un truc nouveau ou à rester sur ce qu’on connaît ? |
+| PK-G05-023 | hot · +18 | entrée sans badge dans son PDF, classée +18 par prudence : à confirmer | D’après toi, je préfère un moment improvisé ou un moment prévu ? |
+| C3-02-013 | moyen | ton léger (invente, super-pouvoir) mais sujet sensible (defaut) : Moyen ou Soft ? | Invente un super-pouvoir basé sur ton plus gros défaut. |
+| C4-01-009 | moyen · +18 | carte +18 surtout pratique (santé, limites, communication) : classée Moyen, à confirmer | Donne trois façons de commencer une discussion sur les envies sexuelles. |
