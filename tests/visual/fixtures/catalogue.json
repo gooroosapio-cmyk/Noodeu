@@ -853,11 +853,10 @@
 "rules": {
 "N2-076": {
 "how_to": [
-"Le serveur tire le premier joueur ; il joue X et l'autre O. À chaque revanche acceptée par les deux, le premier joueur alterne. Une nouvelle session indépendante effectue un nouveau tirage.",
-"Chacun son tour place son symbole dans une case vide numérotée 0..8, ligne par ligne. Les coups hors tour, hors plateau ou sur case occupée sont refusés sans passer le tour.",
-"Après chaque coup, le serveur teste les trois lignes, trois colonnes et deux diagonales. Trois symboles identiques alignés gagnent immédiatement, y compris au neuvième coup.",
-"Sans gagnant et avec neuf cases occupées, résultat nul. Après un résultat, toute pose est interdite. Une manche gagnée vaut 1 victoire dans la série ; nulle 0 chacun.",
-"Une série vise 1 victoire par défaut (options 2 ou 3) ; maximum 12 manches pour éviter une boucle de nulles, puis bilan des victoires, égalité possible. La revanche commence une nouvelle session liée à l'ancienne et ne réinitialise jamais son historique."
+"Le premier joueur est tiré au sort : il joue X, l'autre O. À chaque nouvelle manche de la série, le premier joueur alterne.",
+"Chacun son tour, pose ton symbole dans une case vide.",
+"Trois symboles alignés (ligne, colonne ou diagonale) gagnent aussitôt, même sur la neuvième case. Plateau plein sans alignement : manche nulle.",
+"Une manche gagnée vaut 1 victoire. La série se joue en 1, 2 ou 3 victoires (réglage du salon), 12 manches au plus ; égalité possible."
 ],
 "details": [
 "Score : 1 victoire par manche gagnée ; 0 pour une nulle.",
@@ -871,18 +870,14 @@
 },
 "N2-078": {
 "how_to": [
-"Variante retenue : jeu classique à un tir par tour, grille A..J × 1..10, cinq navires de longueurs 5,4,3,3,2 et 17 cases occupées. Le mode salve de la notice Hasbro n'est pas retenu.",
-"Chaque navire est droit, horizontal ou vertical, dans les limites, sans chevauchement. Le voisinage latéral et diagonal est autorisé (clarification Noodeu explicite ; la notice consultée ne pose pas d'interdiction de contact).",
-"Placement au toucher case de départ puis orientation, avec bouton Tourner ; une liste accessible navire/ligne/colonne/orientation remplace le glisser-déposer. Placement aléatoire serveur facultatif, aperçu privé puis confirmation. Aucun repositionnement après verrouillage.",
-"Le premier tireur est tiré au sort lorsque les deux flottes sont verrouillées. Chaque joueur tire une fois à son tour, même après touché. Un tir déjà effectué est refusé sans perte du tour. Le serveur seul calcule manqué, touché ou coulé.",
-"En accord avec le classique de la notice, un touché annonce le type du navire touché ; un coulé annonce son identité et marque ses cases déjà atteintes. Les autres coordonnées ne sont jamais envoyées au tireur. Le serveur annonce la victoire quand les 17 cases adverses ont été touchées.",
-"Pas de match nul en jeu normal alterné : le tir qui coule la dernière case termine la partie. Aucune flotte complète révélée à l'abandon. Après victoire, dévoiler les placements restants seulement si les deux demandent Voir les flottes ; sinon conserver le secret.",
-"La configuration 6 × 6, navires 3/2/2 de l'ancien catalogue est une autre version. Ne pas la convertir ni modifier ses parties ; l’ID N2-078 est une correspondance de jeu avec nouvelle version proposée, pas une autorisation d’écrasement."
+"Grille de A à J et de 1 à 10, cinq navires de 5, 4, 3, 3 et 2 cases. Place-les droits, sans chevauchement ; ils peuvent se toucher.",
+"Placement case par case avec le bouton Tourner, ou placement aléatoire ; une fois ta flotte verrouillée, elle ne bouge plus.",
+"Quand les deux flottes sont prêtes, le premier tireur est tiré au sort. Un tir par tour, même après un touché ; une case déjà visée est refusée.",
+"Un touché annonce le type de navire ; un coulé annonce son identité. Le premier à toucher les 17 cases adverses gagne. Les positions restantes ne sont jamais montrées."
 ],
 "details": [
 "Score : Navires coulés et victoire ; aucun point relationnel.",
 "Adaptation Noodeu : Voisinage autorisé explicité.",
-"Adaptation Noodeu : Premier joueur serveur ; révélation finale sur accord commun.",
 "Adaptation Noodeu : Art et navires originaux Noodeu.",
 "Source de mécanique : Battleship F4527, notice française — Hasbro (https://instructions.hasbro.com/api/download/F4527_fr-fr_battleship-jeu-de-strategie-pour-enfants-a-partir-de-7-ans-pour-2-joueurs.pdf).",
 "Règles rédigées par Noodeu (règles originales Noodeu, sources séparées)."
@@ -893,11 +888,10 @@
 },
 "N2-079": {
 "how_to": [
-"Plateau Noodeu : 5 × 5 points, soit 4 × 4 cases et 40 arêtes. Un trait relie seulement deux points voisins horizontaux ou verticaux ; jamais de diagonale.",
-"Le premier joueur est tiré au sort, puis alterné lors d'une revanche. Un trait déjà présent est refusé sans consommation du tour. Les arêtes ont un ID canonique h:r:c (r=0..4,c=0..3) ou v:r:c (r=0..3,c=0..4).",
-"Le serveur ajoute le trait puis examine les une ou deux cases adjacentes. Toute case dont les quatre côtés sont maintenant fermés et qui n'a pas de propriétaire appartient au joueur qui vient de jouer.",
-"Chaque case nouvellement fermée rapporte exactement 1 point. Un trait qui ferme deux cases rapporte 2 points dans la même transaction. Dès qu'au moins une case est fermée, le joueur rejoue ; sinon le tour passe.",
-"À la fermeture des 16 cases, comparer les points : plus grand score gagnant, 8-8 égalité. Invariant : somme des points = nombre de cases attribuées ; aucun coup possible après la fin."
+"Le premier joueur est tiré au sort. Chacun son tour, trace un trait entre deux points voisins, à l'horizontale ou à la verticale.",
+"Fermer le quatrième côté d'une case te la donne : 1 point par case, 2 si ton trait en ferme deux.",
+"Tant que tu fermes au moins une case, tu rejoues ; sinon la main passe.",
+"Quand les 16 cases sont fermées, le plus de cases l'emporte ; 8 à 8, c'est une égalité."
 ],
 "details": [
 "Score : 1 point par carré, maximum total 16.",
@@ -911,11 +905,10 @@
 },
 "N2-083": {
 "how_to": [
-"Trois choix structurés et stables : rock, paper, scissors. Pierre bat ciseaux ; ciseaux bat feuille ; feuille bat pierre. Un geste identique est une égalité à 0 point et ne compte pas parmi les deux victoires à atteindre.",
-"Chaque joueur sélectionne en privé puis verrouille. Les deux choix sont révélés dans la même transaction. Après verrouillage aucune modification, même si l'autre semble avoir perdu la connexion.",
-"Victoire de manche : 1 point ; premier à 2 manches décisives gagnées remporte la partie. La référence IFRPS indique elle-même être un prototype ; elle est une référence de règle consultée, pas une homologation de Noodeu.",
-"Chaque manche dispose de 30 secondes à partir d'un départ synchronisé. Si un choix manque à l'échéance, la manche est annulée sans dévoiler le choix isolé et sans attribuer de victoire. Les joueurs peuvent réessayer après confirmation Prêt.",
-"Après 20 engagements (égalités et annulations incluses), terminer sur le score courant et afficher Série écourtée ; égalité possible. Aucun vainqueur n'est inventé. La revanche nécessite deux accords et crée une nouvelle session."
+"Chacun choisit en secret pierre, feuille ou ciseaux, puis verrouille son choix : il ne peut plus changer.",
+"Les deux gestes sont révélés ensemble. Pierre bat ciseaux, ciseaux bat feuille, feuille bat pierre ; même geste : égalité, 0 point.",
+"Chaque manche dure 30 secondes. Si un choix manque, la manche est annulée sans montrer le geste de l'autre et sans point.",
+"Le premier à 2 manches gagnées remporte la partie. Après 20 manches, la série s'arrête sur le score du moment."
 ],
 "details": [
 "Score : Premier à 2 victoires décisives ; égalités 0.",
@@ -1198,12 +1191,10 @@
 },
 "nd-de-chanceux": {
 "how_to": [
-"Variante à un dé : le premier joueur est tiré au sort. Son total provisoire commence à 0 ; les deux scores conservés commencent à 0.",
-"Lancer demande au serveur un entier uniforme de 1 à 6. Sur 2..6, ajouter ce résultat au total provisoire et conserver le tour. Le joueur peut relancer ou S'arrêter. Sur 1, perdre seulement le total provisoire et passer la main ; les points déjà conservés restent intacts.",
-"S'arrêter est permis si le provisoire est supérieur à 0 : le serveur l'ajoute au score conservé, remet le provisoire à 0 et passe la main. Si le score conservé atteint ou dépasse 100, la partie finit immédiatement. Pas de dernier tour accordé à l'autre.",
-"L'animation de dé ne calcule jamais le résultat : elle affiche die_value donné par la transaction serveur. Un double clic ou une relance réseau du même action_id renvoie le même résultat. Une nouvelle action ne peut être soumise qu'après la confirmation du précédent lancer.",
-"Le seuil 100 est retenu comme objectif de partie. La source NSW donne 100 à titre d'exemple mais décrit deux dés et un double 1 qui efface les points conservés : cette règle n'est pas importée. La référence universitaire Neller/Presser décrit bien le jeu à un dé. La nécessité d'appuyer sur S'arrêter avant de gagner est une précision Noodeu.",
-"Pas de plafond de tours imposé ; pause ou abandon individuel disponibles. Pas d'égalité au cours normal : la conservation qui atteint 100 désigne un seul gagnant. La revanche alterne le premier joueur."
+"Le premier joueur est tiré au sort. À ton tour, lance le dé autant de fois que tu veux : chaque résultat de 2 à 6 s'ajoute au total du tour.",
+"Un 1 fait perdre le total du tour et passe la main ; les points déjà conservés restent acquis.",
+"S'arrêter ajoute le total du tour à ton score conservé et passe la main.",
+"Le premier qui atteint 100 points conservés en s'arrêtant gagne, sans dernier tour pour l'autre. Le dé est lancé par le serveur."
 ],
 "details": [
 "Score : Score conservé ; premier à au moins 100 après S’arrêter.",

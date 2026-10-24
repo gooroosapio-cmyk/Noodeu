@@ -184,7 +184,9 @@ language sql volatile security definer set search_path = '' as $$
   update public.game_sessions set total_rounds = current_round where id = p_session $$;
 
 -- ---------------------------------------------------------------------------
--- Coups
+-- Coups. Morpion : l'alignement prime sur le plateau plein (neuvième case gagnante).
+-- Pierre-feuille-ciseaux : échéance passée sans les deux gestes → manche annulée, aucun geste isolé révélé, zéro point.
+-- Bataille navale : un coulé annonce son identité et marque ses cases déjà atteintes ; aucune autre coordonnée envoyée.
 -- ---------------------------------------------------------------------------
 create or replace function private.board_apply6(m text, c jsonb, sec jsonb, seat int, typ text, p jsonb, p_session uuid) returns jsonb
 language plpgsql volatile security definer set search_path = '' as $$
@@ -225,7 +227,6 @@ begin
     b := jsonb_set(b, array[cell::text], to_jsonb(seat));
     c := jsonb_set(c, '{board}', b);
     line := private.ttt_line(b);
-    -- Alignement prioritaire sur le plateau plein (neuvième case gagnante).
     if line is not null then
       c := c || jsonb_build_object('done', true, 'winner', seat, 'line', line,
         'scores', jsonb_build_object(me, 1, oth::text, 0));
@@ -267,7 +268,6 @@ begin
     return private.res(c, sec, jsonb_build_object('gained', gained));
 
   elsif m = 'rps' then
-    -- Échéance passée sans les deux gestes : manche annulée, aucun geste isolé révélé, zéro point.
     if now() > (c ->> 'deadline_at')::timestamptz and typ in ('lock_gesture', 'expire') then
       c := c || jsonb_build_object('done', true, 'void', true, 'locked', '{}'::jsonb, 'scores', '{"1": 0, "2": 0}'::jsonb);
       sec := '{"seats": {}}';
@@ -374,7 +374,6 @@ begin
         shots := shots || jsonb_build_array(jsonb_build_object('r', r, 'c', col, 'res', 'hit', 'ship', hit_ship));
         select count(*) into ship_hits from jsonb_array_elements(shots) x where x ->> 'ship' = hit_ship;
         if ship_hits = (select (s2 ->> 'len')::int from jsonb_array_elements(private.bn_ships()) s2 where s2 ->> 'id' = hit_ship) then
-          -- Coulé : on annonce son identité et on marque ses cases déjà atteintes (aucune autre coordonnée envoyée).
           shots := (select jsonb_agg(case when x ->> 'ship' = hit_ship then x || '{"res": "sunk"}' else x end order by o)
                     from jsonb_array_elements(shots) with ordinality t(x, o));
           c := jsonb_set(c, array['sunk', me], (c #> array['sunk', me]) || to_jsonb(hit_ship));
@@ -397,7 +396,8 @@ begin
 end $$;
 
 -- ---------------------------------------------------------------------------
--- Partenaire automatique de test (comptes listés dans private.test_autoplayers uniquement)
+-- Partenaire automatique de test (comptes listés dans private.test_autoplayers uniquement).
+-- Morpion : gagner, sinon bloquer, sinon le centre. Bataille navale : viser autour d'un touché non coulé.
 -- ---------------------------------------------------------------------------
 create or replace function private.board_bot6(m text, c jsonb, sec jsonb, seat int) returns jsonb
 language plpgsql volatile security definer set search_path = '' as $$
@@ -421,7 +421,6 @@ begin
   if coalesce((c ->> 'done')::boolean, false) then return null; end if;
   if m = 'tic_tac_toe' then
     if (c ->> 'turn')::int <> seat then return null; end if;
-    -- Gagner, sinon bloquer, sinon le centre, sinon une case libre.
     foreach who in array array[seat, oth] loop
       foreach l slice 1 in array array[[0,1,2],[3,4,5],[6,7,8],[0,3,6],[1,4,7],[2,5,8],[0,4,8],[2,4,6]] loop
         if (select count(*) from unnest(l) k where (b ->> k)::int = who) = 2 then
@@ -472,7 +471,6 @@ begin
     if (c ->> 'turn')::int <> seat then return null; end if;
     select array_agg((x2 ->> 'r') || ':' || (x2 ->> 'c')) into tried from jsonb_array_elements(c #> array['shots', me]) x2;
     tried := coalesce(tried, '{}');
-    -- Viser autour d'un touché non coulé, sinon au hasard.
     for x in select * from jsonb_array_elements(c #> array['shots', me]) loop
       if x ->> 'res' = 'hit' then
         for r, col in select (x ->> 'r')::int + d.dr, (x ->> 'c')::int + d.dc
