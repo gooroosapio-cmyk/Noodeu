@@ -22,9 +22,23 @@ export function notificationText(n: AppNotification) {
 
 /** Centre de notifications personnelles (ouvert depuis la cloche de l'en-tête). */
 export function NotificationCenter({ onClose, onOpenChat }: { onClose: () => void; onOpenChat: () => void }) {
-  const { notifications, notificationsUnread, markNotificationsRead, active, invitations, openSession } = useDuo();
+  const { notifications, notificationsUnread, markNotificationsRead, active, activeDuos, switchDuo, invitations } = useDuo();
   const navigate = useNavigate();
   const toast = useToast();
+
+  // Notification d'un autre de mes duos actifs : on bascule d'abord sur ce duo (jamais sur un duo dont je ne suis pas membre).
+  async function openInDuo(n: AppNotification, sessionId?: string) {
+    const target = n.couple_id && activeDuos.find((x) => x.id === n.couple_id);
+    if (target && active?.id !== target.id) await switchDuo(target.id);
+    onClose();
+    if (n.type === "message") {
+      if (target) onOpenChat();
+      else navigate(n.couple_id ? `/espace?duo=${n.couple_id}` : "/espace");
+      return;
+    }
+    if (target && sessionId) navigate(`/partie/${sessionId}`);
+    else toast(t("notif.stale"));
+  }
 
   // Chaque notification revérifie l'état actuel : un ancien événement n'autorise jamais une action devenue invalide.
   function open(n: AppNotification) {
@@ -41,13 +55,8 @@ export function NotificationCenter({ onClose, onOpenChat }: { onClose: () => voi
         navigate(n.couple_id ? `/espace?duo=${n.couple_id}` : "/espace");
         return;
       case "game_proposed":
-        if (d.session_id && openSession?.id === d.session_id) { onClose(); navigate(`/partie/${d.session_id}`); }
-        else toast(t("notif.stale"));
-        return;
       case "message":
-        onClose();
-        if (n.couple_id && active?.id === n.couple_id) onOpenChat();
-        else navigate(n.couple_id ? `/espace?duo=${n.couple_id}` : "/espace");
+        void openInDuo(n, d.session_id);
         return;
       case "gentle_reminder":
         onClose();

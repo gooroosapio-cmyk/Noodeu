@@ -306,3 +306,20 @@ Correspondances :
   Émotions…) : ces cartes sont sautées sans l'accord des deux dans le salon, ainsi que les cartes au-delà du plafond
   d'intensité ; l'ordre du pack est conservé. Un pack est « terminé » quand toutes ses cartes non +18 sont réalisées.
 - Thèmes de la question du jour : titres des packs (le catalogue ne donne pas de thème aux cartes de jeux).
+
+## Plusieurs duos actifs (27 octobre 2026)
+
+Migration `20261027000300_multi_duos.sql` (fichier à coller : `docs/sql_editeur_duos_multiples.sql`).
+- Une personne peut avoir jusqu'à 10 duos actifs en même temps (plafond technique contre les abus). Une même paire ne
+  peut pas avoir deux duos actifs ; une paire qui s'est séparée retrouve son ancien espace à la réinvitation (inchangé).
+- « Duo affiché » : choisi par la personne (`set_current_duo`), retenu côté serveur d'une connexion à l'autre. Toutes les
+  fonctions « mon duo » (parties, discussion, question du jour, progression, filtres) servent ce duo ; les autres duos
+  restent intacts (parties ouvertes, messages, progression). Bouton « Changer de duo » sur l'accueil et dans l'Espace,
+  avec les messages non lus des autres duos ; une notification d'un autre duo y bascule avant de s'ouvrir.
+- Accepter une invitation affiche le nouveau duo pour la personne qui accepte ; l'autre garde son duo affiché
+  (le nouveau ne s'affiche chez elle que si elle n'en avait aucun). Aucune notification n'informe un partenaire
+  des autres duos de l'autre.
+- Terminer un duo (`leave_duo`) : aucune notification, pour personne ; les anciennes notifications « duo terminé » sont
+  effacées. L'historique reste en lecture seule pour chacun. La suppression de compte termine tous les duos actifs.
+- Cloisonnement : chaque accès vérifie l'appartenance au duo concerné (tables, fonctions, canaux temps réel) ; le duo
+  affiché ne donne jamais accès à un duo dont on n'est pas membre (tests `c17_multi_duos.sql`).

@@ -4,6 +4,7 @@ import { t } from "../i18n";
 import { useAuth } from "../auth/AuthProvider";
 import { useDuo } from "../duo/DuoProvider";
 import { DuoIdentity } from "../duo/DuoIdentity";
+import { DuoSwitcher } from "../duo/DuoSwitcher";
 import { PendingRequest, useInviteActions } from "../duo/InviteScreens";
 import { Alert, Art, ConfirmDialog, Icon, PageLoading, Sheet, formatDate } from "../components/ui";
 import { GameThumb, TileGrid } from "./Libraries";
@@ -86,6 +87,7 @@ export function Home() {
               <DuoIdentity duo={active} online={duo.partnerOnline} size={32} />
             </Link>
             <Link className="btn" to="/bibliotheques">{t("home.choose")}</Link>
+            <DuoSwitcher compact />
           </div>
           <Art name="duo-hands" size={112} />
         </section>

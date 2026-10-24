@@ -1,5 +1,5 @@
 import { useEffect, useState, type FormEvent } from "react";
-import { Link, useNavigate, useSearchParams } from "react-router";
+import { useNavigate, useSearchParams } from "react-router";
 import { t } from "../i18n";
 import { rpc } from "../lib/supabase";
 import { errorMessage } from "../lib/errors";
@@ -12,14 +12,15 @@ import { useDuo } from "./DuoProvider";
 
 export function InvitePage() {
   const [params] = useSearchParams();
-  const { active, invitations } = useDuo();
+  const { activeDuos, invitations } = useDuo();
   const navigate = useNavigate();
+  const [startCount] = useState(activeDuos.length);
   const [tab, setTab] = useState<"invite" | "join">(params.get("code") || invitations.incoming ? "join" : "invite");
   const [justPaired, setJustPaired] = useState(false);
 
   useEffect(() => {
-    if (active && justPaired) navigate("/espace", { replace: true });
-  }, [active, justPaired, navigate]);
+    if (justPaired && activeDuos.length > startCount) navigate("/espace", { replace: true });
+  }, [activeDuos.length, startCount, justPaired, navigate]);
 
   return (
     <SubPage backTo="/accueil">
@@ -28,12 +29,8 @@ export function InvitePage() {
           <h1 className="t-page">{t("invite.title")}</h1>
           <p>{t("invite.subtitle")}</p>
         </div>
-        {active ? (
-          <>
-            <Alert kind="info">{t("invite.alreadyDuo")}</Alert>
-            <Link className="btn btn--secondary" to="/espace">{t("nav.space")}</Link>
-          </>
-        ) : (
+        {activeDuos.length > 0 && <Alert kind="info">{t("invite.otherDuo", { n: activeDuos.length })}</Alert>}
+        {(
           <>
             <div className="chips" role="tablist" aria-label={t("invite.title")}>
               <button className="chip" role="tab" aria-selected={tab === "invite"} aria-pressed={tab === "invite"} onClick={() => setTab("invite")}>{t("invite.tabInvite")}</button>

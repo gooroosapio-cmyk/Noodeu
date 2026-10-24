@@ -630,7 +630,7 @@ export const fr = {
   "space.private": "Ce qui reste personnel",
   "space.privateText": "Tes favoris, ta photo et tes réglages restent les tiens, quel que soit ton duo.",
   "space.endTitle": "Terminer ce duo ?",
-  "space.endText": "Plus de nouvelles parties ni de nouveaux messages avec {name}. L'historique reste consultable par chacun, en lecture seule. Tu pourras ensuite inviter quelqu'un d'autre. {name} sera prévenu.",
+  "space.endText": "Plus de nouvelles parties ni de nouveaux messages avec {name}. L'historique reste consultable par chacun, en lecture seule. Aucune notification n'est envoyée. Tes autres duos ne changent pas.",
   "space.end": "Terminer ce duo",
   "space.ended": "Duo terminé.",
   "space.members": "Membres",
@@ -665,7 +665,8 @@ export const fr = {
   "invite.waitingTitle": "Demande envoyée",
   "invite.waitingText": "{name} doit maintenant confirmer votre duo.",
   "invite.withdraw": "Annuler ma demande",
-  "invite.alreadyDuo": "Tu as déjà un duo actif. Termine-le depuis l'Espace avant d'en commencer un autre.",
+  "invite.alreadyDuo": "Tu as déjà un duo actif avec cette personne.",
+  "invite.otherDuo": "Tu as déjà {n} duo(s) actif(s). Une nouvelle invitation crée un duo de plus : les autres restent intacts et tu passes de l'un à l'autre quand tu veux.",
   "invite.paired": "Votre duo est confirmé !",
 
   "settings.title": "Réglages",
@@ -1401,6 +1402,15 @@ export const fr = {
   "launch.closeAndStart": "Fermer l'autre partie et lancer",
   "conv.tt.idea": "Besoin d'une idée ?",
   "conv.tt.noIdea": "Pas d'idée disponible pour l'instant : laisse parler ton imagination.",
+  "duo.switch": "Changer de duo ({n})",
+  "duo.addOther": "Ajouter un duo",
+  "duo.switchTitle": "Mes duos",
+  "duo.switchHint": "Choisis le duo à afficher. Les autres restent intacts, avec leurs parties et leurs messages ; ton choix est gardé à la prochaine connexion.",
+  "duo.current": "Duo affiché",
+  "duo.goTo": "Passer à ce duo",
+  "duo.switched": "Tu es maintenant avec {name}.",
+  "duo.unreadElsewhere": "{n} message(s) non lu(s) dans tes autres duos",
+  "duo.showThis": "Afficher ce duo",
 } as const;
 
 export type MessageKey = keyof typeof fr;

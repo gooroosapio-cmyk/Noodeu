@@ -189,7 +189,10 @@ begin
   -- Pas de répétition récente : 20 jours simulés.
   for k in 1..20 loop
     insert into public.daily_cards (scope, day, bank, item_id) select 'c:' || private.my_couple_id()::text, current_date - k, bank, item_id
-      from public.content_meta where standalone and not review and not adult order by random() limit 1 on conflict do nothing;
+      from public.content_meta m where standalone and not review and not adult
+        and not exists (select 1 from public.daily_cards t where t.scope = 'c:' || private.my_couple_id()::text
+                        and t.bank = m.bank and t.item_id = m.item_id)
+      order by random() limit 1 on conflict do nothing;
   end loop;
   perform t11.ok(not exists (select 1 from public.daily_cards a join public.daily_cards b on a.scope = b.scope and a.bank = b.bank
                              and a.item_id = b.item_id and a.day < b.day where a.scope = 'c:' || private.my_couple_id()::text

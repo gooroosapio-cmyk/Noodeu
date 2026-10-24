@@ -42,6 +42,7 @@ const players = [
   { seat: 2, user_id: PARTNER, is_me: false, display_name: "Alex", word_form: "m", avatar_path: null, ready: false, keep_memory: false },
 ];
 const activeDuo = { id: DUO, active: true, created_at: "2026-10-01T10:00:00Z", separated_at: null, partner: { id: PARTNER, name: "Alex", avatar_path: null, deleted: false }, episodes: [{ started_at: "2026-10-01T10:00:00Z", ended_at: null }] };
+const secondDuo = { id: "00000000-0000-4000-a000-00000000d002", active: true, current: false, unread: 3, created_at: "2026-10-20T10:00:00Z", separated_at: null, partner: { id: "y", name: "Camille", avatar_path: null, deleted: false }, episodes: [{ started_at: "2026-10-20T10:00:00Z", ended_at: null }] };
 const archivedDuo = { id: OLD_DUO, active: false, created_at: "2026-08-01T10:00:00Z", separated_at: "2026-09-20T10:00:00Z", partner: { id: "x", name: "Sam", avatar_path: null, deleted: false }, episodes: [{ started_at: "2026-08-01T10:00:00Z", ended_at: "2026-09-20T10:00:00Z" }] };
 function sessionState(status, answers = [], revealed = false) {
   return { ok: true, my_seat: 1, players, game: { title: game.title, mechanic: "portrait_words", rules, config },
@@ -149,6 +150,10 @@ const allScreens = [
   } },
   { name: "32-fermer-partie-ouverte", path: "/bibliotheques/ND-Q-P01", scenario: { ...duo, open: { id: SESSION, game_id: "N2-076", status: "lobby", title: "Morpion" } },
     action: async (page) => page.getByRole("button", { name: "Fermer l'autre partie et lancer" }).click() },
+  { name: "06f-accueil-deux-duos", path: "/accueil", scenario: { ...duo, duos: [{ ...activeDuo, current: true }, secondDuo, archivedDuo] } },
+  { name: "06g-changer-de-duo", path: "/accueil", scenario: { ...duo, duos: [{ ...activeDuo, current: true }, secondDuo, archivedDuo] },
+    action: async (page) => page.getByRole("button", { name: /Changer de duo/ }).click() },
+  { name: "21d-espace-autre-duo", path: `/espace?duo=${"00000000-0000-4000-a000-00000000d002"}`, scenario: { ...duo, duos: [{ ...activeDuo, current: true }, secondDuo, archivedDuo] } },
   { name: "22b-profil", path: "/reglages/profil", scenario: duo },
   { name: "25-conseils", path: "/conseils", scenario: duo },
   { name: "30-chat", path: "/accueil", scenario: duo, action: async (page) => page.getByRole("button", { name: /Ouvrir la discussion/ }).last().click() },

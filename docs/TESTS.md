@@ -158,3 +158,8 @@ questionnaire aléatoire : nombre choisi, rubrique, +18 et plafond respectés, m
 progression, « Plus tard » ; idées de Deux vérités jamais +18 sans accord). Tests c14 et c15 mis à jour (effectifs du
 catalogue final, test de pureté sans score). Recette visuelle : `08a-packs-c01` (rubrique fusionnée et questionnaire
 aléatoire), `07-bibliotheques` (À huis clos en deuxième), `32-fermer-partie-ouverte`.
+
+Duos multiples : `supabase/tests/c17_multi_duos.sql` (deux duos actifs pour A, B non prévenu ; pas de doublon de paire ;
+une partie ouverte dans chaque duo, bascule sans perte ; non-lus des autres duos ; B ne voit ni le duo, ni les parties,
+ni les membres, ni le profil de C (tables et fonctions), C non plus pour A-B ; C ne peut pas terminer A-B ; fin de duo sans
+notification, retour automatique sur l'autre duo, historique en lecture seule). Recette visuelle : `06f`, `06g`, `21d`.

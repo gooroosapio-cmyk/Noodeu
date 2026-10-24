@@ -103,13 +103,16 @@ export function OurSpace() {
   const [error, setError] = useState<string | null>(null);
 
   if (duo.loading) return <PageLoading />;
-  const selectedId = params.get("duo") && duo.duos.some((d) => d.id === params.get("duo")) ? params.get("duo")! : duo.duos[0]?.id;
+  const selectedId = params.get("duo") && duo.duos.some((d) => d.id === params.get("duo")) ? params.get("duo")! : (duo.active?.id ?? duo.duos[0]?.id);
   const selected = duo.duos.find((d) => d.id === selectedId) ?? null;
   const partnerName = selected?.partner?.deleted ? t("duo.deleted") : selected?.partner?.name || "?";
 
   async function endDuo() {
     setBusy(true);
-    const res = await rpc("leave_couple");
+    if (!selected) return;
+    let res = await rpc("leave_duo", { p_couple: selected.id });
+    // Base pas encore mise à jour (un seul duo actif) : l'ancienne fonction termine ce même duo.
+    if (!res.ok && res.error === "unexpected" && duo.activeDuos.length <= 1) res = await rpc("leave_couple");
     setBusy(false);
     setConfirmEnd(false);
     setManage(false);
@@ -149,7 +152,17 @@ export function OurSpace() {
               </li>
             ))}
           </ul>
-          {selected.active ? (
+          {selected.active && selected.id !== duo.active?.id ? (
+            <div className="stack">
+              <p className="t-small muted">{t("duo.switchHint")}</p>
+              <button className="btn" onClick={async () => { if (await duo.switchDuo(selected.id)) toast(t("duo.switched", { name: partnerName })); }}>
+                <Icon name="users" />{t("duo.showThis")}
+              </button>
+              <button className="btn btn--quiet btn--sm" aria-haspopup="dialog" onClick={() => setManage(true)}>
+                <Icon name="settings" size={20} />{t("duo.manage")}
+              </button>
+            </div>
+          ) : selected.active ? (
             <div className="stack">
               {duo.openSession ? (
                 <Link className="btn" to={`/partie/${duo.openSession.id}`}>{duo.openSession.status === "ended" ? t("home.seeResults") : t("home.resume")}</Link>
@@ -165,7 +178,7 @@ export function OurSpace() {
             <div className="stack">
               <Alert kind="info">{t("space.archiveBanner")}</Alert>
               {!selected.partner?.deleted && (
-                duo.active ? (
+                duo.activeDuos.some((d) => d.partner?.id && d.partner.id === selected.partner?.id) ? (
                   <p className="t-small muted">{t("invite.alreadyDuo")}</p>
                 ) : (
                   <>
@@ -186,7 +199,7 @@ export function OurSpace() {
         </section>
       )}
 
-      {selected?.active && (
+      {selected?.active && selected.id === duo.active?.id && (
         <section className="section" aria-labelledby="space-progress">
           <h2 className="t-section" id="space-progress">{t("progress.title")}</h2>
           <ProgressSection />
@@ -203,8 +216,8 @@ export function OurSpace() {
 
       {selected && !selected.active && <ArchivedMessages coupleId={selected.id} partnerName={partnerName} />}
 
-      {!duo.active && duo.duos.length > 0 && (
-        <Link className="btn btn--secondary" to="/inviter">{t("duo.invite")}</Link>
+      {duo.duos.length > 0 && (
+        <Link className="btn btn--secondary" to="/inviter"><Icon name="plus" />{duo.active ? t("duo.addOther") : t("duo.invite")}</Link>
       )}
 
       <section className="card card--soft stack stack--2">

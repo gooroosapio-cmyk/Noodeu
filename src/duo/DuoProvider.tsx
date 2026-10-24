@@ -8,6 +8,10 @@ import type { ChatMessage } from "../lib/types";
 export interface DuoSummary {
   id: string;
   active: boolean;
+  /** Duo affiché (plusieurs duos peuvent être actifs en même temps). */
+  current?: boolean;
+  /** Messages non lus de ce duo. */
+  unread?: number;
   created_at: string;
   separated_at: string | null;
   partner: { id: string | null; name: string; avatar_path: string | null; deleted: boolean } | null;
@@ -44,6 +48,9 @@ interface DuoValue {
   invitations: InvitationStatus;
   openSession: OpenSession | null;
   refresh: () => Promise<void>;
+  /** Duos actifs (on bascule de l'un à l'autre sans perte de données). */
+  activeDuos: DuoSummary[];
+  switchDuo: (coupleId: string) => Promise<boolean>;
   // Chat du duo actif
   messages: ChatMessage[];
   chatUnread: number;
@@ -79,7 +86,8 @@ export function DuoProvider({ children }: { children: ReactNode }) {
   const [messages, setMessages] = useState<ChatMessage[]>([]);
   const [chatUnread, setChatUnread] = useState(0);
   const [notifications, setNotifications] = useState<AppNotification[]>([]);
-  const active = duos.find((d) => d.active) ?? null;
+  const activeDuos = duos.filter((d) => d.active);
+  const active = activeDuos.find((d) => d.current) ?? activeDuos[0] ?? null;
   const activeId = active?.id ?? null;
   const activeRef = useRef<string | null>(null);
   activeRef.current = activeId;
@@ -219,6 +227,13 @@ export function DuoProvider({ children }: { children: ReactNode }) {
     await rpc("mark_notifications_read", { p_ids: ids ?? null });
   }, []);
 
+  // Bascule : le serveur retient le duo choisi (il reste le même à la prochaine connexion).
+  const switchDuo = useCallback(async (coupleId: string) => {
+    const res = await rpc("set_current_duo", { p_couple: coupleId });
+    if (res.ok) await refresh();
+    return res.ok;
+  }, [refresh]);
+
   const partnerId = active?.partner?.id;
   const partnerOnline = Boolean(partnerId && online.includes(partnerId));
   const notificationsUnread = notifications.filter((n) => !n.read_at).length;
@@ -226,7 +241,7 @@ export function DuoProvider({ children }: { children: ReactNode }) {
   return (
     <DuoContext.Provider
       value={{
-        loading, error, duos, active, partnerOnline, invitations, openSession, refresh,
+        loading, error, duos, active, activeDuos, switchDuo, partnerOnline, invitations, openSession, refresh,
         messages, chatUnread, sendMessage, markChatRead, loadArchive,
         notifications, notificationsUnread, markNotificationsRead,
       }}
