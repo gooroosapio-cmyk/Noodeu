@@ -1,3 +1,4 @@
+import { useEffect } from "react";
 import { Navigate, Outlet, createBrowserRouter, useLocation } from "react-router";
 import { useRegisterSW } from "virtual:pwa-register/react";
 import { t } from "./i18n";
@@ -21,7 +22,24 @@ function LegacySpace() {
 }
 
 function UpdatePrompt() {
-  const { needRefresh: [needRefresh], updateServiceWorker } = useRegisterSW();
+  const location = useLocation();
+  const { needRefresh: [needRefresh], updateServiceWorker } = useRegisterSW({
+    // L'application installée reste souvent ouverte : on vérifie la présence d'une nouvelle version au retour
+    // dans l'application et toutes les 15 minutes (sinon l'ancienne version reste servie par le cache).
+    onRegisteredSW(_url, registration) {
+      if (!registration) return;
+      const check = () => {
+        if (document.visibilityState === "visible" && navigator.onLine) void registration.update().catch(() => undefined);
+      };
+      setInterval(check, 15 * 60 * 1000);
+      document.addEventListener("visibilitychange", check);
+    },
+  });
+  // Hors d'une partie, la nouvelle version s'installe d'elle-même ; pendant une partie, on propose seulement.
+  const inGame = location.pathname.startsWith("/partie/");
+  useEffect(() => {
+    if (needRefresh && !inGame) void updateServiceWorker(true);
+  }, [needRefresh, inGame, updateServiceWorker]);
   if (!needRefresh) return null;
   return (
     <div className="toast-region" style={{ pointerEvents: "auto" }}>
