@@ -2,6 +2,7 @@
 // Packs de questions (C01) et questionnaires (C02) : textes, ordre, échelles et calculs viennent du serveur.
 // L'écran n'affiche jamais une réponse du partenaire avant la révélation : il ne la reçoit pas.
 import { LaterButton } from "../Later";
+import { DeepToggle, IntensityTransition, useSessionMeta } from "../../parcours/meta";
 import { useEffect, useMemo, useState } from "react";
 import { Link } from "react-router";
 import { t } from "../../i18n";
@@ -119,6 +120,8 @@ function PackPlaying({ c, round }: { c: Common; round: QRound }) {
   const iAnswered = Boolean(card.status?.[me.seat]);
   const theyAnswered = Boolean(partner && card.status?.[partner.seat]);
   useEffect(() => setErr(null), [round.round_no]);
+  const meta = useSessionMeta(c.st.session.id, round.round_no);
+  const prevItem = (c.st.rounds as unknown as QRound[]).find((r) => r.round_no === round.round_no - 1)?.card?.item?.id;
 
   async function send(payload: Record<string, unknown>) {
     setErr(null);
@@ -138,6 +141,7 @@ function PackPlaying({ c, round }: { c: Common; round: QRound }) {
       <div className="nd-progress" role="progressbar" aria-label={t("q.pack.progress")} aria-valuemin={0} aria-valuemax={card.count} aria-valuenow={card.index + 1}>
         <div className="nd-progress__fill" style={{ width: `${(100 * (card.index + 1)) / card.count}%` }} />
       </div>
+      <IntensityTransition prev={prevItem ? meta[prevItem] : undefined} cur={meta[card.item.id]} />
       <article className="q-card">
         <div className="q-card__head">
           <span className="nd-chip">{card.set_no ? t("q.pack.setChip", { s: card.set_no }) : t("q.pack.cardChip", { n: card.index + 1 })}</span>
@@ -145,6 +149,7 @@ function PackPlaying({ c, round }: { c: Common; round: QRound }) {
         </div>
         <h2 className={`t-question${card.item.text.length > 140 ? " t-question--long" : ""}`}>{card.item.text}</h2>
         <p className="t-meta">{first?.is_me ? t("q.pack.youFirst") : t("q.pack.firstSpeaker", { name: nameOf(first) })}</p>
+        {!card.done && <DeepToggle followup={meta[card.item.id]?.long_followup} roundKey={round.round_no} />}
         {!c.st.session.read_only && <LaterButton sessionId={c.st.session.id} round={round.round_no} disabled={!c.online} />}
       </article>
 

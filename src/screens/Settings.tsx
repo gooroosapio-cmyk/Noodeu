@@ -9,6 +9,7 @@ import { SubPage } from "../components/AppShell";
 import { Alert, ConfirmDialog, Icon, PageLoading, Sheet, useToast } from "../components/ui";
 import type { Profile, WordForm } from "../lib/types";
 import { INTENSITIES } from "./catalog";
+import { HealthResources } from "../parcours/HealthResources";
 
 const COUNTRIES = ["FR", "BE", "CH", "CA"] as const;
 
@@ -180,6 +181,8 @@ export function Settings() {
           <button className="btn btn--danger" onClick={() => setConfirmDelete(true)}>{t("settings.delete")}</button>
         </div>
       </section>
+
+      <HealthResources />
 
       <section className="section">
         <h2 className="t-section">{t("settings.help")}</h2>

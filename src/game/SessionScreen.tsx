@@ -20,6 +20,7 @@ import { BoardPlaying, BoardResults, isBoard } from "./board/BoardGame";
 import { QuestionnairePlaying, QuestionnaireResults, isQuestionnaireMech } from "./board/QuestionnaireGames";
 import { ConversationPlaying, ConversationResults, OptionalAdult, isConversationMech } from "./board/ConversationGames";
 import { WordPlaying, isWordMech } from "./board/WordGames";
+import { AfterGame } from "../parcours/AfterGame";
 
 type Run = (fn: string, args?: Record<string, unknown>) => Promise<{ ok: boolean }>;
 
@@ -129,6 +130,7 @@ export function SessionScreen() {
           : rounds
           ? <RoundsResults c={common} navigate={navigate} />
           : <Results st={st} me={me} partner={partner} busy={busy} online={online} run={run} navigate={navigate} />)}
+        {st.session.status === "ended" && !st.session.read_only && <AfterGame onOpenChat={() => setChat(true)} />}
         {st.session.status === "abandoned" && (
           <section className="empty">
             <Illustration name="17-pause" />

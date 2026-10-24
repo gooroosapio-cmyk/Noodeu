@@ -28,7 +28,7 @@ export interface InvitationStatus {
 
 export interface AppNotification {
   id: string;
-  type: "invitation_claimed" | "invitation_accepted" | "invitation_declined" | "duo_ended" | "game_proposed" | "message";
+  type: "invitation_claimed" | "invitation_accepted" | "invitation_declined" | "duo_ended" | "game_proposed" | "message" | "gentle_reminder";
   couple_id: string | null;
   data: Record<string, unknown>;
   created_at: string;

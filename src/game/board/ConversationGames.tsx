@@ -2,6 +2,7 @@
 // Jeux de conversation (catégorie 3) : cartes tirées par le serveur, réponses scellées, révélation commune,
 // « Continuer » des deux. L'écran ne reçoit jamais la réponse de l'autre avant la révélation.
 import { LaterButton } from "../Later";
+import { IntensityTransition, useSessionMeta } from "../../parcours/meta";
 import { useEffect, useState } from "react";
 import { Link } from "react-router";
 import { t } from "../../i18n";
@@ -281,6 +282,9 @@ function RoundView({ c, round }: { c: Common; round: CRound }) {
   const busy = c.busy || !c.online;
   const total = c.st.session.total_rounds;
   const m = card.mech;
+  const meta = useSessionMeta(c.st.session.id, round.round_no);
+  const prevId = (roundsOf(c.st).find((r) => r.round_no === round.round_no - 1)?.card as { card_id?: string } | undefined)?.card_id;
+  const curId = (card as { card_id?: string }).card_id;
   const continued = Boolean(card.continue?.[me.seat]);
   const theyContinued = Boolean(partner && card.continue?.[partner.seat]);
   const label = m === "nd_truth_dare" && card.kind ? t(card.kind === "truth" ? "conv.td.truth" : "conv.td.dare")
@@ -293,6 +297,7 @@ function RoundView({ c, round }: { c: Common; round: CRound }) {
         {m === "nd_truth_dare" && <span className="t-meta">{forWho(players.find((p) => p.seat === card.active), "conv.td.yourTurn", "conv.td.turnOf")}</span>}
         {m === "nd_two_truths" && <span className="t-meta">{forWho(players.find((p) => p.seat === card.author), "conv.tt.youAuthor", "conv.tt.authorIs")}</span>}
       </div>
+      <IntensityTransition prev={prevId ? meta[prevId] : undefined} cur={curId ? meta[curId] : undefined} />
       {(card.text || card.redacted) && <CardBox card={card} label={label} />}
 
       {card.done ? (

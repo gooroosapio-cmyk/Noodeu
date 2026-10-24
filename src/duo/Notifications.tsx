@@ -10,6 +10,7 @@ const icons: Record<AppNotification["type"], IconName> = {
   duo_ended: "info",
   game_proposed: "play",
   message: "chat",
+  gentle_reminder: "sun",
 };
 
 export function notificationText(n: AppNotification) {
@@ -47,6 +48,10 @@ export function NotificationCenter({ onClose, onOpenChat }: { onClose: () => voi
         onClose();
         if (n.couple_id && active?.id === n.couple_id) onOpenChat();
         else navigate(n.couple_id ? `/espace?duo=${n.couple_id}` : "/espace");
+        return;
+      case "gentle_reminder":
+        onClose();
+        navigate("/accueil");
         return;
       default:
         onClose();

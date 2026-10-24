@@ -212,3 +212,57 @@ de jugement de G07 ne sont pas importés (jamais projetés, conformément au kit
   proposée aux deux après 120 s. Pas de choix de thèmes (facultatif dans le kit). La limite technique du nombre de manches
   passe de 50 à 200 (aucun plafond de jeu : fin à 30 points ou à épuisement des consignes).
 - Réglage commun modifié dans le salon : les deux « prêt » sont annulés (comportement existant).
+
+## Parcours : classement, rythme, question du jour, favoris, progression (26 octobre 2026)
+
+Migrations `20261026000100_parcours_schema.sql`, `20261026000110_content_meta_data.sql` (générée par
+`scripts/classify_contents.py`) et `20261026000120_parcours_engine.sql`. Aucune donnée existante n'est supprimée ; les
+identifiants, sources, règles des jeux, ordres et calculs des questionnaires standardisés sont inchangés.
+
+Classement
+- 1001 questions de 15 banques classées par règles explicites (intensité Soft/Moyen/Hot, +18 indépendant, durée
+  « rapide » 1–2 min ou « discussion » avec durée indicative, formats solo/duo/jeu/rituel/défi, saisons, thème) dans
+  `content_meta`, table séparée des banques (textes jamais réécrits). Un doute donne « à relire » (57 cas,
+  `docs/CLASSEMENT_A_RELIRE.md`), jamais un classement plus doux ; une carte « à relire » n'entre pas dans la question du jour.
+- Les tests standardisés ne sont classés qu'au niveau de l'activité (ordre et calculs intacts) ; les 30 activités jouables
+  ont une intensité, des formats et une durée.
+- Plafond du duo : l'intensité la plus basse acceptée par les deux, appliquée côté serveur au tirage des cartes
+  (`conv_draw`), à la création d'une partie (`filtered_out`) et à la question du jour ; la bibliothèque masque ce qui dépasse
+  le plafond. Les réglages personnels (intensité, pays, fuseau, rappels, majorité) ne sont lisibles que par la personne
+  (lecture du profil limitée aux colonnes publiques pour le partenaire, `get_my_prefs`).
+- +18 désactivé par défaut ; l'activer demande une déclaration de majorité horodatée (refus serveur
+  `adult_confirmation_required` sinon) ; il ne s'applique en partie que si les deux l'ont activé et acceptent dans le salon.
+  Le texte « l'activation ne vaut jamais consentement » figure dans Réglages et dans la fenêtre de majorité.
+
+Rythme
+- Passer et Arrêter sans justification ni pénalité (« Quitter la partie » devient « Arrêter la partie », pour les deux).
+- Plus tard : enregistrement personnel (`save_for_later`), aucune notification ni changement de la partie pour l'autre.
+- Pause : chronos suspendus ; reprise seulement quand chaque joueur l'a demandée ; les échéances de la manche en cours sont
+  décalées de la durée de la pause. Le partenaire de test accepte la reprise.
+- Bandeau « Vous pouvez passer, faire une pause ou arrêter à tout moment. » au début des activités intimes et des parties
+  dont les cartes +18 sont actives (`adult_active`).
+
+Question du jour
+- Même carte pour le duo, conservée la journée du fuseau du duo (fixé au premier tirage, Europe/Paris par défaut), au
+  hasard, par thème ou de saison, 3 changements par jour au plus (visibles des deux), sans répétition sur 90 jours ;
+  seulement des questions autonomes (jamais Aron, ni les affirmations Gottman, ni une consigne chronométrée).
+  +18 seulement si les deux ont activé le +18 et le +18 dans la question du jour.
+- Versions courte et approfondie : la version approfondie ajoute une relance rédigée par Noodeu (4 relances neutres), sans
+  toucher au texte source ; seulement pour les packs de conversation ouverts.
+
+Favoris, progression
+- Favoris de questions (et, plus tard, de stories Conseils), Plus tard et avis privés (Utile, Trop intime, Bien adaptée)
+  dans des tables personnelles (RLS par utilisateur) ; les favoris d'activités existants sont conservés.
+- Progression du duo : compteurs seulement (consultées, réalisées à deux, passées) ; une question passée ne compte pas comme
+  répondue ; un pack est terminé quand toutes ses cartes ont été réalisées (règle existante). Pour un test, seul « terminé »
+  est montré côté partenaire (un refus ou un abandon reste privé).
+
+Accompagnement, engagement
+- Retour au calme facultatif en fin de partie : trois messages prérédigés envoyés dans la discussion du duo sur action
+  explicite, ou message libre ; défi léger Soft non +18 tiré d'Action ou Vérité.
+- Phrases de transition quand l'intensité monte d'une carte à la suivante.
+- Ressources santé par pays (France, Suisse, Canada) issues d'organismes publics, vérifiées par recherche web (pages non
+  ouvertes directement) ; Belgique et autres pays : à compléter, rien n'est affiché sans vérification.
+- Rappels doux : réglage personnel (1 à 3 par semaine, heures calmes, espacement de 48 h, aucun contenu intime, aucun rappel
+  si la question du jour a déjà été tirée). La fonction d'envoi existe mais n'est pas planifiée : l'écran l'indique.
+  La planification demande l'extension gratuite `pg_cron`, à activer avec l'accord du responsable.

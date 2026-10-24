@@ -81,6 +81,20 @@ async function setup(page, scenario) {
     }
     if (p.endsWith("/game_favorites")) return json([{ game_id: "ND-Q-P01" }, { game_id: "N2-076" }]);
     if (p.endsWith("/game_sessions")) return json(scenario.history ?? []);
+    // Parcours : réglages personnels, plafond du duo, question du jour, progression, questions gardées.
+    if (p.endsWith("/rpc/get_my_prefs")) return json({ ok: true, max_intensity: scenario.maxIntensity ?? "moyen", adult_confirmed_at: scenario.intimate ? "2026-10-01T10:00:00Z" : null,
+      daily_adult: false, timezone: "Europe/Paris", country: scenario.country ?? "FR", reminders: { enabled: Boolean(scenario.reminders), per_week: 2, quiet_start: 21, quiet_end: 9 } });
+    if (p.endsWith("/rpc/get_my_filters")) return json({ ok: true, my_max: "moyen", duo_cap: scenario.cap ?? 2, duo_adult: false, in_duo: Boolean(scenario.duos?.length) });
+    if (p.endsWith("/rpc/get_daily")) return json({ ok: true, day: "2026-10-24", mode: "hasard", theme: null, redraws_left: 3, bank: "q_gottman_open", item_id: "GO-01",
+      shared: Boolean(scenario.duos?.length), card: { text: "Quel souvenir de notre première année te fait encore sourire ?", theme: "Conversations à prendre le temps d'avoir",
+        intensity: "soft", duration_kind: "discussion", minutes_min: 5, minutes_max: 10, long_followup: "Peux-tu donner un exemple précis ?" } });
+    if (p.endsWith("/rpc/get_daily_themes")) return json(["Conversations à prendre le temps d'avoir", "Se retrouver"]);
+    if (p.endsWith("/rpc/get_progress")) return json({ ok: true, games: { "ND-Q-P01": { kind: "pack", count: 36, cards_done: 12, completed: false, viewed: 14, answered: 11, passed: 2 },
+      "ND-Q-012": { kind: "test", me: "completed", partner: "pending" } } });
+    if (p.endsWith("/rpc/get_my_items")) return json({ ok: true, later: [], favorites: [{ kind: "question", bank: "q_usu_roadtrip", item_id: "R-03",
+      view: { text: "Quel voyage aimerais-tu que l'on fasse ensemble ?", intensity: "soft", duration_kind: "discussion", minutes_min: 5, minutes_max: 10 } }] });
+    if (p.endsWith("/rpc/get_session_meta")) return json({ ok: true, items: {} });
+    if (/\/(item_favorites|later_items|item_feedback)$/.test(p)) return json(route.request().method() === "GET" ? null : []);
     return json({});
   });
 }
@@ -116,10 +130,18 @@ const allScreens = [
     { step: "guess", seat: 1, skipped: false, payload: pick(["calme", "drole", "fiable", "sportif", "patient"]) },
     { step: "self", seat: 2, skipped: false, payload: pick(["calme", "fiable", "drole", "patient", "gourmand"]) },
     { step: "guess", seat: 2, skipped: false, payload: pick(["curieux", "calme", "reveur", "creatif", "sociable"]) }], true) } },
+  { name: "20-pause-reprise", path: `/partie/${SESSION}`, scenario: { ...duo, state: (() => { const st = sessionState("playing");
+    return { ...st, session: { ...st.session, status: "paused", paused_by: ME, pause_state: { paused_at: "2026-10-24T10:00:00Z", by: ME, resume: [st.my_seat ?? 1] } } }; })() } },
   { name: "21a-espace-duo", path: "/espace", scenario: duo },
   { name: "21b-espace-archive", path: `/espace?duo=${OLD_DUO}`, scenario: { ...duo, duos: [archivedDuo] } },
   { name: "21c-espace-sans-duo", path: "/espace", scenario: solo },
   { name: "22-parametres", path: "/reglages", scenario: duo },
+  { name: "22c-majorite-18", path: "/reglages", scenario: duo, action: async (page) => page.getByRole("switch", { name: /Activer À huis clos/ }).click() },
+  { name: "22d-rappels", path: "/reglages", scenario: { ...duo, reminders: true } },
+  { name: "07c-filtres", path: "/bibliotheques", scenario: duo, action: async (page) => {
+    await page.getByRole("button", { name: /Afficher les filtres/ }).click();
+    await page.getByRole("button", { name: "Discussion · plus long" }).click();
+  } },
   { name: "22b-profil", path: "/reglages/profil", scenario: duo },
   { name: "25-conseils", path: "/conseils", scenario: duo },
   { name: "30-chat", path: "/accueil", scenario: duo, action: async (page) => page.getByRole("button", { name: /Ouvrir la discussion/ }).last().click() },

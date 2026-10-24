@@ -143,3 +143,11 @@ Petit bac : lettre retenue, révisions, Stop après 10 s et quatre cases, index 
 échéances 120 s et 60 s ; Cite trois : deux chargements, appel confirmé, consigne retenue, accusés à 750 ms, juge seul,
 correction à deux accords appliquée une fois, passage, fin à 30 confirmée par les deux, retrait +18 ; partenaire automatique).
 Écrans `60-mot-*` pour la recette visuelle (échéances recalées à l'heure du rendu).
+
+Tests SQL des parcours : `supabase/tests/c15_parcours.sql` (classement des 1001 questions ; majorité obligatoire pour le +18 ;
+plafond commun appliqué au tirage et à la création de partie ; retrait du +18 ; pause à double reprise et décalage des
+échéances ; Arrêter ; Plus tard, favoris et avis invisibles du partenaire et sans notification ; question du jour partagée,
+fuseau, thème, sans répétition, solo ; progression : passée différente de répondue, aucune réponse renvoyée ; défi léger ;
+rappels sans contenu, plafond et espacement ; réglages personnels illisibles et non modifiables par le partenaire).
+Recette visuelle : écrans `07c-filtres`, `20-pause-reprise`, `22c-majorite-18`, `22d-rappels`, question du jour sur
+`06*-accueil`, progression et « Mes questions » sur `21a-espace-duo`.
