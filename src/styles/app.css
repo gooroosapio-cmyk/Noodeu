@@ -815,3 +815,33 @@ button.pix5__cell { cursor: pointer; }
 .q-choice--lie { border-color: #E6A27F; background: var(--c-peach); }
 .q-choice { flex-wrap: wrap; }
 .q-choice > .grow { min-width: 0; overflow-wrap: anywhere; }
+
+/* ===== Lot 4 : Pendu, Petit bac, Cite trois ===== */
+.hm-board { display: grid; justify-items: center; gap: var(--s-1); }
+.hm-flower { width: 112px; height: 112px; }
+.hm-slots { display: flex; flex-wrap: wrap; justify-content: center; gap: 6px; margin: 0; }
+.hm-slot {
+  display: grid; place-items: center; width: 2.25rem; height: 2.75rem; border-bottom: 3px solid var(--c-text);
+  font: 700 1.375rem/1 var(--f-heading); color: var(--c-text); text-transform: uppercase;
+}
+.hm-slot--on { color: var(--c-accent); }
+.hm-keys { display: grid; grid-template-columns: repeat(auto-fill, minmax(2.75rem, 1fr)); gap: 6px; }
+.hm-key {
+  min-height: 2.75rem; border-radius: var(--r-button); border: 1px solid var(--c-border-control); background: var(--c-surface);
+  font: 700 1rem/1 var(--f-body); color: var(--c-text); cursor: pointer;
+}
+.hm-key:disabled { cursor: default; opacity: 1; }
+.hm-key--hit { background: var(--c-sage); border-color: transparent; color: var(--c-success); }
+.hm-key--miss { background: var(--c-peach); border-color: transparent; color: #7A3E22; text-decoration: line-through; }
+.hm-key:not(.hm-key--hit):not(.hm-key--miss):disabled { color: var(--c-text-2); background: var(--c-bg); }
+.hm-choice { justify-content: center; font-weight: 600; }
+.pb-head { display: flex; align-items: center; justify-content: space-between; gap: var(--s-3); flex-wrap: wrap; }
+.pb-letter {
+  display: grid; place-items: center; width: 4.5rem; height: 4.5rem; border-radius: var(--r-tile);
+  background: var(--c-lavender); border: 2px solid var(--c-text); font: 800 2.5rem/1 var(--f-heading); color: var(--c-text);
+}
+.pb-time { display: inline-flex; align-items: center; gap: 6px; font: 700 1.25rem/1 var(--f-body); color: var(--c-text); }
+.pb-time--low { color: var(--c-danger); }
+.pb-field .field__label img { flex: none; }
+.cite-count { display: grid; justify-items: center; gap: var(--s-3); padding: var(--s-6) 0; text-align: center; }
+.cite-timer { display: grid; justify-items: center; gap: var(--s-1); }

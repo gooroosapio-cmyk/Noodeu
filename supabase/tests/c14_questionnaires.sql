@@ -55,7 +55,7 @@ begin
   perform t7.ok((select count(*) from public.games where status = 'published') = 30, '30 activités');
   perform t7.ok((select count(*) from public.games where implementation = 'playable' and mechanic in ('pack_conversation', 'test_form')) = 14, '14 jouables (7 packs + 7 tests)');
   perform t7.ok((select count(*) from public.games where category_id in ('nd-conversation-decouverte', 'nd-mini-jeux-interactifs')
-                 and implementation = 'coming_soon') = 3, '3 jeux C3/C4 encore en « Bientôt » (lots 2 et 3 livrés)');
+                 and implementation = 'playable') = 16, 'les 16 jeux C3/C4 jouables (lots 2, 3 et 4 livrés)');
   perform t7.ok((select count(*) from public.content_banks where bank like 'q\_%') = 370, '370 items (171 + 199)');
   perform t7.ok((select count(*) from public.content_banks where bank = 'q_aron' and content_version = '4.0.0') = 36, 'Aron reste en 4.0.0');
   perform t7.ok((select count(*) from public.content_banks where bank = 'q_usu_roadtrip' and content_version = '5.0.0') = 55, 'USU55 reste en 5.0.0');
@@ -65,7 +65,9 @@ begin
   perform t7.ok((select meta ->> 'namespace' from public.games where id = 'N2-078') = 'noodeu_c34_v1'
                 and (select meta ->> 'reference_code' from public.games where id = 'N2-078') = 'M07', 'M07 = bataille navale (namespace)');
   perform t7.as_user('00000000-0000-4000-a000-0000000000a7');
+  update public.games set implementation = 'coming_soon' where id = 'N2-023';
   perform t7.err(public.create_session('N2-023'), 'game_unavailable', 'un jeu encore « Bientôt » ne se lance pas');
+  update public.games set implementation = 'playable' where id = 'N2-023';
 end $$;
 
 -- ===== 2. Se découvrir : carte commune, réponses privées, révélation, reprise ====================

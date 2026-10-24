@@ -148,8 +148,11 @@ allScreens.push({ name: "54-N2-128-export-png", path: `/partie/${SESSION}`, scen
 allScreens.push({ name: "52-N2-001-salon-options", path: `/partie/${SESSION}`, scenario: { ...duo, state: fixture("N2-001-lobby.json") },
   action: async (page) => page.getByRole("button", { name: "Options" }).first().click() });
 // Catégories 1 et 2 : packs de questions et questionnaires (tests/visual/make_fixtures_c14.py).
+// Échéances relatives ({ __rel: secondes }) recalées sur l'heure du rendu.
+const rebase = (o) => (Array.isArray(o) ? o.map(rebase) : o && typeof o === "object"
+  ? ("__rel" in o ? new Date(Date.now() + o.__rel * 1000).toISOString() : Object.fromEntries(Object.entries(o).map(([k, v]) => [k, rebase(v)]))) : o);
 for (const key of Object.keys(fixture("index_c14.json"))) {
-  allScreens.push({ name: `60-${key}`, path: `/partie/${SESSION}`, scenario: { ...duo, intimate: key === "salon-huis-clos" || key === "conv-salon", state: fixture(`c14-${key}.json`) } });
+  allScreens.push({ name: `60-${key}`, path: `/partie/${SESSION}`, scenario: { ...duo, intimate: key === "salon-huis-clos" || key === "conv-salon", state: rebase(fixture(`c14-${key}.json`)) } });
 }
 const ONLY = process.env.ONLY;
 const screens = ONLY ? allScreens.filter((s) => s.name.includes(ONLY)) : allScreens;

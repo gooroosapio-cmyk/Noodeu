@@ -19,6 +19,7 @@ import { OptionsSheet, RoundsPlaying, RoundsResults, hasOptions, isRounds } from
 import { BoardPlaying, BoardResults, isBoard } from "./board/BoardGame";
 import { QuestionnairePlaying, QuestionnaireResults, isQuestionnaireMech } from "./board/QuestionnaireGames";
 import { ConversationPlaying, ConversationResults, OptionalAdult, isConversationMech } from "./board/ConversationGames";
+import { WordPlaying, isWordMech } from "./board/WordGames";
 
 type Run = (fn: string, args?: Record<string, unknown>) => Promise<{ ok: boolean }>;
 
@@ -76,8 +77,10 @@ export function SessionScreen() {
   const rounds = isRounds(st);
   const board = isBoard(st);
   const questionnaire = board && isQuestionnaireMech((st.game.config as unknown as { mechanic?: string }).mechanic);
-  const conversation = board && isConversationMech((st.game.config as unknown as { mechanic?: string }).mechanic);
-  const common = { st, run, busy, online };
+  const mech = (st.game.config as unknown as { mechanic?: string }).mechanic;
+  const word = board && isWordMech(mech);
+  const conversation = board && (isConversationMech(mech) || word);
+  const common = { st, run, busy, online, act: s.act };
   const showOptions = rounds && hasOptions(st) && ["lobby", "playing", "paused"].includes(st.session.status) && !st.session.read_only;
 
   return (
@@ -113,7 +116,7 @@ export function SessionScreen() {
 
         {st.session.status === "lobby" && <Lobby st={st} me={me} partner={partner} partnerHere={partnerHere} busy={busy} online={online} run={run} onChat={() => setChat(true)}
           onOptions={showOptions ? () => setOptions(true) : undefined} />}
-        {st.session.status === "playing" && (conversation ? <ConversationPlaying c={common} /> : questionnaire ? <QuestionnairePlaying c={common} /> : board ? <BoardPlaying {...common} /> : rounds ? <RoundsPlaying {...common} /> : <Playing st={st} partnerName={partnerName} partner={partner} busy={busy} online={online} run={run} />)}
+        {st.session.status === "playing" && (word ? <WordPlaying c={common} /> : conversation ? <ConversationPlaying c={common} /> : questionnaire ? <QuestionnairePlaying c={common} /> : board ? <BoardPlaying {...common} /> : rounds ? <RoundsPlaying {...common} /> : <Playing st={st} partnerName={partnerName} partner={partner} busy={busy} online={online} run={run} />)}
         {st.session.status === "paused" && (
           <section className="empty enter">
             <Illustration name="17-pause" />
@@ -217,7 +220,7 @@ function Lobby({ st, me, partner, partnerHere, busy, online, run, onChat, onOpti
       </div>
 
       {intimate && <AdultConsent st={st} busy={busy} online={online} run={run} />}
-      {isConversationMech((st.game.config as unknown as { mechanic?: string }).mechanic)
+      {(isConversationMech((st.game.config as unknown as { mechanic?: string }).mechanic) || isWordMech((st.game.config as unknown as { mechanic?: string }).mechanic))
         && Boolean((st.game as unknown as { adult_available?: boolean }).adult_available)
         && <OptionalAdult st={st} busy={busy} online={online} run={run} />}
 

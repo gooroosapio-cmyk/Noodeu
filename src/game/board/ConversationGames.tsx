@@ -11,44 +11,49 @@ import type { Player, SessionState } from "../../lib/types";
 
 type J = any;
 type Run = (fn: string, args?: Record<string, unknown>) => Promise<{ ok: boolean; error?: string; info?: any }>;
-interface Common { st: SessionState; run: Run; busy: boolean; online: boolean }
-interface CRound { round_no: number; card: J; revealed: boolean; private: J }
+export interface Common { st: SessionState; run: Run; busy: boolean; online: boolean; act?: (fn: string, args: Record<string, unknown>) => Promise<{ ok: boolean; error?: string; info?: any }> }
+export interface CRound { round_no: number; card: J; revealed: boolean; private: J }
 
 export const CONVERSATION_MECHS = ["nd_never", "nd_dilemma", "nd_duo_target", "nd_opinion", "nd_sentence", "nd_predict", "nd_truth_dare", "nd_two_truths"];
 export const isConversationMech = (m?: string) => Boolean(m && CONVERSATION_MECHS.includes(m));
 const roundsOf = (st: SessionState) => st.rounds as unknown as CRound[];
-const nameOf = (p?: Player) => (p ? (p.is_me ? t("game.you") : p.display_name || "?") : "?");
+export const nameOf = (p?: Player) => (p ? (p.is_me ? t("game.you") : p.display_name || "?") : "?");
 /** Texte selon que la personne désignée est soi (« Tu es le sujet ») ou l'autre (« Sujet : Alex »). */
-const forWho = (p: Player | undefined, mine: string, theirs: string) => (p?.is_me ? t(mine as never) : t(theirs as never, { name: nameOf(p) }));
+export const forWho = (p: Player | undefined, mine: string, theirs: string) => (p?.is_me ? t(mine as never) : t(theirs as never, { name: nameOf(p) }));
 const MAX = 1000;
 
-function moveError(code?: string) {
+function moveError(code?: string, extra: string[] = []) {
   const known = ["invalid_text", "locked", "no_cards", "duplicate_text", "not_your_turn", "phase"];
+  if (code && extra.includes(code)) return t(`word.err.${code}` as never);
   return code && known.includes(code) ? t(`conv.err.${code}` as never) : t("q.err.generic");
 }
 
-function useMoves(c: Common, round: CRound) {
+export function useMoves(c: Common, round: CRound, known: string[] = []) {
   const [err, setErr] = useState<string | null>(null);
   useEffect(() => setErr(null), [round.round_no]);
-  const play = async (type: string, payload: Record<string, unknown> = {}) => {
-    setErr(null);
-    const res = await c.run("play_move", { p_round: round.round_no, p_action: crypto.randomUUID(), p_type: type, p_payload: payload });
-    if (!res.ok && res.error !== "busy" && res.error !== "stale_round") setErr(moveError(res.error));
-    return res.ok;
+  /** Coup brut : renvoie la réponse du serveur ; « quiet » n'affiche pas d'erreur (échéances, relances automatiques). */
+  const send = async (type: string, payload: Record<string, unknown> = {}, quiet = false) => {
+    if (!quiet) setErr(null);
+    const args = { p_round: round.round_no, p_action: crypto.randomUUID(), p_type: type, p_payload: payload };
+    // Les envois automatiques passent hors du verrou d'interface (pas de refus « busy » au moment d'une échéance).
+    const res = quiet && c.act ? await c.act("play_move", args) : await c.run("play_move", args);
+    if (!quiet && !res.ok && res.error !== "busy" && res.error !== "stale_round") setErr(moveError(res.error, known));
+    return res;
   };
+  const play = async (type: string, payload: Record<string, unknown> = {}) => (await send(type, payload)).ok;
   const after = async (type: string, payload: Record<string, unknown> = {}) => {
     setErr(null);
     const res = await c.run("round_after", { p_round: round.round_no, p_type: type, p_payload: payload });
-    if (!res.ok && res.error !== "busy") setErr(moveError(res.error));
+    if (!res.ok && res.error !== "busy") setErr(moveError(res.error, known));
     return res.ok;
   };
-  return { err, play, after };
+  return { err, play, after, send };
 }
 
 // ---------------------------------------------------------------------------
 // Éléments communs
 // ---------------------------------------------------------------------------
-function CardBox({ card, label }: { card: J; label?: string }) {
+export function CardBox({ card, label }: { card: J; label?: string }) {
   if (card.redacted) return <article className="q-card"><p className="muted">{t("conv.redacted")}</p></article>;
   return (
     <article className="q-card">
@@ -253,7 +258,7 @@ function TwoTruths({ card, priv, me, partner, busy, play }: { card: J; priv: J; 
 // ---------------------------------------------------------------------------
 // Écran de manche
 // ---------------------------------------------------------------------------
-function AdultWithdraw({ c }: { c: Common }) {
+export function AdultWithdraw({ c }: { c: Common }) {
   const prefs = (c.st as unknown as { my_prefs?: { adult: boolean; excluded_topics: string[] } }).my_prefs;
   if (!prefs?.adult) return null;
   return (
@@ -366,7 +371,8 @@ export function ConversationPlaying({ c }: { c: Common }) {
 
 export function ConversationResults({ c, navigate }: { c: Common; navigate: (to: string) => void }) {
   const players = c.st.players;
-  const result = c.st.session.result as { points?: Record<string, number>; shortened?: boolean } | undefined;
+  const result = c.st.session.result as { points?: Record<string, number>; shortened?: boolean; target_reached?: boolean } | undefined;
+  const cite = c.st.game.mechanic === "nd_name_three_call";
   const scored = Boolean(result?.points);
   const rounds = roundsOf(c.st).filter((r) => r.card?.done);
   const ended = c.st.session.status === "ended" && !c.st.session.read_only;
@@ -376,7 +382,8 @@ export function ConversationResults({ c, navigate }: { c: Common; navigate: (to:
         <Art name="trophy" size={96} />
         <h1 className="t-page">{t("conv.endTitle")}</h1>
         <p className="t-small muted">{t("conv.endText", { n: rounds.length, title: c.st.game.title })}</p>
-        {result?.shortened && <p className="t-meta">{t("conv.shortened")}</p>}
+        {result?.shortened && <p className="t-meta">{cite ? t("word.ct.shortened") : t("conv.shortened")}</p>}
+        {cite && !result?.target_reached && !result?.shortened && <p className="t-meta">{t("word.ct.noWinner")}</p>}
       </div>
       {scored && (
         <div className="mini-scores">
@@ -389,8 +396,13 @@ export function ConversationResults({ c, navigate }: { c: Common; navigate: (to:
       )}
       {rounds.map((r) => (
         <details key={r.round_no} className="card">
-          <summary className="strong">{r.card.redacted ? t("conv.redacted") : r.card.text ?? r.card.statements?.[0]?.text ?? t("conv.round", { n: r.round_no, total: c.st.session.total_rounds })}</summary>
-          {r.card.skipped ? <p className="muted">{t("conv.skipped")}</p> : r.card.answers ? <Reveal card={r.card} players={players} />
+          <summary className="strong">{r.card.redacted ? t("conv.redacted") : r.card.text ?? r.card.statements?.[0]?.text
+            ?? (r.card.letter ? t("word.pb.roundLetter", { n: r.round_no, l: r.card.letter }) : t("conv.round", { n: r.round_no, total: c.st.session.total_rounds }))}</summary>
+          {r.card.skipped ? <p className="muted">{t("conv.skipped")}</p>
+            : r.card.mech === "nd_categories_stop" ? <p className="t-small">{players.map((p) => `${nameOf(p)} : ${r.card.scores?.[p.seat] ?? 0}`).join(" · ")}</p>
+            : r.card.mech === "nd_hangman" ? <p className="t-small">{r.card.found ? t("word.hm.resultFound") : t("word.hm.resultMissed")}</p>
+            : r.card.mech === "nd_name_three_call" ? <p className="t-small">{r.card.void ? t(`word.ct.void.${r.card.void}` as never) : r.card.verdict ? t("word.ct.success") : t("word.ct.failure")}</p>
+            : r.card.answers ? <Reveal card={r.card} players={players} />
             : r.card.response ? <p className="q-answer__text">{r.card.response.text ?? t("conv.td.actionDone")}</p> : null}
         </details>
       ))}

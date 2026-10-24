@@ -137,3 +137,9 @@ Tests SQL du lot 3 : `supabase/tests/c14_conversation.sql` (sans remise, aucune 
 réponse scellée invisible pour l'autre, passage sans divulgation, Continuer des deux, retrait +18 avec purge,
 cible limitée au duo, verdict du sujet et correction par différence, Action ou Vérité, Deux vérités et un mensonge,
 partenaire automatique jusqu'à la fin de chaque jeu). Écrans `60-conv-*` pour la recette visuelle.
+
+Tests SQL du lot 4 : `supabase/tests/c14_lot4.sql` (Pendu : rôles, accents « école », lettre répétée, six erreurs, mot banni ;
+Petit bac : lettre retenue, révisions, Stop après 10 s et quatre cases, index par catégorie, arbitrage privé, barème 5/10/15,
+échéances 120 s et 60 s ; Cite trois : deux chargements, appel confirmé, consigne retenue, accusés à 750 ms, juge seul,
+correction à deux accords appliquée une fois, passage, fin à 30 confirmée par les deux, retrait +18 ; partenaire automatique).
+Écrans `60-mot-*` pour la recette visuelle (échéances recalées à l'heure du rendu).

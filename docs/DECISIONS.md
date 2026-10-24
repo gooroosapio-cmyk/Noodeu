@@ -189,3 +189,26 @@ côté serveur par `scripts/import_lot3.py` (banques non lisibles par les client
 - La confirmation de majorité repose sur l'activation personnelle d'À huis clos dans Réglages.
 - Mise en ligne : moteur, 730 cartes (empreintes identiques à la base de test pour chaque banque), règles des 8 jeux ;
   `play_move`, `round_after` et `set_session_prefs` ne sont plus appelables sans compte connecté.
+
+## Lot 4 : Le Pendu, Petit bac, Cite trois en 10 secondes (25 octobre 2026)
+
+Moteur famille 8 (`20261025000300_lot4_engine.sql`), banques importées côté serveur par `scripts/import_lot4.py`
+(`20261025000310_lot4_catalogue.sql`) : 288 mots relus du Pendu (Lexique 4.10, CC BY-SA 4.0), index Petit bac de 134 entrées
+(Lexique 4.10 et Wikidata CC0), 100 consignes originales de Cite trois (70 standard, 30 +18). Les exemples éditoriaux et notes
+de jugement de G07 ne sont pas importés (jamais projetés, conformément au kit). Les mentions de licence figurent dans les règles.
+
+- Le Pendu : le donneur choisit parmi 8 mots tirés au hasard dans le niveau réglé (liste privée), plutôt que dans tout le lot :
+  le devineur, donneur à la manche suivante, ne voit ainsi qu'une petite partie du lot. Le niveau « difficile » ne compte que
+  7 mots relus : une partie longue s'arrête plus tôt (partie écourtée), sans élargissement silencieux.
+- Le Pendu : la fleur à six pétales du kit C03/C04 est utilisée ; les pièces « pendu-etape » de l'interface v2 (potence)
+  ne le sont pas, le kit interdisant toute scène de pendaison.
+- Petit bac : 4 lettres seulement couvrent les quatre catégories (B, C, R, T) ; la partie se joue donc en 3 manches,
+  les options 5 et 7 restant désactivées comme le prévoit le kit. Une réponse valide contestée par un seul joueur devient
+  « non tranchée » (0 provisoire, jamais déclarée fausse). Deux réponses de même forme normalisée sont identiques sans vote.
+- Cite trois : l'appel reste externe (aucun enregistrement). La consigne est remise par le serveur à l'heure de départ ;
+  l'accusé de réception doit arriver dans les 750 ms prévues par le kit, sinon la manche est annulée sans point : sur une
+  connexion lente, cela peut arriver plus souvent. L'écart d'horloge est mesuré à chaque réponse du serveur.
+- Cite trois : quitter l'écran pendant les 10 secondes annule la manche ; rappel au juge après 30 s ; « manche non évaluée »
+  proposée aux deux après 120 s. Pas de choix de thèmes (facultatif dans le kit). La limite technique du nombre de manches
+  passe de 50 à 200 (aucun plafond de jeu : fin à 30 points ou à épuisement des consignes).
+- Réglage commun modifié dans le salon : les deux « prêt » sont annulés (comportement existant).

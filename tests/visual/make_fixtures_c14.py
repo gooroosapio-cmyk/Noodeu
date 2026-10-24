@@ -5,6 +5,7 @@ Produits par les vraies fonctions d'une base locale où toutes les migrations so
 (base « nd2 » par défaut, ou NOODEU_DB). Maya (vue de l'écran) et Alex jouent ; tout est annulé à la fin.
 """
 import json
+from datetime import datetime
 import os
 import subprocess
 
@@ -185,16 +186,73 @@ do $$ declare s uuid; i int; begin
   perform fx7.seat_mv(s, 2, 'lock_guess', '{{"statement_id": "s3"}}');
   insert into fx_out (line) select fx7.out('conv-dvm-revelation', s);
 
+
+  -- Lot 4 : Pendu, Petit bac, Cite trois (échéances relatives, recalées à l'heure du rendu).
+  s := fx7.start('N2-023');
+  update public.session_rounds set card = card || '{{"giver": 1, "guesser": 2, "first": 1}}' where session_id = s and round_no = 1;
+  update private.round_secrets set secret = jsonb_build_object('seats', jsonb_build_object('1', jsonb_build_object('choices',
+    (select jsonb_agg(jsonb_build_object('id', value ->> 'id', 'text', value ->> 'text')) from (select value from public.content_banks
+       where bank = 'hangman_words' and (value ->> 'difficulty' = 'standard' or value ->> 'text' = 'fenêtre')
+       order by value ->> 'text' = 'fenêtre' desc, idx limit 8) x)))) where session_id = s and round_no = 1;
+  insert into fx_out (line) select fx7.out('mot-pendu-choix', s);
+  perform fx7.seat_mv(s, 1, 'choose_word', jsonb_build_object('word_id', (select value ->> 'id' from public.content_banks where bank = 'hangman_words' and value ->> 'text' = 'fenêtre')));
+  perform fx7.seat_mv(s, 2, 'guess_letter', '{{"letter": "E"}}');
+  perform fx7.seat_mv(s, 2, 'guess_letter', '{{"letter": "S"}}');
+  perform fx7.seat_mv(s, 2, 'guess_letter', '{{"letter": "T"}}');
+  perform fx7.seat_mv(s, 2, 'guess_letter', '{{"letter": "A"}}');
+  insert into fx_out (line) select fx7.out('mot-pendu-donneur', s);
+  update public.session_rounds set card = card || '{{"giver": 2, "guesser": 1}}' where session_id = s and round_no = 1;
+  insert into fx_out (line) select fx7.out('mot-pendu-devineur', s);
+  update public.session_rounds set card = card || '{{"giver": 1, "guesser": 2}}' where session_id = s and round_no = 1;
+  perform fx7.seat_mv(s, 2, 'guess_letter', '{{"letter": "F"}}');
+  perform fx7.seat_mv(s, 2, 'guess_letter', '{{"letter": "N"}}');
+  perform fx7.seat_mv(s, 2, 'guess_letter', '{{"letter": "R"}}');
+  insert into fx_out (line) select fx7.out('mot-pendu-fin', s);
+
+  s := fx7.start('N2-018');
+  perform fx7.seat_mv(s, 1, 'round_loaded');
+  perform fx7.seat_mv(s, 2, 'round_loaded');
+  update public.session_rounds set card = card || '{{"letter": "C"}}' where session_id = s and round_no = 1;
+  perform fx7.seat_mv(s, 1, 'save_field', '{{"category_id": "animal", "text": "Chat", "draft_revision": 1}}');
+  perform fx7.seat_mv(s, 1, 'save_field', '{{"category_id": "ville", "text": "Copenhague", "draft_revision": 1}}');
+  update public.session_rounds set card = card || jsonb_build_object('deadline_at', now() + interval '87 seconds', 'stop_after', now() - interval '1 second') where session_id = s and round_no = 1;
+  insert into fx_out (line) select fx7.out('mot-bac-saisie', s);
+  perform fx7.seat_mv(s, 2, 'save_field', '{{"category_id": "animal", "text": "chat", "draft_revision": 1}}');
+  perform fx7.seat_mv(s, 2, 'save_field', '{{"category_id": "objet", "text": "Cafetière", "draft_revision": 1}}');
+  perform fx7.seat_mv(s, 2, 'save_field', '{{"category_id": "pays", "text": "Chili", "draft_revision": 1}}');
+  perform fx7.seat_mv(s, 1, 'stop', '{{"drafts": {{"objet": {{"text": "Crayon", "draft_revision": 1}}, "pays": {{"text": "Canada", "draft_revision": 1}}}}}}');
+  insert into fx_out (line) select fx7.out('mot-bac-arbitrage', s);
+  perform fx7.seat_mv(s, 1, 'confirm_validation');
+  perform fx7.seat_mv(s, 2, 'confirm_validation');
+  insert into fx_out (line) select fx7.out('mot-bac-resultat', s);
+
+  s := fx7.start('nd-cite-trois');
+  insert into fx_out (line) select fx7.out('mot-cite-appel', s);
+  perform fx7.seat_mv(s, 1, 'round_loaded', '{{"call": true}}');
+  perform fx7.seat_mv(s, 2, 'round_loaded', '{{"call": true}}');
+  update public.session_rounds set card = card || jsonb_build_object('starts_at', now() - interval '200 milliseconds', 'deadline_at', now() + interval '7 seconds') where session_id = s and round_no = 1;
+  update private.round_secrets set secret = secret || '{{"respondent": 2}}' where session_id = s and round_no = 1;
+  perform fx7.seat_mv(s, 1, 'prompt_received');
+  perform fx7.seat_mv(s, 2, 'prompt_received');
+  insert into fx_out (line) select fx7.out('mot-cite-juge', s);
+  perform fx7.seat_mv(s, 1, 'verdict', '{{"success": true}}');
+  perform fx7.as_user('{PARTNER}');
+  perform public.round_after(s, 1, 'correction_request', '{{}}');
+  insert into fx_out (line) select fx7.out('mot-cite-correction', s);
+
   update public.game_sessions set status = 'abandoned' where status in ('lobby','playing','paused','ended');
   perform fx7.as_user('{ME}');
   s := (public.create_session('N2-002') ->> 'session_id')::uuid;
   insert into fx_out (line) select fx7.out('conv-salon', s);
 end $$;
+select 'NOW ' || to_char(now() at time zone 'utc', 'YYYY-MM-DD"T"HH24:MI:SS.US+00:00');
 select line from fx_out order by n;
 rollback;
 """
 
 out = subprocess.run(PG, input=SQL, capture_output=True, text=True, check=True).stdout
+# Heure de la transaction (now() y est figée) : référence des échéances relatives.
+NOW = next((datetime.fromisoformat(l.split(" ", 1)[1]) for l in out.splitlines() if l.startswith("NOW ")), None)
 os.makedirs(OUT, exist_ok=True)
 index = {}
 for line in out.splitlines():
@@ -202,6 +260,12 @@ for line in out.splitlines():
         continue
     _, key, payload = line.split(" ", 2)
     state = json.loads(payload)
+    gen = state.get("server_now")
+    for r in state.get("rounds", []):
+        card = r.get("card") or {}
+        for k in ("starts_at", "deadline_at", "stop_after", "validation_deadline", "started_at", "frozen_at", "judged_at"):
+            if isinstance(card.get(k), str) and NOW:
+                card[k] = {"__rel": (datetime.fromisoformat(card[k]) - NOW).total_seconds()}
     with open(os.path.join(OUT, f"c14-{key}.json"), "w", encoding="utf8") as f:
         json.dump(state, f, ensure_ascii=False)
     index[key] = state["session"]["status"]

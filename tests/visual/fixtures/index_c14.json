@@ -27,5 +27,15 @@
  "conv-av-verite": "playing",
  "conv-dvm-ecriture": "playing",
  "conv-dvm-revelation": "playing",
+ "mot-pendu-choix": "playing",
+ "mot-pendu-donneur": "playing",
+ "mot-pendu-devineur": "playing",
+ "mot-pendu-fin": "playing",
+ "mot-bac-saisie": "playing",
+ "mot-bac-arbitrage": "playing",
+ "mot-bac-resultat": "playing",
+ "mot-cite-appel": "playing",
+ "mot-cite-juge": "playing",
+ "mot-cite-correction": "playing",
  "conv-salon": "lobby"
 }
