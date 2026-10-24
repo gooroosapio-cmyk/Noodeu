@@ -171,7 +171,7 @@ declare s uuid; ans jsonb := '{}'; it jsonb; st jsonb;
 begin
   perform t7.as_user('00000000-0000-4000-a000-0000000000a7');
   perform t7.err(public.create_session('ND-Q-011'), 'content_not_enabled', 'RICE100 refusé sans activation des deux profils');
-  update public.profiles set intimate_opt_in = true where id in ('00000000-0000-4000-a000-0000000000a7', '00000000-0000-4000-a000-0000000000b7');
+  update public.profiles set intimate_opt_in = true, adult_confirmed_at = now(), max_intensity = 'hot' where id in ('00000000-0000-4000-a000-0000000000a7', '00000000-0000-4000-a000-0000000000b7');
   s := (public.create_session('ND-Q-011') ->> 'session_id')::uuid;
   perform t7.err(public.set_ready(s, true), 'adult_consent_required', 'pas de lancement sans accord dans le salon');
   perform public.set_session_prefs(s, true, '{}');

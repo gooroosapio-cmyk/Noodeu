@@ -121,7 +121,7 @@ end $$;
 do $$
 declare s uuid; c jsonb; adult_item jsonb;
 begin
-  update public.profiles set intimate_opt_in = true where id in ('00000000-0000-4000-a000-0000000000a9', '00000000-0000-4000-a000-0000000000b9');
+  update public.profiles set intimate_opt_in = true, adult_confirmed_at = now(), max_intensity = 'hot' where id in ('00000000-0000-4000-a000-0000000000a9', '00000000-0000-4000-a000-0000000000b9');
   s := t9.start('N2-002', null, true);
   perform t9.ok(private.adult_allowed(s), 'deux accords +18 actifs');
   perform t9.ok((select count(*) from public.content_banks where bank = 'conv_dilemma' and (value ->> 'adult')::boolean) = 30

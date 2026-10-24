@@ -14,4 +14,4 @@ run supabase/tests/local_shim.sql
 for f in supabase/migrations/*.sql; do [[ "$f" < "$PURGE" ]] && run "$f"; done
 for f in supabase/tests/ancienne_base/slice*.sql; do echo "== $f"; psql_ -d noodeu -v ON_ERROR_STOP=1 -q -At -f "$f" || exit 1; done
 for f in supabase/migrations/*.sql; do [[ "$f" < "$PURGE" ]] || run "$f"; done
-for f in supabase/tests/c14_*.sql; do [ -e "$f" ] || continue; echo "== $f"; psql_ -d noodeu -v ON_ERROR_STOP=1 -q -At -f "$f" || exit 1; done
+for f in supabase/tests/c1[4-9]_*.sql; do [ -e "$f" ] || continue; echo "== $f"; psql_ -d noodeu -v ON_ERROR_STOP=1 -q -At -f "$f" || exit 1; done

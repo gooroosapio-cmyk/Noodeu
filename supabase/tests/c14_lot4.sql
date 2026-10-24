@@ -296,7 +296,7 @@ end $$;
 do $$
 declare s uuid; c jsonb; adult_item jsonb;
 begin
-  update public.profiles set intimate_opt_in = true where id in ('00000000-0000-4000-a000-0000000000aa', '00000000-0000-4000-a000-0000000000bb');
+  update public.profiles set intimate_opt_in = true, adult_confirmed_at = now(), max_intensity = 'hot' where id in ('00000000-0000-4000-a000-0000000000aa', '00000000-0000-4000-a000-0000000000bb');
   s := t10.start('nd-cite-trois', null, true);
   select value into adult_item from public.content_banks where bank = 'cite_trois' and (value ->> 'adult')::boolean limit 1;
   perform t10.patch(s, jsonb_build_object('adult', true, 'card_id', adult_item ->> 'id'));
