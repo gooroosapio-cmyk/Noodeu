@@ -12,7 +12,7 @@ export type IconName =
   | "eraser" | "smile" | "puzzle" | "cards" | "lightning" | "leaf" | "sparkles" | "delete" | "quote"
   | "gamepad" | "chevron-right" | "bookmark-filled" | "trophy" | "timer" | "source" | "gift" | "moon" | "sun" | "text"
   | "lock-keyhole" | "unlock-keyhole" | "thumbs-up" | "thumbs-down" | "dices" | "ship" | "scissors" | "hand" | "calendar-days"
-  | "ellipsis" | "shield-check" | "triangle-alert" | "wifi-off" | "circle-check";
+  | "ellipsis" | "shield-check" | "triangle-alert" | "wifi-off" | "circle-check" | "book-open";
 
 /** Illustrations de l'interface v2 (cellules découpées des atlas du kit, PNG transparents convertis en WebP). */
 export type ArtName = string;

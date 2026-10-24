@@ -9,7 +9,9 @@ import { useDuo } from "../duo/DuoProvider";
 import { ChatPanel } from "../duo/Chat";
 import { SubPage } from "../components/AppShell";
 import { Avatar } from "../components/Avatar";
-import { Alert, ConfirmDialog, Icon, Illustration, Loading, PageLoading } from "../components/ui";
+import { Alert, Art, ConfirmDialog, Icon, Illustration, Loading, PageLoading } from "../components/ui";
+import { RulesSheet } from "../components/RulesSheet";
+import { ART_BY_PACK } from "../screens/Libraries";
 import type { Player, Round, SessionState } from "../lib/types";
 import { answerOf, nextStep, portraitReveal, toggleWord, wordLabel } from "./portrait";
 import { useDraft, useSession } from "./useSession";
@@ -79,7 +81,7 @@ export function SessionScreen() {
   return (
     <SubPage
       backTo="/accueil"
-      title={st.game.title}
+      title={st.session.status === "lobby" ? t("game.roomTitle") : st.game.title}
       actions={
         <>
           {live && (
@@ -153,41 +155,64 @@ export function SessionScreen() {
   );
 }
 
+function lobbyArt(st: SessionState) {
+  const cfg = st.game.config as unknown as { mechanic?: string; pack?: { code?: string }; test?: { instrument?: string } };
+  if (cfg.mechanic === "pack_conversation") return ART_BY_PACK[cfg.pack?.code ?? ""] ?? "c01-generic";
+  if (cfg.mechanic === "test_form") return cfg.test?.instrument ?? "C02";
+  return "room";
+}
+
 function Lobby({ st, me, partner, partnerHere, busy, online, run, onChat, onOptions }: {
   st: SessionState; me?: Player; partner?: Player; partnerHere: boolean; busy: boolean; online: boolean; run: Run; onChat: () => void; onOptions?: () => void;
 }) {
+  const [showRules, setShowRules] = useState(false);
   // Moteur 2.1.0 : les réglages passent par la fenêtre d'options (avec les préférences privées).
   const settings = onOptions ? {} : st.game.config.settings ?? {};
   // Questionnaires « À huis clos » : accord personnel de chacun, enregistré par le serveur avant le lancement.
   const intimate = isQuestionnaireMech((st.game.config as unknown as { mechanic?: string }).mechanic)
     && Boolean((st.game as unknown as { adult_available?: boolean }).adult_available);
   return (
-    <section className="stack stack--6 enter">
-      <div className="page-header">
-        <h1 className="t-page">{t("game.lobbyTitle")}</h1>
-        <p>{t("game.lobbyText")}</p>
-      </div>
-      <div className="card" style={{ gap: 0, paddingBlock: 4 }}>
+    <section className="stack stack--5 enter">
+      <h1 className="sr-only">{t("game.lobbyTitle")}</h1>
+      <span className="nd-chip room-badge"><Icon name="lock-keyhole" size={16} />{t("game.roomBadge")}</span>
+      <div className="room-players">
         {[me, partner].filter(Boolean).map((p) => (
-          <div className="player" key={p!.seat}>
-            <Avatar name={p!.display_name} path={p!.avatar_path} size={44} me={p!.is_me} />
-            <div className="grow stack" style={{ gap: 2 }}>
-              <span className="t-card">{p!.is_me ? `${p!.display_name} (${t("game.you")})` : p!.display_name}</span>
-              <span className="status">
-                {p!.ready ? <Icon name="check" size={16} /> : <Icon name="clock" size={16} />}
-                {p!.ready ? t("game.isReady") : t("game.isNotReady")}
-                {!p!.is_me && partnerHere && <> · {t("game.here")}</>}
-              </span>
-            </div>
+          <div className="room-player" key={p!.seat}>
+            <Avatar name={p!.display_name} path={p!.avatar_path} size={72} me={p!.is_me} />
+            <span className="room-player__name">{p!.is_me ? t("game.youCap") : p!.display_name}</span>
+            <span className="status">
+              {p!.ready ? <Icon name="check" size={16} /> : <Icon name="clock" size={16} />}
+              {p!.ready ? t("game.isReady") : t("game.isNotReady")}
+            </span>
+            {!p!.is_me && partnerHere && <span className="t-meta">{t("game.here")}</span>}
           </div>
         ))}
       </div>
 
-      <div className="card card--soft stack stack--4">
-        <h2 className="t-section">{t("sheet.howTo")}</h2>
-        <ol className="how">{st.game.rules.how_to.map((x) => <li key={x}>{x}</li>)}</ol>
-        <p className="row t-small"><Icon name="lock" size={18} />{st.game.rules.privacy}</p>
+      <div className="room-game">
+        <Art name={lobbyArt(st)} size={88} />
+        <div className="room-game__body">
+          <span className="t-card">{st.game.title}</span>
+          {st.game.rules.objective && st.game.rules.objective !== st.game.title && <span className="t-meta">{st.game.rules.objective}</span>}
+          <span className="nd-chip nd-chip--mint">{t("game.twoPeople")}</span>
+        </div>
       </div>
+
+      <div className="info-rows">
+        <button className="info-row info-row--link" onClick={() => setShowRules(true)}>
+          <Icon name="book-open" size={20} /><span className="grow">{t("rules.open")}</span><Icon name="chevron-right" size={20} />
+        </button>
+        {onOptions && (
+          <button className="info-row info-row--link" onClick={onOptions}>
+            <Icon name="settings" size={20} /><span className="grow">{t("rounds.options")}</span><Icon name="chevron-right" size={20} />
+          </button>
+        )}
+        <button className="info-row info-row--link" onClick={onChat}>
+          <Icon name="chat" size={20} /><span className="grow">{t("game.chat")}</span><Icon name="chevron-right" size={20} />
+        </button>
+      </div>
+
+      {intimate && <AdultConsent st={st} busy={busy} online={online} run={run} />}
 
       {Object.entries(settings).map(([key, def]) => (
         <fieldset key={key}>
@@ -202,17 +227,13 @@ function Lobby({ st, me, partner, partnerHere, busy, online, run, onChat, onOpti
         </fieldset>
       ))}
 
-      {intimate && <AdultConsent st={st} busy={busy} online={online} run={run} />}
-
-      {onOptions && (
-        <button className="btn btn--secondary" onClick={onOptions}><Icon name="settings" />{t("rounds.options")}</button>
-      )}
-      <button className="btn btn--secondary" onClick={onChat}><Icon name="chat" />{t("game.chat")}</button>
       <div className="action-bar">
         <button className="btn" disabled={busy || !online} onClick={() => run("set_ready", { p_ready: !me?.ready })}>
           {busy ? t("common.sending") : me?.ready ? t("game.notReady") : t("game.ready")}
         </button>
+        <p className="t-meta center">{t("game.lobbyText")}</p>
       </div>
+      {showRules && <RulesSheet title={st.game.title} rules={st.game.rules} onClose={() => setShowRules(false)} />}
     </section>
   );
 }

@@ -8,10 +8,11 @@ import { useAuth } from "../auth/AuthProvider";
 import { useDuo } from "../duo/DuoProvider";
 import { SubPage } from "../components/AppShell";
 import { Alert, Art, DemoTag, Icon, Loading, PageLoading } from "../components/ui";
-import type { Category, Game } from "../lib/types";
+import type { Category, Game, GameRules } from "../lib/types";
+import { RulesSheet } from "../components/RulesSheet";
 import { CATEGORY_BY_SHELF, SHELF_PATH, SHELVES, normalizeText, shelfOf, useCatalog, type Shelf } from "./catalog";
 
-const ART_BY_PACK: Record<string, string> = {
+export const ART_BY_PACK: Record<string, string> = {
   P01: "c01-aron36", P03: "c01-approfondies", P15: "c01-retrouver55", P11: "c01-rituels",
   P12: "c01-place", P13: "c01-projets", P14: "c01-valeurs",
 };
@@ -271,7 +272,8 @@ export function GameSheet() {
   const cat = useCatalog(userId);
   const online = useOnline();
   const navigate = useNavigate();
-  const [rules, setRules] = useState<{ objective: string; how_to: string[]; details: string[]; privacy: string } | null>(null);
+  const [rules, setRules] = useState<GameRules | null>(null);
+  const [showRules, setShowRules] = useState(false);
   const [busy, setBusy] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const game = cat.games.find((g) => g.id === gameId);
@@ -310,40 +312,35 @@ export function GameSheet() {
   }
 
   return (
-    <SubPage backTo={backTo} actions={
+    <SubPage backTo={backTo} title={game.title} actions={
       <button className="icon-btn icon-btn--soft" aria-pressed={favorite} onClick={() => void cat.toggleFavorite(game.id)}
         aria-label={favorite ? t("lib.removeFavorite", { title: game.title }) : t("lib.addFavorite", { title: game.title })}>
         <Icon name={favorite ? "star" : "bookmark"} />
       </button>
     }>
       <main className="page page--bare page--read">
-        <div className={`sheet-hero sheet-hero--${intime ? "lavender" : shelf === "tests" ? "butter" : shelf === "minijeux" ? "sage" : "peach"}`}>
-          <GameThumb game={game} size="lg" />
-        </div>
-        <div className="stack stack--2">
+        <div className="game-intro">
+          <Art name={artOf(game)} size={112} className="game-intro__art" />
           <h1 className="t-page">{game.title}</h1>
-          <p className="t-meta">
-            {typeLabel(game)} · {durationLabel(game)}{catTitle ? ` · ${intime ? t("lib.shelf.huisclos") : catTitle}` : ""}
-          </p>
-          {game.is_demo && <div><DemoTag /></div>}
+          <p className="t-small muted">{game.hook || game.promise}</p>
+          <div className="row row--wrap" style={{ gap: 6 }}>
+            <span className="nd-chip">{typeLabel(game)}</span>
+            <span className="nd-chip nd-chip--mint">{durationLabel(game)}</span>
+            {catTitle && <span className="nd-chip nd-chip--peach">{intime ? t("lib.shelf.huisclos") : catTitle}</span>}
+            {game.is_demo && <DemoTag />}
+          </div>
         </div>
-        <p>{game.hook || game.promise}</p>
         {soon ? (
           <Alert kind="info">{t("sheet.soon")}</Alert>
         ) : !rules ? <Loading /> : (
-          <>
-            <section className="card card--soft stack stack--4">
-              <h2 className="t-section">{t("sheet.howTo")}</h2>
-              <ol className="how">{rules.how_to.map((x) => <li key={x}>{x}</li>)}</ol>
-              <p className="row t-small"><Icon name="lock" size={18} />{rules.privacy}</p>
-              {intime && <p className="row t-small"><Icon name="lock" size={18} />{t("sheet.huisclosRule")}</p>}
-            </section>
-            <details className="disclosure">
-              <summary>{t("sheet.details")}<Icon name="chevron-down" /></summary>
-              <div><p>{rules.objective}</p><ul style={{ margin: 0, paddingLeft: 20 }}>{rules.details.map((x) => <li key={x}>{x}</li>)}</ul></div>
-            </details>
-          </>
+          <ul className="info-rows">
+            <li className="info-row"><Icon name="users" size={20} /><span className="grow">{t("sheet.twoPlayers")}</span></li>
+            <li className="info-row"><Icon name="lock-keyhole" size={20} /><span className="grow">{rules.privacy}</span></li>
+            {intime && <li className="info-row"><Icon name="shield-check" size={20} /><span className="grow">{t("sheet.huisclosRule")}</span></li>}
+          </ul>
         )}
+        {!soon && rules && <button className="btn btn--secondary" onClick={() => setShowRules(true)}><Icon name="book-open" size={20} />{t("sheet.seeRules")}</button>}
+        {showRules && rules && <RulesSheet title={game.title} rules={rules} onClose={() => setShowRules(false)} />}
         {error && <Alert>{error}</Alert>}
         <div className="action-bar">
           {soon ? (

@@ -6,6 +6,7 @@ import { Link } from "react-router";
 import { t } from "../../i18n";
 import { Alert, Art, Icon, Loading } from "../../components/ui";
 import type { Player, SessionState } from "../../lib/types";
+import { ART_BY_PACK } from "../../screens/Libraries";
 
 type J = any;
 type Run = (fn: string, args?: Record<string, unknown>) => Promise<{ ok: boolean; error?: string; info?: any }>;
@@ -137,8 +138,12 @@ function PackPlaying({ c, round }: { c: Common; round: QRound }) {
         <div className="nd-progress__fill" style={{ width: `${(100 * (card.index + 1)) / card.count}%` }} />
       </div>
       <article className="q-card">
-        <p className="t-meta">{first?.is_me ? t("q.pack.youFirst") : t("q.pack.firstSpeaker", { name: nameOf(first) })}</p>
+        <div className="q-card__head">
+          <span className="nd-chip">{card.set_no ? t("q.pack.setChip", { s: card.set_no }) : t("q.pack.cardChip", { n: card.index + 1 })}</span>
+          <Art name={ART_BY_PACK[(c.st.game.config as any).pack?.code ?? ""] ?? "c01-generic"} size={64} />
+        </div>
         <h2 className={`t-question${card.item.text.length > 140 ? " t-question--long" : ""}`}>{card.item.text}</h2>
+        <p className="t-meta">{first?.is_me ? t("q.pack.youFirst") : t("q.pack.firstSpeaker", { name: nameOf(first) })}</p>
       </article>
 
       {card.done ? (
@@ -258,7 +263,11 @@ function TestDone({ c, round }: { c: Common; round: QRound }) {
   return (
     <div className="stack stack--4 enter" aria-live="polite">
       <section className="card stack stack--3">
-        <div className="row"><Art name="result-private" size={56} /><h2 className="t-section">{t("q.test.yourResult")}</h2></div>
+        <div className="q-result-head">
+          <Art name="result-private" size={96} />
+          <h2 className="t-section">{t("q.test.yourResult")}</h2>
+          <p className="t-meta row"><Icon name="lock-keyhole" size={16} />{shared ? t("q.test.sharedWith", { name: nameOf(partner) }) : t("q.test.onlyYou")}</p>
+        </div>
         {declined ? <p>{t("q.test.youDeclined")}</p>
           : result?.status === "complete" ? <Scores card={card} scores={result.scores} />
           : <p>{t("q.test.incomplete", { n: result?.answered ?? 0, total: result?.total ?? card.count })}</p>}

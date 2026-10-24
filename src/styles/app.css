@@ -128,7 +128,7 @@ h1, h2, h3 { font-weight: 700; }
 .topbar__actions { display: flex; align-items: center; gap: var(--s-2); min-width: 0; }
 .topbar__logo { display: inline-flex; align-items: center; min-height: 44px; }
 .topbar__logo img { width: 104px; height: auto; display: block; }
-.topbar__title { flex: 1; min-width: 0; text-align: center; font: 600 1rem/1.25rem var(--f-body); white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+.topbar__title { flex: 1; min-width: 0; text-align: left; font: 700 1.0625rem/1.375rem var(--f-heading); white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
 
 /* ---------- Icônes, logo, illustrations ---------- */
 .icon { display: inline-block; flex: none; background: currentColor;
@@ -725,3 +725,25 @@ button.pix5__cell { cursor: pointer; }
 .q-scores__row:last-child { border-bottom: 0; }
 .q-scores dt { font-weight: 600; min-width: 0; }
 .q-scores dd { margin: 0; color: var(--c-accent-down); }
+
+/* ---------- Fiche, salon (interface v2) ---------- */
+.nd-chip--mint { background: var(--c-sage); color: var(--c-success); }
+.nd-chip--peach { background: var(--c-peach); color: #7A3E22; }
+.game-intro { display: grid; gap: var(--s-2); justify-items: start; }
+.game-intro__art { width: 112px; height: 112px; justify-self: center; margin-bottom: var(--s-2); }
+.info-rows { list-style: none; margin: 0; padding: 0; display: grid; gap: 8px; }
+.info-row { display: flex; align-items: center; gap: 12px; min-height: 46px; padding: 10px 12px; background: var(--c-surface); border-radius: 10px; font-size: 0.875rem; }
+.info-row > .icon { color: var(--c-text-2); }
+.info-row--link { width: 100%; border: 0; text-align: left; cursor: pointer; color: var(--c-text); text-decoration: none; }
+.info-row--link:active { background: var(--c-surface-soft); }
+.rules-details { margin: 0; padding-left: 20px; display: grid; gap: 6px; font-size: 0.875rem; }
+.room-badge { justify-self: center; }
+.room-players { display: grid; grid-template-columns: 1fr 1fr; gap: 20px; }
+.room-player { display: grid; justify-items: center; gap: 4px; text-align: center; min-width: 0; }
+.room-player__name { font: 700 0.875rem/1.125rem var(--f-heading); overflow-wrap: break-word; max-width: 100%; }
+.room-game { display: flex; align-items: center; gap: var(--s-3); padding: 14px; background: var(--c-surface); border: 1px solid var(--c-border); border-radius: var(--r-panel); }
+.room-game .art { width: 88px; height: 88px; flex: none; }
+.room-game__body { display: grid; gap: 4px; justify-items: start; min-width: 0; }
+.q-card__head { display: flex; align-items: flex-start; justify-content: space-between; gap: var(--s-2); }
+.q-card__head .art { width: 64px; height: 64px; margin: -6px -6px 0 0; }
+.q-result-head { display: grid; justify-items: center; gap: 6px; text-align: center; }
