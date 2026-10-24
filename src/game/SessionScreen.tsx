@@ -173,7 +173,7 @@ function PausedPanel({ st, userId, partnerName, busy, online, run }: {
       <p>{st.session.paused_by === userId ? t("game.pausedByYou") : t("game.pausedBy", { name: partnerName })}</p>
       <p className="t-meta">{t("rhythm.pauseTimers")}</p>
       {mine ? (
-        <p className="t-small strong row"><Icon name="clock" size={18} />{t("rhythm.resumeWaiting", { name: partnerName })}</p>
+        <p className="t-small strong row" style={{ justifyContent: "center" }}><Icon name="clock" size={18} />{t("rhythm.resumeWaiting", { name: partnerName })}</p>
       ) : (
         <>
           {theirs && <p className="t-small strong">{t("rhythm.partnerReady", { name: partnerName })}</p>}
