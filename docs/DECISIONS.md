@@ -187,3 +187,5 @@ côté serveur par `scripts/import_lot3.py` (banques non lisibles par les client
 - Sélection de thèmes non proposée : facultative dans le kit ; toutes les cartes autorisées sont tirées.
 - Action ou Vérité : « Arrêter » passe par « Quitter la partie » du salon.
 - La confirmation de majorité repose sur l'activation personnelle d'À huis clos dans Réglages.
+- Mise en ligne : moteur, 730 cartes (empreintes identiques à la base de test pour chaque banque), règles des 8 jeux ;
+  `play_move`, `round_after` et `set_session_prefs` ne sont plus appelables sans compte connecté.
