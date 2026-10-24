@@ -102,13 +102,16 @@ def bank_name(instrument):
 
 
 def item_value(it, ambiguous_note):
-    keep = ["id", "source_position", "text_fr", "kind", "response_type", "scale_id", "axis", "reverse", "options_ordered"]
-    v = {k: it.get(k) for k in keep}
-    v["section"] = it.get("set") or it.get("section_id")
+    """Ce dont le moteur a besoin : texte d'origine, position source, type de réponse, échelle ; les choix ne sont
+    recopiés que pour le vrai/faux (les échelles des tests sont dans la configuration de la version)."""
+    v = {"id": it["id"], "source_position": it["source_position"], "text_fr": it["text_fr"], "kind": it.get("kind"),
+         "response_type": it.get("response_type"), "scale_id": it.get("scale_id"), "section": it.get("set")}
+    if it.get("response_type") == "true_false":
+        v["options_ordered"] = it.get("options_ordered")
     if it.get("source_ambiguity"):
         v["source_ambiguity"] = True
         v["note"] = ambiguous_note
-    return v
+    return {k: x for k, x in v.items() if x is not None}
 
 
 banks, games, versions = [], [], []
