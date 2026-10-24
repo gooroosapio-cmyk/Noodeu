@@ -409,8 +409,8 @@ begin
           select case when count(*) = 0 then null else jsonb_build_object('kind', 'test',
             'me', case when bool_or(rd.card -> 'completed' ? sp.seat::text) then 'completed'
                        when bool_or(rd.card -> 'declined' ? sp.seat::text) then 'declined' else 'started' end,
-            'partner', case when bool_or(rd.card -> 'completed' ? (3 - sp.seat)::text) then 'completed'
-                            when bool_or(rd.card -> 'declined' ? (3 - sp.seat)::text) then 'declined' else 'started' end) end
+            -- Côté partenaire, seulement « terminé » ou non : un refus ou un abandon reste privé.
+            'partner', case when bool_or(rd.card -> 'completed' ? (3 - sp.seat)::text) then 'completed' else 'pending' end) end
           from public.game_sessions gs join public.session_rounds rd on rd.session_id = gs.id
           join public.session_players sp on sp.session_id = gs.id and sp.user_id = auth.uid()
           where gs.couple_id = c and gs.game_id = g.id)

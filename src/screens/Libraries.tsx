@@ -10,6 +10,7 @@ import { SubPage } from "../components/AppShell";
 import { Alert, Art, DemoTag, Icon, Loading, PageLoading } from "../components/ui";
 import type { Category, Game, GameRules } from "../lib/types";
 import { RulesSheet } from "../components/RulesSheet";
+import { ProgressBadge, useProgress } from "../parcours/Progress";
 import {
   CATEGORY_BY_SHELF, DURATIONS, FORMATS, INTENSITIES, NO_FILTERS, SHELF_PATH, SHELVES, hasFilters, intensityRank, matchesFilters,
   normalizeText, shelfOf, useCatalog, useMyFilters, type Filters, type Shelf,
@@ -74,6 +75,7 @@ export function TileGrid({ games }: { games: Game[] }) {
 
 /** Ligne de pack (pages Se découvrir, Mieux se comprendre, À huis clos). */
 function PackList({ games }: { games: Game[] }) {
+  const progress = useProgress();
   return (
     <ul className="pack-list">
       {games.map((g) => (
@@ -83,6 +85,7 @@ function PackList({ games }: { games: Game[] }) {
             <span className="pack-row__body">
               <span className="pack-row__title">{g.title}</span>
               <span className="t-meta">{typeLabel(g)} · {durationLabel(g)}</span>
+              <ProgressBadge p={progress?.[g.id]} />
             </span>
             <Icon name="chevron-right" size={20} />
           </Link>

@@ -11,6 +11,7 @@ import { useShell } from "../components/AppShell";
 import { Avatar } from "../components/Avatar";
 import { Alert, ConfirmDialog, Icon, Loading, PageLoading, Sheet, formatDate, useToast } from "../components/ui";
 import type { ChatMessage } from "../lib/types";
+import { MyItems, ProgressSection } from "../parcours/Progress";
 
 interface HistoryItem {
   id: string;
@@ -184,6 +185,21 @@ export function OurSpace() {
           <History coupleId={selected.id} />
         </section>
       )}
+
+      {selected?.active && (
+        <section className="section" aria-labelledby="space-progress">
+          <h2 className="t-section" id="space-progress">{t("progress.title")}</h2>
+          <ProgressSection />
+        </section>
+      )}
+
+      <section className="section" aria-labelledby="space-items">
+        <div className="section__head">
+          <h2 className="t-section" id="space-items">{t("items.title")}</h2>
+          <span className="t-meta row"><Icon name="lock" size={16} />{t("items.private")}</span>
+        </div>
+        <MyItems />
+      </section>
 
       {selected && !selected.active && <ArchivedMessages coupleId={selected.id} partnerName={partnerName} />}
 
