@@ -7,5 +7,13 @@
  "test-rice": "playing",
  "test-resultat": "playing",
  "test-fin": "ended",
- "salon-huis-clos": "lobby"
+ "salon-huis-clos": "lobby",
+ "mini-morpion-jeu": "playing",
+ "mini-morpion-fin": "ended",
+ "mini-points-jeu": "playing",
+ "mini-pfc-verrouille": "playing",
+ "mini-pfc-revelation": "playing",
+ "mini-de-jeu": "playing",
+ "mini-naval-placement": "playing",
+ "mini-naval-tirs": "playing"
 }

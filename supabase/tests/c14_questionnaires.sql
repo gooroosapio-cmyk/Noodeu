@@ -53,9 +53,9 @@ begin
   perform t7.ok((select count(*) from public.game_categories where status = 'published') = 4, 'quatre catégories publiées');
   perform t7.ok((select count(*) from public.game_categories where status = 'archived') >= 8, 'anciennes familles archivées, pas effacées');
   perform t7.ok((select count(*) from public.games where status = 'published') = 30, '30 activités');
-  perform t7.ok((select count(*) from public.games where implementation = 'playable') = 14, '14 jouables (7 packs + 7 tests)');
+  perform t7.ok((select count(*) from public.games where implementation = 'playable' and mechanic in ('pack_conversation', 'test_form')) = 14, '14 jouables (7 packs + 7 tests)');
   perform t7.ok((select count(*) from public.games where category_id in ('nd-conversation-decouverte', 'nd-mini-jeux-interactifs')
-                 and implementation = 'coming_soon') = 16, '16 jeux C3/C4 en « Bientôt »');
+                 and implementation = 'coming_soon') = 11, '11 jeux C3/C4 encore en « Bientôt » (5 mini-jeux livrés au lot 2)');
   perform t7.ok((select count(*) from public.content_banks where bank like 'q\_%') = 370, '370 items (171 + 199)');
   perform t7.ok((select count(*) from public.content_banks where bank = 'q_aron' and content_version = '4.0.0') = 36, 'Aron reste en 4.0.0');
   perform t7.ok((select count(*) from public.content_banks where bank = 'q_usu_roadtrip' and content_version = '5.0.0') = 55, 'USU55 reste en 5.0.0');

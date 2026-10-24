@@ -149,3 +149,20 @@ G/M, versions C01 5.0.0 lues par un adaptateur sans changer `content_version`.
   actuelles avec les nouveaux jetons ; leurs nouvelles mises en page suivront dans un lot dédié.
 - Les banques des jeux C03 et de G07 sont arrivées dans le Drive le 24 octobre : ces jeux passent dans le lot 3,
   ils restent « Bientôt » jusque-là.
+
+## Lot 2 : mini-jeux (25 octobre 2026)
+
+Livrés selon les spécifications du kit C03/C04 V1 (`noodeu_c34_v1`) : Morpion (M01, N2-076), Points et carrés
+(M04, N2-079), Pierre, feuille, ciseaux (M11, N2-083), Le Dé chanceux (M12, nd-de-chanceux), Bataille navale (M07, N2-078).
+Moteur serveur « famille 6 » (`20261025000100_minijeux_lot2.sql`) ; règles du kit importées par `scripts/import_lot2.py`.
+
+Écarts assumés, à revoir si besoin :
+- Manche suivante (Morpion, Pierre-feuille-ciseaux) : un appui de l'un ou l'autre suffit, comme pour les autres jeux
+  de plateau, au lieu de l'accord des deux.
+- Pierre-feuille-ciseaux : les 30 secondes partent de la création de la manche (début de partie ou « Manche suivante »),
+  sans étape « Prêt » par manche. L'annulation à l'échéance est décidée par l'heure du serveur.
+- Bataille navale : l'option « Voir les flottes » après la partie (double accord) n'est pas proposée ; les positions
+  restantes restent toujours secrètes, ce que le kit prévoit en l'absence d'accord.
+- Revanche : « Rejouer » ouvre une nouvelle partie (nouveau tirage) ; elle n'est pas reliée à l'ancienne.
+- Plateaux denses (Points et carrés, Bataille navale) : plateau entier par défaut, bouton « Agrandir le plateau »
+  qui donne des cibles de 44 px avec défilement horizontal.

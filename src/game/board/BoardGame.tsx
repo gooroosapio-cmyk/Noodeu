@@ -8,6 +8,7 @@ import { Alert, Icon, Illustration, Loading } from "../../components/ui";
 import type { Player, SessionState } from "../../lib/types";
 import { CREATION_VIEWS, CreationSolution, isCreationMech } from "./CreationGames";
 import { MEMORY_VIEWS, MemorySolution, isMemoryMech } from "./MemoryGames";
+import { MINI_VIEWS, MiniSolution, isMiniMech } from "./MiniGames";
 
 type Run = (fn: string, args?: Record<string, unknown>) => Promise<{ ok: boolean; error?: string; info?: any }>;
 interface Common { st: SessionState; run: Run; busy: boolean; online: boolean }
@@ -569,6 +570,7 @@ const VIEWS: Record<string, ComponentType<V>> = {
   word_growth: Growth, cross_letters: Cross, rebus: Rebus,
   ...CREATION_VIEWS,
   ...MEMORY_VIEWS,
+  ...MINI_VIEWS,
 };
 
 // ---------------------------------------------------------------------------
@@ -578,6 +580,7 @@ function Solution({ round, st }: { round: BRound; st: SessionState }) {
   const c = round.card, s = round.solution ?? {};
   if (isCreationMech(c.mech)) return <CreationSolution c={c} s={s} players={st.players} title={st.game.title} />;
   if (isMemoryMech(c.mech)) return <MemorySolution c={c} s={s} players={st.players} />;
+  if (isMiniMech(c.mech)) return <MiniSolution c={c} players={st.players} />;
   const line = (k: MessageKey, vars: Record<string, string | number>) => <p>{t(k, vars)}</p>;
   switch (c.mech) {
     case "taboo": return line("board.sol.word", { w: s.target ?? "" });
@@ -687,7 +690,7 @@ export function BoardResults({ c, navigate }: { c: Common; navigate: (to: string
       </div>
       {result?.points && (
         <div className="card stack stack--2">
-          <h2 className="t-card">{t("rounds.points")}</h2>
+          <h2 className="t-card">{isMiniMech(c.st.game.mechanic) ? t("mini.finalScore") : t("rounds.points")}</h2>
           {c.st.players.map((p) => <p key={p.seat}>{nameOf(p)} : {result.points![String(p.seat)] ?? 0}</p>)}
         </div>
       )}

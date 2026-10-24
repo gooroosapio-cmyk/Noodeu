@@ -45,7 +45,13 @@ Contrôles : défilement horizontal, contenu masqué sous la navigation, erreurs
 Catalogue actuel (catégories 1 à 4) : `tests/visual/fixtures/catalogue.json` est extrait de la base locale, et
 `python3 tests/visual/make_fixtures_c14.py` produit des états **réels** (fonctions de la base, transaction annulée)
 pour les packs (vrai/faux, attente, révélation avec partage et réponse gardée, fin de séance), les questionnaires
-(première page, page de l'item Rice 69, résultat partagé, fin) et le salon « À huis clos ». Écrans `60-*`.
+(première page, page de l'item Rice 69, résultat partagé, fin), le salon « À huis clos » et les mini-jeux du lot 2
+(morpion en cours et fini, points et carrés, pierre-feuille-ciseaux verrouillé puis révélé, dé, placement et tirs
+de bataille navale). Écrans `60-*`.
+
+Tests SQL du lot 2 : `supabase/tests/c14_minijeux.sql` (cas d'acceptation du kit : victoires et nulles, neuvième case,
+case occupée, double capture, matrice des neuf gestes, échéance sans divulgation, dé à 1, victoire à 98 + 5,
+chevauchement, contact autorisé, tir répété, aucune coordonnée adverse transmise, idempotence, robot jusqu'au bout).
 
 ## 4. Recette manuelle à deux téléphones (à faire après mise en ligne)
 
