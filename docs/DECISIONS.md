@@ -111,3 +111,28 @@ priment (consignes présentes > kit).
   combinaison filtre le tirage (`+18 si A et B`, exclusions = union).
 - Catalogue importé par un script idempotent (`scripts/import_catalogue.py`) qui produit une migration de données et
   un rapport ; vignettes SVG copiées dans `public/assets/jeux/` (aucun appel à Drive).
+
+## Nouvelle base : catégories 1 à 4 (cadrage du 24 octobre 2026)
+
+Sources : Drive Noodeu (01_Se_decouvrir, 02_Mieux_se_comprendre, 03_04_Conversation_et_Mini_jeux,
+05_Ressources_communes), point d'entrée `00_PROMPT_CLAUDE_CATEGORIES_1_4.txt`.
+
+| # | Question | Décision |
+|---|---|---|
+| 1 | Ancienne base (145 activités) | Purge complète puis import neuf. La purge doit être collée dans l'éditeur SQL du projet Noodeu (l'outil en ligne refuse les suppressions). |
+| 2 | Cartes de la catégorie 3 | Fournies par le propriétaire plus tard (voir 5). |
+| 3 | Droits C1/C2 | Jouables en phase de test, sans droits commerciaux ; sources et réserve « droits commerciaux à confirmer » affichées. |
+| 4 | RICE100, item 69 « ? » | Affiché tel quel avec la réserve « item source ambigu » ; passé, l'indice n'est pas calculé et on l'explique. |
+| 5 | Banques vides (G01–G05, G09, G10, G07) | Les 8 jeux restent « Bientôt » jusqu'au dépôt des banques par le propriétaire. Aucune carte inventée. |
+| 6 | Entrées « Questions » et « Tests » | Une page par entrée : bannière de la catégorie puis grille de packs en 2 colonnes, fiche au toucher. |
+| 7 | Jeux et mini-jeux | Deux sections titrées en 2 colonnes : « Conversation et découverte » (8) puis « Mini-jeux » (8). |
+| 8 | RICE100, QSI12, SPN16 | Section « À huis clos » : activation personnelle de chacun puis double consentement au lancement. |
+| 9 | Thème Cocon pastel V5 | Refonte complète V5 de tous les écrans. |
+| 10 | Packs longs de Se découvrir | Ordre de la source, reprise à la carte suivante d'une séance à l'autre ; Aron en 3 séries de 12. |
+| 11 | Notes vocales | Écrit d'abord ; vocal 30 s dans un lot ultérieur, après vérification du stockage privé. |
+| 12 | Ordre de livraison | Lot 1 : thème V5, bibliothèque, 7 packs C1 et 7 tests C2. Lot 2 : mini-jeux sans contenu bloqué (Morpion, Points et carrés, Pierre-feuille-ciseaux, Dé chanceux, Bataille navale). Lot 3 : Deux vérités et un mensonge, Pendu, Petit bac ; Cite trois et les 7 conversations dès réception des banques. |
+
+Règles fixées par les documents (non redemandées) : même carte et même version pour les deux, réponses privées,
+partage volontaire, passer = valeur nulle (jamais 0), aucun score de compatibilité ni diagnostic, calculs C2 côté
+serveur, résultat individuel avec partage révocable des scores seulement, namespace `noodeu_c34_v1` pour les codes
+G/M, versions C01 5.0.0 lues par un adaptateur sans changer `content_version`.
