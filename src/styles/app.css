@@ -271,7 +271,7 @@ legend { padding: 0; margin-bottom: var(--s-2); font-weight: 600; }
 /* ---------- Navigation basse ---------- */
 .nav {
   position: fixed; left: 0; right: 0; bottom: 0; z-index: 30;
-  display: grid; grid-template-columns: repeat(5, minmax(0, 1fr));
+  display: grid; grid-template-columns: 1fr 1.3fr 1fr 1fr 1fr;
   min-height: var(--nav-h); padding: var(--s-2) var(--s-2) calc(var(--s-1) + env(safe-area-inset-bottom));
   background: var(--c-surface); border-top: 1px solid var(--c-border);
   width: min(100%, var(--shell)); left: 50%; right: auto; transform: translateX(-50%);
@@ -282,12 +282,12 @@ legend { padding: 0; margin-bottom: var(--s-2); font-weight: 600; }
   color: var(--c-text-2); font: 400 0.6875rem/0.875rem var(--f-body); isolation: isolate;
 }
 .nav a .icon { align-self: center; }
-.nav a > span { max-width: 100%; overflow-wrap: normal; }
-/* Texte très agrandi : on autorise la coupure plutôt que le chevauchement. */
-@media (max-width: 439px) { .nav a > span { overflow-wrap: anywhere; } }
+.nav a > span { max-width: 100%; overflow-wrap: normal; word-break: keep-all; white-space: nowrap; }
+/* Jamais de mot coupé : avec un texte très agrandi, les libellés restent plafonnés (nom accessible inchangé). */
+.nav a { font-size: min(0.6875rem, 12px); }
 .nav a[aria-current="page"] { color: var(--c-accent); font-weight: 700; }
 .nav a[aria-current="page"]::before { content: ""; position: absolute; top: 2px; width: 46px; height: 30px; background: var(--c-accent-soft); border-radius: 12px; z-index: -1; }
-@media (max-width: 359px) { .nav a { font-size: 0.59375rem; } }
+@media (max-width: 359px) { .nav a { font-size: min(0.625rem, 11px); } }
 
 
 /* ---------- Bibliothèques ---------- */
@@ -296,7 +296,7 @@ legend { padding: 0; margin-bottom: var(--s-2); font-weight: 600; }
 /* ---------- Accueil ---------- */
 .hero { padding: var(--s-5) var(--s-4); gap: var(--s-4); }
 .hero__cta { width: 100%; max-width: 360px; }
-@media (min-width: 560px) { .chips { display: flex; flex-wrap: wrap; gap: var(--s-2); }
+.chips { display: flex; flex-wrap: wrap; gap: var(--s-2); }
 .chip {
   min-height: 44px; min-width: 44px; justify-content: center; padding: var(--s-2) var(--s-4); border-radius: var(--r-pill);
   border: 1px solid transparent; background: var(--c-chip); cursor: pointer;
@@ -309,7 +309,6 @@ legend { padding: 0; margin-bottom: var(--s-2); font-weight: 600; }
 .chips--scroll { flex-wrap: nowrap; overflow-x: auto; scrollbar-width: none; padding-bottom: 2px; }
 .chips--scroll::-webkit-scrollbar { display: none; }
 .chips--scroll .chip { flex: none; }
-@media (min-width: 400px) { 
 /* ---------- Feuilles (filtres, chat, notifications) ---------- */
 .sheet-backdrop { position: fixed; inset: 0; z-index: 50; background: rgb(67 38 62 / 38%); display: flex; align-items: flex-end; justify-content: center; }
 .sheet {
@@ -671,7 +670,9 @@ button.pix5__cell { cursor: pointer; }
   background: var(--c-surface); border: 1px solid var(--c-border); border-radius: var(--r-card);
 }
 .pack-row .art { width: 64px; height: 64px; flex: none; }
-.pack-row__body { flex: 1; min-width: 0; display: grid; gap: 2px; }
+.pack-row { flex-wrap: wrap; }
+/* Base en rem : avec un texte très agrandi, le texte passe sous l'illustration plutôt que de couper les mots. */
+.pack-row__body { flex: 1 1 9rem; min-width: 0; display: grid; gap: 2px; }
 .pack-row__title { font: 700 0.875rem/1.125rem var(--f-heading); }
 .pack-row > .icon { color: var(--c-text-2); }
 .pack-row:active { background: var(--c-surface-soft); }
@@ -688,7 +689,8 @@ button.pix5__cell { cursor: pointer; }
   background: var(--c-surface); border: 1px solid var(--c-border); border-radius: var(--r-card);
   text-decoration: none; color: var(--c-text);
 }
-.resume-card__body { flex: 1; min-width: 0; display: grid; gap: 2px; }
+.resume-card { flex-wrap: wrap; }
+.resume-card__body { flex: 1 1 8rem; min-width: 0; display: grid; gap: 2px; }
 .resume-card__cta { flex: none; padding: 8px 14px; border-radius: var(--r-button); background: var(--c-accent-soft); color: var(--c-accent-down); font: 700 0.875rem/1.125rem var(--f-heading); }
 
 /* ---------- Packs et questionnaires ---------- */
