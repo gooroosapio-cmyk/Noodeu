@@ -1,7 +1,13 @@
 import { createContext, useCallback, useContext, useEffect, useState, type ReactNode } from "react";
 import type { Session } from "@supabase/supabase-js";
-import { supabase } from "../lib/supabase";
+import { rpc, supabase } from "../lib/supabase";
 import type { Profile } from "../lib/types";
+
+/** Valeurs par défaut des réglages personnels (identiques à celles de la base). */
+const DEFAULT_PREFS: Pick<Profile, "max_intensity" | "adult_confirmed_at" | "daily_adult" | "timezone" | "country" | "reminders"> = {
+  max_intensity: "moyen", adult_confirmed_at: null, daily_adult: false, timezone: null, country: null,
+  reminders: { enabled: false, per_week: 2, quiet_start: 21, quiet_end: 9 },
+};
 
 interface AuthValue {
   loading: boolean;
@@ -41,19 +47,36 @@ export function AuthProvider({ children }: { children: ReactNode }) {
       setProfile(null);
       return;
     }
-    const { data, error } = await supabase
-      .from("profiles")
-      .select("id, display_name, word_form, intimate_opt_in, reduced_motion, avatar_path")
-      .eq("id", userId)
-      .maybeSingle();
+    // Colonnes publiques (visibles du duo) puis réglages personnels, lisibles par la seule personne concernée.
+    const [{ data, error }, prefs] = await Promise.all([
+      supabase.from("profiles").select("id, display_name, word_form, intimate_opt_in, reduced_motion, avatar_path").eq("id", userId).maybeSingle(),
+      rpc<Partial<Profile>>("get_my_prefs", {}),
+    ]);
     // Erreur réseau ou profil absent : l'interface propose de réessayer au lieu d'attendre indéfiniment.
     setProfileError(Boolean(error) || !data);
-    if (data) setProfile(data as Profile);
+    if (data) {
+      const { ok: _ok, ...own } = prefs.ok ? prefs : { ok: false };
+      setProfile({ ...DEFAULT_PREFS, ...(data as Profile), ...own });
+    }
   }, [userId]);
 
   useEffect(() => {
     void refreshProfile();
   }, [refreshProfile]);
+
+  // Fuseau de l'appareil, enregistré une fois (question du jour et heures calmes des rappels).
+  useEffect(() => {
+    if (!userId || !profile || profile.timezone) return;
+    let tz = "";
+    try {
+      tz = Intl.DateTimeFormat().resolvedOptions().timeZone;
+    } catch {
+      return;
+    }
+    if (tz) void supabase.from("profiles").update({ timezone: tz }).eq("id", userId).then(({ error }) => {
+      if (!error) setProfile((p) => (p ? { ...p, timezone: tz } : p));
+    });
+  }, [userId, profile]);
 
   useEffect(() => {
     document.documentElement.classList.toggle("reduced-motion", Boolean(profile?.reduced_motion));

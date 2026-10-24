@@ -845,3 +845,16 @@ button.pix5__cell { cursor: pointer; }
 .pb-field .field__label img { flex: none; }
 .cite-count { display: grid; justify-items: center; gap: var(--s-3); padding: var(--s-6) 0; text-align: center; }
 .cite-timer { display: grid; justify-items: center; gap: var(--s-1); }
+/* ---------- Filtres combinables (bibliothèque) ---------- */
+.search-row { display: flex; gap: var(--s-2); align-items: center; }
+.search-row .search { flex: 1; min-width: 0; }
+.filter-btn { position: relative; flex: none; }
+.filter-badge { position: absolute; top: 2px; right: 2px; min-width: 18px; height: 18px; border-radius: 9px; background: var(--c-accent); color: var(--c-accent-ink); font: 700 0.6875rem/18px var(--f-body); text-align: center; }
+.filter-panel { padding: var(--s-3); border-radius: var(--r-card, 16px); background: var(--c-surface); border: 1px solid var(--c-border); }
+.filter-group { border: 0; margin: 0; padding: 0; display: grid; gap: var(--s-2); }
+.filter-group legend { padding: 0; margin-bottom: var(--s-2); }
+.chip:disabled { opacity: 0.45; cursor: not-allowed; }
+.group__pad { padding: var(--s-3) var(--s-4); display: grid; gap: var(--s-2); }
+.group__note { padding: 0 var(--s-4) var(--s-3); }
+.check-row { display: flex; gap: var(--s-3); align-items: flex-start; min-height: 44px; padding-top: var(--s-3); cursor: pointer; }
+.check-row input { width: 22px; height: 22px; flex: none; accent-color: var(--c-accent); }

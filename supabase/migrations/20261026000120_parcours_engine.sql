@@ -130,7 +130,9 @@ begin
     'my_prefs', (select jsonb_build_object('adult', sp.adult, 'excluded_topics', to_jsonb(sp.excluded_topics))
                  from public.session_prefs sp where sp.session_id = s.id and sp.user_id = me),
     'game', (select jsonb_build_object('title', g.title, 'mechanic', g.mechanic, 'rules', v.rules, 'config', v.config,
-                                       'adult_available', g.adult_available, 'thumbnail', g.thumbnail)
+                                       'adult_available', g.adult_available, 'thumbnail', g.thumbnail,
+                                       'content_level', g.content_level, 'intensity', g.intensity,
+                                       'adult_active', private.adult_allowed(s.id))
              from public.games g join public.game_versions v on v.game_id = g.id and v.version = s.game_version
              where g.id = s.game_id),
     'players', (select coalesce(jsonb_agg(jsonb_build_object(

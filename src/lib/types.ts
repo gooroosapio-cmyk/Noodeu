@@ -7,7 +7,20 @@ export interface Profile {
   intimate_opt_in: boolean;
   reduced_motion: boolean;
   avatar_path: string | null;
+  /** Intensité maximale acceptée (le duo suit la plus basse des deux). */
+  max_intensity: Intensity;
+  /** Déclaration de majorité horodatée, exigée pour activer le +18. */
+  adult_confirmed_at: string | null;
+  /** +18 aussi dans la question du jour (en plus du +18 général). */
+  daily_adult: boolean;
+  timezone: string | null;
+  country: string | null;
+  reminders: Reminders;
 }
+
+export type Intensity = "soft" | "moyen" | "hot";
+export type Format = "solo" | "duo" | "jeu" | "rituel" | "defi";
+export interface Reminders { enabled: boolean; per_week: number; quiet_start: number; quiet_end: number }
 
 export type SessionStatus = "lobby" | "playing" | "paused" | "ended" | "closed" | "abandoned";
 
@@ -73,6 +86,9 @@ export interface SessionState {
     current_round: number;
     total_rounds: number;
     paused_by: string | null;
+    /** Pause partagée : la reprise demande l'accord de chaque joueur (sièges ayant accepté dans resume). */
+    pause_state?: { paused_at: string; by: string; resume: number[] } | null;
+    server_now?: string;
     state_version: number;
     read_only: boolean;
     created_at: string;
@@ -80,7 +96,10 @@ export interface SessionState {
     result?: Record<string, unknown>;
   };
   my_seat: number | null;
-  game: { title: string; mechanic: string; rules: GameRules; config: GameConfig };
+  game: {
+    title: string; mechanic: string; rules: GameRules; config: GameConfig;
+    adult_available?: boolean; content_level?: string; intensity?: Intensity | null; adult_active?: boolean;
+  };
   players: Player[];
   rounds: Round[];
 }
@@ -109,6 +128,9 @@ export interface Game {
   thumbnail: string | null;
   /** Métadonnées éditoriales (nombre d'items, code de référence, statut des droits…). */
   meta: { items?: number; code?: string; instrument?: string; reference_code?: string; rights_status?: string; duration_is_estimate?: boolean } | null;
+  intensity: Intensity | null;
+  formats: Format[];
+  duration_kind: "rapide" | "discussion" | null;
 }
 
 export interface Category {

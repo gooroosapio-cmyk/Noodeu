@@ -1,6 +1,7 @@
 /* eslint-disable @typescript-eslint/no-explicit-any */
 // Jeux de conversation (catégorie 3) : cartes tirées par le serveur, réponses scellées, révélation commune,
 // « Continuer » des deux. L'écran ne reçoit jamais la réponse de l'autre avant la révélation.
+import { LaterButton } from "../Later";
 import { useEffect, useState } from "react";
 import { Link } from "react-router";
 import { t } from "../../i18n";
@@ -21,6 +22,8 @@ export const nameOf = (p?: Player) => (p ? (p.is_me ? t("game.you") : p.display_
 /** Texte selon que la personne désignée est soi (« Tu es le sujet ») ou l'autre (« Sujet : Alex »). */
 export const forWho = (p: Player | undefined, mine: string, theirs: string) => (p?.is_me ? t(mine as never) : t(theirs as never, { name: nameOf(p) }));
 const MAX = 1000;
+/** Cartes tirées d'une banque de questions : elles peuvent être gardées pour plus tard (jamais Deux vérités, écrites par les joueurs). */
+const LATER_MECHS = new Set(["nd_never", "nd_dilemma", "nd_duo_target", "nd_opinion", "nd_sentence", "nd_predict", "nd_truth_dare"]);
 
 function moveError(code?: string, extra: string[] = []) {
   const known = ["invalid_text", "locked", "no_cards", "duplicate_text", "not_your_turn", "phase"];
@@ -357,6 +360,7 @@ function RoundView({ c, round }: { c: Common; round: CRound }) {
       )}
 
       {err && <Alert>{err}</Alert>}
+      {!card.done && !card.redacted && LATER_MECHS.has(m) && <LaterButton sessionId={c.st.session.id} round={round.round_no} disabled={!c.online} />}
       {!card.done && <button className="btn btn--quiet" disabled={busy} onClick={() => void play("skip_round")}>{t("conv.skip")}</button>}
       {(card.adult || !card.done) && <AdultWithdraw c={c} />}
     </section>

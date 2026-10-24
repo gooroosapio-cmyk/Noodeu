@@ -1,6 +1,7 @@
 /* eslint-disable @typescript-eslint/no-explicit-any */
 // Packs de questions (C01) et questionnaires (C02) : textes, ordre, échelles et calculs viennent du serveur.
 // L'écran n'affiche jamais une réponse du partenaire avant la révélation : il ne la reçoit pas.
+import { LaterButton } from "../Later";
 import { useEffect, useMemo, useState } from "react";
 import { Link } from "react-router";
 import { t } from "../../i18n";
@@ -144,6 +145,7 @@ function PackPlaying({ c, round }: { c: Common; round: QRound }) {
         </div>
         <h2 className={`t-question${card.item.text.length > 140 ? " t-question--long" : ""}`}>{card.item.text}</h2>
         <p className="t-meta">{first?.is_me ? t("q.pack.youFirst") : t("q.pack.firstSpeaker", { name: nameOf(first) })}</p>
+        {!c.st.session.read_only && <LaterButton sessionId={c.st.session.id} round={round.round_no} disabled={!c.online} />}
       </article>
 
       {card.done ? (

@@ -73,7 +73,6 @@ export function SessionScreen() {
   const partnerName = partner?.display_name || "?";
   const partnerHere = Boolean(partner?.user_id && s.present.includes(partner.user_id));
   const live = ["lobby", "playing", "paused", "ended"].includes(st.session.status) && !st.session.read_only;
-  const canPause = st.session.status === "playing" || st.session.status === "paused";
   const rounds = isRounds(st);
   const board = isBoard(st);
   const questionnaire = board && isQuestionnaireMech((st.game.config as unknown as { mechanic?: string }).mechanic);
@@ -81,6 +80,8 @@ export function SessionScreen() {
   const word = board && isWordMech(mech);
   const conversation = board && (isConversationMech(mech) || word);
   const common = { st, run, busy, online, act: s.act };
+  // Bandeau des packs et parties +18, au début : on peut passer, faire une pause ou arrêter à tout moment.
+  const adultStart = (st.game.content_level === "intime" || Boolean(st.game.adult_active)) && st.session.current_round <= 1;
   const showOptions = rounds && hasOptions(st) && ["lobby", "playing", "paused"].includes(st.session.status) && !st.session.read_only;
 
   return (
@@ -101,10 +102,10 @@ export function SessionScreen() {
               <Icon name="settings" />
             </button>
           )}
-          {canPause && (
-            <button className="icon-btn icon-btn--soft" disabled={busy || !online} onClick={() => run("set_paused", { p_paused: st.session.status === "playing" })}
-              aria-label={st.session.status === "paused" ? t("game.resume") : t("game.pause")}>
-              <Icon name={st.session.status === "paused" ? "play" : "pause"} />
+          {st.session.status === "playing" && (
+            <button className="icon-btn icon-btn--soft" disabled={busy || !online} onClick={() => run("set_paused", { p_paused: true })}
+              aria-label={t("game.pause")}>
+              <Icon name="pause" />
             </button>
           )}
         </>
@@ -116,15 +117,9 @@ export function SessionScreen() {
 
         {st.session.status === "lobby" && <Lobby st={st} me={me} partner={partner} partnerHere={partnerHere} busy={busy} online={online} run={run} onChat={() => setChat(true)}
           onOptions={showOptions ? () => setOptions(true) : undefined} />}
+        {st.session.status === "playing" && adultStart && <Alert kind="info"><Icon name="shield-check" size={18} />{t("rhythm.adultBanner")}</Alert>}
         {st.session.status === "playing" && (word ? <WordPlaying c={common} /> : conversation ? <ConversationPlaying c={common} /> : questionnaire ? <QuestionnairePlaying c={common} /> : board ? <BoardPlaying {...common} /> : rounds ? <RoundsPlaying {...common} /> : <Playing st={st} partnerName={partnerName} partner={partner} busy={busy} online={online} run={run} />)}
-        {st.session.status === "paused" && (
-          <section className="empty enter">
-            <Illustration name="17-pause" />
-            <h2 className="t-section">{t("game.pausedTitle")}</h2>
-            <p>{st.session.paused_by === userId ? t("game.pausedByYou") : t("game.pausedBy", { name: partnerName })}</p>
-            <button className="btn btn--auto" disabled={busy || !online} onClick={() => run("set_paused", { p_paused: false })}>{t("game.resume")}</button>
-          </section>
-        )}
+        {st.session.status === "paused" && <PausedPanel st={st} userId={userId} partnerName={partnerName} busy={busy} online={online} run={run} />}
         {(st.session.status === "ended" || st.session.status === "closed") && (conversation
           ? <ConversationResults c={common} navigate={navigate} />
           : questionnaire
@@ -159,6 +154,33 @@ export function SessionScreen() {
       {chat && <ChatPanel inGame onClose={() => setChat(false)} />}
       {options && <OptionsSheet c={common} onClose={() => setOptions(false)} />}
     </SubPage>
+  );
+}
+
+/** Pause partagée : chronos suspendus ; la partie ne reprend qu'avec l'accord de vous deux. */
+function PausedPanel({ st, userId, partnerName, busy, online, run }: {
+  st: SessionState; userId: string | null; partnerName: string; busy: boolean; online: boolean; run: Run;
+}) {
+  const resume = st.session.pause_state?.resume ?? [];
+  const mine = st.my_seat != null && resume.includes(st.my_seat);
+  const theirs = st.players.some((p) => !p.is_me && resume.includes(p.seat));
+  return (
+    <section className="empty enter" aria-live="polite">
+      <Illustration name="17-pause" />
+      <h2 className="t-section">{t("game.pausedTitle")}</h2>
+      <p>{st.session.paused_by === userId ? t("game.pausedByYou") : t("game.pausedBy", { name: partnerName })}</p>
+      <p className="t-meta">{t("rhythm.pauseTimers")}</p>
+      {mine ? (
+        <p className="t-small strong row"><Icon name="clock" size={18} />{t("rhythm.resumeWaiting", { name: partnerName })}</p>
+      ) : (
+        <>
+          {theirs && <p className="t-small strong">{t("rhythm.partnerReady", { name: partnerName })}</p>}
+          <button className="btn btn--auto" disabled={busy || !online} onClick={() => run("set_paused", { p_paused: false })}>
+            {theirs ? t("game.resume") : t("rhythm.askResume")}
+          </button>
+        </>
+      )}
+    </section>
   );
 }
 

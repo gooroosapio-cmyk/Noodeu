@@ -34,6 +34,9 @@ const messages: Record<string, string> = {
   invalid_message: "Ton message est vide ou trop long (1000 caractères maximum).",
   not_ended: "La partie n'est pas encore terminée.",
   confirmation_required: "Confirmation manquante.",
+  filtered_out: "Cette activité dépasse le réglage d'intensité de l'un de vous : elle ne peut pas être lancée pour l'instant.",
+  adult_confirmation_required: "Confirme d'abord avoir 18 ans ou plus.",
+  not_paused: "La partie n'est pas en pause.",
 };
 
 export function errorMessage(code: string | undefined | null): string {

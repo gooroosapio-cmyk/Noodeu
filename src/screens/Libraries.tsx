@@ -1,6 +1,6 @@
 import { useEffect, useLayoutEffect, useMemo, useRef, useState } from "react";
 import { Link, useNavigate, useParams } from "react-router";
-import { t } from "../i18n";
+import { t, type MessageKey } from "../i18n";
 import { errorMessage } from "../lib/errors";
 import { rpc, supabase } from "../lib/supabase";
 import { useOnline } from "../lib/useOnline";
@@ -10,7 +10,10 @@ import { SubPage } from "../components/AppShell";
 import { Alert, Art, DemoTag, Icon, Loading, PageLoading } from "../components/ui";
 import type { Category, Game, GameRules } from "../lib/types";
 import { RulesSheet } from "../components/RulesSheet";
-import { CATEGORY_BY_SHELF, SHELF_PATH, SHELVES, normalizeText, shelfOf, useCatalog, type Shelf } from "./catalog";
+import {
+  CATEGORY_BY_SHELF, DURATIONS, FORMATS, INTENSITIES, NO_FILTERS, SHELF_PATH, SHELVES, hasFilters, intensityRank, matchesFilters,
+  normalizeText, shelfOf, useCatalog, useMyFilters, type Filters, type Shelf,
+} from "./catalog";
 
 export const ART_BY_PACK: Record<string, string> = {
   P01: "c01-aron36", P03: "c01-approfondies", P15: "c01-retrouver55", P11: "c01-rituels",
@@ -121,17 +124,63 @@ function HuisClosNotice({ enabled }: { enabled: boolean }) {
     );
 }
 
-const STORE = "noodeu.lib.state.v4";
-interface LibState { query: string; scroll: number }
+const STORE = "noodeu.lib.state.v5";
+interface LibState { query: string; scroll: number; filters: Filters; open: boolean }
 
 function loadState(): LibState {
   try {
     const s = JSON.parse(sessionStorage.getItem(STORE) ?? "null") as LibState | null;
-    if (s && typeof s.query === "string") return s;
+    if (s && typeof s.query === "string" && s.filters) return { ...s, filters: { ...NO_FILTERS, ...s.filters } };
   } catch {
     /* rien */
   }
-  return { query: "", scroll: 0 };
+  return { query: "", scroll: 0, filters: NO_FILTERS, open: false };
+}
+
+/** Plafond d'intensité du duo : le réglage le plus doux des deux (serveur), à défaut le mien. */
+export function useCap() {
+  const { profile } = useAuth();
+  const { active } = useDuo();
+  const my = useMyFilters(`${profile?.max_intensity}|${profile?.intimate_opt_in}|${active?.id ?? ""}`);
+  return { cap: my?.duo_cap ?? intensityRank(profile?.max_intensity), duoAdult: my?.duo_adult ?? false };
+}
+
+type Group = "intensity" | "duration" | "format";
+const GROUP_VALUES: Record<Group, readonly string[]> = { intensity: INTENSITIES, duration: DURATIONS, format: FORMATS };
+
+/** Filtres combinables : intensité, durée, format et +18 (ce dernier seulement si la personne l'a activé). */
+function FilterPanel({ filters, cap, adultOk, onChange }: { filters: Filters; cap: number; adultOk: boolean; onChange: (f: Filters) => void }) {
+  function flip(group: Group, v: string) {
+    const cur = filters[group] as string[];
+    onChange({ ...filters, [group]: cur.includes(v) ? cur.filter((x) => x !== v) : [...cur, v] });
+  }
+  return (
+    <div className="filter-panel stack" id="lib-filters">
+      {(Object.keys(GROUP_VALUES) as Group[]).map((group) => (
+        <fieldset key={group} className="filter-group">
+          <legend className="t-meta">{t(`filter.${group}` as MessageKey)}</legend>
+          <div className="chips chips--scroll">
+            {GROUP_VALUES[group].map((v) => {
+              const blocked = group === "intensity" && intensityRank(v as Filters["intensity"][number]) > cap;
+              return (
+                <button key={v} type="button" className="chip" aria-pressed={(filters[group] as string[]).includes(v)} disabled={blocked}
+                  title={blocked ? t("filter.aboveCap") : undefined} onClick={() => flip(group, v)}>
+                  {t(`filter.${group}.${v}` as MessageKey)}
+                </button>
+              );
+            })}
+          </div>
+        </fieldset>
+      ))}
+      {adultOk && (
+        <label className="switch-row">
+          <span className="switch-row__text"><span>{t("filter.adult")}</span><span className="t-meta">{t("filter.adultHint")}</span></span>
+          <input className="switch" type="checkbox" role="switch" checked={filters.adult} onChange={(e) => onChange({ ...filters, adult: e.target.checked })} />
+        </label>
+      )}
+      {hasFilters(filters) && <button type="button" className="btn btn--quiet btn--auto btn--sm" onClick={() => onChange(NO_FILTERS)}>{t("lib.clearFilters")}</button>}
+    </div>
+  );
 }
 
 function categoryOf(categories: Category[], shelf: Shelf) {
@@ -147,6 +196,7 @@ export function Libraries() {
   const cat = useCatalog(userId);
   const [state, setState] = useState<LibState>(loadState);
   const intimate = !!profile?.intimate_opt_in;
+  const { cap } = useCap();
 
   // Recherche et position conservées en mémoire de session (jamais dans l'URL).
   useEffect(() => {
@@ -170,20 +220,27 @@ export function Libraries() {
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [cat.loading]);
 
+  // En duo, seules les activités compatibles avec les préférences des deux sont proposées.
+  const allowed = useMemo(() => cat.games.filter((g) => intensityRank(g.intensity) <= cap), [cat.games, cap]);
+  const hidden = cat.games.length - allowed.length;
+
   const byShelf = useMemo(() => {
     const m = new Map<Shelf, Game[]>(SHELVES.map((s) => [s, []]));
-    for (const g of cat.games) {
+    for (const g of allowed) {
       const s = shelfOf(g);
       if (s) m.get(s)!.push(g);
     }
     return m;
-  }, [cat.games]);
+  }, [allowed]);
 
   const q = normalizeText(state.query.trim());
+  const filtering = !!q || hasFilters(state.filters);
   // Les activités « À huis clos » restent hors des résultats tant que la personne ne les a pas activées.
-  const results = useMemo(() => q
-    ? cat.games.filter((g) => (shelfOf(g) !== "huisclos" || intimate) && normalizeText(`${g.title} ${g.hook} ${g.promise}`).includes(q))
-    : [], [cat.games, q, intimate]);
+  const results = useMemo(() => filtering
+    ? allowed.filter((g) => (shelfOf(g) !== "huisclos" || intimate) && matchesFilters(g, state.filters)
+      && (!q || normalizeText(`${g.title} ${g.hook} ${g.promise}`).includes(q)))
+    : [], [allowed, q, filtering, state.filters, intimate]);
+  const nFilters = state.filters.intensity.length + state.filters.duration.length + state.filters.format.length + (state.filters.adult ? 1 : 0);
 
   if (cat.loading) return <PageLoading />;
   const count = (s: Shelf) => byShelf.get(s)?.length ?? 0;
@@ -197,21 +254,29 @@ export function Libraries() {
       {cat.error && (
         <Alert>{t("lib.error")} <button className="btn btn--quiet btn--auto btn--sm" onClick={() => void cat.reload()}>{t("common.retry")}</button></Alert>
       )}
+      <div className="search-row">
       <div className="search">
         <Icon name="search" size={20} />
         <label htmlFor="search" className="sr-only">{t("lib.search")}</label>
         <input id="search" className="input" type="search" placeholder={t("lib.searchShort")} value={state.query}
           onChange={(e) => setState((s) => ({ ...s, query: e.target.value }))} enterKeyHint="search" />
       </div>
-      <p className="sr-only" aria-live="polite">{q ? t("lib.results", { n: results.length }) : ""}</p>
+        <button type="button" className="icon-btn icon-btn--soft filter-btn" aria-expanded={state.open} aria-controls="lib-filters"
+          aria-label={nFilters ? t("filter.openN", { n: nFilters }) : t("filter.open")} onClick={() => setState((s) => ({ ...s, open: !s.open }))}>
+          <Icon name="filter" size={20} />{nFilters > 0 && <span className="filter-badge" aria-hidden="true">{nFilters}</span>}
+        </button>
+      </div>
+      {state.open && <FilterPanel filters={state.filters} cap={cap} adultOk={intimate} onChange={(f) => setState((s) => ({ ...s, filters: f }))} />}
+      {hidden > 0 && <p className="t-meta row"><Icon name="shield-check" size={18} />{t("filter.hidden", { n: hidden })}</p>}
+      <p className="sr-only" aria-live="polite">{filtering ? t("lib.results", { n: results.length }) : ""}</p>
 
       {cat.games.length === 0 ? (
         <div className="card stack center"><p className="t-card">{t("lib.emptyCatalog")}</p></div>
-      ) : q ? (
+      ) : filtering ? (
         results.length ? <TileGrid games={results} /> : (
           <div className="card stack center">
             <p className="t-card">{t("lib.noResults")}</p>
-            <button className="btn btn--secondary btn--auto" onClick={() => setState((s) => ({ ...s, query: "" }))}>{t("lib.clearFilters")}</button>
+            <button className="btn btn--secondary btn--auto" onClick={() => setState((s) => ({ ...s, query: "", filters: NO_FILTERS }))}>{t("lib.clearFilters")}</button>
           </div>
         )
       ) : (
@@ -246,8 +311,9 @@ export function Libraries() {
 export function ShelfPage({ shelf }: { shelf: "questions" | "tests" | "huisclos" }) {
   const { userId, profile } = useAuth();
   const cat = useCatalog(userId);
+  const { cap } = useCap();
   if (cat.loading) return <PageLoading />;
-  const games = cat.games.filter((g) => shelfOf(g) === shelf);
+  const games = cat.games.filter((g) => shelfOf(g) === shelf && intensityRank(g.intensity) <= cap);
   const intimate = !!profile?.intimate_opt_in;
   return (
     <SubPage backTo="/bibliotheques" title={shelfTitle(cat.categories, shelf)}>
@@ -326,6 +392,7 @@ export function GameSheet() {
           <div className="row row--wrap" style={{ gap: 6 }}>
             <span className="nd-chip">{typeLabel(game)}</span>
             <span className="nd-chip nd-chip--mint">{durationLabel(game)}</span>
+            {game.intensity && <span className="nd-chip">{t(`filter.intensity.${game.intensity}`)}</span>}
             {catTitle && <span className="nd-chip nd-chip--peach">{intime ? t("lib.shelf.huisclos") : catTitle}</span>}
             {game.is_demo && <DemoTag />}
           </div>

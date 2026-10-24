@@ -235,5 +235,27 @@ begin
                  'aucun rappel sans activation');
 end $$;
 
+-- ===== Réglages personnels invisibles du partenaire =====
+do $$
+declare denied boolean := false; nm text;
+begin
+  perform t11.as_user('00000000-0000-4000-a000-0000000000a1');
+  set local role authenticated;
+  select display_name into nm from public.profiles where id = '00000000-0000-4000-a000-0000000000b1';
+  perform t11.ok(nm is not null, 'nom du partenaire lisible');
+  begin
+    perform max_intensity from public.profiles where id = '00000000-0000-4000-a000-0000000000b1';
+  exception when insufficient_privilege then denied := true;
+  end;
+  perform t11.ok(denied, 'intensité du partenaire illisible');
+  perform t11.ok(public.get_my_prefs() ->> 'max_intensity' is not null, 'mes réglages lisibles par moi');
+  update public.profiles set country = 'FR', max_intensity = 'soft' where id = auth.uid();
+  perform t11.ok(public.get_my_prefs() ->> 'country' = 'FR', 'mes réglages modifiables par moi');
+  update public.profiles set country = 'BE' where id = '00000000-0000-4000-a000-0000000000b1';
+  reset role;
+  perform t11.ok((select country is distinct from 'BE' from public.profiles where id = '00000000-0000-4000-a000-0000000000b1'),
+                 'réglages du partenaire non modifiables');
+end $$;
+
 select 'TOUS LES TESTS PARCOURS SONT PASSÉS';
 rollback;

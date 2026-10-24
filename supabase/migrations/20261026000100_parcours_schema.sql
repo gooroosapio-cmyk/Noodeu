@@ -477,3 +477,18 @@ revoke execute on function public.get_my_filters(), public.save_for_later(uuid, 
 grant execute on function public.get_my_filters(), public.save_for_later(uuid, int), public.get_my_items(),
   public.get_session_meta(uuid), public.get_daily(text, text, text), public.get_daily_themes(), public.get_progress(),
   public.get_light_challenge(), public.set_paused(uuid, boolean) to authenticated;
+
+-- Réglages personnels : modifiables par la personne seule, et jamais lisibles par l'autre membre du duo (la ligne de profil
+-- reste visible du partenaire pour le nom et la photo, d'où une lecture limitée aux colonnes publiques).
+revoke select on public.profiles from authenticated;
+grant select (id, display_name, word_form, intimate_opt_in, reduced_motion, created_at, updated_at, avatar_path)
+  on public.profiles to authenticated;
+grant update (max_intensity, adult_confirmed_at, daily_adult, timezone, country, reminders) on public.profiles to authenticated;
+
+create or replace function public.get_my_prefs() returns jsonb
+language sql stable security definer set search_path = '' as $$
+  select jsonb_build_object('ok', true, 'max_intensity', p.max_intensity, 'adult_confirmed_at', p.adult_confirmed_at,
+    'daily_adult', p.daily_adult, 'timezone', p.timezone, 'country', p.country, 'reminders', p.reminders)
+  from public.profiles p where p.id = auth.uid() $$;
+revoke execute on function public.get_my_prefs() from public, anon;
+grant execute on function public.get_my_prefs() to authenticated;

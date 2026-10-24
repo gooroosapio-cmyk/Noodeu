@@ -1,6 +1,6 @@
 import { useCallback, useEffect, useState } from "react";
-import { supabase } from "../lib/supabase";
-import type { Category, Game } from "../lib/types";
+import { rpc, supabase } from "../lib/supabase";
+import type { Category, Format, Game, Intensity } from "../lib/types";
 
 export function useCatalog(userId: string | null) {
   const [categories, setCategories] = useState<Category[]>([]);
@@ -14,7 +14,7 @@ export function useCatalog(userId: string | null) {
     setError(false);
     const [c, g, f, r] = await Promise.all([
       supabase.from("game_categories").select("id, title, promise, sort, is_demo, family_no").eq("status", "published").order("sort"),
-      supabase.from("games").select("id, category_id, mechanic, title, promise, hook, style, duration_min, duration_max, content_level, current_version, sort, is_demo, implementation, adult_available, mute_ok, difficulties, thumbnail, meta").eq("status", "published").order("sort"),
+      supabase.from("games").select("id, category_id, mechanic, title, promise, hook, style, duration_min, duration_max, content_level, current_version, sort, is_demo, implementation, adult_available, mute_ok, difficulties, thumbnail, meta, intensity, formats, duration_kind").eq("status", "published").order("sort"),
       userId ? supabase.from("game_favorites").select("game_id").eq("user_id", userId) : Promise.resolve({ data: [], error: null }),
       // Parties du duo (lisibles par ses seuls membres) : activités récemment jouées.
       supabase.from("game_sessions").select("game_id, created_at").order("created_at", { ascending: false }).limit(40),
@@ -88,4 +88,39 @@ export const SHELF_PATH: Record<"questions" | "tests" | "huisclos", string> = {
 
 export function normalizeText(s: string) {
   return s.normalize("NFD").replace(/[\u0300-\u036f]/g, "").toLowerCase();
+}
+
+// ---------- Filtres (intensité, durée, format) ----------
+
+export const INTENSITIES: Intensity[] = ["soft", "moyen", "hot"];
+export const FORMATS: Format[] = ["solo", "duo", "jeu", "rituel", "defi"];
+export const DURATIONS = ["rapide", "discussion"] as const;
+export const intensityRank = (i: Intensity | null | undefined) => (i === "hot" ? 3 : i === "moyen" ? 2 : 1);
+
+export interface Filters { intensity: Intensity[]; duration: (typeof DURATIONS)[number][]; format: Format[]; adult: boolean }
+export const NO_FILTERS: Filters = { intensity: [], duration: [], format: [], adult: false };
+export const hasFilters = (f: Filters) => f.intensity.length + f.duration.length + f.format.length > 0 || f.adult;
+
+/** Filtres combinés : chaque groupe restreint (ET entre groupes, OU à l'intérieur d'un groupe). */
+export function matchesFilters(g: Game, f: Filters) {
+  if (f.intensity.length && !f.intensity.includes(g.intensity ?? "soft")) return false;
+  if (f.duration.length && !(g.duration_kind && f.duration.includes(g.duration_kind))) return false;
+  if (f.format.length && !f.format.some((x) => (g.formats ?? []).includes(x))) return false;
+  if (f.adult && !(g.adult_available || g.content_level === "intime")) return false;
+  return true;
+}
+
+export interface MyFilters { my_max: Intensity; duo_cap: number; duo_adult: boolean; in_duo: boolean }
+
+/** Plafond commun (le réglage le plus doux des deux membres), calculé côté serveur. */
+export function useMyFilters(key: unknown) {
+  const [data, setData] = useState<MyFilters | null>(null);
+  useEffect(() => {
+    let alive = true;
+    void rpc<MyFilters>("get_my_filters", {}).then((res) => {
+      if (alive && res.ok) setData(res as unknown as MyFilters);
+    });
+    return () => { alive = false; };
+  }, [key]);
+  return data;
 }
