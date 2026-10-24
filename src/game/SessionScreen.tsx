@@ -18,6 +18,7 @@ import { useDraft, useSession } from "./useSession";
 import { OptionsSheet, RoundsPlaying, RoundsResults, hasOptions, isRounds } from "./rounds/RoundsGame";
 import { BoardPlaying, BoardResults, isBoard } from "./board/BoardGame";
 import { QuestionnairePlaying, QuestionnaireResults, isQuestionnaireMech } from "./board/QuestionnaireGames";
+import { ConversationPlaying, ConversationResults, OptionalAdult, isConversationMech } from "./board/ConversationGames";
 
 type Run = (fn: string, args?: Record<string, unknown>) => Promise<{ ok: boolean }>;
 
@@ -75,6 +76,7 @@ export function SessionScreen() {
   const rounds = isRounds(st);
   const board = isBoard(st);
   const questionnaire = board && isQuestionnaireMech((st.game.config as unknown as { mechanic?: string }).mechanic);
+  const conversation = board && isConversationMech((st.game.config as unknown as { mechanic?: string }).mechanic);
   const common = { st, run, busy, online };
   const showOptions = rounds && hasOptions(st) && ["lobby", "playing", "paused"].includes(st.session.status) && !st.session.read_only;
 
@@ -111,7 +113,7 @@ export function SessionScreen() {
 
         {st.session.status === "lobby" && <Lobby st={st} me={me} partner={partner} partnerHere={partnerHere} busy={busy} online={online} run={run} onChat={() => setChat(true)}
           onOptions={showOptions ? () => setOptions(true) : undefined} />}
-        {st.session.status === "playing" && (questionnaire ? <QuestionnairePlaying c={common} /> : board ? <BoardPlaying {...common} /> : rounds ? <RoundsPlaying {...common} /> : <Playing st={st} partnerName={partnerName} partner={partner} busy={busy} online={online} run={run} />)}
+        {st.session.status === "playing" && (conversation ? <ConversationPlaying c={common} /> : questionnaire ? <QuestionnairePlaying c={common} /> : board ? <BoardPlaying {...common} /> : rounds ? <RoundsPlaying {...common} /> : <Playing st={st} partnerName={partnerName} partner={partner} busy={busy} online={online} run={run} />)}
         {st.session.status === "paused" && (
           <section className="empty enter">
             <Illustration name="17-pause" />
@@ -120,7 +122,9 @@ export function SessionScreen() {
             <button className="btn btn--auto" disabled={busy || !online} onClick={() => run("set_paused", { p_paused: false })}>{t("game.resume")}</button>
           </section>
         )}
-        {(st.session.status === "ended" || st.session.status === "closed") && (questionnaire
+        {(st.session.status === "ended" || st.session.status === "closed") && (conversation
+          ? <ConversationResults c={common} navigate={navigate} />
+          : questionnaire
           ? <QuestionnaireResults c={common} navigate={navigate} />
           : board
           ? <BoardResults c={common} navigate={navigate} />
@@ -213,6 +217,9 @@ function Lobby({ st, me, partner, partnerHere, busy, online, run, onChat, onOpti
       </div>
 
       {intimate && <AdultConsent st={st} busy={busy} online={online} run={run} />}
+      {isConversationMech((st.game.config as unknown as { mechanic?: string }).mechanic)
+        && Boolean((st.game as unknown as { adult_available?: boolean }).adult_available)
+        && <OptionalAdult st={st} busy={busy} online={online} run={run} />}
 
       {Object.entries(settings).map(([key, def]) => (
         <fieldset key={key}>

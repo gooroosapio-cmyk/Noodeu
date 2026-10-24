@@ -15,5 +15,17 @@
  "mini-pfc-revelation": "playing",
  "mini-de-jeu": "playing",
  "mini-naval-placement": "playing",
- "mini-naval-tirs": "playing"
+ "mini-naval-tirs": "playing",
+ "conv-jamais-attente": "playing",
+ "conv-jamais-revelation": "playing",
+ "conv-preferes-jeu": "playing",
+ "conv-qui-revelation": "playing",
+ "conv-devine-verdict": "playing",
+ "conv-phrase-jeu": "playing",
+ "conv-accord-jeu": "playing",
+ "conv-av-choix": "playing",
+ "conv-av-verite": "playing",
+ "conv-dvm-ecriture": "playing",
+ "conv-dvm-revelation": "playing",
+ "conv-salon": "lobby"
 }

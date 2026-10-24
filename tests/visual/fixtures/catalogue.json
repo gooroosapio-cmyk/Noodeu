@@ -444,11 +444,11 @@
 "duration_min": 8,
 "duration_max": 20,
 "content_level": "standard",
-"current_version": null,
+"current_version": 1,
 "sort": 15,
 "is_demo": false,
-"implementation": "coming_soon",
-"adult_available": false,
+"implementation": "playable",
+"adult_available": true,
 "mute_ok": true,
 "difficulties": [],
 "thumbnail": "/assets/c14/G01.webp",
@@ -470,11 +470,11 @@
 "duration_min": 6,
 "duration_max": 15,
 "content_level": "standard",
-"current_version": null,
+"current_version": 1,
 "sort": 16,
 "is_demo": false,
-"implementation": "coming_soon",
-"adult_available": false,
+"implementation": "playable",
+"adult_available": true,
 "mute_ok": true,
 "difficulties": [],
 "thumbnail": "/assets/c14/G02.webp",
@@ -496,11 +496,11 @@
 "duration_min": 5,
 "duration_max": 15,
 "content_level": "standard",
-"current_version": null,
+"current_version": 1,
 "sort": 17,
 "is_demo": false,
-"implementation": "coming_soon",
-"adult_available": false,
+"implementation": "playable",
+"adult_available": true,
 "mute_ok": true,
 "difficulties": [],
 "thumbnail": "/assets/c14/G03.webp",
@@ -522,11 +522,11 @@
 "duration_min": 5,
 "duration_max": 15,
 "content_level": "standard",
-"current_version": null,
+"current_version": 1,
 "sort": 18,
 "is_demo": false,
-"implementation": "coming_soon",
-"adult_available": false,
+"implementation": "playable",
+"adult_available": true,
 "mute_ok": true,
 "difficulties": [],
 "thumbnail": "/assets/c14/G04.webp",
@@ -548,11 +548,11 @@
 "duration_min": 8,
 "duration_max": 18,
 "content_level": "standard",
-"current_version": null,
+"current_version": 1,
 "sort": 19,
 "is_demo": false,
-"implementation": "coming_soon",
-"adult_available": false,
+"implementation": "playable",
+"adult_available": true,
 "mute_ok": true,
 "difficulties": [],
 "thumbnail": "/assets/c14/G05.webp",
@@ -574,11 +574,11 @@
 "duration_min": 5,
 "duration_max": 15,
 "content_level": "standard",
-"current_version": null,
+"current_version": 1,
 "sort": 20,
 "is_demo": false,
-"implementation": "coming_soon",
-"adult_available": false,
+"implementation": "playable",
+"adult_available": true,
 "mute_ok": true,
 "difficulties": [],
 "thumbnail": "/assets/c14/G09.webp",
@@ -600,11 +600,11 @@
 "duration_min": 5,
 "duration_max": 15,
 "content_level": "standard",
-"current_version": null,
+"current_version": 1,
 "sort": 21,
 "is_demo": false,
-"implementation": "coming_soon",
-"adult_available": false,
+"implementation": "playable",
+"adult_available": true,
 "mute_ok": true,
 "difficulties": [],
 "thumbnail": "/assets/c14/G10.webp",
@@ -626,10 +626,10 @@
 "duration_min": 8,
 "duration_max": 18,
 "content_level": "standard",
-"current_version": null,
+"current_version": 1,
 "sort": 22,
 "is_demo": false,
-"implementation": "coming_soon",
+"implementation": "playable",
 "adult_available": false,
 "mute_ok": true,
 "difficulties": [],
@@ -652,7 +652,7 @@
 "duration_min": 1,
 "duration_max": 4,
 "content_level": "standard",
-"current_version": 1,
+"current_version": 2,
 "sort": 23,
 "is_demo": false,
 "implementation": "playable",
@@ -678,7 +678,7 @@
 "duration_min": 4,
 "duration_max": 10,
 "content_level": "standard",
-"current_version": 1,
+"current_version": 2,
 "sort": 24,
 "is_demo": false,
 "implementation": "playable",
@@ -704,7 +704,7 @@
 "duration_min": 10,
 "duration_max": 25,
 "content_level": "standard",
-"current_version": 1,
+"current_version": 2,
 "sort": 25,
 "is_demo": false,
 "implementation": "playable",
@@ -756,7 +756,7 @@
 "duration_min": 1,
 "duration_max": 5,
 "content_level": "standard",
-"current_version": 1,
+"current_version": 2,
 "sort": 27,
 "is_demo": false,
 "implementation": "playable",
@@ -782,7 +782,7 @@
 "duration_min": 5,
 "duration_max": 15,
 "content_level": "standard",
-"current_version": 1,
+"current_version": 2,
 "sort": 28,
 "is_demo": false,
 "implementation": "playable",
@@ -851,6 +851,64 @@
 }
 ],
 "rules": {
+"N2-002": {
+"how_to": [
+"Deux propositions s'affichent ; chacun choisit en secret celle qu'il préfère et verrouille.",
+"Les deux choix apparaissent ensemble. Aucune préférence n'est vraie ou fausse.",
+"Passer ne vaut aucune des deux options et ne révèle rien. Continuez quand vous êtes prêts tous les deux."
+],
+"details": [
+"Score : Sans score compétitif.",
+"Adaptation Noodeu : Verrouillage distant et passage séparé.",
+"Référence de mécanique : Tu préfères pour couples — BlindSpots (https://couplesquestionsgame.com/fr/jeux/tu-preferes-pour-couples).",
+"Référence de mécanique : Tu préfères — PsyCat Games (https://psycatgames.com/fr/magazine/party-games/would-you-rather/).",
+"Cartes originales Noodeu (noodeu-g03-1.1.0), écrites pour jouer à distance.",
+"Cartes +18 désactivées par défaut : elles n'apparaissent que si vous les activez tous les deux. Retirer ton accord est immédiat."
+],
+"privacy": "Ta réponse reste secrète jusqu'à ce que vous ayez répondu tous les deux. Passer clôt la carte sans rien révéler.",
+"objective": "Choisissez entre les deux propositions, puis découvrez le choix de l’autre.",
+"step_texts": {}
+},
+"N2-003": {
+"how_to": [
+"Une affirmation s'affiche pour vous deux.",
+"Chacun répond en secret « Déjà fait » ou « Jamais », puis verrouille sa réponse.",
+"Les deux réponses apparaissent ensemble ; racontez si vous en avez envie, sans obligation.",
+"Passer clôt la carte sans pénalité et sans rien révéler. Continuez quand vous êtes prêts tous les deux."
+],
+"details": [
+"Score : Sans score compétitif.",
+"Adaptation Noodeu : Retrait de toute règle de consommation d’alcool.",
+"Adaptation Noodeu : Boutons explicites et révélation à deux.",
+"Référence de mécanique : Je n’ai jamais pour couples — BlindSpots (https://couplesquestionsgame.com/fr/jeux/je-nai-jamais-pour-couples).",
+"Référence de mécanique : Je n’ai jamais — PsyCat Games (https://psycatgames.com/fr/magazine/party-games/never-ever/).",
+"Cartes originales Noodeu (noodeu-g02-1.1.0), écrites pour jouer à distance.",
+"Cartes +18 désactivées par défaut : elles n'apparaissent que si vous les activez tous les deux. Retirer ton accord est immédiat."
+],
+"privacy": "Ta réponse reste secrète jusqu'à ce que vous ayez répondu tous les deux. Passer clôt la carte sans rien révéler.",
+"objective": "Une affirmation, deux réponses secrètes, puis les anecdotes si vous le souhaitez.",
+"step_texts": {}
+},
+"N2-004": {
+"how_to": [
+"À chaque manche, l'un de vous est le sujet, l'autre devine ; les rôles alternent, le premier sujet est tiré au sort.",
+"Le sujet répond pour lui ; l'autre écrit la réponse qu'il imagine. Chacun verrouille son texte.",
+"Les deux textes apparaissent ensemble. Seul le sujet décide : « Ça correspond » rapporte 1 point à celui qui devine.",
+"« Je ne sais pas », « Aucun » ou « Jamais » sont des réponses possibles ; passer ne rapporte rien."
+],
+"details": [
+"Score : 1 point par prédiction validée par le sujet ; 0 sinon.",
+"Adaptation Noodeu : Rôles alternés dans un duo.",
+"Adaptation Noodeu : Validation explicite des réponses libres.",
+"Référence de mécanique : Me connais-tu vraiment ? — PsyCat Games (https://psycatgames.com/fr/magazine/conversation-starters/how-well-do-you-know-me/).",
+"Référence de mécanique : Le Jeu des Jeunes Mariés — PsyCat Games (https://psycatgames.com/fr/magazine/conversation-starters/newlywed-game/).",
+"Cartes originales Noodeu (noodeu-g05-1.1.0), écrites pour jouer à distance.",
+"Cartes +18 désactivées par défaut : elles n'apparaissent que si vous les activez tous les deux. Retirer ton accord est immédiat."
+],
+"privacy": "Ta réponse reste secrète jusqu'à ce que vous ayez répondu tous les deux. Passer clôt la carte sans rien révéler.",
+"objective": "Une personne répond pour elle-même ; l’autre essaie de prévoir sa réponse.",
+"step_texts": {}
+},
 "N2-076": {
 "how_to": [
 "Le premier joueur est tiré au sort : il joue X, l'autre O. À chaque nouvelle manche de la série, le premier joueur alterne.",
@@ -1189,6 +1247,63 @@
 "objective": "55 questions pour se retrouver",
 "step_texts": {}
 },
+"nd-accord-desaccord": {
+"how_to": [
+"Une opinion s'affiche, jamais présentée comme un fait.",
+"Chacun vote en secret « D'accord » ou « Pas d'accord », puis verrouille.",
+"Les deux votes apparaissent ensemble ; débattez si vous voulez. Il n'y a pas de perdant.",
+"Passer clôt la carte sans rien révéler. Continuez quand vous êtes prêts tous les deux."
+],
+"details": [
+"Score : Sans score compétitif.",
+"Adaptation Noodeu : Vote distant caché ; débat sans minuterie obligatoire.",
+"Référence de mécanique : Hot Takes — PsyCat Games (https://psycatgames.com/fr/app/hot-takes/).",
+"Cartes originales Noodeu (noodeu-g10-1.1.0), écrites pour jouer à distance.",
+"Cartes +18 désactivées par défaut : elles n'apparaissent que si vous les activez tous les deux. Retirer ton accord est immédiat."
+],
+"privacy": "Ta réponse reste secrète jusqu'à ce que vous ayez répondu tous les deux. Passer clôt la carte sans rien révéler.",
+"objective": "Votez en secret sur une opinion et découvrez vos deux points de vue.",
+"step_texts": {}
+},
+"nd-action-verite": {
+"how_to": [
+"Le premier joueur est tiré au sort, puis vous alternez à chaque manche.",
+"À ton tour, choisis Vérité ou Action : la carte n'est tirée qu'après ton choix. Tu peux la changer avant de répondre.",
+"Vérité : réponds par écrit. Action : réalise-la dans votre appel et marque-la faite, sans preuve ; tu peux partager un mot si tu veux.",
+"Passer clôt la manche sans pénalité. Aucun score."
+],
+"details": [
+"Score : Sans score compétitif.",
+"Adaptation Noodeu : Alternance et salon distant Noodeu.",
+"Adaptation Noodeu : Interface de consentement et passage sans pénalité.",
+"Référence de mécanique : Action ou vérité pour couple — BlindSpots (https://couplesquestionsgame.com/fr/jeux/action-ou-verite-pour-couple).",
+"Référence de mécanique : Action ou Vérité pour les couples — PsyCat Games (https://psycatgames.com/fr/magazine/party-games/couples-truth-or-dare/).",
+"Cartes originales Noodeu (noodeu-g01-1.2.0), écrites pour jouer à distance.",
+"Cartes +18 désactivées par défaut : elles n'apparaissent que si vous les activez tous les deux. Retirer ton accord est immédiat."
+],
+"privacy": "Tes réponses ne sont visibles qu'une fois envoyées. Aucune preuve n'est jamais demandée.",
+"objective": "Choisissez une confidence ou une action que vous avez envie de partager.",
+"step_texts": {}
+},
+"nd-complete-phrase": {
+"how_to": [
+"Une même amorce s'affiche pour vous deux.",
+"Chacun la complète librement, en secret (1000 caractères au plus), puis verrouille.",
+"Les deux phrases apparaissent ensemble. Pas de bonne réponse ni de classement.",
+"Passer clôt la carte sans rien révéler. Continuez quand vous êtes prêts tous les deux."
+],
+"details": [
+"Score : Sans score compétitif.",
+"Adaptation Noodeu : Même amorce et réponses cachées pour le duo.",
+"Adaptation Noodeu : Vote de groupe de la source non retenu.",
+"Référence de mécanique : Complète la phrase — PsyCat Games (https://psycatgames.com/fr/app/finish-the-sentence/).",
+"Cartes originales Noodeu (noodeu-g09-1.1.0), écrites pour jouer à distance.",
+"Cartes +18 désactivées par défaut : elles n'apparaissent que si vous les activez tous les deux. Retirer ton accord est immédiat."
+],
+"privacy": "Ta réponse reste secrète jusqu'à ce que vous ayez répondu tous les deux. Passer clôt la carte sans rien révéler.",
+"objective": "Complétez la même amorce, chacun de votre côté, avant de lire vos deux phrases.",
+"step_texts": {}
+},
 "nd-de-chanceux": {
 "how_to": [
 "Le premier joueur est tiré au sort. À ton tour, lance le dé autant de fois que tu veux : chaque résultat de 2 à 6 s'ajoute au total du tour.",
@@ -1206,6 +1321,43 @@
 ],
 "privacy": "Le dé est lancé par le serveur ; vous voyez tous les deux chaque lancer.",
 "objective": "Relancez pour cumuler, ou conservez vos points avant de tomber sur un 1.",
+"step_texts": {}
+},
+"nd-deux-verites-mensonge": {
+"how_to": [
+"L'auteur est tiré au sort, puis les rôles alternent.",
+"L'auteur écrit trois affirmations sur lui (240 caractères au plus) et désigne en secret celle qui est fausse.",
+"L'autre voit les trois affirmations et choisit celle qu'il croit fausse.",
+"Mensonge trouvé : 1 point à celui qui devine ; sinon 1 point à l'auteur. Une manche passée ne compte pas."
+],
+"details": [
+"Score : 1 point au devineur s’il trouve ; sinon 1 point à l’auteur.",
+"Adaptation Noodeu : Écriture personnelle obligatoire ; aucune biographie tirée du générateur.",
+"Adaptation Noodeu : Version à deux et nombre pair de tours.",
+"Référence de mécanique : Deux vérités et un mensonge — PsyCat Games (https://psycatgames.com/fr/app/2-truths-1-lie/)."
+],
+"privacy": "L'autre ne voit que tes trois affirmations ; le mensonge reste secret jusqu'à son choix.",
+"objective": "Écrivez trois affirmations sur vous ; votre partenaire doit retrouver le mensonge.",
+"step_texts": {}
+},
+"nd-qui-de-nous-deux": {
+"how_to": [
+"Une question s'affiche : « Qui de nous deux… ? ».",
+"Chacun désigne en secret l'un de vous deux, y compris lui-même, puis verrouille.",
+"Les deux votes apparaissent ensemble. Un désaccord n'est ni une erreur ni un échec.",
+"Passer clôt la carte sans rien révéler. Continuez quand vous êtes prêts tous les deux."
+],
+"details": [
+"Score : Sans score compétitif.",
+"Adaptation Noodeu : Désignation de groupe réduite à deux personnes.",
+"Adaptation Noodeu : Tous les deux/Aucun : variante future séparée, non activée.",
+"Référence de mécanique : Qui est le plus susceptible de — BlindSpots (https://couplesquestionsgame.com/fr/jeux/qui-est-le-plus-susceptible-de).",
+"Référence de mécanique : Qui est le plus — PsyCat Games (https://psycatgames.com/fr/magazine/party-games/most-likely-to/).",
+"Cartes originales Noodeu (noodeu-g04-1.1.0), écrites pour jouer à distance.",
+"Cartes +18 désactivées par défaut : elles n'apparaissent que si vous les activez tous les deux. Retirer ton accord est immédiat."
+],
+"privacy": "Ta réponse reste secrète jusqu'à ce que vous ayez répondu tous les deux. Passer clôt la carte sans rien révéler.",
+"objective": "Désignez en secret la personne qui correspond le mieux à la carte.",
 "step_texts": {}
 }
 }

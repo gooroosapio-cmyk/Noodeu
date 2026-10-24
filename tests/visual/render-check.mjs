@@ -149,7 +149,7 @@ allScreens.push({ name: "52-N2-001-salon-options", path: `/partie/${SESSION}`, s
   action: async (page) => page.getByRole("button", { name: "Options" }).first().click() });
 // Catégories 1 et 2 : packs de questions et questionnaires (tests/visual/make_fixtures_c14.py).
 for (const key of Object.keys(fixture("index_c14.json"))) {
-  allScreens.push({ name: `60-${key}`, path: `/partie/${SESSION}`, scenario: { ...duo, intimate: key === "salon-huis-clos", state: fixture(`c14-${key}.json`) } });
+  allScreens.push({ name: `60-${key}`, path: `/partie/${SESSION}`, scenario: { ...duo, intimate: key === "salon-huis-clos" || key === "conv-salon", state: fixture(`c14-${key}.json`) } });
 }
 const ONLY = process.env.ONLY;
 const screens = ONLY ? allScreens.filter((s) => s.name.includes(ONLY)) : allScreens;

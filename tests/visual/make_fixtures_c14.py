@@ -143,6 +143,52 @@ do $$ declare s uuid; i int; begin
         (select (card ->> 'turn')::int from public.session_rounds where session_id = s and round_no = 1))) -> 'payload');
   end loop;
   insert into fx_out (line) select fx7.out('mini-naval-tirs', s);
+
+  -- Jeux de conversation (lot 3).
+  s := fx7.start('N2-003');
+  perform fx7.seat_mv(s, 1, 'lock', '{{"choice": "experienced"}}');
+  insert into fx_out (line) select fx7.out('conv-jamais-attente', s);
+  perform fx7.seat_mv(s, 2, 'lock', '{{"choice": "never"}}');
+  insert into fx_out (line) select fx7.out('conv-jamais-revelation', s);
+
+  s := fx7.start('N2-002');
+  insert into fx_out (line) select fx7.out('conv-preferes-jeu', s);
+
+  s := fx7.start('nd-qui-de-nous-deux');
+  perform fx7.seat_mv(s, 1, 'lock', '{{"seat": 2}}');
+  perform fx7.seat_mv(s, 2, 'lock', '{{"seat": 2}}');
+  insert into fx_out (line) select fx7.out('conv-qui-revelation', s);
+
+  s := fx7.start('N2-004');
+  update public.session_rounds set card = card || '{{"subject": 1, "predictor": 2}}' where session_id = s and round_no = 1;
+  perform fx7.seat_mv(s, 1, 'lock', '{{"text": "Un risotto aux champignons, sans hésiter."}}');
+  perform fx7.seat_mv(s, 2, 'lock', '{{"text": "Des pâtes au pesto."}}');
+  insert into fx_out (line) select fx7.out('conv-devine-verdict', s);
+
+  s := fx7.start('nd-complete-phrase');
+  insert into fx_out (line) select fx7.out('conv-phrase-jeu', s);
+
+  s := fx7.start('nd-accord-desaccord');
+  perform fx7.seat_mv(s, 2, 'lock', '{{"choice": "agree"}}');
+  insert into fx_out (line) select fx7.out('conv-accord-jeu', s);
+
+  s := fx7.start('nd-action-verite');
+  update public.session_rounds set card = card || '{{"active": 1, "first": 1}}' where session_id = s and round_no = 1;
+  insert into fx_out (line) select fx7.out('conv-av-choix', s);
+  perform fx7.seat_mv(s, 1, 'choose_kind', '{{"kind": "truth"}}');
+  insert into fx_out (line) select fx7.out('conv-av-verite', s);
+
+  s := fx7.start('nd-deux-verites-mensonge');
+  update public.session_rounds set card = card || '{{"author": 1, "guesser": 2, "first": 1}}' where session_id = s and round_no = 1;
+  insert into fx_out (line) select fx7.out('conv-dvm-ecriture', s);
+  perform fx7.seat_mv(s, 1, 'publish_three', '{{"confirmed_truths": true, "lie_statement_id": "s2", "statements": [{{"id": "s1", "text": "J''ai déjà vu une baleine depuis un bateau."}}, {{"id": "s2", "text": "Je parle couramment japonais."}}, {{"id": "s3", "text": "J''ai appris à nager à 25 ans."}}]}}');
+  perform fx7.seat_mv(s, 2, 'lock_guess', '{{"statement_id": "s3"}}');
+  insert into fx_out (line) select fx7.out('conv-dvm-revelation', s);
+
+  update public.game_sessions set status = 'abandoned' where status in ('lobby','playing','paused','ended');
+  perform fx7.as_user('{ME}');
+  s := (public.create_session('N2-002') ->> 'session_id')::uuid;
+  insert into fx_out (line) select fx7.out('conv-salon', s);
 end $$;
 select line from fx_out order by n;
 rollback;

@@ -166,3 +166,24 @@ Moteur serveur « famille 6 » (`20261025000100_minijeux_lot2.sql`) ; règles du
 - Revanche : « Rejouer » ouvre une nouvelle partie (nouveau tirage) ; elle n'est pas reliée à l'ancienne.
 - Plateaux denses (Points et carrés, Bataille navale) : plateau entier par défaut, bouton « Agrandir le plateau »
   qui donne des cibles de 44 px avec défilement horizontal.
+
+## Lot 3 : jeux de conversation (25 octobre 2026)
+
+Livrés selon le kit C03/C04 V1 : Je n'ai jamais (G02), Tu préfères (G03), Qui de nous deux ? (G04), Devine ma réponse (G05),
+Complète la phrase (G09), D'accord ou pas d'accord ? (G10), Action ou Vérité (G01), Deux vérités et un mensonge (G08).
+Moteur « conversation » (famille 7, `20261025000200_conversation_engine.sql`) ; 730 cartes originales Noodeu importées
+côté serveur par `scripts/import_lot3.py` (banques non lisibles par les clients).
+
+- Cartes tirées sans remise, filtre +18 appliqué par le serveur avant tout tirage ; cartes +18 désactivées par défaut,
+  activées seulement si les deux joueurs ont activé À huis clos et l'acceptent dans le salon.
+- Retrait de l'accord +18 en cours de partie : immédiat ; la carte adulte en cours est interrompue sans pénalité, les
+  réponses scellées effacées, et les cartes adultes déjà jouées ne sont plus affichées dans la partie.
+- Passer clôt la carte sans rien révéler ; « Continuer » demande l'accord des deux.
+- `set_session_prefs` (accord +18 d'une partie) est désormais livrée par cette migration ; elle manquait en ligne
+  (migration 150 en attente), ce qui empêchait aussi l'accord « À huis clos » des questionnaires.
+
+Écarts assumés :
+- Réponses vocales non proposées (texte d'abord, décision 11 du cadrage) : le kit les rend facultatives.
+- Sélection de thèmes non proposée : facultative dans le kit ; toutes les cartes autorisées sont tirées.
+- Action ou Vérité : « Arrêter » passe par « Quitter la partie » du salon.
+- La confirmation de majorité repose sur l'activation personnelle d'À huis clos dans Réglages.

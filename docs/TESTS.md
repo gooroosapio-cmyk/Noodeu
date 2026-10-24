@@ -132,3 +132,8 @@ Non testé à ce stade : partie réelle entre deux appareils distincts en ligne,
   l'unité est minuscule ; elles sont désormais tracées dans un repère de 100 unités mis à l'échelle.
 - Limite connue : sur un écran de 320 px, les cases de la mosaïque 8 × 8 font environ 34 px (au-dessus du minimum
   WCAG de 24 px, sous la cible confortable de 44 px).
+
+Tests SQL du lot 3 : `supabase/tests/c14_conversation.sql` (sans remise, aucune carte +18 sans les deux accords,
+réponse scellée invisible pour l'autre, passage sans divulgation, Continuer des deux, retrait +18 avec purge,
+cible limitée au duo, verdict du sujet et correction par différence, Action ou Vérité, Deux vérités et un mensonge,
+partenaire automatique jusqu'à la fin de chaque jeu). Écrans `60-conv-*` pour la recette visuelle.
