@@ -11,8 +11,12 @@ delete from public.game_sessions;
 -- games.current_version pointe vers game_versions, qui pointe vers games : on coupe le lien avant d'effacer.
 -- Les versions publiées sont protégées contre toute modification : protection suspendue le temps de la remise à zéro.
 update public.games set current_version = null;
+-- Le lien games → game_versions est vérifié en différé : on force les vérifications avant chaque ALTER TABLE
+-- (sinon « pending trigger events » quand tout tourne dans une seule transaction, comme dans l'éditeur SQL).
+set constraints all immediate;
 alter table public.game_versions disable trigger game_versions_immutable;
 delete from public.games;            -- emporte versions, cartes et favoris
+set constraints all immediate;
 alter table public.game_versions enable trigger game_versions_immutable;
 
 delete from public.content_banks;
