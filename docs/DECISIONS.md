@@ -136,3 +136,16 @@ Règles fixées par les documents (non redemandées) : même carte et même vers
 partage volontaire, passer = valeur nulle (jamais 0), aucun score de compatibilité ni diagnostic, calculs C2 côté
 serveur, résultat individuel avec partage révocable des scores seulement, namespace `noodeu_c34_v1` pour les codes
 G/M, versions C01 5.0.0 lues par un adaptateur sans changer `content_version`.
+
+## Interface v2 (24 octobre 2026)
+
+- Le dossier Drive « interface v2 » (première proposition pastel, compacte) **remplace** Cocon Pastel V5 pour les
+  couleurs, tailles et densité (décision 9 du questionnaire : refonte complète, désormais selon ce kit). Logo inchangé.
+- Bibliothèque : C01 et C02 en catégories horizontales qui ouvrent la liste de leurs packs (et non plus de grandes
+  bannières de 148 px) ; C03 et C04 en grilles à deux colonnes, titres de section « Conversation et découverte » et
+  « Mini-jeux » (décision 7) ; « À huis clos » en dernier, sans contenu tant que l'activation personnelle manque (décision 8).
+- Les illustrations du kit sont découpées cellule par cellule en WebP ; les atlas complets ne sont pas servis.
+- Conseils (stories), Espaces (souvenirs, rituels, capsules) et les écrans de connexion gardent leurs fonctions
+  actuelles avec les nouveaux jetons ; leurs nouvelles mises en page suivront dans un lot dédié.
+- Les banques des jeux C03 et de G07 sont arrivées dans le Drive le 24 octobre : ces jeux passent dans le lot 3,
+  ils restent « Bientôt » jusque-là.

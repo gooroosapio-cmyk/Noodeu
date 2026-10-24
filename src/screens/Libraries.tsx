@@ -7,170 +7,147 @@ import { useOnline } from "../lib/useOnline";
 import { useAuth } from "../auth/AuthProvider";
 import { useDuo } from "../duo/DuoProvider";
 import { SubPage } from "../components/AppShell";
-import { Alert, DemoTag, Icon, Illustration, Loading, PageLoading, useToast } from "../components/ui";
-import type { Category, Game, GameStyle } from "../lib/types";
-import {
-  applyFilters, changesResults, countFilters, emptyFilters, matchesQuick, mechanicIllustration, normalizeText, useCatalog,
-  type Filters, type Quick, type Show,
-} from "./catalog";
+import { Alert, Art, DemoTag, Icon, Loading, PageLoading } from "../components/ui";
+import type { Category, Game } from "../lib/types";
+import { CATEGORY_BY_SHELF, SHELF_PATH, SHELVES, normalizeText, shelfOf, useCatalog, type Shelf } from "./catalog";
 
-/** Vignette d'activité (image du kit servie par l'application) ; illustration générique à défaut. */
-export function GameThumb({ game, size = "md" }: { game: Pick<Game, "thumbnail" | "mechanic">; size?: "md" | "lg" }) {
+const ART_BY_PACK: Record<string, string> = {
+  P01: "c01-aron36", P03: "c01-approfondies", P15: "c01-retrouver55", P11: "c01-rituels",
+  P12: "c01-place", P13: "c01-projets", P14: "c01-valeurs",
+};
+
+/** Illustration d'une activité (kit interface v2) : par pack, instrument ou code de référence du catalogue. */
+export function artOf(g: Pick<Game, "meta" | "mechanic">) {
+  const m = g.meta ?? {};
+  if (g.mechanic === "pack_conversation") return ART_BY_PACK[m.code ?? ""] ?? "c01-generic";
+  if (g.mechanic === "test_form") return m.instrument ?? "C02";
+  return m.reference_code ?? "C03";
+}
+
+/** Vignette d'activité (illustration du kit, décorative). */
+export function GameThumb({ game, size = "md" }: { game: Pick<Game, "meta" | "mechanic">; size?: "md" | "lg" }) {
   return (
-    <div className={`game-card__thumb game-card__thumb--wide${size === "lg" ? " game-card__thumb--lg" : ""}`} aria-hidden="true">
-      {game.thumbnail
-        ? <img src={game.thumbnail} alt="" loading="lazy" decoding="async" width={720} height={420} />
-        : <Illustration name={mechanicIllustration[game.mechanic] ?? "01-connexion-a-deux"} />}
+    <div className={`game-thumb${size === "lg" ? " game-thumb--lg" : ""}`} aria-hidden="true">
+      <Art name={artOf(game)} size={size === "lg" ? 112 : 56} />
     </div>
   );
 }
 
-/** Carte d'activité : zone principale (fiche) et favori sont deux contrôles frères. */
-export function GameCard({ game, favorite, onToggleFavorite, categoryTitle }: {
-  game: Game; favorite: boolean; onToggleFavorite: () => Promise<boolean>; categoryTitle?: string;
-}) {
-  const toast = useToast();
-  const [pending, setPending] = useState(false);
-  const soon = game.implementation === "coming_soon";
+const PASTELS = ["peach", "sage", "lavender", "butter"] as const;
+
+/** Libellé de type affiché sous un titre. */
+export function typeLabel(g: Game) {
+  const n = g.meta?.items;
+  if (g.mechanic === "test_form") return n ? t("lib.type.test", { n }) : t("lib.shelf.tests");
+  if (g.mechanic === "pack_conversation") return n ? t("lib.type.pack", { n }) : t("lib.shelf.questions");
+  return shelfOf(g) === "minijeux" ? t("lib.type.minijeu") : t("lib.type.conversation");
+}
+
+export function durationLabel(g: Pick<Game, "duration_min" | "duration_max">) {
+  return g.duration_min === g.duration_max ? t("lib.duration", { min: g.duration_min }) : t("lib.durationRange", { min: g.duration_min, max: g.duration_max });
+}
+
+/** Tuile de la grille à deux colonnes : titre à gauche, illustration à droite. Toute la tuile ouvre la fiche. */
+export function GameTile({ game, index }: { game: Game; index: number }) {
+  const soon = game.implementation !== "playable";
   return (
-    <article className={soon ? "game-card game-card--soon" : "game-card"}>
-      <GameThumb game={game} />
-      <Link className="game-card__main" to={`/bibliotheques/${game.id}`}>
-        <span className="game-card__title">{game.title}</span>
-        <span className="t-meta">
-          {t(`lib.style.${game.style}`)}
-          {categoryTitle ? ` · ${categoryTitle}` : ""}
-          {soon && <> · <span className="tag tag--soon">{t("lib.soon")}</span></>}
-        </span>
-      </Link>
-      <button
-        className="icon-btn"
-        aria-pressed={favorite}
-        disabled={pending}
-        aria-label={favorite ? t("lib.removeFavorite", { title: game.title }) : t("lib.addFavorite", { title: game.title })}
-        onClick={async () => {
-          setPending(true);
-          const ok = await onToggleFavorite();
-          setPending(false);
-          if (!ok) toast(t("lib.favoriteError"));
-        }}
-      >
-        <Icon name={favorite ? "star" : "bookmark"} />
-      </button>
-      <p className="game-card__desc">{game.hook || game.promise}</p>
-    </article>
+    <Link className={`gtile gtile--${PASTELS[index % 4]}${soon ? " gtile--soon" : ""}`} to={`/bibliotheques/${game.id}`}
+      aria-label={soon ? `${game.title} (${t("lib.soon")})` : undefined}>
+      <span className="gtile__title">{game.title}</span>
+      {soon && <span className="gtile__soon" aria-hidden="true">{t("lib.soon")}</span>}
+      <Art name={artOf(game)} />
+    </Link>
   );
 }
 
-const STORE = "noodeu.lib.state.v2";
-type Sort = "recommended" | "alpha" | "playable";
-interface LibState { quick: Quick; show: Show; query: string; filters: Filters; sort: Sort; scroll: number }
+export function TileGrid({ games }: { games: Game[] }) {
+  return (
+    <ul className="gtile-grid">
+      {games.map((g, i) => <li key={g.id}><GameTile game={g} index={i} /></li>)}
+    </ul>
+  );
+}
+
+/** Ligne de pack (pages Se découvrir, Mieux se comprendre, À huis clos). */
+function PackList({ games }: { games: Game[] }) {
+  return (
+    <ul className="pack-list">
+      {games.map((g) => (
+        <li key={g.id}>
+          <Link className="pack-row" to={`/bibliotheques/${g.id}`}>
+            <Art name={artOf(g)} size={64} />
+            <span className="pack-row__body">
+              <span className="pack-row__title">{g.title}</span>
+              <span className="t-meta">{typeLabel(g)} · {durationLabel(g)}</span>
+            </span>
+            <Icon name="chevron-right" size={20} />
+          </Link>
+        </li>
+      ))}
+    </ul>
+  );
+}
+
+const BANNER: Record<"questions" | "tests" | "huisclos", { art: string; tone: string }> = {
+  questions: { art: "C01", tone: "" },
+  tests: { art: "C02", tone: " cat-banner--lavender" },
+  huisclos: { art: "result-private", tone: " cat-banner--butter" },
+};
+
+/** Catégorie horizontale (environ 74 px) : titre, sous-titre, illustration et chevron ; ouvre la liste des packs. */
+export function ShelfBanner({ shelf, title, text }: { shelf: "questions" | "tests" | "huisclos"; title: string; text: string }) {
+  return (
+    <Link className={`cat-banner${BANNER[shelf].tone}`} to={SHELF_PATH[shelf]}>
+      <span className="cat-banner__copy">
+        <span className="cat-banner__title">{title}</span>
+        <span className="cat-banner__text">{text}</span>
+      </span>
+      <Art name={BANNER[shelf].art} size={92} />
+      <Icon name="chevron-right" size={20} />
+    </Link>
+  );
+}
+
+/** Bloc « À huis clos » : rien n'est listé tant que la personne ne l'a pas activé elle-même. */
+function HuisClosNotice({ enabled }: { enabled: boolean }) {
+  return enabled
+    ? <p className="t-meta row"><Icon name="lock-keyhole" size={18} />{t("lib.huisclosOn")}</p>
+    : (
+      <div className="card card--lavender stack">
+        <p className="row"><Icon name="lock-keyhole" size={20} /><span>{t("lib.huisclosOff")}</span></p>
+        <Link className="btn btn--secondary" to="/reglages">{t("lib.huisclosActivate")}</Link>
+      </div>
+    );
+}
+
+const STORE = "noodeu.lib.state.v4";
+interface LibState { query: string; scroll: number }
 
 function loadState(): LibState {
   try {
     const s = JSON.parse(sessionStorage.getItem(STORE) ?? "null") as LibState | null;
-    if (s) return { ...s, filters: { ...emptyFilters, ...s.filters } };
+    if (s && typeof s.query === "string") return s;
   } catch {
     /* rien */
   }
-  return { quick: "all", show: "all", query: "", filters: emptyFilters, sort: "recommended", scroll: 0 };
+  return { query: "", scroll: 0 };
 }
 
-const MODES: GameStyle[] = ["echange", "creation", "cooperation", "duel"];
-
-/** Options réellement utiles : un groupe n'apparaît que s'il change les résultats. */
-function availableOptions(games: Game[], categories: Category[]) {
-  const family = categories.filter((c) => changesResults(games, (g) => g.category_id === c.id)).map((c) => ({ id: c.id, label: c.title }));
-  const mode = MODES.filter((m) => changesResults(games, (g) => g.style === m)).map((m) => ({ id: m, label: t(`lib.style.${m}`) }));
-  const diffs = [...new Set(games.flatMap((g) => g.difficulties))];
-  const difficulty = diffs.filter((d) => changesResults(games, (g) => g.difficulties.includes(d))).map((d) => ({ id: d, label: d === "facile" || d === "normal" ? t(`lib.difficulty.${d}`) : d }));
-  return {
-    family: family.length >= 2 ? family : [],
-    mode: mode.length >= 2 ? mode : [],
-    difficulty,
-    mute: changesResults(games, (g) => g.mute_ok),
-    adult: changesResults(games, (g) => g.adult_available),
-  };
+function categoryOf(categories: Category[], shelf: Shelf) {
+  return categories.find((c) => c.id === CATEGORY_BY_SHELF[shelf]);
 }
 
-/** Filtre déroulant sous la recherche : chaque choix s'applique immédiatement. */
-function FilterPanel({ id, games, categories, state, update, onClose, hasRecent }: {
-  id: string; games: Game[]; categories: Category[]; state: LibState; update: (p: Partial<LibState>) => void; onClose: () => void; hasRecent: boolean;
-}) {
-  const opts = availableOptions(games, categories);
-  const groups = ([
-    { key: "family", title: t("filters.family"), options: opts.family },
-    { key: "mode", title: t("filters.mode"), options: opts.mode },
-    { key: "difficulty", title: t("filters.difficulty"), options: opts.difficulty },
-  ] as { key: "family" | "mode" | "difficulty"; title: string; options: { id: string; label: string }[] }[]).filter((g) => g.options.length > 0);
-
-  function toggle(key: "family" | "mode" | "difficulty", value: string) {
-    const list = state.filters[key] as string[];
-    update({ filters: { ...state.filters, [key]: list.includes(value) ? list.filter((x) => x !== value) : [...list, value] } });
-  }
-
-  return (
-    <div id={id} className="filter-panel" role="region" aria-label={t("lib.filters")}
-      onKeyDown={(e) => { if (e.key === "Escape") { e.stopPropagation(); onClose(); } }}>
-      <fieldset>
-        <legend>{t("lib.show")}</legend>
-        <div className="chips">
-          <button type="button" className="chip" aria-pressed={state.show === "all"} onClick={() => update({ show: "all" })}>{t("lib.showAll")}</button>
-          <button type="button" className="chip" aria-pressed={state.show === "favorites"} onClick={() => update({ show: "favorites" })}><Icon name="star" size={16} />{t("lib.favorites")}</button>
-          {hasRecent && <button type="button" className="chip" aria-pressed={state.show === "recent"} onClick={() => update({ show: "recent" })}><Icon name="clock" size={16} />{t("lib.recent")}</button>}
-        </div>
-      </fieldset>
-      {groups.map((g) => (
-        <fieldset key={g.key}>
-          <legend>{g.title}</legend>
-          <div className="chips">
-            {g.options.map((o) => {
-              const on = (state.filters[g.key] as string[]).includes(o.id);
-              return (
-                <button key={o.id} type="button" className="chip" role="checkbox" aria-checked={on} onClick={() => toggle(g.key, o.id)}>
-                  {on && <Icon name="check" size={16} />}{o.label}
-                </button>
-              );
-            })}
-          </div>
-        </fieldset>
-      ))}
-      {(opts.mute || opts.adult) && (
-        <fieldset>
-          <legend>{t("filters.more")}</legend>
-          <div className="chips">
-            {opts.mute && <button type="button" className="chip" role="checkbox" aria-checked={state.filters.mute}
-              onClick={() => update({ filters: { ...state.filters, mute: !state.filters.mute } })}>{state.filters.mute && <Icon name="check" size={16} />}{t("filters.mute")}</button>}
-            {opts.adult && <button type="button" className="chip" role="checkbox" aria-checked={state.filters.adult}
-              onClick={() => update({ filters: { ...state.filters, adult: !state.filters.adult } })}>{state.filters.adult && <Icon name="check" size={16} />}{t("filters.adult")}</button>}
-          </div>
-        </fieldset>
-      )}
-      <label className="filter-panel__sort">
-        <span className="t-small">{t("lib.sort")}</span>
-        <select className="input" value={state.sort} onChange={(e) => update({ sort: e.target.value as Sort })}>
-          <option value="recommended">{t("lib.sortRecommended")}</option>
-          <option value="playable">{t("lib.sortPlayable")}</option>
-          <option value="alpha">{t("lib.sortAlpha")}</option>
-        </select>
-      </label>
-      <div className="row row--between">
-        <button type="button" className="btn btn--quiet btn--auto btn--sm" onClick={() => update({ show: "all", filters: emptyFilters, sort: "recommended" })}>{t("filters.reset")}</button>
-        <button type="button" className="btn btn--secondary btn--auto btn--sm" onClick={onClose}>{t("lib.closeFilters")}</button>
-      </div>
-    </div>
-  );
+function shelfTitle(categories: Category[], shelf: Shelf) {
+  return shelf === "huisclos" ? t("lib.shelf.huisclos") : categoryOf(categories, shelf)?.title ?? t(`lib.shelf.${shelf}`);
 }
 
 export function Libraries() {
-  const { userId } = useAuth();
+  const { userId, profile } = useAuth();
   const cat = useCatalog(userId);
   const [state, setState] = useState<LibState>(loadState);
-  const [open, setOpen] = useState(false);
-  const filterBtn = useRef<HTMLButtonElement>(null);
-  const update = (patch: Partial<LibState>) => setState((s) => ({ ...s, ...patch }));
+  const intimate = !!profile?.intimate_opt_in;
 
-  // Filtres et position conservés en mémoire de session (jamais dans l'URL).
+  // Recherche et position conservées en mémoire de session (jamais dans l'URL).
   useEffect(() => {
     try {
       sessionStorage.setItem(STORE, JSON.stringify(state));
@@ -192,78 +169,97 @@ export function Libraries() {
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [cat.loading]);
 
-  const catTitle = useMemo(() => new Map(cat.categories.map((c) => [c.id, c.title])), [cat.categories]);
-  const shown = useMemo(() => {
-    const q = normalizeText(state.query.trim());
-    let list = applyFilters(cat.games, state.filters).filter((g) =>
-      matchesQuick(g, state.quick)
-      && (state.show !== "favorites" || cat.favorites.has(g.id))
-      && (state.show !== "recent" || cat.recent.includes(g.id))
-      && (!q || normalizeText(`${g.title} ${g.hook} ${g.promise}`).includes(q)));
-    if (state.show === "recent") list = [...list].sort((a, b) => cat.recent.indexOf(a.id) - cat.recent.indexOf(b.id));
-    else if (state.sort === "alpha") list = [...list].sort((a, b) => a.title.localeCompare(b.title, "fr"));
-    else if (state.sort === "playable") list = [...list].sort((a, b) => Number(a.implementation !== "playable") - Number(b.implementation !== "playable"));
-    return list;
-  }, [cat.games, cat.favorites, cat.recent, state]);
+  const byShelf = useMemo(() => {
+    const m = new Map<Shelf, Game[]>(SHELVES.map((s) => [s, []]));
+    for (const g of cat.games) {
+      const s = shelfOf(g);
+      if (s) m.get(s)!.push(g);
+    }
+    return m;
+  }, [cat.games]);
+
+  const q = normalizeText(state.query.trim());
+  // Les activités « À huis clos » restent hors des résultats tant que la personne ne les a pas activées.
+  const results = useMemo(() => q
+    ? cat.games.filter((g) => (shelfOf(g) !== "huisclos" || intimate) && normalizeText(`${g.title} ${g.hook} ${g.promise}`).includes(q))
+    : [], [cat.games, q, intimate]);
 
   if (cat.loading) return <PageLoading />;
-
-  const active = countFilters(state.filters) + (state.show !== "all" ? 1 : 0);
-  const closePanel = () => { setOpen(false); filterBtn.current?.focus(); };
-  // Regroupement par famille quand l'ordre recommandé est utilisé (sinon : liste continue).
-  const grouped = state.sort === "recommended" && state.show !== "recent";
-  const sections = grouped
-    ? cat.categories.map((c) => ({ id: c.id, title: c.title, games: shown.filter((g) => g.category_id === c.id) })).filter((s) => s.games.length)
-    : [{ id: "all", title: "", games: shown }];
+  const count = (s: Shelf) => byShelf.get(s)?.length ?? 0;
 
   return (
     <main className="page page--tight">
-      <h1 className="t-page">{t("lib.title")}</h1>
+      <div className="page-header">
+        <h1 className="t-page">{t("lib.title")}</h1>
+        <p className="t-small muted">{t("lib.subtitle")}</p>
+      </div>
       {cat.error && (
         <Alert>{t("lib.error")} <button className="btn btn--quiet btn--auto btn--sm" onClick={() => void cat.reload()}>{t("common.retry")}</button></Alert>
       )}
-      <div className="lib-tools">
-        <div className="toolbar">
-          <div className="search">
-            <Icon name="search" size={20} />
-            <label htmlFor="search" className="sr-only">{t("lib.search")}</label>
-            <input id="search" className="input" type="search" placeholder={t("lib.searchShort")} value={state.query} onChange={(e) => update({ query: e.target.value })} enterKeyHint="search" />
-          </div>
-          <button ref={filterBtn} className="btn btn--secondary btn--auto filter-btn" aria-expanded={open} aria-controls="lib-filters"
-            onClick={() => setOpen((o) => !o)} aria-label={active ? t("lib.filtersCount", { n: active }) : t("lib.filters")}>
-            <Icon name="filter" size={20} /><span className="filter-btn__label">{t("lib.filters")}</span>
-            {active > 0 && <span className="tag" style={{ minHeight: 22 }} aria-hidden="true">{active}</span>}
-            <Icon name="chevron-down" size={18} />
-          </button>
-        </div>
-        <div className="chips chips--scroll" role="group" aria-label={t("lib.quick")}>
-          {(["all", "together", "duel"] as Quick[]).map((q) => (
-            <button key={q} type="button" className="chip" aria-pressed={state.quick === q} onClick={() => update({ quick: q })}>{t(`lib.quick.${q}`)}</button>
-          ))}
-        </div>
-        {open && <FilterPanel id="lib-filters" games={cat.games} categories={cat.categories} state={state} update={update} onClose={closePanel} hasRecent={cat.recent.length > 0} />}
-        <p className="sr-only" aria-live="polite">{t("lib.results", { n: shown.length })}</p>
+      <div className="search">
+        <Icon name="search" size={20} />
+        <label htmlFor="search" className="sr-only">{t("lib.search")}</label>
+        <input id="search" className="input" type="search" placeholder={t("lib.searchShort")} value={state.query}
+          onChange={(e) => setState((s) => ({ ...s, query: e.target.value }))} enterKeyHint="search" />
       </div>
+      <p className="sr-only" aria-live="polite">{q ? t("lib.results", { n: results.length }) : ""}</p>
 
-      {shown.length === 0 ? (
-        <div className="card stack center">
-          <p className="t-card">{cat.games.length === 0 ? t("lib.emptyCatalog") : state.show === "favorites" && !countFilters(state.filters) && !state.query ? t("lib.emptyFavorites") : t("lib.noResults")}</p>
-          {(active > 0 || state.query || state.quick !== "all") && (
-            <button className="btn btn--secondary btn--auto" onClick={() => update({ filters: emptyFilters, query: "", show: "all", quick: "all" })}>{t("lib.clearFilters")}</button>
-          )}
-        </div>
-      ) : sections.map((sec) => (
-        <section key={sec.id} className="section" aria-labelledby={sec.title ? `fam-${sec.id}` : undefined}>
-          {sec.title && <h2 className="t-section" id={`fam-${sec.id}`}>{sec.title}</h2>}
-          <div className="stack grid-2 grid-3">
-            {sec.games.map((g) => (
-              <GameCard key={g.id} game={g} favorite={cat.favorites.has(g.id)} categoryTitle={grouped ? undefined : catTitle.get(g.category_id)}
-                onToggleFavorite={() => cat.toggleFavorite(g.id)} />
+      {cat.games.length === 0 ? (
+        <div className="card stack center"><p className="t-card">{t("lib.emptyCatalog")}</p></div>
+      ) : q ? (
+        results.length ? <TileGrid games={results} /> : (
+          <div className="card stack center">
+            <p className="t-card">{t("lib.noResults")}</p>
+            <button className="btn btn--secondary btn--auto" onClick={() => setState((s) => ({ ...s, query: "" }))}>{t("lib.clearFilters")}</button>
+          </div>
+        )
+      ) : (
+        <>
+          <div className="stack" style={{ gap: "var(--grid-gap)" }}>
+            {(["questions", "tests"] as const).map((s) => count(s) > 0 && (
+              <ShelfBanner key={s} shelf={s} title={shelfTitle(cat.categories, s)} text={t(`lib.bannerText.${s}`)} />
             ))}
           </div>
-        </section>
-      ))}
+          {(["conversation", "minijeux"] as const).map((s) => count(s) > 0 && (
+            <section key={s} className="section" aria-labelledby={`shelf-${s}`}>
+              <div className="section__head">
+                <h2 className="t-section" id={`shelf-${s}`}>{t(`lib.shelf.${s}`)}</h2>
+                <span className="t-meta">{t(s === "minijeux" ? "lib.countMini" : "lib.countGames", { n: count(s) })}</span>
+              </div>
+              <TileGrid games={byShelf.get(s)!} />
+            </section>
+          ))}
+          {count("huisclos") > 0 && (
+            <section className="section" aria-labelledby="shelf-huisclos">
+              <h2 className="t-section" id="shelf-huisclos">{t("lib.shelf.huisclos")}</h2>
+              {intimate ? <ShelfBanner shelf="huisclos" title={t("lib.shelf.huisclos")} text={t("lib.huisclosText")} /> : <HuisClosNotice enabled={false} />}
+            </section>
+          )}
+        </>
+      )}
     </main>
+  );
+}
+
+/** Page d'une catégorie horizontale (Se découvrir, Mieux se comprendre, À huis clos) : liste de ses packs. */
+export function ShelfPage({ shelf }: { shelf: "questions" | "tests" | "huisclos" }) {
+  const { userId, profile } = useAuth();
+  const cat = useCatalog(userId);
+  if (cat.loading) return <PageLoading />;
+  const games = cat.games.filter((g) => shelfOf(g) === shelf);
+  const intimate = !!profile?.intimate_opt_in;
+  return (
+    <SubPage backTo="/bibliotheques" title={shelfTitle(cat.categories, shelf)}>
+      <main className="page page--bare page--tight">
+        <div className="page-header">
+          <h1 className="t-page">{t(shelf === "questions" ? "lib.choosePack" : "lib.chooseTest")}</h1>
+          <p className="t-small muted">{shelf === "huisclos" ? t("lib.huisclosText") : categoryOf(cat.categories, shelf)?.promise}</p>
+        </div>
+        {cat.error && <Alert>{t("lib.error")}</Alert>}
+        {shelf === "huisclos" && <HuisClosNotice enabled={intimate} />}
+        {(shelf !== "huisclos" || intimate) && (games.length ? <PackList games={games} /> : <div className="card stack center"><p className="t-card">{t("lib.emptyCatalog")}</p></div>)}
+      </main>
+    </SubPage>
   );
 }
 
@@ -299,6 +295,9 @@ export function GameSheet() {
   const favorite = cat.favorites.has(game.id);
   const soon = game.implementation !== "playable";
   const catTitle = cat.categories.find((c) => c.id === game.category_id)?.title;
+  const shelf = shelfOf(game);
+  const backTo = shelf === "questions" || shelf === "tests" || shelf === "huisclos" ? SHELF_PATH[shelf] : "/bibliotheques";
+  const intime = game.content_level === "intime";
 
   async function prepare() {
     if (busy) return;
@@ -311,19 +310,20 @@ export function GameSheet() {
   }
 
   return (
-    <SubPage backTo="/bibliotheques" actions={
+    <SubPage backTo={backTo} actions={
       <button className="icon-btn icon-btn--soft" aria-pressed={favorite} onClick={() => void cat.toggleFavorite(game.id)}
         aria-label={favorite ? t("lib.removeFavorite", { title: game.title }) : t("lib.addFavorite", { title: game.title })}>
         <Icon name={favorite ? "star" : "bookmark"} />
       </button>
     }>
       <main className="page page--bare page--read">
-        <GameThumb game={game} size="lg" />
+        <div className={`sheet-hero sheet-hero--${intime ? "lavender" : shelf === "tests" ? "butter" : shelf === "minijeux" ? "sage" : "peach"}`}>
+          <GameThumb game={game} size="lg" />
+        </div>
         <div className="stack stack--2">
           <h1 className="t-page">{game.title}</h1>
           <p className="t-meta">
-            {t(`lib.style.${game.style}`)}{catTitle ? ` · ${catTitle}` : ""}
-            {game.adult_available && <> · {t("sheet.adultAvailable")}</>}
+            {typeLabel(game)} · {durationLabel(game)}{catTitle ? ` · ${intime ? t("lib.shelf.huisclos") : catTitle}` : ""}
           </p>
           {game.is_demo && <div><DemoTag /></div>}
         </div>
@@ -336,7 +336,7 @@ export function GameSheet() {
               <h2 className="t-section">{t("sheet.howTo")}</h2>
               <ol className="how">{rules.how_to.map((x) => <li key={x}>{x}</li>)}</ol>
               <p className="row t-small"><Icon name="lock" size={18} />{rules.privacy}</p>
-              {game.adult_available && <p className="row t-small"><Icon name="info" size={18} />{t("sheet.adultRule")}</p>}
+              {intime && <p className="row t-small"><Icon name="lock" size={18} />{t("sheet.huisclosRule")}</p>}
             </section>
             <details className="disclosure">
               <summary>{t("sheet.details")}<Icon name="chevron-down" /></summary>

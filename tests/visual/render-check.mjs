@@ -65,7 +65,7 @@ async function setup(page, scenario) {
     const p = url.pathname;
     const json = (body) => route.fulfill({ status: 200, contentType: "application/json", body: JSON.stringify(body) });
     if (p.endsWith("/auth/v1/settings")) return json({ external: { google: true, email: true } });
-    if (p.endsWith("/profiles")) return json([{ id: ME, display_name: "Maya", word_form: "f", intimate_opt_in: false, reduced_motion: false, avatar_path: null }]);
+    if (p.endsWith("/profiles")) return json([{ id: ME, display_name: "Maya", word_form: "f", intimate_opt_in: Boolean(scenario.intimate), reduced_motion: false, avatar_path: null }]);
     if (p.endsWith("/rpc/get_my_duos")) return json(scenario.duos ?? []);
     if (p.endsWith("/rpc/get_open_session")) return json(scenario.open ?? null);
     if (p.endsWith("/rpc/get_invitation_status")) return json(scenario.invitations ?? { outgoing: null, incoming: null });
@@ -79,7 +79,7 @@ async function setup(page, scenario) {
       const id = (url.searchParams.get("game_id") ?? "").replace(/^eq\./, "");
       return json(catalogue.rules[id] ? [{ rules: catalogue.rules[id] }] : [{ rules }]);
     }
-    if (p.endsWith("/game_favorites")) return json([{ game_id: "N2-005" }, { game_id: "N2-061" }]);
+    if (p.endsWith("/game_favorites")) return json([{ game_id: "ND-Q-P01" }, { game_id: "N2-076" }]);
     if (p.endsWith("/game_sessions")) return json(scenario.history ?? []);
     return json({});
   });
@@ -98,10 +98,14 @@ const allScreens = [
   { name: "04-inviter", path: "/inviter", scenario: { ...solo, invitations: { outgoing: { id: "i", code: "K7PM-Q2RX", status: "open", expires_at: "2026-10-22T10:00:00Z", expired: false, claimer_name: null }, incoming: null } } },
   { name: "04b-rejoindre", path: "/rejoindre", scenario: solo },
   { name: "07-bibliotheques", path: "/bibliotheques", scenario: duo },
-  { name: "07b-filtres", path: "/bibliotheques", scenario: duo, action: async (page) => page.getByRole("button", { name: /^Filtres/ }).click() },
-  { name: "09-fiche", path: "/bibliotheques/N2-001", scenario: duo },
-  { name: "09b-fiche-bientot", path: "/bibliotheques/N2-061", scenario: duo },
-  { name: "07c-biblio-duel", path: "/bibliotheques", scenario: duo, action: async (page) => page.getByRole("button", { name: "Duel", exact: true }).click() },
+  { name: "07b-recherche", path: "/bibliotheques", scenario: duo, action: async (page) => page.getByLabel("Rechercher un jeu").fill("questions") },
+  { name: "08a-packs-c01", path: "/bibliotheques/questions", scenario: duo },
+  { name: "08b-tests-c02", path: "/bibliotheques/tests", scenario: duo },
+  { name: "08c-huis-clos-desactive", path: "/bibliotheques/a-huis-clos", scenario: duo },
+  { name: "08d-huis-clos-active", path: "/bibliotheques/a-huis-clos", scenario: { ...duo, intimate: true } },
+  { name: "09-fiche", path: "/bibliotheques/ND-Q-P01", scenario: duo },
+  { name: "09c-fiche-test", path: "/bibliotheques/ND-Q-012", scenario: duo },
+  { name: "09b-fiche-bientot", path: "/bibliotheques/N2-076", scenario: duo },
   { name: "11-salon", path: `/partie/${SESSION}`, scenario: { ...duo, state: sessionState("lobby") } },
   { name: "12-mon-portrait", path: `/partie/${SESSION}`, scenario: { ...duo, state: sessionState("playing") } },
   { name: "18-attente", path: `/partie/${SESSION}`, scenario: { ...duo, state: sessionState("playing", [
@@ -117,7 +121,7 @@ const allScreens = [
   { name: "21c-espace-sans-duo", path: "/espace", scenario: solo },
   { name: "22-parametres", path: "/reglages", scenario: duo },
   { name: "22b-profil", path: "/reglages/profil", scenario: duo },
-  { name: "25-astuces", path: "/astuces", scenario: duo },
+  { name: "25-conseils", path: "/conseils", scenario: duo },
   { name: "30-chat", path: "/accueil", scenario: duo, action: async (page) => page.getByRole("button", { name: /Ouvrir la discussion/ }).last().click() },
   { name: "31-notifications", path: "/accueil", scenario: duo, action: async (page) => page.getByRole("button", { name: /Notifications/ }).click() },
 ];
@@ -143,6 +147,10 @@ allScreens.push({ name: "54-N2-128-export-png", path: `/partie/${SESSION}`, scen
   } });
 allScreens.push({ name: "52-N2-001-salon-options", path: `/partie/${SESSION}`, scenario: { ...duo, state: fixture("N2-001-lobby.json") },
   action: async (page) => page.getByRole("button", { name: "Options" }).first().click() });
+// Catégories 1 et 2 : packs de questions et questionnaires (tests/visual/make_fixtures_c14.py).
+for (const key of Object.keys(fixture("index_c14.json"))) {
+  allScreens.push({ name: `60-${key}`, path: `/partie/${SESSION}`, scenario: { ...duo, intimate: key === "salon-huis-clos", state: fixture(`c14-${key}.json`) } });
+}
 const ONLY = process.env.ONLY;
 const screens = ONLY ? allScreens.filter((s) => s.name.includes(ONLY)) : allScreens;
 const sizes = (process.env.WIDTHS ?? "320,360,390,430,768,1440").split(",").map((w) => ({ width: Number(w), height: Number(w) >= 768 ? 900 : 780 }));

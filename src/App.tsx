@@ -9,7 +9,7 @@ import { InvitePage } from "./duo/InviteScreens";
 import { Alert, EmptyState, NetworkBanner, PageLoading, ToastProvider } from "./components/ui";
 import { AppShell } from "./components/AppShell";
 import { Home } from "./screens/Home";
-import { GameSheet, Libraries } from "./screens/Libraries";
+import { GameSheet, Libraries, ShelfPage } from "./screens/Libraries";
 import { OurSpace } from "./screens/OurSpace";
 import { ProfileEdit, Settings } from "./screens/Settings";
 import { Tips } from "./screens/Tips";
@@ -86,13 +86,17 @@ export const router = createBrowserRouter([
             children: [
               { path: "/accueil", element: <Home /> },
               { path: "/bibliotheques", element: <Libraries /> },
-              { path: "/astuces", element: <Tips /> },
+              { path: "/conseils", element: <Tips /> },
+              { path: "/astuces", element: <Navigate to="/conseils" replace /> },
               { path: "/espace", element: <OurSpace /> },
               { path: "/notre-espace", element: <LegacySpace /> },
               { path: "/parametres", element: <Navigate to="/reglages" replace /> },
               { path: "/reglages", element: <Settings /> },
             ],
           },
+          { path: "/bibliotheques/questions", element: <ShelfPage shelf="questions" /> },
+          { path: "/bibliotheques/tests", element: <ShelfPage shelf="tests" /> },
+          { path: "/bibliotheques/a-huis-clos", element: <ShelfPage shelf="huisclos" /> },
           { path: "/bibliotheques/:gameId", element: <GameSheet /> },
           { path: "/reglages/profil", element: <ProfileEdit /> },
           { path: "/parametres/profil", element: <Navigate to="/reglages/profil" replace /> },

@@ -15,11 +15,11 @@ const ShellContext = createContext<ShellValue>({ openChat: () => undefined });
 export const useShell = () => useContext(ShellContext);
 
 // Navigation imposée : exactement cinq destinations. Le jeu et son salon n'en font pas partie.
-const tabs: { to: string; label: string; short?: string; icon: IconName }[] = [
+const tabs: { to: string; label: string; icon: IconName }[] = [
   { to: "/accueil", label: t("nav.home"), icon: "home" },
-  { to: "/bibliotheques", label: t("nav.libraries"), short: t("nav.librariesShort"), icon: "library" },
-  { to: "/astuces", label: t("nav.tips"), icon: "bulb" },
-  { to: "/espace", label: t("nav.space"), icon: "heart" },
+  { to: "/bibliotheques", label: t("nav.libraries"), icon: "library" },
+  { to: "/conseils", label: t("nav.tips"), icon: "bulb" },
+  { to: "/espace", label: t("nav.space"), icon: "users" },
   { to: "/reglages", label: t("nav.settings"), icon: "settings" },
 ];
 
@@ -40,13 +40,9 @@ function BottomNav() {
   return (
     <nav className="nav" aria-label={t("nav.label")} ref={ref}>
       {tabs.map((tab) => (
-        <NavLink key={tab.to} to={tab.to} aria-label={tab.short ? tab.label : undefined}>
-          <Icon name={tab.icon} size={24} />
-          {tab.short ? (
-            <span aria-hidden="true"><span className="nav__full--long">{tab.label}</span><span className="nav__short">{tab.short}</span></span>
-          ) : (
-            <span>{tab.label}</span>
-          )}
+        <NavLink key={tab.to} to={tab.to}>
+          <Icon name={tab.icon} size={23} />
+          <span>{tab.label}</span>
         </NavLink>
       ))}
     </nav>

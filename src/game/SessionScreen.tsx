@@ -15,6 +15,7 @@ import { answerOf, nextStep, portraitReveal, toggleWord, wordLabel } from "./por
 import { useDraft, useSession } from "./useSession";
 import { OptionsSheet, RoundsPlaying, RoundsResults, hasOptions, isRounds } from "./rounds/RoundsGame";
 import { BoardPlaying, BoardResults, isBoard } from "./board/BoardGame";
+import { QuestionnairePlaying, QuestionnaireResults, isQuestionnaireMech } from "./board/QuestionnaireGames";
 
 type Run = (fn: string, args?: Record<string, unknown>) => Promise<{ ok: boolean }>;
 
@@ -71,6 +72,7 @@ export function SessionScreen() {
   const canPause = st.session.status === "playing" || st.session.status === "paused";
   const rounds = isRounds(st);
   const board = isBoard(st);
+  const questionnaire = board && isQuestionnaireMech((st.game.config as unknown as { mechanic?: string }).mechanic);
   const common = { st, run, busy, online };
   const showOptions = rounds && hasOptions(st) && ["lobby", "playing", "paused"].includes(st.session.status) && !st.session.read_only;
 
@@ -107,7 +109,7 @@ export function SessionScreen() {
 
         {st.session.status === "lobby" && <Lobby st={st} me={me} partner={partner} partnerHere={partnerHere} busy={busy} online={online} run={run} onChat={() => setChat(true)}
           onOptions={showOptions ? () => setOptions(true) : undefined} />}
-        {st.session.status === "playing" && (board ? <BoardPlaying {...common} /> : rounds ? <RoundsPlaying {...common} /> : <Playing st={st} partnerName={partnerName} partner={partner} busy={busy} online={online} run={run} />)}
+        {st.session.status === "playing" && (questionnaire ? <QuestionnairePlaying c={common} /> : board ? <BoardPlaying {...common} /> : rounds ? <RoundsPlaying {...common} /> : <Playing st={st} partnerName={partnerName} partner={partner} busy={busy} online={online} run={run} />)}
         {st.session.status === "paused" && (
           <section className="empty enter">
             <Illustration name="17-pause" />
@@ -116,7 +118,9 @@ export function SessionScreen() {
             <button className="btn btn--auto" disabled={busy || !online} onClick={() => run("set_paused", { p_paused: false })}>{t("game.resume")}</button>
           </section>
         )}
-        {(st.session.status === "ended" || st.session.status === "closed") && (board
+        {(st.session.status === "ended" || st.session.status === "closed") && (questionnaire
+          ? <QuestionnaireResults c={common} navigate={navigate} />
+          : board
           ? <BoardResults c={common} navigate={navigate} />
           : rounds
           ? <RoundsResults c={common} navigate={navigate} />
@@ -154,6 +158,9 @@ function Lobby({ st, me, partner, partnerHere, busy, online, run, onChat, onOpti
 }) {
   // Moteur 2.1.0 : les réglages passent par la fenêtre d'options (avec les préférences privées).
   const settings = onOptions ? {} : st.game.config.settings ?? {};
+  // Questionnaires « À huis clos » : accord personnel de chacun, enregistré par le serveur avant le lancement.
+  const intimate = isQuestionnaireMech((st.game.config as unknown as { mechanic?: string }).mechanic)
+    && Boolean((st.game as unknown as { adult_available?: boolean }).adult_available);
   return (
     <section className="stack stack--6 enter">
       <div className="page-header">
@@ -194,6 +201,8 @@ function Lobby({ st, me, partner, partnerHere, busy, online, run, onChat, onOpti
           <p className="t-meta">{t("game.settingsReset")}</p>
         </fieldset>
       ))}
+
+      {intimate && <AdultConsent st={st} busy={busy} online={online} run={run} />}
 
       {onOptions && (
         <button className="btn btn--secondary" onClick={onOptions}><Icon name="settings" />{t("rounds.options")}</button>
@@ -413,5 +422,27 @@ function Results({ st, me, partner, busy, online, run, navigate }: {
       <Link className="btn btn--quiet" to="/accueil">{t("game.home")}</Link>
       <button className="btn btn--quiet" onClick={() => setView("partner")}>{t("portrait.revealPartner", { name: partnerName })}</button>
     </section>
+  );
+}
+
+function AdultConsent({ st, busy, online, run }: { st: SessionState; busy: boolean; online: boolean; run: Run }) {
+  const { profile } = useAuth();
+  const prefs = (st as unknown as { my_prefs?: { adult: boolean; excluded_topics: string[] } }).my_prefs ?? { adult: false, excluded_topics: [] };
+  if (!profile?.intimate_opt_in) {
+    return (
+      <div className="card card--lavender stack">
+        <p className="row"><Icon name="lock-keyhole" size={20} /><span>{t("q.adult.needProfile")}</span></p>
+        <Link className="btn btn--secondary" to="/reglages">{t("lib.huisclosActivate")}</Link>
+      </div>
+    );
+  }
+  return (
+    <div className="group">
+      <label className="switch-row">
+        <span className="switch-row__text"><span>{t("q.adult.consent")}</span><span className="t-meta">{t("q.adult.consentHint")}</span></span>
+        <input className="switch" type="checkbox" role="switch" checked={prefs.adult} disabled={busy || !online}
+          onChange={(e) => run("set_session_prefs", { p_adult: e.target.checked, p_excluded: prefs.excluded_topics })} />
+      </label>
+    </div>
   );
 }

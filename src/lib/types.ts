@@ -107,6 +107,8 @@ export interface Game {
   mute_ok: boolean;
   difficulties: string[];
   thumbnail: string | null;
+  /** Métadonnées éditoriales (nombre d'items, code de référence, statut des droits…). */
+  meta: { items?: number; code?: string; instrument?: string; reference_code?: string; rights_status?: string; duration_is_estimate?: boolean } | null;
 }
 
 export interface Category {

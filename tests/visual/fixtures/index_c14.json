@@ -1,0 +1,11 @@
+{
+ "pack-vf-jeu": "playing",
+ "pack-attente": "playing",
+ "pack-revelation": "playing",
+ "pack-fin": "ended",
+ "test-jeu": "playing",
+ "test-rice": "playing",
+ "test-resultat": "playing",
+ "test-fin": "ended",
+ "salon-huis-clos": "lobby"
+}

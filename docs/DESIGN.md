@@ -1,32 +1,49 @@
 # Système visuel et composants
 
-Référence : direction « Complicité » (kit V1) + cahier de refonte UI/UX du 21 octobre 2026.
+Référence actuelle : **interface v2** (première proposition pastel, version compacte, 24 octobre 2026),
+dossier Drive « interface v2 ». Elle remplace les tailles et la densité de Cocon Pastel V5 et des kits précédents.
+Priorité : `05_Composants/tokens.json` et `noodeu-ui.css` du kit, puis `00_Guides/REGLES_PRODUCTION.md`, puis les maquettes.
 Tout est centralisé dans `src/styles/app.css` (jetons) et `src/components/`.
 
 ## Jetons
 
 | Rôle | Valeur | Usage |
 |---|---|---|
-| `--c-bg` | #FFF8F0 | fond crème |
-| `--c-surface` / `--c-surface-soft` | #FFFFFF / #FCE7DA | cartes / surfaces pêche |
-| `--c-text` / `--c-text-2` | #43263E / #756672 | texte principal / secondaire |
-| `--c-accent` / `--c-accent-soft` | #FF6B68 / #FFE2DA | action, sélection |
-| `--c-border` / `--c-border-control` | #E5DAD2 / #8C7687 | séparations discrètes / contours de contrôles |
-| `--c-focus`, `--c-danger`, `--c-success` | #593551, #A62F3E, #2F6C50 | focus, suppression, confirmation |
+| `--c-bg` / `--c-surface` | #FCF8F4 / #FFFFFF | fond / cartes |
+| `--c-text` / `--c-text-2` | #30283E / #685C74 | texte principal / secondaire |
+| `--c-accent` / `--c-accent-down` | #7654BD / #62439F | action principale (texte blanc) / action pressée, focus |
+| `--c-peach`, `--c-sage` (menthe), `--c-lavender`, `--c-butter` | #FFE3D1, #D8EFE6, #E8DEF5, #FFF0BA | tuiles et bannières |
+| `--c-border` / `--c-border-control` | #E8E0EB / #9B89A6 | séparation décorative / bordure de champ |
+| `--c-success`, `--c-danger` | #24664D, #A83948 | confirmation, erreur |
 
-Contrastes mesurés (WCAG 2.2) : texte/fond 12,6:1 ; secondaire/fond 5,1:1 ; secondaire/pêche 4,5:1 ;
-prune sur corail (boutons) 4,8:1 ; contours de contrôles 3,9 à 4,2:1 ; danger 6,8:1. Le blanc sur corail (2,8:1)
-n'est **jamais** utilisé pour du texte. Les états (sélection, succès, erreur) ont toujours une icône ou un libellé.
+Relief discret : bord inférieur de 2 px sur les tuiles et le bouton principal ; ombre de surface `0 2px 8px #30283E0F`.
+Rayons : tuile 14, bouton 12, champ 10, panneau 18, fenêtre basse 22.
 
-Espacements 4, 8, 12, 16, 20, 24, 32, 40, 48. Marges de page : 16 (petits mobiles), 20 dès 390 px, 24 dès 768 px,
-32 dès 1024 px. Rayons : 14 (boutons, champs), 20 (cartes), 24 (fenêtres). Une seule ombre, pour les éléments surélevés.
+Typographie (rem, suit la taille de texte de l'appareil) : titre de page 22/28, section 17/22, catégorie 16/20,
+tuile de jeu 14/18, texte 14/21, question 20/27, bouton 14/18, saisie 16/22, aide 12/18, navigation 11/14, score 28/34.
+Nunito Sans 700 (titres, boutons) ; DM Sans (texte, champs), polices auto-hébergées (OFL).
 
-Typographie (en rem, suit la taille de texte de l'appareil) : titre public 30/36 (32/38 dès 390 px), titre de page
-26/32 (24/30 sous 360 px), section 20/26, carte 17/23, texte 16/24, description 14/20, métadonnées 13/18,
-navigation 12/16, boutons 16/20. Familles du kit : Nunito Sans 700 (titres), DM Sans 400–700 (texte).
+Mesures : marges 16 (12 sous 360 px), grille 10 (8 sous 360 px), catégorie horizontale ≈ 74 px, tuile ≥ 72 px,
+boutons et champs ≥ 44 px, icônes 20 px dans une cible de 44 px, navigation ≥ 64 px + zone sûre.
+Contenu centré, largeur maximale 600 px. Aucun `transform: scale` global ; les cartes grandissent avec le texte.
 
-Mise en page : une colonne sur mobile ; contenu plafonné à 1120 px ; formulaires 480 px ; lecture 640 px ;
-listes en 2 colonnes dès 768 px et 3 dès 1024 px.
+## Ressources
+
+- `public/assets/v2/art/*.webp` : les 53 illustrations nommées du manifeste, **découpées cellule par cellule** dans
+  les huit atlas PNG du kit (aucune planche complète n'est affichée). Nom = clé du manifeste (C01, G01, M07,
+  RICE100, c01-aron36, duo-hands…). Composant `Art`.
+- `public/assets/v2/icones/` : icônes Lucide du kit (licence ISC jointe), renommées selon les noms du code ;
+  neuf icônes absentes de Lucide (chevron-up, skip, eraser, puzzle, cards, leaf, quote, bookmark-filled, gift)
+  reprennent celles du kit précédent. Composant `Icon` (masque CSS, hérite de la couleur).
+- Illustration d'une activité : pack → `c01-*`, questionnaire → instrument (`IPIP50`…), C03/C04 → code de référence.
+- Les pièces de jeu natives (`06_Jeux` : pions, dés, navires, étapes du Pendu…) serviront aux mini-jeux des lots 2 et 3.
+
+## Bibliothèque
+
+Ordre imposé : C01 « Se découvrir » puis C02 « Mieux se comprendre » en catégories horizontales empilées, qui ouvrent
+la liste de leurs packs ; C03 « Conversation et découverte » et C04 « Mini-jeux » en grilles à deux colonnes ;
+« À huis clos » en dernier, visible seulement après activation personnelle dans Réglages. Recherche conservée.
+
 
 ## Composants
 
@@ -39,10 +56,12 @@ listes en 2 colonnes dès 768 px et 3 dès 1024 px.
 | ChatLauncher, ChatPanel, MessageList | `duo/Chat.tsx` | discussion du duo (bulle flottante, panneau, brouillon par duo) |
 | NotificationCenter | `duo/Notifications.tsx` | centre de notifications (cloche) |
 | InvitePanel, PendingRequest, JoinPanel | `duo/InviteScreens.tsx` | code, partage, copie, annulation ; double confirmation |
-| GameCard, FilterSheet | `screens/Libraries.tsx` | carte de jeu (fiche et favori séparés), filtres à brouillon |
+| ShelfBanner, TileGrid, GameTile, PackList, ShelfPage | `screens/Libraries.tsx` | catégories horizontales, grille à deux colonnes, listes de packs |
+| QuestionnairePlaying, QuestionnaireResults | `game/board/QuestionnaireGames.tsx` | carte commune des packs (réponse privée, partage, révélation), questionnaires paginés et résultats |
+| Art | `components/ui.tsx` | illustration découpée du kit interface v2 |
 
-Navigation basse : 5 colonnes égales ; « Bibliothèques » devient « Biblio. » sous 440 px (nom accessible complet) ;
-sa hauteur réelle est mesurée et réservée (texte agrandi compris) ; la bulle de discussion se place au-dessus.
+Navigation basse : Accueil, Bibliothèque, Conseils, Espaces, Réglages ; 5 colonnes égales, onglet actif en violet sur
+pastille lavande ; sa hauteur réelle est mesurée et réservée (texte agrandi compris) ; la bulle de discussion se place au-dessus.
 
 ## Images
 

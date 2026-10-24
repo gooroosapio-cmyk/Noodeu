@@ -42,6 +42,11 @@ notifications, jeu…) à 320, 360, 390, 430, 768, 1440 px et 390×560 ; `ZOOM=2
 Contrôles : défilement horizontal, contenu masqué sous la navigation, erreurs JavaScript, cibles tactiles < 44 px.
 ⚠️ Ce script simule les réponses du serveur pour afficher les écrans : il ne teste **pas** la synchronisation.
 
+Catalogue actuel (catégories 1 à 4) : `tests/visual/fixtures/catalogue.json` est extrait de la base locale, et
+`python3 tests/visual/make_fixtures_c14.py` produit des états **réels** (fonctions de la base, transaction annulée)
+pour les packs (vrai/faux, attente, révélation avec partage et réponse gardée, fin de séance), les questionnaires
+(première page, page de l'item Rice 69, résultat partagé, fin) et le salon « À huis clos ». Écrans `60-*`.
+
 ## 4. Recette manuelle à deux téléphones (à faire après mise en ligne)
 
 1. Créer deux comptes (A et B), confirmer les e-mails.

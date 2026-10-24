@@ -9,11 +9,20 @@ export type IconName =
   | "close" | "check" | "plus" | "minus" | "search" | "filter" | "bookmark" | "star" | "share" | "send" | "copy"
   | "link" | "users" | "user" | "chat" | "pause" | "play" | "stop" | "skip" | "mic" | "image" | "volume" | "clock"
   | "lock" | "eye" | "eye-off" | "bell" | "wifi" | "refresh" | "logout" | "info" | "help" | "pencil" | "undo"
-  | "eraser" | "smile" | "puzzle" | "cards" | "lightning" | "leaf" | "sparkles" | "delete" | "quote";
+  | "eraser" | "smile" | "puzzle" | "cards" | "lightning" | "leaf" | "sparkles" | "delete" | "quote"
+  | "gamepad" | "chevron-right" | "bookmark-filled" | "trophy" | "timer" | "source" | "gift" | "moon" | "sun" | "text"
+  | "lock-keyhole" | "unlock-keyhole" | "thumbs-up" | "thumbs-down" | "dices" | "ship" | "scissors" | "hand" | "calendar-days"
+  | "ellipsis" | "shield-check" | "triangle-alert" | "wifi-off" | "circle-check";
+
+/** Illustrations de l'interface v2 (cellules découpées des atlas du kit, PNG transparents convertis en WebP). */
+export type ArtName = string;
+export function Art({ name, size = 72, className = "", alt = "" }: { name: ArtName; size?: number; className?: string; alt?: string }) {
+  return <img className={`art ${className}`} src={`/assets/v2/art/${name}.webp`} width={size} height={size} alt={alt} loading="lazy" decoding="async" />;
+}
 
 /** Icône du kit (masque CSS : hérite de la couleur du texte). Décorative sauf si `label` est fourni. */
 export function Icon({ name, size = 22, label }: { name: IconName; size?: number; label?: string }) {
-  const style = { width: size, height: size, "--icon": `url("${BASE}/03_Icones_SVG/icon-${name}.svg")` } as CSSProperties;
+  const style = { width: size, height: size, "--icon": `url("/assets/v2/icones/icon-${name}.svg")` } as CSSProperties;
   return <span className="icon" style={style} role={label ? "img" : undefined} aria-label={label} aria-hidden={label ? undefined : true} />;
 }
 

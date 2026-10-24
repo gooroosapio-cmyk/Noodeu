@@ -5,8 +5,8 @@ import { useAuth } from "../auth/AuthProvider";
 import { useDuo } from "../duo/DuoProvider";
 import { DuoIdentity } from "../duo/DuoIdentity";
 import { PendingRequest, useInviteActions } from "../duo/InviteScreens";
-import { Alert, ConfirmDialog, Icon, Illustration, PageLoading, Sheet, formatDate } from "../components/ui";
-import { GameCard, GameThumb } from "./Libraries";
+import { Alert, Art, ConfirmDialog, Icon, PageLoading, Sheet, formatDate } from "../components/ui";
+import { GameThumb, TileGrid } from "./Libraries";
 import { useCatalog } from "./catalog";
 
 function PendingInvitationCard() {
@@ -64,26 +64,29 @@ export function Home() {
   const sessionGame = openSession ? cat.games.find((g) => g.id === openSession.game_id) : undefined;
   const favorites = cat.games.filter((g) => cat.favorites.has(g.id)).slice(0, 3);
   // Suggestions : uniquement des activités jouables dès maintenant.
-  const discover = cat.games.filter((g) => !cat.favorites.has(g.id) && g.implementation === "playable").slice(0, 3);
-  const card = (g: (typeof cat.games)[number]) => (
-    <GameCard key={g.id} game={g} favorite={cat.favorites.has(g.id)} onToggleFavorite={() => cat.toggleFavorite(g.id)} />
-  );
+  // « À huis clos » n'est jamais suggéré sur l'accueil.
+  const discover = cat.games.filter((g) => !cat.favorites.has(g.id) && g.implementation === "playable" && g.content_level !== "intime").slice(0, 4);
 
   return (
     <main className="page page--tight">
       <div className="page-header">
-        <h1 className="t-page">{t("home.hello", { name })}</h1>
-        <p>{active ? t("home.subtitleDuo") : t("home.subtitleSolo")}</p>
+        <h1 className="t-page">{active ? t("home.helloDuo") : t("home.hello", { name })}</h1>
+        <p className="t-small muted">{active ? t("home.tagline") : t("home.subtitleSolo")}</p>
       </div>
 
       {duo.error && <Alert>{t("net.loadError")}</Alert>}
 
-      {/* Carte principale : le duo (ou l'invitation), centrée. */}
+      {/* Carte principale : la pause à deux (ou l'invitation). */}
       {active ? (
-        <section className="card hero center" aria-label={t("home.duoCard")}>
-          <DuoIdentity duo={active} online={duo.partnerOnline} center size={60} />
-          {!openSession && <Link className="btn hero__cta" to="/bibliotheques">{t("home.choose")}<Icon name="arrow-right" /></Link>}
-          <Link className="btn btn--quiet btn--sm btn--auto" to="/espace">{t("home.openSpace")}</Link>
+        <section className="home-duo-card" aria-labelledby="home-duo">
+          <div className="home-duo-card__copy">
+            <h2 className="t-section" id="home-duo">{t("home.duoTitle")}</h2>
+            <Link className="t-small home-duo-card__who" to="/espace">
+              <DuoIdentity duo={active} online={duo.partnerOnline} size={32} />
+            </Link>
+            <Link className="btn" to="/bibliotheques">{t("home.choose")}</Link>
+          </div>
+          <Art name="duo-hands" size={112} />
         </section>
       ) : invitations.outgoing?.status === "claimed" ? (
         <PendingRequest />
@@ -109,17 +112,15 @@ export function Home() {
 
       {active && openSession && (
         <section className="section" aria-labelledby="home-now">
-          <h2 className="t-section" id="home-now">{t("home.now")}</h2>
-          <div className="card now-card">
-            {sessionGame ? <GameThumb game={sessionGame} /> : (
-              <div className="game-card__thumb" aria-hidden="true"><Illustration name="01-connexion-a-deux" /></div>
-            )}
-            <div className="stack" style={{ gap: 2 }}>
-              <span className="t-meta">{sessionLabel}</span>
+          <h2 className="t-section" id="home-now">{t("home.resumeTitle")}</h2>
+          <Link className="resume-card" to={`/partie/${openSession.id}`} aria-label={`${sessionAction} : ${openSession.title}`}>
+            {sessionGame ? <GameThumb game={sessionGame} /> : <div className="game-thumb" aria-hidden="true"><Art name="room" size={56} /></div>}
+            <span className="resume-card__body">
               <span className="t-card">{openSession.title}</span>
-            </div>
-            <Link className="btn now-card__cta" to={`/partie/${openSession.id}`}>{sessionAction}<Icon name="arrow-right" /></Link>
-          </div>
+              <span className="t-meta">{sessionLabel}</span>
+            </span>
+            <span className="resume-card__cta" aria-hidden="true">{t("home.resumeShort")}</span>
+          </Link>
         </section>
       )}
 
@@ -128,17 +129,17 @@ export function Home() {
           <div className="section__head">
             <h2 className="t-section" id="home-fav">{t("home.favorites")}</h2>
           </div>
-          <div className="stack grid-2">{favorites.map(card)}</div>
+          <TileGrid games={favorites} />
         </section>
       )}
 
       {discover.length > 0 && (
         <section className="section" aria-labelledby="home-ideas">
           <div className="section__head">
-            <h2 className="t-section" id="home-ideas">{active ? t("home.ideasDuo") : t("home.ideas")}</h2>
+            <h2 className="t-section" id="home-ideas">{active ? t("home.forYou") : t("home.ideas")}</h2>
             <Link className="btn btn--quiet btn--auto btn--sm" to="/bibliotheques">{t("home.seeGames")}</Link>
           </div>
-          <div className="stack grid-2">{discover.map(card)}</div>
+          <TileGrid games={discover} />
         </section>
       )}
     </main>
