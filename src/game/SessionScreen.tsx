@@ -201,7 +201,9 @@ function Lobby({ st, me, partner, partnerHere, busy, online, run, onChat, onOpti
   const settings = onOptions ? {} : st.game.config.settings ?? {};
   // Questionnaires « À huis clos » : accord personnel de chacun, enregistré par le serveur avant le lancement.
   // Activité « À huis clos » (questionnaire, pack ou jeu) : accord obligatoire de chacun avant le lancement.
-  const intimate = st.game.content_level === "intime";
+  // (Repli tant que le serveur ne transmet pas encore content_level : questionnaires intimes, comme avant.)
+  const intimate = st.game.content_level ? st.game.content_level === "intime"
+    : isQuestionnaireMech((st.game.config as unknown as { mechanic?: string }).mechanic) && Boolean(st.game.adult_available);
   return (
     <section className="stack stack--5 enter">
       <h1 className="sr-only">{t("game.lobbyTitle")}</h1>
