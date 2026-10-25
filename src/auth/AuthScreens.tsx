@@ -98,6 +98,7 @@ export function AuthForm({ mode }: { mode: "signup" | "login" }) {
   const google = useGoogleEnabled();
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
+  const [confirm, setConfirm] = useState("");
   const [name, setName] = useState("");
   const [adult, setAdult] = useState(false);
   const [busy, setBusy] = useState(false);
@@ -106,11 +107,16 @@ export function AuthForm({ mode }: { mode: "signup" | "login" }) {
 
   if (session) return <Navigate to={next} replace />;
   const signup = mode === "signup";
+  const mismatch = signup && confirm.length > 0 && confirm !== password;
   const suffix = next !== "/accueil" ? `?next=${encodeURIComponent(next)}` : "";
 
   async function submit(e: FormEvent) {
     e.preventDefault();
     if (busy) return;
+    if (signup && password !== confirm) {
+      setError(t("auth.passwordMismatch"));
+      return;
+    }
     setBusy(true);
     setError(null);
     setInfo(null);
@@ -172,6 +178,15 @@ export function AuthForm({ mode }: { mode: "signup" | "login" }) {
           {signup && <span id="pw-hint" className="field__hint">{t("auth.passwordHint")}</span>}
         </div>
         {signup && (
+          <div className="field">
+            <label className="field__label" htmlFor="password2">{t("auth.passwordConfirm")}</label>
+            <input id="password2" className="input" type="password" required minLength={8} autoComplete="new-password"
+              value={confirm} onChange={(e) => setConfirm(e.target.value)}
+              aria-invalid={mismatch} aria-describedby={mismatch ? "pw2-error" : undefined} />
+            {mismatch && <span id="pw2-error" className="field__error" role="alert">{t("auth.passwordMismatch")}</span>}
+          </div>
+        )}
+        {signup && (
           <label className="choice">
             <input type="checkbox" required checked={adult} onChange={(e) => setAdult(e.target.checked)} />
             <span>{t("auth.adult")}</span>
@@ -179,7 +194,7 @@ export function AuthForm({ mode }: { mode: "signup" | "login" }) {
         )}
         {error && <Alert>{error}</Alert>}
         {info && <Alert kind="info">{info}</Alert>}
-        <button className="btn" type="submit" disabled={busy || (signup && (!adult || !name.trim()))}>
+        <button className="btn" type="submit" disabled={busy || (signup && (!adult || !name.trim() || password.length < 8 || confirm !== password))}>
           {busy ? t("common.sending") : signup ? t("auth.signup") : t("auth.login")}
         </button>
         {!signup && <button type="button" className="btn btn--quiet" onClick={forgot}>{t("auth.forgot")}</button>}

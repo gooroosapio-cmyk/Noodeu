@@ -4,12 +4,13 @@
 
 Les migrations de `supabase/migrations/` sont appliquées au projet `uqyrjdaonqqkkpzyjfcg` (région eu-west-1).
 
-Réglages à faire dans le tableau de bord Supabase (**Authentication → URL Configuration**) une fois l'adresse du site connue :
+Réglages d'authentification **appliqués le 25/10/2026** (API de gestion Supabase) :
 
 - **Site URL** : `https://noodeu.vercel.app` ;
-- **Redirect URLs** : la même adresse suivie de `/**`, plus `http://localhost:5173/**` pour le développement.
-
-Sans ce réglage, les liens de confirmation d'e-mail renvoient vers une adresse par défaut.
+- **Redirect URLs** : `https://noodeu.vercel.app/**`, `http://localhost:5173/**`, `http://localhost:4173/**` ;
+- **Inscription ouverte, sans e-mail de validation** (« Confirm email » désactivé) : le compte est utilisable dès sa
+  création. Pour réactiver la validation plus tard : Authentication → Sign In / Providers → Email → « Confirm email » ;
+- **Mot de passe** : 8 caractères minimum (aussi vérifié par le formulaire, avec confirmation du mot de passe).
 
 ### Envoi des e-mails
 

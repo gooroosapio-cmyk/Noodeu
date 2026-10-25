@@ -369,3 +369,13 @@ Migration `20261027000300_multi_duos.sql` (fichier à coller : `docs/sql_editeur
 - Relance « je t'attends » ajoutée aux attentes : tour de l'autre en Action ou Vérité, verdict de Devine ma réponse,
   « Continuer », réponse scellée des packs, résultat d'un test encore en cours chez l'autre, jeux par étapes.
 - Les packs et questionnaires n'ont pas d'univers propre dans le kit V4 : ils gardent leur présentation actuelle.
+
+## Comptes et connexion (25/10/2026)
+
+- Accès gratuit : toute personne qui a le lien peut créer un compte (prénom, e-mail, mot de passe et confirmation du
+  mot de passe, déclaration de majorité). Aucun e-mail de validation pour le moment : le compte est actif tout de suite.
+- Connexion Google : le bouton s'affiche seul dès que le fournisseur est activé dans Supabase. L'activation demande un
+  identifiant client Google créé par le propriétaire du projet (voir DEPLOIEMENT.md) ; il n'est saisi que dans Supabase.
+- Après connexion, l'accueil sans duo propose « Inviter » (code et lien à partager) ou « J'ai un code ». L'association
+  demande toujours la confirmation des deux personnes.
+- « Mot de passe oublié » utilise encore le service d'e-mails intégré de Supabase, limité à quelques envois par heure.

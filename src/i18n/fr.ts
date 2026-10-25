@@ -44,6 +44,8 @@ export const fr = {
   "auth.loginTitle": "Te connecter",
   "auth.email": "Adresse e-mail",
   "auth.password": "Mot de passe",
+  "auth.passwordConfirm": "Confirmer le mot de passe",
+  "auth.passwordMismatch": "Les deux mots de passe ne sont pas identiques.",
   "auth.passwordHint": "8 caractères minimum.",
   "auth.firstName": "Prénom ou surnom",
   "auth.firstNameHint": "C'est le nom que verra la personne avec qui tu joues.",
