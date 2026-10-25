@@ -6,6 +6,7 @@ create table private.audio_answers (
  user_id uuid not null, path text unique not null, mime text not null check(mime in ('audio/webm','audio/mp4','audio/ogg')),
  state text not null default 'pending' check(state in ('pending','verified','rejected')),
  duration_ms integer check(duration_ms between 1 and 30000), committed boolean not null default false,
+ worker_attempt_at timestamptz,
  created_at timestamptz not null default now(), expires_at timestamptz not null default now()+interval '24 hours'
 );
 alter table private.audio_answers enable row level security;
@@ -88,8 +89,13 @@ begin
 end $$;
 -- Interface de maintenance : service_role seulement. Aucun cron installé.
 create function public.audio_worker_jobs() returns jsonb language sql security definer set search_path='' as $$
- select coalesce(jsonb_agg(to_jsonb(a)),'[]'::jsonb) from
- (select id,path,mime,state,expires_at from private.audio_answers where expires_at<=now() or state='pending' order by created_at limit 100) a $$;
+ with chosen as (
+  select id from private.audio_answers where expires_at<=now() or state='pending'
+  order by worker_attempt_at nulls first, expires_at, id limit 100 for update skip locked
+ ), claimed as (
+  update private.audio_answers a set worker_attempt_at=clock_timestamp() from chosen
+  where a.id=chosen.id returning a.id,a.path,a.mime,a.state,a.expires_at
+ ) select coalesce(jsonb_agg(to_jsonb(claimed)),'[]'::jsonb) from claimed $$;
 create function public.verify_answer_audio(p_id uuid,p_duration_ms integer) returns void language plpgsql security definer set search_path='' as $$
 begin
  update private.audio_answers set state=case when p_duration_ms between 1 and 30000 then 'verified' else 'rejected' end,

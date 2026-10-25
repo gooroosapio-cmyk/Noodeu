@@ -45,10 +45,10 @@ begin
     -- Retransmission strictement identique : aucun effet supplémentaire.
     if n.body = btrim(p_body) and n.due_on is not distinct from p_due and n.done = p_done then
       return jsonb_build_object('ok', true, 'version', n.version); end if;
-    if n.version <> p_version then return jsonb_build_object('ok', false, 'error', 'conflict'); end if;
+    if n.version is distinct from p_version then return jsonb_build_object('ok', false, 'error', 'conflict'); end if;
     update private.duo_notes set body = btrim(p_body), due_on = p_due, done = p_done, version = version + 1 where id = p_id;
   else
-    if p_version <> 0 then return jsonb_build_object('ok', false, 'error', 'conflict'); end if;
+    if p_version is distinct from 0 then return jsonb_build_object('ok', false, 'error', 'conflict'); end if;
     if (select count(*) from private.duo_notes where couple_id = p_couple) >= 100 then
       return jsonb_build_object('ok', false, 'error', 'limit'); end if;
     insert into private.duo_notes(id, couple_id, author, body, due_on, done) values(p_id, p_couple, auth.uid(), btrim(p_body), p_due, p_done);
@@ -82,7 +82,7 @@ begin
   insert into private.duo_spaces(couple_id) values(p_couple) on conflict do nothing;
   select version into v from private.duo_spaces where couple_id = p_couple for update;
   if (select cover_path from private.duo_spaces where couple_id = p_couple) = p_path then return jsonb_build_object('ok', true); end if;
-  if v <> p_version then return jsonb_build_object('ok', false, 'error', 'conflict'); end if;
+  if v is distinct from p_version then return jsonb_build_object('ok', false, 'error', 'conflict'); end if;
   update private.duo_spaces set cover_path = p_path, version = version + 1 where couple_id = p_couple;
   perform realtime.send('{}'::jsonb, 'duo', 'couple:' || p_couple::text, true);
   return jsonb_build_object('ok', true);

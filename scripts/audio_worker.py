@@ -25,7 +25,7 @@ def decoded_duration_ms(path, mime="audio/webm"):
     expected = {'audio/webm':'webm', 'audio/mp4':'mp4', 'audio/ogg':'ogg'}
     if expected.get(mime) not in formats:
         return None
-    if not streams or any(s.get('codec_type') != 'audio' for s in streams):
+    if len(streams) != 1 or streams[0].get('codec_type') != 'audio':
         return None
     decoded = subprocess.run(['ffmpeg', '-nostdin', '-v', 'error', '-i', path, '-t', '31', '-f', 's16le', '-ac', '1', '-ar', '16000', 'pipe:1'], capture_output=True, timeout=20, check=True)
     samples = len(decoded.stdout) // 2

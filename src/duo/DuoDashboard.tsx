@@ -19,13 +19,15 @@ export function DuoDashboard({ coupleId, active, partner, children }: { coupleId
   const [body, setBody] = useState('');
   const [due, setDue] = useState('');
   const [busy, setBusy] = useState(false);
+  const refreshGeneration = useRef(0);
   const busyRef = useRef(false), alive = useRef(true), noteId = useRef(crypto.randomUUID());
   const fileInput = useRef<HTMLInputElement>(null);
   const online = useOnline(), toast = useToast();
   useEffect(() => { alive.current = true; return () => { alive.current = false; }; }, []);
   const refresh = useCallback(async () => {
+    const generation = ++refreshGeneration.current;
     const res = await rpc<Space>('get_duo_space', { p_couple: coupleId });
-    if (!alive.current) return;
+    if (!alive.current || generation !== refreshGeneration.current) return;
     if (res.ok && Array.isArray(res.notes)) { setSpace(res); setUnavailable(false); }
     else setUnavailable(true);
   }, [coupleId]);
@@ -47,9 +49,11 @@ export function DuoDashboard({ coupleId, active, partner, children }: { coupleId
     busyRef.current = true; setBusy(true); setError(null);
     try {
       const blob = await prepareCover(file);
+      if (!alive.current) return;
       const path = `${coupleId}/${crypto.randomUUID()}.webp`;
       const { error: storageError } = await supabase.storage.from('duo-covers').upload(path, blob, { contentType: 'image/webp', upsert: false, cacheControl: '0' });
       if (storageError) throw new Error('La photo n’a pas été enregistrée. Réessaie.');
+      if (!alive.current) return;
       const res = await rpc('set_duo_cover', { p_couple: coupleId, p_path: path, p_version: space.version });
       if (!res.ok) throw new Error(res.error === 'conflict' ? 'La couverture a changé entre-temps. Recharge puis réessaie.' : 'Impossible de mettre à jour la couverture.');
       if (alive.current) { await refresh(); toast('Couverture partagée avec ton duo.'); }

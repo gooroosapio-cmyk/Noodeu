@@ -13,6 +13,11 @@ class AudioWorkerTests(unittest.TestCase):
     subprocess.run(['ffmpeg','-v','error','-f','lavfi','-i','sine=frequency=440:sample_rate=16000','-t',str(seconds),'-c:a','libopus',path],check=True)
     self.assertEqual(worker.decoded_duration_ms(path) is not None,accepted)
     self.assertIsNone(worker.decoded_duration_ms(path,'audio/mp4'))
+ def test_rejects_multiple_audio_tracks(self):
+  with tempfile.TemporaryDirectory() as folder:
+   path=f'{folder}/multiple.webm'
+   subprocess.run(['ffmpeg','-v','error','-f','lavfi','-i','sine=frequency=440:sample_rate=16000','-f','lavfi','-i','sine=frequency=880:sample_rate=16000','-map','0:a','-map','1:a','-t','1','-c:a','libopus',path],check=True)
+   self.assertIsNone(worker.decoded_duration_ms(path))
  def test_cleanup_orders_object_before_metadata_and_retries_failure(self):
   class Client:
    def __init__(self,fail=False): self.calls=[];self.fail=fail

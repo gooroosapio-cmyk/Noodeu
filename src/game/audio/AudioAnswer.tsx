@@ -31,7 +31,7 @@ export function AudioAnswer({ sessionId, round, disabled, onSend, onBusy }: {
       const mime = ['audio/webm;codecs=opus','audio/mp4','audio/ogg;codecs=opus'].find(m => MediaRecorder.isTypeSupported(m));
       if (!mime) throw new Error('Format audio indisponible. Tu peux répondre par texte.');
       const media = await navigator.mediaDevices.getUserMedia({audio:true});
-      if (!alive.current) { media.getTracks().forEach(t=>t.stop()); return; }
+      if (!alive.current || document.hidden) { media.getTracks().forEach(t=>t.stop()); lock.current=false; if(alive.current) onBusy(false); return; }
       stream.current = media; const chunks: Blob[] = [];
       const rec = new MediaRecorder(media,{mimeType:mime,audioBitsPerSecond:64000}); recorder.current = rec;
       rec.ondataavailable = e => { if (e.data.size) chunks.push(e.data); };
@@ -50,7 +50,7 @@ export function AudioAnswer({ sessionId, round, disabled, onSend, onBusy }: {
       setSeconds(0); setRecording(true); rec.start(250); const started=Date.now();
       tick.current=setInterval(()=>setSeconds(Math.min(30,Math.floor((Date.now()-started)/1000))),250);
       timer.current=setTimeout(stop,MAX_RECORD_MS);
-    } catch { if (alive.current) { setError('Micro indisponible ou permission refusée. Tu peux répondre par texte.'); onBusy(false); } lock.current=false; }
+    } catch { stop(); if(timer.current)clearTimeout(timer.current); if(tick.current)clearInterval(tick.current); stream.current=null; if (alive.current) { setRecording(false); setError('Micro indisponible ou permission refusée. Tu peux répondre par texte.'); onBusy(false); } lock.current=false; }
   }
   async function send(choice:'share'|'private') {
     if (lock.current || disabled || !blob.current) return;

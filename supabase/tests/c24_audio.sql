@@ -13,7 +13,7 @@ insert into auth.users(id,email,raw_user_meta_data) values
 ('00000000-0000-4000-b000-000000000024','b24@noodeu.invalid','{"display_name":"B"}'),
 ('00000000-0000-4000-c000-000000000024','c24@noodeu.invalid','{"display_name":"C"}');
 do $$ declare a uuid := '00000000-0000-4000-a000-000000000024'; b uuid := '00000000-0000-4000-b000-000000000024'; c uuid := '00000000-0000-4000-c000-000000000024';
- ab uuid; sid uuid; aid uuid:=gen_random_uuid(); path text; res jsonb; act uuid:=gen_random_uuid();
+ ab uuid; sid uuid; aid uuid:=gen_random_uuid(); path text; res jsonb; jobs1 jsonb; jobs2 jsonb; act uuid:=gen_random_uuid();
 begin
  ab:=ts24.pair(a,b); perform ts24.as_user(a); sid:=(public.create_session('ND-Q-P21')->>'session_id')::uuid;
  perform public.set_ready(sid,true); perform ts24.as_user(b); perform public.set_ready(sid,true); perform ts24.as_user(a);
@@ -64,6 +64,12 @@ begin
  perform public.finish_audio_expiration(aid);
  perform ts24.ok(not exists(select 1 from private.audio_answers where id=aid),'métadonnées expirées supprimées après objet');
  perform ts24.ok(position(aid::text in public.get_session_state(sid)::text)=0,'références audio retirées des réponses après nettoyage');
+ -- 101 réservations non téléversées : la seconde collecte atteint le job restant.
+ insert into private.audio_answers(id,session_id,round_no,user_id,path,mime)
+ select gen_random_uuid(),sid,1,a,'test-rotation/'||i::text,'audio/webm' from generate_series(1,101) i;
+ jobs1:=public.audio_worker_jobs(); jobs2:=public.audio_worker_jobs();
+ perform ts24.ok(jsonb_array_length(jobs1)=100,'lot worker borné');
+ perform ts24.ok((select count(distinct j->>'id') from jsonb_array_elements(jobs1||jobs2) j)=101,'aucune famine après 100 objets absents');
  perform ts24.ok(not has_function_privilege('authenticated','public.verify_answer_audio(uuid,integer)','execute'),'navigateur ne peut vérifier sa durée');
 end $$;
 select 'TOUS LES TESTS AUDIO SONT PASSÉS';

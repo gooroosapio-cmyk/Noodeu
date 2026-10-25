@@ -67,4 +67,24 @@ try {
   await page.locator('.theatre-note').nth(2).getByRole('button').click();await page.reload();
   await page.locator('#tt2-0').waitFor();assert.equal(await page.locator('#tt2-0').inputValue(),'Je chante');assert.equal(await page.locator('#tt2-2').inputValue(),'Je vole');
   assert.equal(await page.locator('.theatre-note').nth(2).getByRole('button').getAttribute('aria-pressed'),'true');await ctx.close();console.log('PASS G08 : brouillon et mensonge conservés après rechargement, clé par joueur/séance/manche');}
+ {const state=JSON.parse(readFileSync(new URL('./fixtures/c14-pack-vf-jeu.json',import.meta.url),'utf8'));
+  state.rounds[0].card.item.response='open';state.rounds[0].card.item.options=null;state.rounds[0].card.status={};
+  const {ctx,page}=await pageFor({...duo,notifications:[],state});
+  await page.route('**/rpc/get_audio_capability',r=>r.fulfill({json:{ok:true,enabled:true}}));
+  await page.addInitScript(()=>{window.stoppedTracks=0;Object.defineProperty(navigator.mediaDevices,'getUserMedia',{value:async()=>({getTracks:()=>[{stop:()=>window.stoppedTracks++}]})});
+   window.MediaRecorder=class {static isTypeSupported(){return true;} constructor(){throw new Error('codec unavailable');}};});
+  await page.goto(`http://localhost:4173/partie/${SESSION}`);await page.getByRole('button',{name:'Enregistrer un audio',exact:true}).click();
+  await page.getByText('Micro indisponible ou permission refusée. Tu peux répondre par texte.').waitFor();assert.ok(await page.evaluate(()=>window.stoppedTracks>=1));
+  await page.locator('#q-text').fill('Texte après échec codec');await ctx.close();console.log('PASS audio : micro libéré si le constructeur du codec échoue');}
+ {const {ctx,page}=await pageFor({...duo,notifications:[]});let uploads=0;
+  await page.route('**/storage/v1/object/duo-covers/**',r=>{uploads++;return r.abort();});await page.goto('http://localhost:4173/espace');
+  await page.getByRole('button',{name:'Changer la photo de couverture'}).waitFor();
+  await page.locator('input[type=file]').setInputFiles({name:'faux.png',mimeType:'image/png',buffer:Buffer.from('not an image')});
+  await page.getByText('Cette image est illisible. Choisis une autre photo.').waitFor();assert.equal(uploads,0);await ctx.close();console.log('PASS couverture : faux PNG rejeté avant upload');}
+ {const {ctx,page}=await pageFor({...duo,notifications:[]});let calls=0,arrived;const requested=new Promise(r=>{arrived=r;});
+  await page.route('**/rpc/get_duo_space',async route=>{const first=++calls===1;if(first){arrived();await new Promise(r=>setTimeout(r,1000));}
+   await route.fulfill({json:{ok:true,version:first?0:1,cover_path:null,notes:[{id:'note-order',body:first?'Ancienne note retardée':'Note récente conservée',due_on:null,done:false,version:first?0:1}]}});});
+  await page.goto('http://localhost:4173/espace',{waitUntil:'domcontentloaded'});await requested;await page.evaluate(()=>window.dispatchEvent(new Event('focus')));
+  await page.getByText('Note récente conservée').waitFor();await page.waitForTimeout(1200);assert.equal(await page.getByText('Ancienne note retardée').count(),0);
+  await ctx.close();console.log('PASS espace : actualisation tardive ne remplace pas les notes récentes');}
 } finally {await browser.close();}

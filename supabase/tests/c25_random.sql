@@ -13,7 +13,7 @@ insert into auth.users(id,email,raw_user_meta_data) values
 ('00000000-0000-4000-b000-000000000025','b25@noodeu.invalid','{"display_name":"B"}'),
 ('00000000-0000-4000-c000-000000000025','c25@noodeu.invalid','{"display_name":"C"}');
 do $$ declare a uuid:='00000000-0000-4000-a000-000000000025'; b uuid:='00000000-0000-4000-b000-000000000025';
- s uuid; ab uuid; ids text[]:='{}'; card jsonb; snapshot jsonb; q jsonb; i integer;
+ s uuid; ab uuid; ids text[]:='{}'; card jsonb; snapshot jsonb; q jsonb; i integer; seen text[]; bank_name text; cfg jsonb;
 begin
  ab:=ts25.pair(a,b); perform ts25.as_user(a); s:=(public.create_session('ND-Q-P21')->>'session_id')::uuid;
  perform public.set_ready(s,true); perform ts25.as_user(b); perform public.set_ready(s,true);
@@ -30,6 +30,26 @@ begin
  end loop;
  perform ts25.as_user(a);
  perform ts25.ok((public.get_progress()#>>'{games,ND-Q-P21,cards_done}')::integer=5,'progression par IDs répondus ensemble');
+ -- Abandon puis nouvelle séance : ne rejoue aucune carte déjà tirée.
+ select array_agg(item_id) into seen from private.pack_draws where couple_id=ab and game_id='ND-Q-P21';
+ perform public.abandon_session(s);
+ s:=(public.create_session('ND-Q-P21')->>'session_id')::uuid;
+ perform public.set_ready(s,true);perform ts25.as_user(b);perform public.set_ready(s,true);perform ts25.as_user(a);
+ select r.card into card from public.session_rounds r where r.session_id=s and round_no=1;
+ perform ts25.ok(not(card#>>'{item,id}'=any(seen)),'pas de répétition après abandon/recréation');
+ perform ts25.ok((public.get_progress()#>>'{games,ND-Q-P21,cards_done}')::integer=5,'abandon ne réinitialise pas réponses accomplies');
+ -- Fixture réduit l'attente : marque les cartes éligibles restantes comme tirées dans le cycle courant.
+ select v.config into cfg from public.games g join public.game_versions v on v.game_id=g.id and v.version=g.current_version where g.id='ND-Q-P21';
+ bank_name:=cfg->>'bank';
+ insert into private.pack_draws(couple_id,game_id,cycle,item_id)
+ select ab,'ND-Q-P21',1,cb.value->>'id' from public.content_banks cb where cb.bank=bank_name
+ and private.pack_card_ok(s,cb.bank,cb.value,private.adult_allowed(s)) on conflict do nothing;
+ perform public.abandon_session(s);
+ s:=(public.create_session('ND-Q-P21')->>'session_id')::uuid;
+ perform public.set_ready(s,true);perform ts25.as_user(b);perform public.set_ready(s,true);perform ts25.as_user(a);
+ select r.card into card from public.session_rounds r where r.session_id=s and round_no=1;
+ perform ts25.ok((card->>'cycle')::integer=2,'cycle suivant seulement après épuisement');
+ perform ts25.ok((select count(*)=count(distinct v) from jsonb_array_elements(card->'queue') v),'nouveau cycle sans doublon interne');
  perform ts25.ok(not exists(select 1 from private.pack_progress where couple_id=ab and game_id='ND-Q-P21'),'pas de corruption de next_index');
  perform ts25.ok(not exists(select 1 from public.games g join public.game_versions v on v.game_id=g.id and v.version=g.current_version
   where (g.mechanic='test_form' or g.id in ('ND-Q-P01','ND-Q-P20')) and v.config#>>'{pack,random_order}'='true'),'exceptions structurées intactes');

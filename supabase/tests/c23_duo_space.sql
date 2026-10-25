@@ -25,6 +25,8 @@ begin
  perform ts23.ok(public.get_duo_space(ac)->>'error'='not_found','B ne lit pas A-C');
  perform ts23.ok((public.save_duo_note(ab,n,'Modifiée par B',null,true,0)->>'ok')::boolean,'B coche');
  perform ts23.ok(public.save_duo_note(ab,n,'Écrasement périmé',null,false,0)->>'error'='conflict','conflit conservé');
+ perform ts23.ok(public.save_duo_note(ab,n,'Écrasement sans version',null,false,null)->>'error'='conflict','version NULL ne contourne pas le conflit');
+ perform ts23.ok(public.save_duo_note(ab,gen_random_uuid(),'Création sans version',null,false,null)->>'error'='conflict','création exige version');
  perform ts23.as_user(c);
  perform ts23.ok(public.get_duo_space(ab)->>'error'='not_found','C ne lit pas A-B');
  perform ts23.ok(public.save_duo_note(ab,gen_random_uuid(),'Intrusion')->>'error'='not_found','C ne peut écrire A-B');
@@ -35,6 +37,7 @@ begin
  perform ts23.ok(public.set_duo_cover(ab,path,0)->>'error'='invalid_file','pas de couverture sans objet');
  set local role authenticated;
  insert into storage.objects(bucket_id,name) values('duo-covers',path);
+ perform ts23.ok(public.set_duo_cover(ab,path,null)->>'error'='conflict','couverture exige version non NULL');
  perform ts23.ok((public.set_duo_cover(ab,path,0)->>'ok')::boolean,'upload A-B autorisé');
  perform ts23.as_user(c);
  perform ts23.ok((select count(*) from storage.objects where bucket_id='duo-covers' and name=path)=0,'RLS cache objet à C');
