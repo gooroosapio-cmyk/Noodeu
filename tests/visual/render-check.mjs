@@ -102,6 +102,7 @@ async function setup(page, scenario) {
       shared: Boolean(scenario.duos?.length), card: { text: "Quel souvenir de notre première année te fait encore sourire ?", theme: "Conversations à prendre le temps d'avoir",
         intensity: "soft", duration_kind: "discussion", minutes_min: 5, minutes_max: 10, long_followup: "Peux-tu donner un exemple précis ?" } });
     if (p.endsWith("/rpc/get_daily_themes")) return json(["Conversations à prendre le temps d'avoir", "Se retrouver"]);
+    if (p.endsWith("/rpc/get_home_moment")) return json({ ok: true, question: "Quelle activité toute simple aimerais-tu essayer à deux ?", games_played: 3, server_now: new Date().toISOString(), expires_at: new Date(Date.now() + 3600000).toISOString() });
     if (p.endsWith("/rpc/get_progress")) return json({ ok: true, games: { "ND-Q-P01": { kind: "pack", count: 36, cards_done: 12, completed: false, viewed: 14, answered: 11, passed: 2 },
       "ND-Q-012": { kind: "test", me: "completed", partner: "pending" } } });
     if (p.endsWith("/rpc/get_my_items")) return json({ ok: true, later: [], favorites: [{ kind: "question", bank: "q_usu_roadtrip", item_id: "R-03",
