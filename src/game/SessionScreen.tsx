@@ -17,6 +17,8 @@ import { answerOf, nextStep, portraitReveal, toggleWord, wordLabel } from "./por
 import { useDraft, useSession } from "./useSession";
 import { OptionsSheet, RoundsPlaying, RoundsResults, hasOptions, isRounds } from "./rounds/RoundsGame";
 import { BoardPlaying, BoardResults, isBoard } from "./board/BoardGame";
+import { Hero, Stage } from "./premium/Stage";
+import { universeOf } from "./premium/universe";
 import { QuestionnairePlaying, QuestionnaireResults, isQuestionnaireMech } from "./board/QuestionnaireGames";
 import { ConversationPlaying, ConversationResults, isConversationMech } from "./board/ConversationGames";
 import { WordPlaying, isWordMech } from "./board/WordGames";
@@ -81,6 +83,7 @@ export function SessionScreen() {
   const word = board && isWordMech(mech);
   const conversation = board && (isConversationMech(mech) || word);
   const common = { st, run, busy, online, act: s.act };
+  const universe = universeOf(st);
   // Bandeau des packs et parties +18, au début : on peut passer, faire une pause ou arrêter à tout moment.
   const adultStart = (st.game.content_level === "intime" || Boolean(st.game.adult_active)) && st.session.current_round <= 1;
   const showOptions = rounds && hasOptions(st) && ["lobby", "playing", "paused"].includes(st.session.status) && !st.session.read_only;
@@ -119,9 +122,9 @@ export function SessionScreen() {
         {st.session.status === "lobby" && <Lobby st={st} me={me} partner={partner} partnerHere={partnerHere} busy={busy} online={online} run={run} onChat={() => setChat(true)}
           onOptions={showOptions ? () => setOptions(true) : undefined} />}
         {st.session.status === "playing" && adultStart && <Alert kind="info"><Icon name="shield-check" size={18} />{t("rhythm.adultBanner")}</Alert>}
-        {st.session.status === "playing" && (word ? <WordPlaying c={common} /> : conversation ? <ConversationPlaying c={common} /> : questionnaire ? <QuestionnairePlaying c={common} /> : board ? <BoardPlaying {...common} /> : rounds ? <RoundsPlaying {...common} /> : <Playing st={st} partnerName={partnerName} partner={partner} busy={busy} online={online} run={run} />)}
+        {st.session.status === "playing" && <Stage u={universe} compact>{word ? <WordPlaying c={common} /> : conversation ? <ConversationPlaying c={common} /> : questionnaire ? <QuestionnairePlaying c={common} /> : board ? <BoardPlaying {...common} /> : rounds ? <RoundsPlaying {...common} /> : <Playing st={st} partnerName={partnerName} partner={partner} busy={busy} online={online} run={run} />}</Stage>}
         {st.session.status === "paused" && <PausedPanel st={st} userId={userId} partnerName={partnerName} busy={busy} online={online} run={run} />}
-        {(st.session.status === "ended" || st.session.status === "closed") && (conversation
+        {(st.session.status === "ended" || st.session.status === "closed") && <Stage u={universe}>{(conversation
           ? <ConversationResults c={common} navigate={navigate} />
           : questionnaire
           ? <QuestionnaireResults c={common} navigate={navigate} />
@@ -129,7 +132,7 @@ export function SessionScreen() {
           ? <BoardResults c={common} navigate={navigate} />
           : rounds
           ? <RoundsResults c={common} navigate={navigate} />
-          : <Results st={st} me={me} partner={partner} busy={busy} online={online} run={run} navigate={navigate} />)}
+          : <Results st={st} me={me} partner={partner} busy={busy} online={online} run={run} navigate={navigate} />)}</Stage>}
         {st.session.status === "ended" && !st.session.read_only && <AfterGame onOpenChat={() => setChat(true)} />}
         {st.session.status === "abandoned" && (
           <section className="empty">
@@ -220,7 +223,7 @@ function Lobby({ st, me, partner, partnerHere, busy, online, run, onChat, onOpti
       </div>
 
       <div className="room-game">
-        <Art name={lobbyArt(st)} size={88} />
+        {universeOf(st) ? <Hero u={universeOf(st)!} size={88} /> : <Art name={lobbyArt(st)} size={88} />}
         <div className="room-game__body">
           <span className="t-card">{st.game.title}</span>
           {st.game.rules.objective && st.game.rules.objective !== st.game.title && <span className="t-meta">{st.game.rules.objective}</span>}
