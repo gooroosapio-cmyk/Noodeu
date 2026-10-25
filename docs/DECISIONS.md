@@ -357,3 +357,15 @@ Migration `20261027000300_multi_duos.sql` (fichier à coller : `docs/sql_editeur
 - Bataille navale : viser une case puis confirmer le tir (évite les tirs par erreur sur un petit écran). Points et
   carrés : zones de 28 px sans chevauchement, 44 px avec « Agrandir le plateau ».
 - Migrations `20261028000200` à `20261028000500` ; les parties déjà commencées gardent leur version de règles.
+
+## Jeux premium V4, lot J4 (28/10/2026)
+
+- Jeux de conversation : sceaux Vérité / Action (G01), tampons de passeport (G02), deux portes de même poids (G03),
+  portraits (G04), enveloppes en vis-à-vis (G05), rubans (G09), bulles (G10). À la révélation, chaque option montre
+  qui l'a choisie ; aucun verdict ni mesure de compatibilité (« Même réponse cette fois » / « Deux réponses
+  différentes : de quoi en parler »).
+- Je n'ai jamais : libellés exacts « Je l'ai déjà fait » / « Je ne l'ai jamais fait » (identifiants inchangés,
+  migration `20261028000600_jamais_libelles.sql`).
+- Relance « je t'attends » ajoutée aux attentes : tour de l'autre en Action ou Vérité, verdict de Devine ma réponse,
+  « Continuer », réponse scellée des packs, résultat d'un test encore en cours chez l'autre, jeux par étapes.
+- Les packs et questionnaires n'ont pas d'univers propre dans le kit V4 : ils gardent leur présentation actuelle.
