@@ -1,0 +1,44 @@
+== supabase/tests/ancienne_base/slice1_security_and_game.sql
+TOUS LES TESTS SONT PASSÉS
+== supabase/tests/ancienne_base/slice2_family1_engines.sql
+TOUS LES TESTS FAMILLE 1 SONT PASSÉS
+== supabase/tests/ancienne_base/slice3_test_autoplayer.sql
+TOUS LES TESTS DU PARTENAIRE AUTOMATIQUE SONT PASSÉS
+== supabase/tests/ancienne_base/slice4_family2_board.sql
+TOUS LES TESTS FAMILLE 2 SONT PASSÉS
+== supabase/tests/ancienne_base/slice5_family3_creation.sql
+TOUS LES TESTS FAMILLE 3 SONT PASSÉS
+== supabase/tests/ancienne_base/slice6_family4_memory.sql
+TOUS LES TESTS FAMILLE 4 SONT PASSÉS
+psql:supabase/migrations/20261023000000_purge_activites.sql:16: WARNING:  SET CONSTRAINTS can only be used in transaction blocks
+psql:supabase/migrations/20261023000000_purge_activites.sql:19: WARNING:  SET CONSTRAINTS can only be used in transaction blocks
+== supabase/tests/c14_conversation.sql
+TOUS LES TESTS CONVERSATION (LOT 3) SONT PASSÉS
+== supabase/tests/c14_lot4.sql
+TOUS LES TESTS DU LOT 4 SONT PASSÉS
+== supabase/tests/c14_minijeux.sql
+TOUS LES TESTS MINI-JEUX (LOT 2) SONT PASSÉS
+== supabase/tests/c14_questionnaires.sql
+TOUS LES TESTS CATÉGORIES 1 À 4 SONT PASSÉS
+== supabase/tests/c15_parcours.sql
+TOUS LES TESTS PARCOURS SONT PASSÉS
+== supabase/tests/c16_catalogue_final.sql
+TOUS LES TESTS DU CATALOGUE FINAL SONT PASSÉS
+== supabase/tests/c17_multi_duos.sql
+TOUS LES TESTS DUOS MULTIPLES SONT PASSÉS
+== supabase/tests/c18_sans_permission_adulte.sql
+TOUS LES TESTS SANS PERMISSION +18 SONT PASSÉS
+== supabase/tests/c19_g08_simultane.sql
+TOUS LES TESTS DEUX VÉRITÉS SIMULTANÉ ET RELANCE SONT PASSÉS
+== supabase/tests/c20_purete.sql
+TOUS LES TESTS DU TEST DE PURETÉ SONT PASSÉS
+== supabase/tests/c21_de30_petitbac8.sql
+TOUS LES TESTS DÉ À 30 ET PETIT BAC À 8 SONT PASSÉS
+== supabase/tests/c22_jamais_libelles.sql
+TOUS LES TESTS JE N'AI JAMAIS SONT PASSÉS
+== supabase/tests/c23_duo_space.sql
+TOUS LES TESTS ESPACE DUO SONT PASSÉS
+== supabase/tests/c24_audio.sql
+TOUS LES TESTS AUDIO SONT PASSÉS
+== supabase/tests/c25_random.sql
+TOUS LES TESTS TIRAGE ET PROGRESSION SONT PASSÉS
