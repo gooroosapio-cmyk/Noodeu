@@ -10,6 +10,8 @@ import { t } from "../../i18n";
 import { Alert, Art, Icon, Loading } from "../../components/ui";
 import { Avatar } from "../../components/Avatar";
 import type { Player, SessionState } from "../../lib/types";
+import { NudgeButton } from "../premium/Nudge";
+import { TwoTruthsReveal, TwoTruthsTheatre, theatreScore } from "../premium/TwoTruthsTheatre";
 
 type J = any;
 type Run = (fn: string, args?: Record<string, unknown>) => Promise<{ ok: boolean; error?: string; info?: any }>;
@@ -292,7 +294,8 @@ function RoundView({ c, round }: { c: Common; round: CRound }) {
       <div className="q-progress">
         <span className="t-meta">{t("conv.round", { n: round.round_no, total })}</span>
         {m === "nd_truth_dare" && <span className="t-meta">{forWho(players.find((p) => p.seat === card.active), "conv.td.yourTurn", "conv.td.turnOf")}</span>}
-        {m === "nd_two_truths" && <span className="t-meta">{forWho(players.find((p) => p.seat === card.author), "conv.tt.youAuthor", "conv.tt.authorIs")}</span>}
+        {m === "nd_two_truths" && card.mode !== "simultaneous" && <span className="t-meta">{forWho(players.find((p) => p.seat === card.author), "conv.tt.youAuthor", "conv.tt.authorIs")}</span>}
+        {m === "nd_two_truths" && card.mode === "simultaneous" && <span className="nd-chip nd-chip--mint">{card.phase === "write" ? t("tt2.simultaneous") : t("tt2.score", { n: theatreScore(c.st, me.seat), total })}</span>}
       </div>
       <IntensityTransition prev={prevId ? meta[prevId] : undefined} cur={curId ? meta[curId] : undefined} />
       {(card.text || card.redacted) && <CardBox card={card} label={label} />}
@@ -306,6 +309,8 @@ function RoundView({ c, round }: { c: Common; round: CRound }) {
                 <h3 className="t-meta strong">{nameOf(players.find((p) => p.seat === card.active))}</h3>
                 <p className="q-answer__text">{card.response?.text ?? t("conv.td.actionDone")}</p>
               </section>
+            ) : m === "nd_two_truths" && card.mode === "simultaneous" ? (
+              <TwoTruthsReveal st={c.st} card={card} me={me} partner={partner} />
             ) : m === "nd_two_truths" ? (
               <div className="stack stack--2">
                 {(card.statements ?? []).map((s: J) => (
@@ -350,10 +355,15 @@ function RoundView({ c, round }: { c: Common; round: CRound }) {
         </div>
       ) : m === "nd_truth_dare" ? (
         <TruthDare card={card} me={me} partner={partner} busy={busy} play={play} />
+      ) : m === "nd_two_truths" && card.mode === "simultaneous" ? (
+        <TwoTruthsTheatre st={c.st} card={card} priv={round.private} me={me} partner={partner} busy={busy} play={play} />
       ) : m === "nd_two_truths" ? (
         <TwoTruths card={card} priv={round.private} me={me} partner={partner} busy={busy} play={play} sessionId={c.st.session.id} />
       ) : card.locked?.[me.seat] ? (
-        <Status card={card} me={me} partner={partner} />
+        <>
+          <Status card={card} me={me} partner={partner} />
+          {partner && !card.locked?.[partner.seat] && <NudgeButton st={c.st} partner={partner} />}
+        </>
       ) : (
         <>
           <SealedForm key={round.round_no} card={card} me={me} partner={partner} players={players} busy={busy} play={play} />

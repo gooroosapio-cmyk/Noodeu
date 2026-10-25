@@ -51,6 +51,8 @@ function sessionState(status, answers = [], revealed = false) {
 }
 const pick = (ids) => ({ words: ids.map((i) => `portrait.${i}`) });
 const notifications = [
+  { id: "n0", type: "nudge", couple_id: DUO, data: { name: "Alex", title: "Deux vérités et un mensonge", session_id: SESSION }, created_at: new Date(Date.now() - 30000).toISOString(), read_at: null },
+  { id: "n9", type: "message", couple_id: DUO, data: { name: "Alex", count: 3 }, created_at: new Date(Date.now() - 60000).toISOString(), read_at: null },
   { id: "n1", type: "game_proposed", couple_id: DUO, data: { name: "Alex", title: game.title, session_id: SESSION }, created_at: new Date(Date.now() - 600000).toISOString(), read_at: null },
   { id: "n2", type: "invitation_accepted", couple_id: DUO, data: { name: "Alex" }, created_at: "2026-10-01T10:00:00Z", read_at: "2026-10-01T11:00:00Z" },
 ];

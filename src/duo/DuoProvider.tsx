@@ -32,7 +32,7 @@ export interface InvitationStatus {
 
 export interface AppNotification {
   id: string;
-  type: "invitation_claimed" | "invitation_accepted" | "invitation_declined" | "duo_ended" | "game_proposed" | "message" | "gentle_reminder";
+  type: "invitation_claimed" | "invitation_accepted" | "invitation_declined" | "duo_ended" | "game_proposed" | "message" | "gentle_reminder" | "nudge";
   couple_id: string | null;
   data: Record<string, unknown>;
   created_at: string;
@@ -236,7 +236,8 @@ export function DuoProvider({ children }: { children: ReactNode }) {
 
   const partnerId = active?.partner?.id;
   const partnerOnline = Boolean(partnerId && online.includes(partnerId));
-  const notificationsUnread = notifications.filter((n) => !n.read_at).length;
+  // Les messages ne comptent pas comme notifications (ils restent dans la discussion).
+  const notificationsUnread = notifications.filter((n) => !n.read_at && n.type !== "message").length;
 
   return (
     <DuoContext.Provider

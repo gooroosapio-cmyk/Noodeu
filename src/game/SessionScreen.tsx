@@ -18,6 +18,7 @@ import { useDraft, useSession } from "./useSession";
 import { OptionsSheet, RoundsPlaying, RoundsResults, hasOptions, isRounds } from "./rounds/RoundsGame";
 import { BoardPlaying, BoardResults, isBoard } from "./board/BoardGame";
 import { Hero, Stage } from "./premium/Stage";
+import { NudgeButton } from "./premium/Nudge";
 import { universeOf } from "./premium/universe";
 import { QuestionnairePlaying, QuestionnaireResults, isQuestionnaireMech } from "./board/QuestionnaireGames";
 import { ConversationPlaying, ConversationResults, isConversationMech } from "./board/ConversationGames";
@@ -266,6 +267,7 @@ function Lobby({ st, me, partner, partnerHere, busy, online, run, onChat, onOpti
         </button>
         <p className="t-meta center">{t("game.lobbyText")}</p>
       </div>
+      {me?.ready && partner && !partner.ready && <NudgeButton st={st} partner={partner} />}
       {showRules && <RulesSheet title={st.game.title} rules={st.game.rules} onClose={() => setShowRules(false)} />}
     </section>
   );

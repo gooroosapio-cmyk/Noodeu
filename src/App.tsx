@@ -8,6 +8,7 @@ import { AuthForm, Onboarding, Welcome, needsOnboarding } from "./auth/AuthScree
 import { DuoProvider } from "./duo/DuoProvider";
 import { InvitePage } from "./duo/InviteScreens";
 import { Alert, EmptyState, NetworkBanner, PageLoading, ToastProvider } from "./components/ui";
+import { NudgeBanner } from "./duo/Notifications";
 import { AppShell } from "./components/AppShell";
 import { Home } from "./screens/Home";
 import { GameSheet, Libraries, ShelfPage } from "./screens/Libraries";
@@ -85,6 +86,7 @@ function RequireAuth() {
   return (
     <DuoProvider>
       <Outlet />
+      <NudgeBanner />
     </DuoProvider>
   );
 }

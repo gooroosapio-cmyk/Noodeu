@@ -247,7 +247,39 @@ function CheckItem({ item, value, onChange, disabled }: { item: J; value: boolea
   );
 }
 
+/** Test de pureté : score avec son dénominateur (indice sur 100, Non sur 72). */
+function PurityScore({ scores, total }: { scores: Record<string, number>; total: number }) {
+  return (
+    <div className="purity-score">
+      <p className="purity-score__main"><strong>{scores.indice}</strong>/100</p>
+      <p className="t-small">{t("q.purity.nonOf", { n: scores.non, total })}</p>
+    </div>
+  );
+}
+
+/** Réponses montrées au clic final (test de pureté) : liste repliable, Oui/Non par question. */
+function SharedAnswers({ card, answers, who }: { card: J; answers: Record<string, number | null>; who: string }) {
+  const items: J[] = card.items ?? [];
+  return (
+    <details className="disclosure">
+      <summary>{t("q.purity.seeAnswers", { name: who })}<Icon name="chevron-down" /></summary>
+      <ol className="purity-answers">
+        {items.map((it) => {
+          const v = answers[it.id];
+          return (
+            <li key={it.id}>
+              <span className="grow">{it.text}</span>
+              <span className={`purity-answer${v === 1 ? " is-yes" : v === 0 ? " is-no" : ""}`}>{v === 1 ? t("q.purity.yes") : v === 0 ? t("q.purity.no") : t("q.purity.skipped")}</span>
+            </li>
+          );
+        })}
+      </ol>
+    </details>
+  );
+}
+
 function Scores({ card, scores }: { card: J; scores: Record<string, number> }) {
+  if (card.instrument === "PURETE72" || (scores && "indice" in scores && "non" in scores)) return <PurityScore scores={scores} total={card.count ?? 72} />;
   return (
     <dl className="q-scores">
       {Object.entries(scores).map(([k, v]) => (
@@ -300,7 +332,8 @@ function TestDone({ c, round }: { c: Common; round: QRound }) {
         <p className="t-meta">{t("q.test.noDiagnosis")}</p>
         {result?.status === "complete" && !c.st.session.read_only && (
           <label className="switch-row" style={{ padding: 0 }}>
-            <span className="switch-row__text"><span>{t("q.test.shareResult", { name: nameOf(partner) })}</span><span className="t-meta">{t("q.test.shareHint")}</span></span>
+            <span className="switch-row__text"><span>{t("q.test.shareResult", { name: nameOf(partner) })}</span>
+              <span className="t-meta">{(c.st.game.config as unknown as { test?: { share_answers?: boolean } }).test?.share_answers ? t("q.purity.shareHintAfter") : t("q.test.shareHint")}</span></span>
             <input className="switch" type="checkbox" role="switch" checked={shared} disabled={c.busy || !c.online}
               onChange={(e) => c.run("set_answer_shared", { p_round: round.round_no, p_share: e.target.checked })} />
           </label>
@@ -308,7 +341,7 @@ function TestDone({ c, round }: { c: Common; round: QRound }) {
       </section>
       <section className="card stack stack--3">
         <h2 className="t-section">{t("q.test.partnerResult", { name: nameOf(partner) })}</h2>
-        {theirs ? <Scores card={card} scores={theirs} />
+        {theirs ? <><Scores card={card} scores={theirs} />{theirs.answers && <SharedAnswers card={card} answers={theirs.answers} who={nameOf(partner)} />}</>
           : partner && card.declined?.[partner.seat] ? <p className="muted">{t("q.test.partnerDeclined")}</p>
           : partner && card.completed?.[partner.seat] ? <p className="muted">{t("q.test.partnerPrivate")}</p>
           : <p className="muted">{t("q.test.partnerInProgress")}</p>}
@@ -325,7 +358,8 @@ function TestPlaying({ c, round }: { c: Common; round: QRound }) {
   const pages = Math.max(1, Math.ceil(items.length / size));
   const [answers, setAnswers] = useState<Answers>(() => ({ ...(round.private?.answers ?? {}) }));
   const [page, setPage] = useState<number>(() => Math.min(pages - 1, Number(round.private?.page ?? 0)));
-  const [share, setShare] = useState(false);
+  const testCfg = (c.st.game.config as unknown as { test?: { share_default?: boolean; share_answers?: boolean } }).test ?? {};
+  const [share, setShare] = useState(Boolean(testCfg.share_default));
   const [err, setErr] = useState<string | null>(null);
   const done = Boolean(card.completed?.[me.seat] || card.declined?.[me.seat]);
   const slice = useMemo(() => items.slice(page * size, page * size + size), [items, page, size]);
@@ -368,13 +402,18 @@ function TestPlaying({ c, round }: { c: Common; round: QRound }) {
       {err && <Alert>{err}</Alert>}
       {last && Object.keys(card.axes ?? {}).length > 0 && (
         <label className="switch-row card" style={{ paddingInline: 12 }}>
-          <span className="switch-row__text"><span>{t("q.test.shareOnFinish")}</span><span className="t-meta">{t("q.test.shareHint")}</span></span>
+          <span className="switch-row__text">
+            <span>{testCfg.share_answers ? t("q.purity.showOnFinish") : t("q.test.shareOnFinish")}</span>
+            <span className="t-meta">{testCfg.share_answers ? t("q.purity.showHint", { name: nameOf(c.st.players.find((p) => !p.is_me)) }) : t("q.test.shareHint")}</span>
+          </span>
           <input className="switch" type="checkbox" role="switch" checked={share} onChange={(e) => setShare(e.target.checked)} />
         </label>
       )}
       <div className="action-bar stack stack--2">
         {last ? (
-          <button className="btn" disabled={busy} onClick={() => void play("complete", { answers: pageAnswers(), page, share })}>{t("q.test.finish")}</button>
+          <button className="btn" disabled={busy} onClick={() => void play("complete", { answers: pageAnswers(), page, share })}>
+            {Object.keys(card.axes ?? {}).length === 0 ? t("q.test.finish") : share ? t("q.test.finishShare") : t("q.test.finishPrivate")}
+          </button>
         ) : (
           <button className="btn" disabled={busy} onClick={async () => {
             const a = pageAnswers();
