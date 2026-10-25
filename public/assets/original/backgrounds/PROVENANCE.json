@@ -1,0 +1,17 @@
+{
+  "created": "2026-10-25",
+  "source": "Images originales générées dans cet exécuteur avec OpenAI imagegen pour la demande utilisateur. Aucun texte ni actif tiers incorporé.",
+  "reference": "Composition adaptée de la description de 1000318217.jpg transmise par le parent ; téléchargement local de la référence en échec.",
+  "files": [
+    {
+      "name": "app-ivory.webp",
+      "bytes": 6678,
+      "sha256": "8394d1888f446a0fea627e28c89110347a6e91db87ae6465b67db47dbd6c152a"
+    },
+    {
+      "name": "auth-ribbons.webp",
+      "bytes": 17622,
+      "sha256": "9a6c06104047b2ac335b13429bf2fc6e363235176e0bf24ea3afdaf57e60ba60"
+    }
+  ]
+}

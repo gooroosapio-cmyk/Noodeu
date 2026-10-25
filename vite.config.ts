@@ -19,8 +19,8 @@ export default defineConfig({
         scope: "/",
         display: "standalone",
         orientation: "portrait",
-        background_color: "#FFF8F0",
-        theme_color: "#FFF8F0",
+        background_color: "#F7F1F1",
+        theme_color: "#F7F1F1",
         icons: [
           { src: "/assets/noodeu/01_Logos/noodeu-app-icon-192.png", sizes: "192x192", type: "image/png", purpose: "any" },
           { src: "/assets/noodeu/01_Logos/noodeu-app-icon-512.png", sizes: "512x512", type: "image/png", purpose: "any maskable" },

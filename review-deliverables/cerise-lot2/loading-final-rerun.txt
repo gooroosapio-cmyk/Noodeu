@@ -1,0 +1,2 @@
+PASS chargement no-preference: logo centré, mouvement adapté, fin sans attente artificielle
+PASS chargement reduce: logo centré, mouvement adapté, fin sans attente artificielle

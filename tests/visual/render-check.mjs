@@ -213,6 +213,7 @@ for (const size of sizes) {
     page.on("pageerror", (e) => errors.push(e.message));
     await setup(page, s.scenario);
     await page.goto(BASE + s.path, { waitUntil: "networkidle" });
+    await page.locator("#root > *").first().waitFor();
     if (zoom !== 1) await page.addStyleTag({ content: `html { font-size: ${zoom * 100}%; }` });
     if (s.action) { await s.action(page); }
     await page.waitForTimeout(Number(process.env.WAIT ?? 350));

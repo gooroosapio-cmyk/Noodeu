@@ -28,7 +28,7 @@ export function useSession(sessionId: string, userId: string | null) {
     if (contextRef.current !== requestedContext) return;
     setLoading(false);
     if (!res.ok) {
-      if (res.error !== "network") setError(res.error);
+      setError(res.error);
       return;
     }
     const next = res as unknown as SessionState;

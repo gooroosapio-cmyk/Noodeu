@@ -1,0 +1,25 @@
+
+> noodeu@0.1.0 test
+> node --experimental-strip-types --test 'src/**/*.test.ts'
+
+✔ couverture : seuls les formats image bornés sont acceptés (0.671403ms)
+✔ proposition récente seulement, dans un de mes duos actifs (1.106929ms)
+✔ fermer une proposition écarte ses duplications sans affecter les autres salons (0.210127ms)
+✔ accord des mots selon la personne décrite (0.772444ms)
+✔ sélection limitée au nombre demandé (0.595508ms)
+✔ mots retrouvés : portrait du siège 1 deviné par le siège 2 (0.165329ms)
+✔ une étape passée ne compte pas comme un échec (0.186491ms)
+✔ étape suivante (0.289016ms)
+✔ rôles : le siège « a » change selon la carte (1.152367ms)
+✔ écoute : l'auteur raconte, l'autre attend puis reformule (0.284158ms)
+✔ étapes après révélation : révision limitée (0.178179ms)
+✔ libellés : accord du lexique Portrait et objets (0.303197ms)
+✔ sélection limitée, ordre et budget (0.261885ms)
+ℹ tests 13
+ℹ suites 0
+ℹ pass 13
+ℹ fail 0
+ℹ cancelled 0
+ℹ skipped 0
+ℹ todo 0
+ℹ duration_ms 186.665967

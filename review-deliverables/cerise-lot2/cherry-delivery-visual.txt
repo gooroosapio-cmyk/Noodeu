@@ -1,0 +1,8 @@
+390x844 02a-connexion: débordement=0px masqué-sous-nav=false erreurs=0
+390x844 02-inscription: débordement=0px masqué-sous-nav=false erreurs=0
+390x844 06d-accueil-duo: débordement=0px masqué-sous-nav=false erreurs=0
+390x844 07-bibliotheques: débordement=0px masqué-sous-nav=false erreurs=0 nav=["Accueil","Bibliothèque","Conseils","Espaces","Réglages"]
+390x844 11-salon: débordement=0px masqué-sous-nav=false erreurs=0
+390x844 21a-espace-duo: débordement=0px masqué-sous-nav=false erreurs=0
+390x844 60-mini-pfc-verrouille: débordement=0px masqué-sous-nav=false erreurs=0
+Aucun débordement, contenu masqué ni erreur JavaScript.

@@ -1,207 +1,207 @@
 {
   "provenance": "Dessins SVG originaux créés pour Noodeu, 2026-10-25 ; pas d’actif tiers incorporé.",
   "palette": [
-    "#17545D",
-    "#EFAD78",
+    "#48283D",
+    "#F4C6AE",
     "#FFF9F0",
-    "#D7E8E6"
+    "#F6E3E9"
   ],
   "files": [
     {
       "file": "011.svg",
-      "sha256": "0a0a9dd1ad7585606d792c1ffece2e598416349b0e3314ef2e9a8ae3b4f4c33e"
+      "sha256": "174b7ca14e0edf4f7f22493d5a89f724b1bd21da47d990c919e5736ae79924ad"
     },
     {
       "file": "012.svg",
-      "sha256": "3916310c0ff49c3a0753b958390ee1e965e0021ce8610a8d2c122d3e30f06efe"
+      "sha256": "9b407530713fa4c4ac27b4646bb5bf97c343ae3999919afed5500c0b55398d3d"
     },
     {
       "file": "021.svg",
-      "sha256": "ea457068fa41703cf1b598518ce66e804441bb716eb66cdc7ed3fed6e357d4e4"
+      "sha256": "2ca3ab80f696fa11fc43490c0f9da14357b731a26e7a17af5ee72740befd9dc1"
     },
     {
       "file": "022.svg",
-      "sha256": "ee16804ff5a28c6424ce2ded9d159a891cfa807d6536841b9e40f4e4d9433784"
+      "sha256": "8350b9e1d0f87432ca4d0564480f438c4d6b40d4f23150f0d8827f651a0c29fb"
     },
     {
       "file": "024.svg",
-      "sha256": "bebc0f06145a1632c012b7730c93c9074ea8d05751185547ce49b50f604e6da3"
+      "sha256": "633469c6ede91e3b4ce7184df07882c500e2468585712130108f65d133c99ec5"
     },
     {
       "file": "025.svg",
-      "sha256": "84e4a6615089a8bf41c68ce050a2f4e6faeaebb6da15b09d8f2dc546c3d08a91"
+      "sha256": "20e8ae86659ac5b91e9c80238f5ea4511b7901755f1577c7ff403a155324d8c0"
     },
     {
       "file": "027.svg",
-      "sha256": "aa1722710cb8baad7a058d7c77902fad51dc0222d67ac9b4009d4db55a9bf971"
+      "sha256": "3143ca3db141083e70aebd881f1256874d19bb5dfe235542ac63d028b09a5ba8"
     },
     {
       "file": "G01.svg",
-      "sha256": "3a6d8fe6080d0af7108f2c7fea6f313f88980f92eb63ff5d96142a1c9661d8b4"
+      "sha256": "73eed23d2b58feeb1a0efecd9e46a198dfb04289d703d0f41c10503ba5cae471"
     },
     {
       "file": "G02.svg",
-      "sha256": "7a663c501342293ae6f50004da82416889ddb31f9a46251d9d4c9f552f9c56ac"
+      "sha256": "16554ecf090a2a6d7b978a6b28c506b10dfd3e4fce91c5afb3ea014e247376bf"
     },
     {
       "file": "G03.svg",
-      "sha256": "5b00972376c6a66f52666f81edce53433a382e956907d95d866932e7f801c7b3"
+      "sha256": "761a69b19dd09936c756636118087abd70cbb751e7fabaf0f9c20fafb42c30c1"
     },
     {
       "file": "G04.svg",
-      "sha256": "df3b5d78f18f1e8b342224155e63cc79d2a0a9720f3d8b2454e1b8d2a32e78b7"
+      "sha256": "6974859f4a1a3d6f6efc88e7f4fd3c9fb32a7ee7ba12e7c40352a541ba45d4f2"
     },
     {
       "file": "G05.svg",
-      "sha256": "4b3812f833a6200ddf77acb0582821adc85845ba8d9cad5ab1dd0df7061eefb1"
+      "sha256": "0d8cb3d67152cf391349f76735c1334d5f51e6c524c787646b9b18876d35d0c6"
     },
     {
       "file": "G06.svg",
-      "sha256": "fc958702b1939cc5b467e76dcccc267c1f1cb1a414044079a547e3b782c1d2b0"
+      "sha256": "86164bd87af4184c2ae4aad01c7c2797c5bbb7fbac72b452ffe822c014553418"
     },
     {
       "file": "G07.svg",
-      "sha256": "b961263b2c443f0181d2ae0dc601b286622b781339cb2bce0c4ceefd38c24d8f"
+      "sha256": "188ddd57868a659344e06e6e3506dd51648fa32d7cc70321ac5c7389ef83d0cf"
     },
     {
       "file": "G08.svg",
-      "sha256": "77e08acc8f3ac9f64321a26880ca26a8412fd9c0c83407b3677d38e340a31344"
+      "sha256": "e5dd5137c91ac923eb664f105534deebb3ef07ee7c586766277a4384e6d33da5"
     },
     {
       "file": "G09.svg",
-      "sha256": "b2f3fcdf2022586af6a925d483dc2297bdf1bcf71b7471026249a47af00beec2"
+      "sha256": "ec4b685e7a7276d1781ffeac2e9d3638abf3610ba6ba872f98243b8305529288"
     },
     {
       "file": "G10.svg",
-      "sha256": "182368122ea7b85d0dc9741a7f20f80daf6a1dcec4376011d35cf4fa999a06d9"
+      "sha256": "d85cfa0589e9212389868d0465c86a653a384c06bcd23fe5ba36429ad885c52a"
     },
     {
       "file": "H01.svg",
-      "sha256": "69ed4afcf61ff61d6d2cdf326acbd874c601223a6e1ae8af642a1023389147c4"
+      "sha256": "050a37e4d4a579f7f053d654bb881ef36f2ee2bb29038f43d2691cd8a1f12cbf"
     },
     {
       "file": "H02.svg",
-      "sha256": "d0e351a7c057fc5ddcc0d30fc11552631acfcbafb2e867ab051d5db8a6d546be"
+      "sha256": "51fd078e74e131c3cd8f7ebb75035cc5be061353f1027b8754697e7086f9de0c"
     },
     {
       "file": "H03.svg",
-      "sha256": "4986bde72be8f333685d4effb72ec6dc398833283758522821ec6d755da0b160"
+      "sha256": "b996e0a5d56984fab88ac94c6a895be0a85340651432bc82ad1408745b94294c"
     },
     {
       "file": "H04.svg",
-      "sha256": "0ab2d228396f79029790b0345b23046fd96a58d3a122fb1eae1f9afaaf76497c"
+      "sha256": "ead94757fabd9f34a48c177e50883990ca21a4e40553ef3afb2417ffdf51d89c"
     },
     {
       "file": "H05.svg",
-      "sha256": "54fce6e3319fa3ec810e9e02a30c26f2b0042ce02967b7448dc8ef11f6992b23"
+      "sha256": "a4b557e15f61b7461b08ac70e01515a1d9885d6f220e54527a01626f2f6e65f1"
     },
     {
       "file": "H06.svg",
-      "sha256": "e74fbb92373bd431ab8d9f923c82bb46bc35df5780ac582eed1d31c39c47f05e"
+      "sha256": "d0b172671c8f9021f807076af59bdbc1c3a451e4166a4407df62f11a9215f4c7"
     },
     {
       "file": "H07.svg",
-      "sha256": "4296efcfbdd31c4cb0f1b4919c662f819e7707f29ad07b471c972c2fafbcc0ea"
+      "sha256": "1edf8413de319e8f99ecc6aa82321ac2caa5aad557cb0b6743f4b436566d9867"
     },
     {
       "file": "H08.svg",
-      "sha256": "7d0def1b2028531a58fd51fe0d650607878f909fb651bae6367ee8a64c9fc4fc"
+      "sha256": "094b9463f199af98b736b4911ad0c6d1640a3f05cf6d5e77cb784a688bd121b1"
     },
     {
       "file": "M01.svg",
-      "sha256": "d254e77fa699993dd299f9f9567ceebedee8c3ac48da3f5ec21dde27a7819637"
+      "sha256": "98e101652a77d1c3b78b810d8cbc139c18955ea6084715636d7f9bb94751770e"
     },
     {
       "file": "M04.svg",
-      "sha256": "1983de99b71c481f7f745e567d6dd173ff1f6d55603723cb6ac6e195b489a5db"
+      "sha256": "312cd62e2195f91eb0982f06c749eb4816f99b0c6fbcc1d9ca58e36e5a515c91"
     },
     {
       "file": "M07.svg",
-      "sha256": "f55df260bbd3d90545b07d5d525b9eb64e4e9e6dddaa9962dd43d43f676c9414"
+      "sha256": "769b132ea733c9eb4f706db082955332ef26c5edbdbff0f9dfdc48f5d67b7f74"
     },
     {
       "file": "M09.svg",
-      "sha256": "b04b69768b70a6de4e609a032294201de80aebb4c13429f64c47c41135ac20c8"
+      "sha256": "77be1c3beab662bd230735029ff5e21814375c28c4091ac0260d7cee1e96dacc"
     },
     {
       "file": "M11.svg",
-      "sha256": "a40239a0b6be2fb197cd81c7e5ac8fc86c4ca5b59d701ea118b3908cb0cb9f4f"
+      "sha256": "a114ea639cf78b777d28cf8185bee7831a51e355850453a5926d3235b118957d"
     },
     {
       "file": "M12.svg",
-      "sha256": "a7b6527312eef78afae88e45c16accb4fd11bdbc888ff339d598c5496cae6524"
+      "sha256": "fa2c8f54a03d52eb181817812293f16e73c0e102e9957359d02396767b58218a"
     },
     {
       "file": "M16.svg",
-      "sha256": "c1eb94d81a8a4de9f571a824ddb36303510804f1b936121a4edb3da44bdeb639"
+      "sha256": "389457662414fcdaecc5bbf742b4f966887cd9e80a28bfe3532ef005adc1e6ea"
     },
     {
       "file": "P01.svg",
-      "sha256": "c4a1c33c38111966c9bb5f46627e0247108380682573000761f7e876aadb3962"
+      "sha256": "d636aaac5296d3dbe05c461b573387425d0987f95e057b07f230fdc866fafada"
     },
     {
       "file": "P03.svg",
-      "sha256": "d20093b116c6cbe82bf69b77bc082de93c6009fa8c7f3dd0c0ebfefb9227ccb4"
+      "sha256": "1d4d8f9a7316ca1bc32f66dbf4c465f0a55798473632f15aba4bf06315f7181b"
     },
     {
       "file": "P11.svg",
-      "sha256": "5c313415352c92edce1b092f60f07f13dce270f7d321e428e3f60de34a35977e"
+      "sha256": "a1ac6c2df14bfffb420e48ffd0d8719c098fa67d24745fc99a0488c1cc0a0352"
     },
     {
       "file": "P12.svg",
-      "sha256": "6fc8f334877ca7ddc8ca90d45369267d45e3726cac3ced6ff37d86a5a025fd5b"
+      "sha256": "995fbcdfc4be495e25613500980ef66e632cd751ac584a5166e63f14bda28856"
     },
     {
       "file": "P13.svg",
-      "sha256": "91bab9cc81c36d3fc39eaa37ecd0ce199eb43a12da96de1cae8e7092c1e04838"
+      "sha256": "9d0fcaa79d448be6de620d36e2e61ef3bf0f9d44a1592fa5bc64eac33848ea94"
     },
     {
       "file": "P14.svg",
-      "sha256": "acf99ce1796088101e0758efb6c01f57a326991e6f9955ae8a9af04632aa459f"
+      "sha256": "552fa113fe89e86a2107fe1ade98937527e044c07597f4f9ee3b0f2b393e1a09"
     },
     {
       "file": "P15.svg",
-      "sha256": "d382d895a31aa7286a56d52ccb02fa4341333319deae2767f552c69f8329a204"
+      "sha256": "aeb107e1fa6537608e6563b700295701a1937642195169b355d6abf6cb23d68b"
     },
     {
       "file": "P20.svg",
-      "sha256": "e22c34b28dc657fbf2e66b7388c756e0f69d0f06b122e361505ada458c791a44"
+      "sha256": "c7d9325f0daeef3f6ed6d106d805ed739cc784723ff36a9b7c9b2a17d0cf1854"
     },
     {
       "file": "P21.svg",
-      "sha256": "f2e5ab110b2e4d44b3f07494f505e44cc05e2f4975a1e07a09a5146a4f64bfbd"
+      "sha256": "ece26f5eb8066a701cebd60250fe6ddf4f8d0d2f43f5cce2be58d847be67f0dd"
     },
     {
       "file": "P22.svg",
-      "sha256": "0f5613634b065bd107700fb41ca19914e769c8174f8087df90c955a8054c42c2"
+      "sha256": "3800fe8087e0b5f9c16e9f09a0675f8cc7084e6a6eb1220a00ed29d09fe184f8"
     },
     {
       "file": "P23.svg",
-      "sha256": "814565773cd141e97e1e33dbdf4d5ca1a52c653a511b704ee40c06c4c549234b"
+      "sha256": "697f35b751b938f1c5f13f5f8f6f1f04698d27e3d84e848da8d7d73d9e3a4164"
     },
     {
       "file": "P24.svg",
-      "sha256": "4711413f58fd0fc23649380f527617ab7c28cbfbf1cf6af67de6b865b586270b"
+      "sha256": "9b8bd73cfeccb04c9f979ea074865df35473f78f56f06dfe951f7cddfba21252"
     },
     {
       "file": "RND1.svg",
-      "sha256": "2e016cff7a3a2f1ef9547476cbf66228e2c9508dd8524493627ad3652dea6ead"
+      "sha256": "f56bdea2f2c4c17040c2dee50494007b307deb9ff8ef214601ee0b38e25463bc"
     },
     {
       "file": "RND2.svg",
-      "sha256": "58059ae8a44c2b8fd671edb7e4b955e83e3bc533109cfcf440fd15c9c7b52706"
+      "sha256": "b4a01250eb7d6cc800d828a380c9546cf011dc7af7dde0def943ec10df518fc2"
     },
     {
       "file": "huisclos.svg",
-      "sha256": "f003cb0d286aaec462cd211aa2011291c1a50befa4e16336858fd1cf89b19243"
+      "sha256": "6303f6bdd85bd21175a692b8c463326255ca0dd47b2c8b6badc6d794d0479e7e"
     },
     {
       "file": "questions.svg",
-      "sha256": "ca617e9ec55eaf9333485ed71362e1f17c8da546ecff815f4205f07a75481d42"
+      "sha256": "4354137b28f3c77aebac4d497c7896bc44d24832d8ab48a05ee23b03e3558f20"
     },
     {
       "file": "tests.svg",
-      "sha256": "79dd4537b4c2537e95606dd8339066e48967f8d84f42be18da8e7403fb0b6887"
+      "sha256": "a61693e505e220a0b0006fcc354e697fc4d7aa1b4dbd5b1ff59d754c7cc856ac"
     }
   ]
 }

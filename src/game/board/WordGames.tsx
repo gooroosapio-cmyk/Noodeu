@@ -235,7 +235,7 @@ function PetitBacWrite({ c, round, send }: { c: Common; round: CRound; send: Sen
             <label className="pb-cell__label" htmlFor={`pb-${k}`}>
               <img src={`/assets/premium/M16/${k}.svg`} alt="" aria-hidden="true" width={22} height={22} />{labels[k] ?? k}
             </label>
-            <input id={`pb-${k}`} className="input pb-cell__input" type="text" maxLength={80} autoComplete="off" autoCapitalize="words" enterKeyHint="next"
+            <input id={`pb-${k}`} className="input pb-cell__input" type="text" maxLength={80} autoComplete="off" autoCapitalize="words" enterKeyHint={k === cats[cats.length-1] ? "done" : "next"}
               placeholder={t("word.pb.placeholder", { l: card.letter })} value={text[k] ?? ""} disabled={offline || left === 0}
               onChange={(e) => change(k, e.target.value)}
               onFocus={(e) => { const el = e.currentTarget; window.setTimeout(() => el.scrollIntoView({ block: "center", behavior: window.matchMedia("(prefers-reduced-motion: reduce)").matches || document.documentElement.classList.contains("reduced-motion") ? "instant" : "smooth" }), 250); }}
@@ -244,6 +244,7 @@ function PetitBacWrite({ c, round, send }: { c: Common; round: CRound; send: Sen
                 e.preventDefault();
                 const next = cats[cats.indexOf(k) + 1];
                 if (next) document.getElementById(`pb-${next}`)?.focus();
+                else e.currentTarget.blur();
               }}
               onBlur={(e) => { if (!saved[k]) { clearTimeout(timers.current[k]); save(k, e.target.value); } }} />
           </div>

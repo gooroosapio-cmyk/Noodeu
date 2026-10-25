@@ -27,7 +27,7 @@ export function Icon({ name, size = 22, label }: { name: IconName; size?: number
 }
 
 export function Logo({ width = 104, variant = "couleur" }: { width?: number; variant?: "couleur" | "prune" | "blanc" }) {
-  return <img className="logo" src={variant === "couleur" ? "/assets/original/logo-petrole.svg" : `${BASE}/01_Logos/noodeu-logo-${variant}.svg`} width={width} height={Math.round((width * 190) / 830)} alt="Noodeu" />;
+  return <img className="logo" src={`${BASE}/01_Logos/noodeu-logo-${variant}.svg`} width={width} height={Math.round((width * 190) / 830)} alt="Noodeu" />;
 }
 
 export type IllustrationName =
@@ -57,14 +57,12 @@ export function Loading({ label = t("common.loading") }: { label?: string }) {
 }
 
 export function PageLoading() {
-  return (
-    <div className="page" aria-busy="true">
-      <span className="sr-only" role="status">{t("common.loading")}</span>
-      <div className="skeleton" style={{ height: 32, width: "60%" }} />
-      <div className="skeleton" style={{ height: 140 }} />
-      <div className="skeleton" style={{ height: 96 }} />
-    </div>
-  );
+  const [delayed,setDelayed]=useState(false);
+  useEffect(()=>{const timer=setTimeout(()=>setDelayed(true),1200);return()=>clearTimeout(timer);},[]);
+  return <div className="page-loading" aria-busy="true" aria-label="Chargement">
+    <div className="page-loading__logo"><Logo width={160} /></div>
+    <p className="t-small" role="status">{delayed ? "Un instant…" : ""}</p>
+  </div>;
 }
 
 export function EmptyState({ illustration, title, text, children }: { illustration?: IllustrationName; title: string; text?: string; children?: ReactNode }) {

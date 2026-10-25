@@ -3,7 +3,7 @@
 // Les pièces viennent du kit interface v2 ; tirages, tours, scores et secrets viennent du serveur.
 import { useEffect, useMemo, useRef, useState, type ComponentType, type ReactNode } from "react";
 import { t } from "../../i18n";
-import { Icon } from "../../components/ui";
+import { Alert, Icon } from "../../components/ui";
 import type { Player } from "../../lib/types";
 
 type J = any;
@@ -21,13 +21,11 @@ export const isMiniMech = (m?: string) => Boolean(m && MINI_MECHS.includes(m));
 function Series({ c, me, partner }: { c: J; me: Player; partner?: Player }) {
   const s = c.series ?? {};
   return (
-    <p className="mini-series t-meta" aria-label={t("mini.seriesLabel")}>
-      <span><strong>{nameOf(me)}</strong> {s[me.seat] ?? 0}</span>
-      <span>·</span>
-      <span><strong>{nameOf(partner)}</strong> {partner ? s[partner.seat] ?? 0 : 0}</span>
-      <span className="grow" />
-      <span>{t("mini.target", { n: c.target })}</span>
-    </p>
+    <div className="series-score" aria-label={t("mini.seriesLabel")}>
+      <div><span>{nameOf(me)}</span><strong>{s[me.seat] ?? 0}</strong></div>
+      <div><span>{nameOf(partner)}</span><strong>{partner ? s[partner.seat] ?? 0 : 0}</strong></div>
+      <p className="t-meta">{t("mini.target", { n: c.target })}</p>
+    </div>
   );
 }
 
@@ -162,7 +160,7 @@ function Rps({ c, priv, me, partner, play, busy }: V) {
   return (
     <div className="stack stack--4">
       <Series c={c} me={me} partner={partner} />
-      <div className="rps-timer" role="timer" aria-live="off">
+      <div className={`rps-timer${left <= 10 ? " rps-timer--urgent" : ""}`} role="timer" aria-live="off">
         <Icon name="timer" size={20} /><span className="t-score">{left}</span><span className="t-meta">{t("mini.rps.seconds")}</span>
       </div>
       <div className="rps" role="radiogroup" aria-label={t("mini.rps.choose")}>
@@ -208,7 +206,7 @@ function Pig({ c, me, partner, play, busy, mine }: V) {
   const target = Number(c.target ?? 30);
   const rolls = (c.rolls as number[] | undefined) ?? [];
   // Le dé rejoue son animation à chaque nouveau lancer reçu du serveur (jamais avant la réponse).
-  const rollKey = (c.log ?? []).length + ":" + (last?.die ?? last?.hold ?? "");
+  const rollKey = String(c.rev ?? (c.log ?? []).length) + ":" + (last?.die ?? last?.hold ?? "");
   const bust = Boolean(c.bust && last?.die === 1);
   return (
     <div className="stack stack--4 pig">
@@ -220,7 +218,7 @@ function Pig({ c, me, partner, play, busy, mine }: V) {
         <img className="pig-tray__felt" src="/assets/premium/M12/tray.svg" alt="" aria-hidden="true" />
         <div className="pig-tray__die" key={rollKey}>
           {c.die ? <img className="pig-die-img" src={`/assets/premium/M12/die-${c.die}.svg`} alt={t("mini.pig.dieValue", { n: c.die })} width={88} height={88} />
-            : <img className="pig-die-img is-idle" src="/assets/premium/M12/die-5.svg" alt="" aria-hidden="true" width={88} height={88} />}
+            : <span className="pig-idle"><Icon name="dices" size={44} /><span className="t-meta">Prêt à lancer</span></span>}
         </div>
       </div>
       <div className={`pig-pot${bust ? " is-bust" : ""}`}>
@@ -300,6 +298,7 @@ function Placement({ c, priv, me, partner, play, busy }: V) {
   const [draft, setDraft] = useState<Ship[]>(server ?? []);
   const [sel, setSel] = useState<string>(ships[0].id);
   const [o, setO] = useState<"H" | "V">("H");
+  const [placementError,setPlacementError] = useState<string|null>(null);
   const locked = Boolean(c.locked?.[me.seat]);
   useEffect(() => { if (server) setDraft(server); }, [JSON.stringify(server)]); // eslint-disable-line react-hooks/exhaustive-deps
   const taken = useMemo(() => {
@@ -314,9 +313,10 @@ function Placement({ c, priv, me, partner, play, busy }: V) {
   function place(r: number, col: number) {
     const len = ships.find((s) => s.id === sel)!.len;
     const next: Ship = { id: sel, len, r, c: col, o };
-    if (!inBounds(next)) return;
+    if (!inBounds(next)) { setPlacementError("Ce navire dépasse de la grille. Choisis une autre case ou tourne-le."); return; }
     const others = draft.filter((s) => s.id !== sel);
-    if (cellsOf(next).some((k) => others.some((s) => cellsOf(s).includes(k)))) return;
+    if (cellsOf(next).some((k) => others.some((s) => cellsOf(s).includes(k)))) { setPlacementError("Deux navires ne peuvent pas occuper la même case."); return; }
+    setPlacementError(null);
     setDraft([...others, next]);
     const free = ships.find((s) => s.id !== sel && !others.some((x) => x.id === s.id));
     if (free) setSel(free.id);
@@ -336,15 +336,16 @@ function Placement({ c, priv, me, partner, play, busy }: V) {
       <p className="t-small">{t("mini.naval.placeHint")}</p>
       <div className="chips" role="radiogroup" aria-label={t("mini.naval.ships")}>
         {ships.map((s) => (
-          <button key={s.id} type="button" role="radio" className="chip" aria-checked={sel === s.id} onClick={() => setSel(s.id)}>
+          <button key={s.id} type="button" role="radio" className="chip" aria-checked={sel === s.id} disabled={busy} onClick={() => { setSel(s.id); setPlacementError(null); }}>
             {draft.some((d) => d.id === s.id) && <Icon name="check" size={14} />}{nameShip(s.id)} · {s.len}
           </button>
         ))}
       </div>
-      <button type="button" className="btn btn--secondary btn--sm" onClick={() => setO(o === "H" ? "V" : "H")}>
+      <button type="button" className="btn btn--secondary btn--sm" disabled={busy} onClick={() => { setO(o === "H" ? "V" : "H"); setPlacementError(null); }}>
         <Icon name="refresh" size={18} />{t("mini.naval.rotate", { o: o === "H" ? t("mini.naval.horizontal") : t("mini.naval.vertical") })}
       </button>
-      <NavalGrid label={t("mini.naval.myFleet")} onCell={place}
+      {placementError && <Alert kind="info">{placementError}</Alert>}
+      <NavalGrid label={t("mini.naval.myFleet")} onCell={busy ? undefined : place}
         cell={(r, col) => taken.has(`${r}:${col}`) ? { cls: `naval__cell--ship${taken.get(`${r}:${col}`) === sel ? " naval__cell--sel" : ""}`, text: nameShip(taken.get(`${r}:${col}`)!) } : { cls: "", text: t("mini.naval.water") }} />
       <div className="stack stack--2">
         <button className="btn btn--secondary" disabled={busy} onClick={() => void play("random_fleet")}><Icon name="dices" size={18} />{t("mini.naval.random")}</button>

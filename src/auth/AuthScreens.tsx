@@ -1,4 +1,4 @@
-import { useState, type FormEvent } from "react";
+import { useRef, useState, type FormEvent } from "react";
 import { Link, Navigate, useLocation, useNavigate } from "react-router";
 import { t } from "../i18n";
 import { supabase } from "../lib/supabase";
@@ -56,6 +56,8 @@ export function AuthForm({ mode }: { mode: "signup" | "login" }) {
   const next = useNextPath();
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
+  const [showPassword, setShowPassword] = useState(false);
+  const authLock = useRef(false);
   const [name, setName] = useState("");
   const [adult, setAdult] = useState(false);
   const [busy, setBusy] = useState(false);
@@ -68,10 +70,12 @@ export function AuthForm({ mode }: { mode: "signup" | "login" }) {
 
   async function submit(e: FormEvent) {
     e.preventDefault();
-    if (busy) return;
+    if (authLock.current) return;
+    authLock.current = true;
     setBusy(true);
     setError(null);
     setInfo(null);
+    try {
     if (signup) {
       const { data, error } = await supabase.auth.signUp({
         email: email.trim(),
@@ -86,7 +90,8 @@ export function AuthForm({ mode }: { mode: "signup" | "login" }) {
       if (error) setError(authErrorMessage(error.message));
       else navigate(next, { replace: true });
     }
-    setBusy(false);
+    } catch { setError("Connexion impossible pour le moment. Réessaie dans un instant."); }
+    finally { authLock.current = false; setBusy(false); }
   }
 
   async function forgot() {
@@ -94,35 +99,38 @@ export function AuthForm({ mode }: { mode: "signup" | "login" }) {
       setError(t("auth.emailRequired"));
       return;
     }
-    await supabase.auth.resetPasswordForEmail(email.trim(), { redirectTo: `${window.location.origin}/reglages/profil` });
-    setInfo(t("auth.resetSent"));
+    if(authLock.current) return;
+    authLock.current=true;setBusy(true);setError(null);setInfo(null);
+    try {
+      const {error}=await supabase.auth.resetPasswordForEmail(email.trim(), { redirectTo: `${window.location.origin}/reglages/profil` });
+      if(error)setError(authErrorMessage(error.message));else setInfo(t("auth.resetSent"));
+    } catch {setError("Envoi impossible pour le moment. Réessaie dans un instant.");}
+    finally {authLock.current=false;setBusy(false);}
   }
 
   return (
-    <main className="page page--bare page--narrow">
+    <main className={`page page--bare page--narrow auth-page ${signup ? "auth-page--signup" : "auth-page--login"}`}>
       <header className="topbar" style={{ padding: 0 }}>
         <Link className="icon-btn icon-btn--soft" to={`/${suffix}`} aria-label={t("common.back")}><Icon name="arrow-left" /></Link>
         <Logo width={96} />
       </header>
-      <h1 className="t-page">{signup ? t("auth.signupTitle") : t("auth.loginTitle")}</h1>
-      <GooglePlaceholder />
-      <div className="divider">{t("auth.or")}</div>
+      <div className="auth-heading"><h1>{signup ? "Créer un compte" : "Bonjour"}</h1><p>{signup ? "Un espace pour vous retrouver à deux." : "Connecte-toi à ton espace Noodeu."}</p></div>
       <form className="stack stack--4" onSubmit={submit}>
         {signup && (
           <div className="field">
             <label className="field__label" htmlFor="name">{t("auth.firstName")}</label>
-            <input id="name" className="input" required maxLength={40} autoComplete="given-name" value={name} onChange={(e) => setName(e.target.value)} aria-describedby="name-hint" />
+            <div className="auth-input"><Icon name="user" size={20} /><input id="name" className="input" required maxLength={40} autoComplete="given-name" value={name} onChange={(e) => setName(e.target.value)} aria-describedby="name-hint" disabled={busy} /></div>
             <span id="name-hint" className="field__hint">{t("auth.firstNameHint")}</span>
           </div>
         )}
         <div className="field">
           <label className="field__label" htmlFor="email">{t("auth.email")}</label>
-          <input id="email" className="input" type="email" required inputMode="email" autoComplete="email" value={email} onChange={(e) => setEmail(e.target.value)} />
+          <div className="auth-input"><Icon name="send" size={20} /><input id="email" className="input" type="email" required inputMode="email" autoComplete="email" value={email} onChange={(e) => setEmail(e.target.value)} disabled={busy} spellCheck={false} autoCapitalize="none" /></div>
         </div>
         <div className="field">
           <label className="field__label" htmlFor="password">{t("auth.password")}</label>
-          <input id="password" className="input" type="password" required minLength={8} autoComplete={signup ? "new-password" : "current-password"}
-            value={password} onChange={(e) => setPassword(e.target.value)} aria-describedby={signup ? "pw-hint" : undefined} />
+          <div className="auth-input auth-input--password"><Icon name="lock" size={20} /><input id="password" className="input" type={showPassword ? "text" : "password"} required minLength={8} autoComplete={signup ? "new-password" : "current-password"}
+            value={password} onChange={(e) => setPassword(e.target.value)} aria-describedby={signup ? "pw-hint" : undefined} disabled={busy} /><button type="button" className="icon-btn" aria-label={showPassword ? "Masquer le mot de passe" : "Afficher le mot de passe"} aria-pressed={showPassword} onClick={() => setShowPassword(v=>!v)}><Icon name={showPassword ? "eye-off" : "eye"} size={20} /></button></div>
           {signup && <span id="pw-hint" className="field__hint">{t("auth.passwordHint")}</span>}
         </div>
         {signup && (
@@ -133,11 +141,12 @@ export function AuthForm({ mode }: { mode: "signup" | "login" }) {
         )}
         {error && <Alert>{error}</Alert>}
         {info && <Alert kind="info">{info}</Alert>}
-        <button className="btn" type="submit" disabled={busy || (signup && (!adult || !name.trim()))}>
-          {busy ? t("common.sending") : signup ? t("auth.signup") : t("auth.login")}
+        <button className="btn auth-submit" type="submit" disabled={busy || (signup && (!adult || !name.trim()))}>
+          <span>{busy ? t("common.sending") : signup ? t("auth.signup") : t("auth.login")}</span><span className="auth-submit__arrow"><Icon name="arrow-right" /></span>
         </button>
-        {!signup && <button type="button" className="btn btn--quiet" onClick={forgot}>{t("auth.forgot")}</button>}
+        {!signup && <button type="button" className="btn btn--quiet" disabled={busy} onClick={forgot}>{t("auth.forgot")}</button>}
       </form>
+      <div className="auth-google"><GooglePlaceholder /></div>
       <Link className="btn btn--quiet" to={`${signup ? "/connexion" : "/inscription"}${suffix}`}>{signup ? t("auth.toLogin") : t("auth.toSignup")}</Link>
     </main>
   );

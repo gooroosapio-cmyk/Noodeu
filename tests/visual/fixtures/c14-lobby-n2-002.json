@@ -1,0 +1,101 @@
+{
+  "ok": true,
+  "game": {
+    "rules": {
+      "how_to": [
+        "Deux propositions s'affichent ; chacun choisit en secret celle qu'il préfère et verrouille.",
+        "Les deux choix apparaissent ensemble. Aucune préférence n'est vraie ou fausse.",
+        "Passer ne vaut aucune des deux options et ne révèle rien. Continuez quand vous êtes prêts tous les deux."
+      ],
+      "details": [
+        "Score : Sans score compétitif.",
+        "Adaptation Noodeu : Verrouillage distant et passage séparé.",
+        "Référence de mécanique : Tu préfères pour couples — BlindSpots (https://couplesquestionsgame.com/fr/jeux/tu-preferes-pour-couples).",
+        "Référence de mécanique : Tu préfères — PsyCat Games (https://psycatgames.com/fr/magazine/party-games/would-you-rather/).",
+        "Cartes originales Noodeu (noodeu-g03-1.1.0), écrites pour jouer à distance."
+      ],
+      "privacy": "Ta réponse reste secrète jusqu'à ce que vous ayez répondu tous les deux. Passer clôt la carte sans rien révéler.",
+      "objective": "Choisissez entre les deux propositions, puis découvrez le choix de l’autre.",
+      "step_texts": {}
+    },
+    "title": "Tu préfères",
+    "config": {
+      "bank": "conv_dilemma",
+      "code": "G03",
+      "turn": "simultaneous",
+      "score": "none",
+      "engine": "board",
+      "rounds": 10,
+      "version": "noodeu-g03-1.1.0",
+      "mechanic": "nd_dilemma",
+      "settings": {
+        "cartes": {
+          "label": "Nombre de cartes",
+          "default": 10,
+          "options": [
+            10,
+            20,
+            30
+          ]
+        }
+      },
+      "bank_version": "noodeu-g03-1.1.0",
+      "rounds_setting": "cartes"
+    },
+    "mechanic": "nd_dilemma",
+    "intensity": "soft",
+    "thumbnail": "/assets/c14/G03.webp",
+    "adult_active": true,
+    "content_level": "standard",
+    "adult_available": true
+  },
+  "rounds": [],
+  "my_seat": 1,
+  "players": [
+    {
+      "seat": 1,
+      "is_me": true,
+      "ready": false,
+      "user_id": "11111111-1111-4111-8111-111111111111",
+      "word_form": "n",
+      "avatar_path": null,
+      "keep_memory": false,
+      "display_name": "Maya"
+    },
+    {
+      "seat": 2,
+      "is_me": false,
+      "ready": false,
+      "user_id": "22222222-2222-4222-8222-222222222222",
+      "word_form": "n",
+      "avatar_path": null,
+      "keep_memory": false,
+      "display_name": "Alex"
+    }
+  ],
+  "session": {
+    "id": "1f76aae8-ac54-4ed0-a16b-88026056aacd",
+    "result": {},
+    "status": "lobby",
+    "game_id": "N2-002",
+    "ended_at": null,
+    "settings": {
+      "cartes": 10
+    },
+    "closed_at": null,
+    "paused_by": null,
+    "read_only": false,
+    "created_at": "2026-10-25T21:00:31.543775+00:00",
+    "server_now": "2026-10-25T21:00:31.543775+00:00",
+    "started_at": null,
+    "pause_state": null,
+    "game_version": 2,
+    "total_rounds": 10,
+    "current_round": 0,
+    "state_version": 2
+  },
+  "my_prefs": {
+    "adult": false,
+    "excluded_topics": []
+  }
+}
