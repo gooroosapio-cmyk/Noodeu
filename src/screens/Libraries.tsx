@@ -116,18 +116,6 @@ export function ShelfBanner({ shelf, title, text }: { shelf: "questions" | "test
   );
 }
 
-/** Bloc « À huis clos » : rien n'est listé tant que la personne ne l'a pas activé elle-même. */
-function HuisClosNotice({ enabled }: { enabled: boolean }) {
-  return enabled
-    ? <p className="t-meta row"><Icon name="lock-keyhole" size={18} />{t("lib.huisclosOn")}</p>
-    : (
-      <div className="card card--lavender stack">
-        <p className="row"><Icon name="lock-keyhole" size={20} /><span>{t("lib.huisclosOff")}</span></p>
-        <Link className="btn btn--secondary" to="/reglages">{t("lib.huisclosActivate")}</Link>
-      </div>
-    );
-}
-
 const STORE = "noodeu.lib.state.v5";
 interface LibState { query: string; scroll: number; filters: Filters; open: boolean }
 
@@ -196,10 +184,9 @@ function shelfTitle(categories: Category[], shelf: Shelf) {
 }
 
 export function Libraries() {
-  const { userId, profile } = useAuth();
+  const { userId } = useAuth();
   const cat = useCatalog(userId);
   const [state, setState] = useState<LibState>(loadState);
-  const intimate = !!profile?.intimate_opt_in;
   const { cap } = useCap();
 
   // Recherche et position conservées en mémoire de session (jamais dans l'URL).
@@ -240,11 +227,10 @@ export function Libraries() {
 
   const q = normalizeText(state.query.trim());
   const filtering = !!q || hasFilters(state.filters);
-  // Les activités « À huis clos » restent hors des résultats tant que la personne ne les a pas activées.
   const results = useMemo(() => filtering
-    ? allowed.filter((g) => (shelfOf(g) !== "huisclos" || intimate) && matchesFilters(g, state.filters)
+    ? allowed.filter((g) => matchesFilters(g, state.filters)
       && (!q || normalizeText(`${g.title} ${g.hook} ${g.promise}`).includes(q)))
-    : [], [allowed, q, filtering, state.filters, intimate]);
+    : [], [allowed, q, filtering, state.filters]);
   const nFilters = state.filters.intensity.length + state.filters.duration.length + state.filters.format.length + (state.filters.adult ? 1 : 0);
 
   if (cat.loading) return <PageLoading />;
@@ -271,7 +257,7 @@ export function Libraries() {
           <Icon name="filter" size={20} />{nFilters > 0 && <span className="filter-badge" aria-hidden="true">{nFilters}</span>}
         </button>
       </div>
-      {state.open && <FilterPanel filters={state.filters} cap={cap} adultOk={intimate} onChange={(f) => setState((s) => ({ ...s, filters: f }))} />}
+      {state.open && <FilterPanel filters={state.filters} cap={cap} adultOk onChange={(f) => setState((s) => ({ ...s, filters: f }))} />}
       {hidden > 0 && <p className="t-meta row"><Icon name="shield-check" size={18} />{t("filter.hidden", { n: hidden })}</p>}
       <p className="sr-only" aria-live="polite">{filtering ? t("lib.results", { n: results.length }) : ""}</p>
 
@@ -288,9 +274,7 @@ export function Libraries() {
         <>
           <div className="stack" style={{ gap: "var(--grid-gap)" }}>
             {count("questions") > 0 && <ShelfBanner shelf="questions" title={shelfTitle(cat.categories, "questions")} text={t("lib.bannerText.questions")} />}
-            {count("huisclos") > 0 && (intimate
-              ? <ShelfBanner shelf="huisclos" title={t("lib.shelf.huisclos")} text={t("lib.huisclosText")} />
-              : <HuisClosNotice enabled={false} />)}
+            {count("huisclos") > 0 && <ShelfBanner shelf="huisclos" title={t("lib.shelf.huisclos")} text={t("lib.huisclosText")} />}
           </div>
           {(["conversation", "minijeux"] as const).map((s) => count(s) > 0 && (
             <section key={s} className="section" aria-labelledby={`shelf-${s}`}>
@@ -342,7 +326,7 @@ function RandomLauncher({ game }: { game: Game }) {
 export function ShelfPage({ shelf: asked }: { shelf: "questions" | "tests" | "huisclos" }) {
   // « Mieux se comprendre » a rejoint « Se découvrir » : l'ancienne adresse mène à la même page.
   const shelf = asked === "tests" ? "questions" : asked;
-  const { userId, profile } = useAuth();
+  const { userId } = useAuth();
   const cat = useCatalog(userId);
   const { cap } = useCap();
   if (cat.loading) return <PageLoading />;
@@ -350,8 +334,6 @@ export function ShelfPage({ shelf: asked }: { shelf: "questions" | "tests" | "hu
   const random = games.find((g) => g.meta?.random && g.implementation === "playable");
   const packs = games.filter((g) => !g.meta?.random && g.mechanic !== "test_form");
   const tests = games.filter((g) => g.mechanic === "test_form");
-  const intimate = !!profile?.intimate_opt_in;
-  const open = shelf !== "huisclos" || intimate;
   return (
     <SubPage backTo="/bibliotheques" title={shelfTitle(cat.categories, shelf)}>
       <main className="page page--bare page--tight">
@@ -360,8 +342,7 @@ export function ShelfPage({ shelf: asked }: { shelf: "questions" | "tests" | "hu
           <p className="t-small muted">{shelf === "huisclos" ? t("lib.huisclosText") : categoryOf(cat.categories, shelf)?.promise}</p>
         </div>
         {cat.error && <Alert>{t("lib.error")}</Alert>}
-        {shelf === "huisclos" && <HuisClosNotice enabled={intimate} />}
-        {open && (
+        {(
           <>
             {random && <RandomLauncher game={random} />}
             {packs.length > 0 && (

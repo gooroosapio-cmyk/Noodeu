@@ -163,3 +163,9 @@ Duos multiples : `supabase/tests/c17_multi_duos.sql` (deux duos actifs pour A, B
 une partie ouverte dans chaque duo, bascule sans perte ; non-lus des autres duos ; B ne voit ni le duo, ni les parties,
 ni les membres, ni le profil de C (tables et fonctions), C non plus pour A-B ; C ne peut pas terminer A-B ; fin de duo sans
 notification, retour automatique sur l'autre duo, historique en lecture seule). Recette visuelle : `06f`, `06g`, `21d`.
+
+Questions +18 sans permission : `supabase/tests/c18_sans_permission_adulte.sql` (nouveau profil +18 actif sans plafond ;
+avec d'anciens réglages restrictifs, pack avec cartes +18 complet, activité À huis clos et activité « hot » lancées sans
+accord ; cartes +18 tirées dans un jeu de conversation ; plus aucune règle sur l'activation du +18 ; filtres sans plafond).
+`scripts/run_sql_tests.sh` lance c14 à c17 avant cette migration, puis c18. Recette visuelle : `11-salon`,
+`60-salon-huis-clos` (message dans le salon), `22-parametres` (plus d'interrupteur +18 ni d'intensité).

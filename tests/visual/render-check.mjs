@@ -142,7 +142,6 @@ const allScreens = [
   { name: "21b-espace-archive", path: `/espace?duo=${OLD_DUO}`, scenario: { ...duo, duos: [archivedDuo] } },
   { name: "21c-espace-sans-duo", path: "/espace", scenario: solo },
   { name: "22-parametres", path: "/reglages", scenario: duo },
-  { name: "22c-majorite-18", path: "/reglages", scenario: duo, action: async (page) => page.getByRole("switch", { name: /Activer À huis clos/ }).click() },
   { name: "22d-rappels", path: "/reglages", scenario: { ...duo, reminders: true } },
   { name: "07c-filtres", path: "/bibliotheques", scenario: duo, action: async (page) => {
     await page.getByRole("button", { name: /Afficher les filtres/ }).click();

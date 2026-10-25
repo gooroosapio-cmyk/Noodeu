@@ -7,7 +7,6 @@ import { IntensityTransition, useSessionMeta } from "../../parcours/meta";
 import { useEffect, useState } from "react";
 import { Link } from "react-router";
 import { t } from "../../i18n";
-import { useAuth } from "../../auth/AuthProvider";
 import { Alert, Art, Icon, Loading } from "../../components/ui";
 import { Avatar } from "../../components/Avatar";
 import type { Player, SessionState } from "../../lib/types";
@@ -271,17 +270,6 @@ function TwoTruths({ card, priv, me, partner, busy, play, sessionId }: { card: J
 // ---------------------------------------------------------------------------
 // Écran de manche
 // ---------------------------------------------------------------------------
-export function AdultWithdraw({ c }: { c: Common }) {
-  const prefs = (c.st as unknown as { my_prefs?: { adult: boolean; excluded_topics: string[] } }).my_prefs;
-  if (!prefs?.adult) return null;
-  return (
-    <button className="btn btn--quiet btn--sm" disabled={c.busy || !c.online}
-      onClick={() => c.run("set_session_prefs", { p_adult: false, p_excluded: prefs.excluded_topics ?? [] })}>
-      {t("conv.adultWithdraw")}
-    </button>
-  );
-}
-
 function RoundView({ c, round }: { c: Common; round: CRound }) {
   const card = round.card;
   const players = c.st.players;
@@ -376,7 +364,6 @@ function RoundView({ c, round }: { c: Common; round: CRound }) {
       {err && <Alert>{err}</Alert>}
       {!card.done && !card.redacted && LATER_MECHS.has(m) && <LaterButton sessionId={c.st.session.id} round={round.round_no} disabled={!c.online} />}
       {!card.done && <button className="btn btn--quiet" disabled={busy} onClick={() => void play("skip_round")}>{t("conv.skip")}</button>}
-      {(card.adult || !card.done) && <AdultWithdraw c={c} />}
     </section>
   );
 }
@@ -432,23 +419,5 @@ export function ConversationResults({ c, navigate }: { c: Common; navigate: (to:
       )}
       <Link className="btn btn--quiet" to="/accueil">{t("game.home")}</Link>
     </section>
-  );
-}
-
-/** Salon : cartes +18 facultatives, désactivées par défaut ; chacun active pour soi. */
-export function OptionalAdult({ st, busy, online, run }: { st: SessionState; busy: boolean; online: boolean; run: Run }) {
-  const { profile } = useAuth();
-  const prefs = (st as unknown as { my_prefs?: { adult: boolean; excluded_topics: string[] } }).my_prefs ?? { adult: false, excluded_topics: [] };
-  return (
-    <div className="group">
-      <label className="switch-row">
-        <span className="switch-row__text">
-          <span>{t("conv.adultToggle")}</span>
-          <span className="t-meta">{profile?.intimate_opt_in ? t("conv.adultToggleHint") : t("conv.adultNeedProfile")}</span>
-        </span>
-        <input className="switch" type="checkbox" role="switch" checked={prefs.adult} disabled={busy || !online || !profile?.intimate_opt_in}
-          onChange={(e) => run("set_session_prefs", { p_adult: e.target.checked, p_excluded: prefs.excluded_topics })} />
-      </label>
-    </div>
   );
 }

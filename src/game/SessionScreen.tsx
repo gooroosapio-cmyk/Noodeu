@@ -18,7 +18,7 @@ import { useDraft, useSession } from "./useSession";
 import { OptionsSheet, RoundsPlaying, RoundsResults, hasOptions, isRounds } from "./rounds/RoundsGame";
 import { BoardPlaying, BoardResults, isBoard } from "./board/BoardGame";
 import { QuestionnairePlaying, QuestionnaireResults, isQuestionnaireMech } from "./board/QuestionnaireGames";
-import { ConversationPlaying, ConversationResults, OptionalAdult, isConversationMech } from "./board/ConversationGames";
+import { ConversationPlaying, ConversationResults, isConversationMech } from "./board/ConversationGames";
 import { WordPlaying, isWordMech } from "./board/WordGames";
 import { AfterGame } from "../parcours/AfterGame";
 
@@ -199,11 +199,8 @@ function Lobby({ st, me, partner, partnerHere, busy, online, run, onChat, onOpti
   const [showRules, setShowRules] = useState(false);
   // Moteur 2.1.0 : les réglages passent par la fenêtre d'options (avec les préférences privées).
   const settings = onOptions ? {} : st.game.config.settings ?? {};
-  // Questionnaires « À huis clos » : accord personnel de chacun, enregistré par le serveur avant le lancement.
-  // Activité « À huis clos » (questionnaire, pack ou jeu) : accord obligatoire de chacun avant le lancement.
-  // (Repli tant que le serveur ne transmet pas encore content_level : questionnaires intimes, comme avant.)
-  const intimate = st.game.content_level ? st.game.content_level === "intime"
-    : isQuestionnaireMech((st.game.config as unknown as { mechanic?: string }).mechanic) && Boolean(st.game.adult_available);
+  // Questions +18 : aucune permission, elles font partie du jeu. Le salon le signale simplement.
+  const sexual = st.game.content_level === "intime" || Boolean(st.game.adult_available);
   return (
     <section className="stack stack--5 enter">
       <h1 className="sr-only">{t("game.lobbyTitle")}</h1>
@@ -245,9 +242,7 @@ function Lobby({ st, me, partner, partnerHere, busy, online, run, onChat, onOpti
         </button>
       </div>
 
-      {intimate && <AdultConsent st={st} busy={busy} online={online} run={run} />}
-      {/* Cartes +18 facultatives (jeux de conversation, packs avec quelques cartes +18) : désactivées par défaut. */}
-      {!intimate && Boolean(st.game.adult_available) && <OptionalAdult st={st} busy={busy} online={online} run={run} />}
+      {sexual && <p className="t-meta row"><Icon name="info" size={18} />{t("game.sexualContent")}</p>}
 
       {Object.entries(settings).map(([key, def]) => (
         <fieldset key={key}>
@@ -478,27 +473,5 @@ function Results({ st, me, partner, busy, online, run, navigate }: {
       <Link className="btn btn--quiet" to="/accueil">{t("game.home")}</Link>
       <button className="btn btn--quiet" onClick={() => setView("partner")}>{t("portrait.revealPartner", { name: partnerName })}</button>
     </section>
-  );
-}
-
-function AdultConsent({ st, busy, online, run }: { st: SessionState; busy: boolean; online: boolean; run: Run }) {
-  const { profile } = useAuth();
-  const prefs = (st as unknown as { my_prefs?: { adult: boolean; excluded_topics: string[] } }).my_prefs ?? { adult: false, excluded_topics: [] };
-  if (!profile?.intimate_opt_in) {
-    return (
-      <div className="card card--lavender stack">
-        <p className="row"><Icon name="lock-keyhole" size={20} /><span>{t("q.adult.needProfile")}</span></p>
-        <Link className="btn btn--secondary" to="/reglages">{t("lib.huisclosActivate")}</Link>
-      </div>
-    );
-  }
-  return (
-    <div className="group">
-      <label className="switch-row">
-        <span className="switch-row__text"><span>{t("q.adult.consent")}</span><span className="t-meta">{t("q.adult.consentHint")}</span></span>
-        <input className="switch" type="checkbox" role="switch" checked={prefs.adult} disabled={busy || !online}
-          onChange={(e) => run("set_session_prefs", { p_adult: e.target.checked, p_excluded: prefs.excluded_topics })} />
-      </label>
-    </div>
   );
 }

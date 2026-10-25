@@ -323,3 +323,15 @@ Migration `20261027000300_multi_duos.sql` (fichier à coller : `docs/sql_editeur
   effacées. L'historique reste en lecture seule pour chacun. La suppression de compte termine tous les duos actifs.
 - Cloisonnement : chaque accès vérifie l'appartenance au duo concerné (tables, fonctions, canaux temps réel) ; le duo
   affiché ne donne jamais accès à un duo dont on n'est pas membre (tests `c17_multi_duos.sql`).
+
+## Questions +18 sans permission (28/10/2026)
+
+- Les questions +18 font partie du jeu et de la conversation : plus d'activation dans les Réglages, plus d'accord dans le
+  salon, plus de retrait en cours de partie, plus de plafond d'intensité. Toutes les cartes peuvent être tirées.
+- Le salon des activités concernées (À huis clos ou cartes +18) affiche seulement : « Ce contenu contient des questions
+  relatives au sexe. »
+- La majorité reste déclarée à l'inscription. Les colonnes `intimate_opt_in`, `max_intensity` et `session_prefs.adult`
+  restent en base, sans effet ; tous les profils sont passés à +18 actif et intensité « hot ».
+- Les phrases de règles qui parlaient d'activer le +18 sont retirées (nouvelles versions de règles).
+- Migration `20261028000100_sans_permission_adulte.sql`, tests `c18_sans_permission_adulte.sql`. Les tests c14 à c17
+  restent exécutés sur le schéma antérieur à ce retrait, pour lequel ils ont été écrits.

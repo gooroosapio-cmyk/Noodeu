@@ -5,7 +5,7 @@ import { useEffect, useRef, useState } from "react";
 import { t } from "../../i18n";
 import { Alert, Icon, Loading } from "../../components/ui";
 import type { Player } from "../../lib/types";
-import { AdultWithdraw, CardBox, nameOf, forWho, useMoves, type Common, type CRound } from "./ConversationGames";
+import { CardBox, nameOf, forWho, useMoves, type Common, type CRound } from "./ConversationGames";
 
 type J = any;
 type Send = (type: string, payload?: Record<string, unknown>, quiet?: boolean) => Promise<{ ok: boolean; error?: string; info?: any }>;
@@ -509,7 +509,6 @@ function CiteTrois({ c, round }: { c: Common; round: CRound }) {
 
       {err && <Alert>{err}</Alert>}
       {!card.done && <button className="btn btn--quiet" disabled={busy} onClick={() => void play("pass_round")}>{t("word.ct.pass")}</button>}
-      {(card.adult || !card.done) && <AdultWithdraw c={c} />}
     </section>
   );
 }

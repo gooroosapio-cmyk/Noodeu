@@ -1,6 +1,5 @@
 import { Link } from "react-router";
 import { fill, t } from "../../i18n";
-import { useAuth } from "../../auth/AuthProvider";
 import { Avatar } from "../../components/Avatar";
 import { Alert, Icon, Illustration, Loading, Sheet, formatDate } from "../../components/ui";
 import type { Player, SessionState } from "../../lib/types";
@@ -248,9 +247,8 @@ export function RoundsResults({ c, navigate }: { c: Common; navigate: (to: strin
 
 const TOPICS = ["passe", "sante_sexuelle", "numerique", "desir"] as const;
 
-/** Petite fenêtre d'options : réglages de partie (salon) et préférences privées (+18, thèmes à éviter). */
+/** Petite fenêtre d'options : réglages de partie (salon) et thèmes à éviter (préférence privée). */
 export function OptionsSheet({ c, onClose }: { c: Common; onClose: () => void }) {
-  const { profile } = useAuth();
   const cfg = cfgOf(c.st);
   const lobby = c.st.session.status === "lobby";
   const prefs = (c.st as unknown as { my_prefs?: { adult: boolean; excluded_topics: string[] } }).my_prefs ?? { adult: false, excluded_topics: [] };
@@ -273,17 +271,6 @@ export function OptionsSheet({ c, onClose }: { c: Common; onClose: () => void })
       ))}
       {adultAvailable && (
         <>
-          <div className="group">
-            <label className="switch-row">
-              <span className="switch-row__text">
-                <span>{t("rounds.adultCards")}</span>
-                <span className="t-meta">{profile?.intimate_opt_in ? t("rounds.adultBoth") : t("rounds.adultNeedsSettings")}</span>
-              </span>
-              <input className="switch" type="checkbox" role="switch" checked={prefs.adult} disabled={c.busy || !c.online || (!profile?.intimate_opt_in && !prefs.adult)}
-                onChange={(e) => setPrefs(e.target.checked, prefs.excluded_topics)} />
-            </label>
-          </div>
-          {!profile?.intimate_opt_in && <Link className="btn btn--quiet btn--auto btn--sm" to="/reglages">{t("rounds.openSettings")}</Link>}
           <fieldset>
             <legend>{t("rounds.avoidTopics")}</legend>
             <div className="chips">

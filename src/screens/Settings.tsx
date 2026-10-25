@@ -8,7 +8,6 @@ import { Avatar, clearAvatarCache } from "../components/Avatar";
 import { SubPage } from "../components/AppShell";
 import { Alert, ConfirmDialog, Icon, PageLoading, Sheet, useToast } from "../components/ui";
 import type { Profile, WordForm } from "../lib/types";
-import { INTENSITIES } from "./catalog";
 import { HealthResources } from "../parcours/HealthResources";
 
 const COUNTRIES = ["FR", "BE", "CH", "CA"] as const;
@@ -20,8 +19,6 @@ export function Settings() {
   const [confirmDelete, setConfirmDelete] = useState(false);
   const [typed, setTyped] = useState("");
   const [deleting, setDeleting] = useState(false);
-  const [adultAsk, setAdultAsk] = useState(false);
-  const [adultCheck, setAdultCheck] = useState(false);
 
   if (!profile) return <PageLoading />;
 
@@ -31,15 +28,6 @@ export function Settings() {
     else toast(t("common.saved"));
   }
 
-  function toggle(key: "reduced_motion" | "intimate_opt_in", value: boolean) {
-    // Activation du +18 : déclaration de majorité horodatée, demandée à chaque nouvelle activation.
-    if (key === "intimate_opt_in" && value) {
-      setAdultCheck(false);
-      setAdultAsk(true);
-      return;
-    }
-    void save(key === "intimate_opt_in" ? { intimate_opt_in: false, daily_adult: false } : { [key]: value });
-  }
 
   const rem = profile.reminders;
   const hours = Array.from({ length: 24 }, (_, h) => h);
@@ -78,7 +66,15 @@ export function Settings() {
         <div className="group">
           <label className="switch-row">
             <span className="switch-row__text"><span>{t("settings.reducedMotion")}</span><span className="t-meta">{t("settings.reducedMotionHint")}</span></span>
-            <input className="switch" type="checkbox" role="switch" checked={profile.reduced_motion} onChange={(e) => void toggle("reduced_motion", e.target.checked)} />
+            <input className="switch" type="checkbox" role="switch" checked={profile.reduced_motion} onChange={(e) => void save({ reduced_motion: e.target.checked })} />
+          </label>
+          <label className="group__pad field">
+            <span className="field__label">{t("settings.country")}</span>
+            <select className="input" value={profile.country ?? ""} onChange={(e) => void save({ country: e.target.value || null })}>
+              <option value="">{t("settings.countryNone")}</option>
+              {COUNTRIES.map((c) => <option key={c} value={c}>{t(`country.${c}`)}</option>)}
+            </select>
+            <span className="t-meta">{t("settings.countryHint")}</span>
           </label>
         </div>
       </section>
@@ -86,17 +82,6 @@ export function Settings() {
       <section className="section">
         <h2 className="t-section">{t("settings.privacy")}</h2>
         <div className="group">
-          <label className="switch-row">
-            <span className="switch-row__text"><span>{t("settings.intimate")}</span><span className="t-meta">{t("settings.intimateHint")}</span></span>
-            <input className="switch" type="checkbox" role="switch" checked={profile.intimate_opt_in} onChange={(e) => void toggle("intimate_opt_in", e.target.checked)} />
-          </label>
-          {profile.intimate_opt_in && (
-            <label className="switch-row">
-              <span className="switch-row__text"><span>{t("settings.dailyAdult")}</span><span className="t-meta">{t("settings.dailyAdultHint")}</span></span>
-              <input className="switch" type="checkbox" role="switch" checked={profile.daily_adult} onChange={(e) => void save({ daily_adult: e.target.checked })} />
-            </label>
-          )}
-          <p className="t-meta group__note">{t("settings.noConsent")}</p>
           <details className="disclosure" style={{ border: 0, borderRadius: 0 }}>
             <summary>{t("settings.privacyRules")}<Icon name="chevron-down" /></summary>
             <div><p className="t-small">{t("settings.privacyText")}</p></div>
@@ -106,31 +91,6 @@ export function Settings() {
             <span className="grow">{t("settings.duos")}</span>
             <span className="chev"><Icon name="arrow-right" size={20} /></span>
           </Link>
-        </div>
-      </section>
-
-      <section className="section" aria-labelledby="set-intensity">
-        <h2 className="t-section" id="set-intensity">{t("settings.intensity")}</h2>
-        <div className="group">
-          <fieldset className="group__pad">
-            <legend className="sr-only">{t("settings.intensity")}</legend>
-            <div className="chips" role="radiogroup" aria-label={t("settings.intensity")}>
-              {INTENSITIES.map((i) => (
-                <button key={i} type="button" className="chip" role="radio" aria-checked={profile.max_intensity === i}
-                  onClick={() => profile.max_intensity !== i && void save({ max_intensity: i })}>{t(`filter.intensity.${i}`)}</button>
-              ))}
-            </div>
-            <p className="t-meta">{t(`settings.intensityHint.${profile.max_intensity}`)}</p>
-            <p className="t-meta">{t("settings.intensityDuo")}</p>
-          </fieldset>
-          <label className="group__pad field">
-            <span className="field__label">{t("settings.country")}</span>
-            <select className="input" value={profile.country ?? ""} onChange={(e) => void save({ country: e.target.value || null })}>
-              <option value="">{t("settings.countryNone")}</option>
-              {COUNTRIES.map((c) => <option key={c} value={c}>{t(`country.${c}`)}</option>)}
-            </select>
-            <span className="t-meta">{t("settings.countryHint")}</span>
-          </label>
         </div>
       </section>
 
@@ -188,25 +148,6 @@ export function Settings() {
         <h2 className="t-section">{t("settings.help")}</h2>
         <p className="t-meta">{t("settings.version", { v: __APP_VERSION__ })} · {t("app.credit")}</p>
       </section>
-
-      {adultAsk && (
-        <ConfirmDialog
-          title={t("settings.adultTitle")}
-          text={t("settings.adultText")}
-          confirmLabel={t("settings.adultConfirm")}
-          disabled={!adultCheck}
-          onCancel={() => setAdultAsk(false)}
-          onConfirm={() => {
-            setAdultAsk(false);
-            void save({ intimate_opt_in: true, adult_confirmed_at: new Date().toISOString() });
-          }}
-        >
-          <label className="check-row">
-            <input type="checkbox" checked={adultCheck} onChange={(e) => setAdultCheck(e.target.checked)} />
-            <span>{t("settings.adultCheck")}</span>
-          </label>
-        </ConfirmDialog>
-      )}
 
       {confirmDelete && (
         <ConfirmDialog

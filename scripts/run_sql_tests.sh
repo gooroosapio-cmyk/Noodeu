@@ -1,7 +1,7 @@
 #!/bin/bash
 # Tests SQL sur une base PostgreSQL locale jetable (jamais sur Supabase).
 # 1. Migrations jusqu'à la purge exclue, puis tests de l'ancienne base (moteurs toujours présents dans le code).
-# 2. Purge et migrations suivantes, puis tests du catalogue actuel (catégories 1 à 4).
+# 2. Purge et migrations suivantes, puis tests du catalogue (catégories 1 à 4).
 # Variables : PGSOCK (dossier du socket, défaut /var/tmp/noodeu-pg), PGPORT (défaut 54329).
 set -e
 cd "$(dirname "$0")/.."
@@ -13,5 +13,10 @@ PURGE=supabase/migrations/20261023000000_purge_activites.sql
 run supabase/tests/local_shim.sql
 for f in supabase/migrations/*.sql; do [[ "$f" < "$PURGE" ]] && run "$f"; done
 for f in supabase/tests/ancienne_base/slice*.sql; do echo "== $f"; psql_ -d noodeu -v ON_ERROR_STOP=1 -q -At -f "$f" || exit 1; done
-for f in supabase/migrations/*.sql; do [[ "$f" < "$PURGE" ]] || run "$f"; done
-for f in supabase/tests/c1[4-9]_*.sql; do [ -e "$f" ] || continue; echo "== $f"; psql_ -d noodeu -v ON_ERROR_STOP=1 -q -At -f "$f" || exit 1; done
+# 3. Jusqu'au retrait des permissions +18 exclu : tests c14 à c17 (écrits pour l'accord +18 et le plafond d'intensité).
+SANS18=supabase/migrations/20261028000100_sans_permission_adulte.sql
+for f in supabase/migrations/*.sql; do [[ "$f" < "$PURGE" || ! "$f" < "$SANS18" ]] || run "$f"; done
+for f in supabase/tests/c1[4-7]_*.sql; do echo "== $f"; psql_ -d noodeu -v ON_ERROR_STOP=1 -q -At -f "$f" || exit 1; done
+# 4. Migrations suivantes, puis tests du comportement actuel (+18 sans permission).
+for f in supabase/migrations/*.sql; do [[ "$f" < "$SANS18" ]] || run "$f"; done
+for f in supabase/tests/c1[8-9]_*.sql supabase/tests/c[2-9][0-9]_*.sql; do [ -e "$f" ] || continue; echo "== $f"; psql_ -d noodeu -v ON_ERROR_STOP=1 -q -At -f "$f" || exit 1; done
