@@ -19,6 +19,9 @@ export function Settings() {
   const [confirmDelete, setConfirmDelete] = useState(false);
   const [typed, setTyped] = useState("");
   const [deleting, setDeleting] = useState(false);
+  const [isAdmin, setIsAdmin] = useState(false);
+  // Entrée affichée aux administrateurs ; chaque action d'administration est revérifiée par le serveur.
+  useEffect(() => { void supabase.rpc("is_app_admin").then(({ data }) => setIsAdmin(data === true)); }, []);
 
   if (!profile) return <PageLoading />;
 
@@ -60,6 +63,17 @@ export function Settings() {
           </Link>
         </div>
       </section>
+
+      {isAdmin && (
+        <section className="section">
+          <div className="group">
+            <Link className="group__row" to="/admin/questions">
+              <span className="list-row__body"><span className="t-card">{t("admin.entry")}</span><span className="t-meta">{t("admin.entryHint")}</span></span>
+              <span className="chev"><Icon name="arrow-right" size={20} /></span>
+            </Link>
+          </div>
+        </section>
+      )}
 
       <section className="section">
         <h2 className="t-section">{t("settings.preferences")}</h2>

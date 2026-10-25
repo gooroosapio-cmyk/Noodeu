@@ -1,4 +1,5 @@
 import { useEffect } from "react";
+import { AdminQuestions } from "./admin/AdminQuestions";
 import { Navigate, Outlet, createBrowserRouter, useLocation } from "react-router";
 import { useRegisterSW } from "virtual:pwa-register/react";
 import { t } from "./i18n";
@@ -119,6 +120,7 @@ export const router = createBrowserRouter([
           { path: "/bibliotheques/a-huis-clos", element: <ShelfPage shelf="huisclos" /> },
           { path: "/bibliotheques/:gameId", element: <GameSheet /> },
           { path: "/reglages/profil", element: <ProfileEdit /> },
+          { path: "/admin/questions", element: <AdminQuestions /> },
           { path: "/parametres/profil", element: <Navigate to="/reglages/profil" replace /> },
           { path: "/inviter", element: <InvitePage /> },
           { path: "/rejoindre", element: <InvitePage /> },

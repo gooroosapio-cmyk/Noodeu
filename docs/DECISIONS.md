@@ -379,3 +379,17 @@ Migration `20261027000300_multi_duos.sql` (fichier à coller : `docs/sql_editeur
 - Après connexion, l'accueil sans duo propose « Inviter » (code et lien à partager) ou « J'ai un code ». L'association
   demande toujours la confirmation des deux personnes.
 - « Mot de passe oublié » utilise encore le service d'e-mails intégré de Supabase, limité à quelques envois par heure.
+
+## Administration des questions (25/10/2026)
+
+- Réglages → « Administration des questions », visible et utilisable seulement par les comptes de `app_admins`
+  (vérifié par le serveur à chaque action). Pas de sixième onglet dans la navigation (cinq destinations imposées).
+- Filtres catégorie et sous-catégorie, recherche, filtre +18, tri (ordre du jeu, alphabétique, +18 d'abord, ajouts
+  récents). Par question : modifier, supprimer (avec confirmation), bouton +18 / Tout public.
+- Ajout dans la sous-catégorie choisie ; le formulaire s'adapte au jeu (deux propositions pour Tu préfères, Vérité ou
+  Action, amorce terminée par « … » pour Complète la phrase ; Je n'ai jamais et D'accord gardent leurs réponses fixes).
+- Questionnaires notés : texte et +18 modifiables, ni ajout ni suppression (le score dépend du nombre d'items).
+- Une suppression place la question dans une corbeille serveur (`private.question_trash`) ; toute action est consignée
+  (`private.question_log`). Les parties en cours gardent les cartes déjà tirées ; une question supprimée encore à venir
+  dans un questionnaire aléatoire est sautée ; un pack joue aussi ses questions ajoutées.
+- Migration `20261029000100_admin_questions.sql`, test `c23_admin_questions.sql`.
