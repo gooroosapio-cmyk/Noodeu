@@ -393,3 +393,9 @@ Migration `20261027000300_multi_duos.sql` (fichier à coller : `docs/sql_editeur
   (`private.question_log`). Les parties en cours gardent les cartes déjà tirées ; une question supprimée encore à venir
   dans un questionnaire aléatoire est sautée ; un pack joue aussi ses questions ajoutées.
 - Migration `20261029000100_admin_questions.sql`, test `c23_admin_questions.sql`.
+
+## Retrait des ressources santé publique et dépistage (25/10/2026)
+
+- Supprimés à la demande du propriétaire : l'encadré « Santé sexuelle et dépistage » (Réglages et page À huis clos)
+  et le choix du pays, qui ne servait qu'à ces ressources. La colonne `profiles.country` reste en base, sans usage.
+- Les questions des packs (dont « Protection et décisions partagées ») ne sont pas concernées.

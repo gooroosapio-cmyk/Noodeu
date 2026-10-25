@@ -10,7 +10,6 @@ import { Alert, Art, DemoTag, Icon, Loading, PageLoading } from "../components/u
 import type { Category, Game, GameRules } from "../lib/types";
 import { RulesSheet } from "../components/RulesSheet";
 import { ProgressBadge, useProgress } from "../parcours/Progress";
-import { HealthResources } from "../parcours/HealthResources";
 import { useLaunch } from "../game/launch";
 import {
   CATEGORY_BY_SHELF, DURATIONS, FORMATS, INTENSITIES, NO_FILTERS, SHELF_PATH, SHELVES, hasFilters, intensityRank, matchesFilters,
@@ -360,7 +359,6 @@ export function ShelfPage({ shelf: asked }: { shelf: "questions" | "tests" | "hu
             {!packs.length && !tests.length && <div className="card stack center"><p className="t-card">{t("lib.emptyCatalog")}</p></div>}
           </>
         )}
-        {shelf === "huisclos" && <HealthResources />}
       </main>
     </SubPage>
   );

@@ -8,9 +8,7 @@ import { Avatar, clearAvatarCache } from "../components/Avatar";
 import { SubPage } from "../components/AppShell";
 import { Alert, ConfirmDialog, Icon, PageLoading, Sheet, useToast } from "../components/ui";
 import type { Profile, WordForm } from "../lib/types";
-import { HealthResources } from "../parcours/HealthResources";
 
-const COUNTRIES = ["FR", "BE", "CH", "CA"] as const;
 
 export function Settings() {
   const { profile, updateProfile, signOut } = useAuth();
@@ -82,14 +80,6 @@ export function Settings() {
             <span className="switch-row__text"><span>{t("settings.reducedMotion")}</span><span className="t-meta">{t("settings.reducedMotionHint")}</span></span>
             <input className="switch" type="checkbox" role="switch" checked={profile.reduced_motion} onChange={(e) => void save({ reduced_motion: e.target.checked })} />
           </label>
-          <label className="group__pad field">
-            <span className="field__label">{t("settings.country")}</span>
-            <select className="input" value={profile.country ?? ""} onChange={(e) => void save({ country: e.target.value || null })}>
-              <option value="">{t("settings.countryNone")}</option>
-              {COUNTRIES.map((c) => <option key={c} value={c}>{t(`country.${c}`)}</option>)}
-            </select>
-            <span className="t-meta">{t("settings.countryHint")}</span>
-          </label>
         </div>
       </section>
 
@@ -156,7 +146,6 @@ export function Settings() {
         </div>
       </section>
 
-      <HealthResources />
 
       <section className="section">
         <h2 className="t-section">{t("settings.help")}</h2>
