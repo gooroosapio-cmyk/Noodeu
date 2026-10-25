@@ -225,7 +225,7 @@ for (const size of sizes) {
         // Un contrôle placé dans une étiquette entièrement cliquable hérite de sa zone tactile.
         const zone = el.closest("label") ?? el;
         const z = zone.getBoundingClientRect();
-        return r.width > 0 && r.height > 0 && (z.height < 44 || z.width < 44) && !el.closest(".game-card__main");
+        return r.width > 0 && r.height > 0 && (z.height < 44 || z.width < 44) && !el.closest(".game-card__main, [inert]");
       }).map((el) => (el.getAttribute("aria-label") || el.textContent || el.tagName).trim().slice(0, 24));
       // Contenu caché sous la navigation : le dernier élément de la page doit rester atteignable.
       const nav = document.querySelector(".nav");

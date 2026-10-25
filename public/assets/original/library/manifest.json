@@ -1,0 +1,207 @@
+{
+  "provenance": "Dessins SVG originaux créés pour Noodeu, 2026-10-25 ; pas d’actif tiers incorporé.",
+  "palette": [
+    "#17545D",
+    "#EFAD78",
+    "#FFF9F0",
+    "#D7E8E6"
+  ],
+  "files": [
+    {
+      "file": "011.svg",
+      "sha256": "0a0a9dd1ad7585606d792c1ffece2e598416349b0e3314ef2e9a8ae3b4f4c33e"
+    },
+    {
+      "file": "012.svg",
+      "sha256": "3916310c0ff49c3a0753b958390ee1e965e0021ce8610a8d2c122d3e30f06efe"
+    },
+    {
+      "file": "021.svg",
+      "sha256": "ea457068fa41703cf1b598518ce66e804441bb716eb66cdc7ed3fed6e357d4e4"
+    },
+    {
+      "file": "022.svg",
+      "sha256": "ee16804ff5a28c6424ce2ded9d159a891cfa807d6536841b9e40f4e4d9433784"
+    },
+    {
+      "file": "024.svg",
+      "sha256": "bebc0f06145a1632c012b7730c93c9074ea8d05751185547ce49b50f604e6da3"
+    },
+    {
+      "file": "025.svg",
+      "sha256": "84e4a6615089a8bf41c68ce050a2f4e6faeaebb6da15b09d8f2dc546c3d08a91"
+    },
+    {
+      "file": "027.svg",
+      "sha256": "aa1722710cb8baad7a058d7c77902fad51dc0222d67ac9b4009d4db55a9bf971"
+    },
+    {
+      "file": "G01.svg",
+      "sha256": "3a6d8fe6080d0af7108f2c7fea6f313f88980f92eb63ff5d96142a1c9661d8b4"
+    },
+    {
+      "file": "G02.svg",
+      "sha256": "7a663c501342293ae6f50004da82416889ddb31f9a46251d9d4c9f552f9c56ac"
+    },
+    {
+      "file": "G03.svg",
+      "sha256": "5b00972376c6a66f52666f81edce53433a382e956907d95d866932e7f801c7b3"
+    },
+    {
+      "file": "G04.svg",
+      "sha256": "df3b5d78f18f1e8b342224155e63cc79d2a0a9720f3d8b2454e1b8d2a32e78b7"
+    },
+    {
+      "file": "G05.svg",
+      "sha256": "4b3812f833a6200ddf77acb0582821adc85845ba8d9cad5ab1dd0df7061eefb1"
+    },
+    {
+      "file": "G06.svg",
+      "sha256": "fc958702b1939cc5b467e76dcccc267c1f1cb1a414044079a547e3b782c1d2b0"
+    },
+    {
+      "file": "G07.svg",
+      "sha256": "b961263b2c443f0181d2ae0dc601b286622b781339cb2bce0c4ceefd38c24d8f"
+    },
+    {
+      "file": "G08.svg",
+      "sha256": "77e08acc8f3ac9f64321a26880ca26a8412fd9c0c83407b3677d38e340a31344"
+    },
+    {
+      "file": "G09.svg",
+      "sha256": "b2f3fcdf2022586af6a925d483dc2297bdf1bcf71b7471026249a47af00beec2"
+    },
+    {
+      "file": "G10.svg",
+      "sha256": "182368122ea7b85d0dc9741a7f20f80daf6a1dcec4376011d35cf4fa999a06d9"
+    },
+    {
+      "file": "H01.svg",
+      "sha256": "69ed4afcf61ff61d6d2cdf326acbd874c601223a6e1ae8af642a1023389147c4"
+    },
+    {
+      "file": "H02.svg",
+      "sha256": "d0e351a7c057fc5ddcc0d30fc11552631acfcbafb2e867ab051d5db8a6d546be"
+    },
+    {
+      "file": "H03.svg",
+      "sha256": "4986bde72be8f333685d4effb72ec6dc398833283758522821ec6d755da0b160"
+    },
+    {
+      "file": "H04.svg",
+      "sha256": "0ab2d228396f79029790b0345b23046fd96a58d3a122fb1eae1f9afaaf76497c"
+    },
+    {
+      "file": "H05.svg",
+      "sha256": "54fce6e3319fa3ec810e9e02a30c26f2b0042ce02967b7448dc8ef11f6992b23"
+    },
+    {
+      "file": "H06.svg",
+      "sha256": "e74fbb92373bd431ab8d9f923c82bb46bc35df5780ac582eed1d31c39c47f05e"
+    },
+    {
+      "file": "H07.svg",
+      "sha256": "4296efcfbdd31c4cb0f1b4919c662f819e7707f29ad07b471c972c2fafbcc0ea"
+    },
+    {
+      "file": "H08.svg",
+      "sha256": "7d0def1b2028531a58fd51fe0d650607878f909fb651bae6367ee8a64c9fc4fc"
+    },
+    {
+      "file": "M01.svg",
+      "sha256": "d254e77fa699993dd299f9f9567ceebedee8c3ac48da3f5ec21dde27a7819637"
+    },
+    {
+      "file": "M04.svg",
+      "sha256": "1983de99b71c481f7f745e567d6dd173ff1f6d55603723cb6ac6e195b489a5db"
+    },
+    {
+      "file": "M07.svg",
+      "sha256": "f55df260bbd3d90545b07d5d525b9eb64e4e9e6dddaa9962dd43d43f676c9414"
+    },
+    {
+      "file": "M09.svg",
+      "sha256": "b04b69768b70a6de4e609a032294201de80aebb4c13429f64c47c41135ac20c8"
+    },
+    {
+      "file": "M11.svg",
+      "sha256": "a40239a0b6be2fb197cd81c7e5ac8fc86c4ca5b59d701ea118b3908cb0cb9f4f"
+    },
+    {
+      "file": "M12.svg",
+      "sha256": "a7b6527312eef78afae88e45c16accb4fd11bdbc888ff339d598c5496cae6524"
+    },
+    {
+      "file": "M16.svg",
+      "sha256": "c1eb94d81a8a4de9f571a824ddb36303510804f1b936121a4edb3da44bdeb639"
+    },
+    {
+      "file": "P01.svg",
+      "sha256": "c4a1c33c38111966c9bb5f46627e0247108380682573000761f7e876aadb3962"
+    },
+    {
+      "file": "P03.svg",
+      "sha256": "d20093b116c6cbe82bf69b77bc082de93c6009fa8c7f3dd0c0ebfefb9227ccb4"
+    },
+    {
+      "file": "P11.svg",
+      "sha256": "5c313415352c92edce1b092f60f07f13dce270f7d321e428e3f60de34a35977e"
+    },
+    {
+      "file": "P12.svg",
+      "sha256": "6fc8f334877ca7ddc8ca90d45369267d45e3726cac3ced6ff37d86a5a025fd5b"
+    },
+    {
+      "file": "P13.svg",
+      "sha256": "91bab9cc81c36d3fc39eaa37ecd0ce199eb43a12da96de1cae8e7092c1e04838"
+    },
+    {
+      "file": "P14.svg",
+      "sha256": "acf99ce1796088101e0758efb6c01f57a326991e6f9955ae8a9af04632aa459f"
+    },
+    {
+      "file": "P15.svg",
+      "sha256": "d382d895a31aa7286a56d52ccb02fa4341333319deae2767f552c69f8329a204"
+    },
+    {
+      "file": "P20.svg",
+      "sha256": "e22c34b28dc657fbf2e66b7388c756e0f69d0f06b122e361505ada458c791a44"
+    },
+    {
+      "file": "P21.svg",
+      "sha256": "f2e5ab110b2e4d44b3f07494f505e44cc05e2f4975a1e07a09a5146a4f64bfbd"
+    },
+    {
+      "file": "P22.svg",
+      "sha256": "0f5613634b065bd107700fb41ca19914e769c8174f8087df90c955a8054c42c2"
+    },
+    {
+      "file": "P23.svg",
+      "sha256": "814565773cd141e97e1e33dbdf4d5ca1a52c653a511b704ee40c06c4c549234b"
+    },
+    {
+      "file": "P24.svg",
+      "sha256": "4711413f58fd0fc23649380f527617ab7c28cbfbf1cf6af67de6b865b586270b"
+    },
+    {
+      "file": "RND1.svg",
+      "sha256": "2e016cff7a3a2f1ef9547476cbf66228e2c9508dd8524493627ad3652dea6ead"
+    },
+    {
+      "file": "RND2.svg",
+      "sha256": "58059ae8a44c2b8fd671edb7e4b955e83e3bc533109cfcf440fd15c9c7b52706"
+    },
+    {
+      "file": "huisclos.svg",
+      "sha256": "f003cb0d286aaec462cd211aa2011291c1a50befa4e16336858fd1cf89b19243"
+    },
+    {
+      "file": "questions.svg",
+      "sha256": "ca617e9ec55eaf9333485ed71362e1f17c8da546ecff815f4205f07a75481d42"
+    },
+    {
+      "file": "tests.svg",
+      "sha256": "79dd4537b4c2537e95606dd8339066e48967f8d84f42be18da8e7403fb0b6887"
+    }
+  ]
+}

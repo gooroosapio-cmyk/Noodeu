@@ -1,4 +1,4 @@
-import { useEffect, useMemo, useState } from "react";
+import { useEffect, useMemo, useRef, useState } from "react";
 import { Link, useNavigate, useParams } from "react-router";
 import { fill, t } from "../i18n";
 import { errorMessage } from "../lib/errors";
@@ -38,6 +38,7 @@ export function SessionScreen() {
   const [confirmQuit, setConfirmQuit] = useState(false);
   const [actionError, setActionError] = useState<string | null>(null);
   const [busy, setBusy] = useState(false);
+  const actionLock = useRef(false);
   const navigate = useNavigate();
 
   const status = s.state?.session.status;
@@ -47,12 +48,12 @@ export function SessionScreen() {
   }, [status]);
 
   async function run(fn: string, args: Record<string, unknown> = {}) {
-    if (busy) return { ok: false as const, error: "busy" };
-    setBusy(true);
+    if (actionLock.current) return { ok: false as const, error: "busy" };
+    actionLock.current = true; setBusy(true);
     setActionError(null);
     const res = await s.act(fn, args);
     if (!res.ok && res.error !== "stale_round" && fn !== "play_move") setActionError(errorMessage(res.error));
-    setBusy(false);
+    actionLock.current = false; setBusy(false);
     return res;
   }
 
@@ -117,6 +118,11 @@ export function SessionScreen() {
       }
     >
       <main className="page page--bare page--read">
+        <div className="session-exit">
+          {["lobby", "playing", "paused"].includes(st.session.status) && !st.session.read_only
+            ? <button className="btn btn--secondary" disabled={busy} onClick={() => setConfirmQuit(true)}><Icon name="logout" size={18} />Quitter la partie</button>
+            : <Link className="btn btn--secondary" to="/accueil"><Icon name="logout" size={18} />Quitter la partie</Link>}
+        </div>
         {s.channel === "down" && online && <Alert kind="info"><Loading label={t("net.reconnecting")} /></Alert>}
         {actionError && <Alert>{actionError}</Alert>}
 
@@ -143,19 +149,19 @@ export function SessionScreen() {
           </section>
         )}
 
-        {["lobby", "playing", "paused"].includes(st.session.status) && !st.session.read_only && (
-          <button className="btn btn--quiet" disabled={busy} onClick={() => setConfirmQuit(true)}>{t("game.quit")}</button>
-        )}
+
       </main>
 
       {confirmQuit && (
-        <ConfirmDialog title={t("game.quitTitle")} text={t("game.quitText", { name: partnerName })} confirmLabel={t("game.quit")} danger busy={busy}
+        <ConfirmDialog title={t("game.quitTitle")} text={st.session.status === "lobby" ? "Quitter annule ce salon pour vous deux. Aucune partie ne commencera." : t("game.quitText", { name: partnerName })} confirmLabel={t("game.quit")} danger busy={busy} disabled={!online}
           onCancel={() => setConfirmQuit(false)}
           onConfirm={async () => {
             const res = await run("abandon_session");
-            setConfirmQuit(false);
-            if (res.ok) navigate("/accueil");
-          }} />
+            if (res.ok) { setConfirmQuit(false); navigate("/accueil"); }
+          }}>
+          {!online && <Alert kind="info">Reconnecte-toi pour confirmer l’arrêt de la partie.</Alert>}
+          {actionError && <Alert>{actionError}</Alert>}
+        </ConfirmDialog>
       )}
       {chat && <ChatPanel inGame onClose={() => setChat(false)} />}
       {options && <OptionsSheet c={common} onClose={() => setOptions(false)} />}

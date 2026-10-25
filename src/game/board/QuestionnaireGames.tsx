@@ -9,7 +9,7 @@ import { Link } from "react-router";
 import { t } from "../../i18n";
 import { Alert, Art, Icon, Loading } from "../../components/ui";
 import type { Player, SessionState } from "../../lib/types";
-import { ART_BY_PACK } from "../../screens/Libraries";
+import { ART_BY_PACK, artOf } from "../../screens/Libraries";
 import { NudgeButton } from "../premium/Nudge";
 
 type J = any;
@@ -151,7 +151,7 @@ function PackPlaying({ c, round }: { c: Common; round: QRound }) {
         <div className="q-card__head">
           {card.item.adult && <span className="nd-chip nd-chip--peach">+18</span>}
           <span className="nd-chip">{card.set_no ? t("q.pack.setChip", { s: card.set_no }) : t("q.pack.cardChip", { n: card.index + 1 })}</span>
-          <Art name={ART_BY_PACK[(c.st.game.config as any).pack?.code ?? ""] ?? "c01-generic"} size={64} />
+          <Art name={ART_BY_PACK[(c.st.game.config as any).pack?.code ?? ""] ?? artOf({id:c.st.session.game_id,meta:{},mechanic:"pack_conversation"})} size={64} />
         </div>
         <h2 className={`t-question${card.item.text.length > 140 ? " t-question--long" : ""}`}>{card.item.text}</h2>
         <p className="t-meta">{first?.is_me ? t("q.pack.youFirst") : t("q.pack.firstSpeaker", { name: nameOf(first) })}</p>

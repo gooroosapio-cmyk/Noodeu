@@ -1,3 +1,4 @@
+import { LIBRARY_ART } from "./libraryArt";
 import { useEffect, useLayoutEffect, useMemo, useRef, useState } from "react";
 import { Link, useParams } from "react-router";
 import { t, type MessageKey } from "../i18n";
@@ -18,20 +19,21 @@ import {
 } from "./catalog";
 
 export const ART_BY_PACK: Record<string, string> = {
-  P01: "c01-aron36", P03: "c01-approfondies", P15: "c01-retrouver55", P11: "c01-rituels",
-  P12: "c01-place", P13: "c01-projets", P14: "c01-valeurs",
+  P01: "custom-P01", P03: "custom-P03", P15: "custom-P15", P11: "custom-P11",
+  P12: "custom-P12", P13: "custom-P13", P14: "custom-P14", P20:"custom-P20", P21:"custom-P21", P22:"custom-P22", P23:"custom-P23", P24:"custom-P24",
+  H01:"custom-H01", H02:"custom-H02", H03:"custom-H03", H04:"custom-H04", H05:"custom-H05", H06:"custom-H06", H07:"custom-H07", H08:"custom-H08", RND1:"custom-RND1", RND2:"custom-RND2",
 };
 
 /** Illustration d'une activité (kit interface v2) : par pack, instrument ou code de référence du catalogue. */
-export function artOf(g: Pick<Game, "meta" | "mechanic">) {
+export function artOf(g: Pick<Game, "id" | "meta" | "mechanic">) {
   const m = g.meta ?? {};
-  if (g.mechanic === "pack_conversation") return ART_BY_PACK[m.code ?? ""] ?? "c01-generic";
-  if (g.mechanic === "test_form") return m.instrument ?? "C02";
-  return m.reference_code ?? "C03";
+  const instruments: Record<string,string> = { RICE100:"011", IPIP50:"012", ECRRS9:"021", CSI4:"022", AAIRS8:"024", QSI12:"025", SPN16:"027" };
+  const code = m.reference_code ?? m.code ?? instruments[m.instrument ?? ""] ?? LIBRARY_ART[g.id];
+  return `custom-${code ?? "G06"}`;
 }
 
 /** Vignette d'activité (illustration du kit, décorative). */
-export function GameThumb({ game, size = "md" }: { game: Pick<Game, "meta" | "mechanic">; size?: "md" | "lg" }) {
+export function GameThumb({ game, size = "md" }: { game: Pick<Game, "id" | "meta" | "mechanic">; size?: "md" | "lg" }) {
   return (
     <div className={`game-thumb${size === "lg" ? " game-thumb--lg" : ""}`} aria-hidden="true">
       <Art name={artOf(game)} size={size === "lg" ? 112 : 56} />
@@ -97,9 +99,9 @@ function PackList({ games }: { games: Game[] }) {
 }
 
 const BANNER: Record<"questions" | "tests" | "huisclos", { art: string; tone: string }> = {
-  questions: { art: "C01", tone: "" },
-  tests: { art: "C02", tone: " cat-banner--lavender" },
-  huisclos: { art: "result-private", tone: " cat-banner--butter" },
+  questions: { art: "custom-questions", tone: "" },
+  tests: { art: "custom-tests", tone: " cat-banner--lavender" },
+  huisclos: { art: "custom-huisclos", tone: " cat-banner--butter" },
 };
 
 /** Catégorie horizontale (environ 74 px) : titre, sous-titre, illustration et chevron ; ouvre la liste des packs. */

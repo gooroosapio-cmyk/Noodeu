@@ -62,7 +62,7 @@ export function GameInvitation() {
     } finally { busyRef.current = false; setBusy(false); }
   }
   if (!current || pathname.startsWith('/partie/')) return null;
-  return <Sheet title={<h2 className="t-section">Une partie à deux ?</h2>} onClose={() => { if (!busyRef.current) dismiss(current); }}>
+  return <Sheet centered title={<h2 className="t-section">Une partie à deux ?</h2>} onClose={() => { if (!busyRef.current) dismiss(current); }}>
     <div className="invitation-summary">
       <Icon name="gamepad" size={32} />
       <div><p className="t-card">{String(current.data.name ?? 'Ton partenaire')} t’invite</p>

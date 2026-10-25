@@ -80,15 +80,14 @@ export function Home() {
       {/* Carte principale : la pause à deux (ou l'invitation). */}
       {active ? (
         <section className="home-duo-card" aria-labelledby="home-duo">
-          <div className="home-duo-card__copy">
-            <h2 className="t-section" id="home-duo">{t("home.duoTitle")}</h2>
-            <Link className="t-small home-duo-card__who" to="/espace">
-              <DuoIdentity duo={active} online={duo.partnerOnline} size={32} />
-            </Link>
+          <h2 className="t-section" id="home-duo">Votre moment à deux</h2>
+          <Link className="home-duo-card__who" to="/espace">
+            <DuoIdentity duo={active} online={duo.partnerOnline} center size={64} />
+          </Link>
+          <div className="home-duo-card__actions">
             <Link className="btn" to="/bibliotheques">{t("home.choose")}</Link>
-            <DuoSwitcher compact />
+            <DuoSwitcher />
           </div>
-          <Art name="duo-hands" size={112} />
         </section>
       ) : invitations.outgoing?.status === "claimed" ? (
         <PendingRequest />

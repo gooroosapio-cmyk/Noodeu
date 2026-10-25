@@ -9,7 +9,7 @@ type Note = { id: string; body: string; due_on: string | null; done: boolean; ve
 type Space = { cover_path: string | null; version: number; notes: Note[] };
 
 /** Remonté par duo (key=coupleId) : aucun brouillon, objet ou réponse tardive ne traverse les duos. */
-export function DuoDashboard({ coupleId, active, partner, children }: { coupleId: string; active: boolean; partner: string; children?: ReactNode }) {
+export function DuoDashboard({ coupleId, active, partner, children, identity }: { coupleId: string; active: boolean; partner: string; children?: ReactNode; identity?: ReactNode }) {
   const { duos } = useDuo();
   const [space, setSpace] = useState<Space | null>(null);
   const [unavailable, setUnavailable] = useState(false);
@@ -74,6 +74,7 @@ export function DuoDashboard({ coupleId, active, partner, children }: { coupleId
   return <section className="duo-dashboard" aria-label={`Votre espace avec ${partner}`}>
     <div className="duo-cover">
       <img src={url ?? '/assets/original/duo-cover.webp'} alt="" width={1400} height={560} />
+      <div className="duo-cover__identity">{identity}</div>
       <div className="duo-cover__caption"><span className="t-meta">VOTRE ESPACE À DEUX</span><h2 className="t-section">Des moments à garder</h2></div>
     </div>
     <div className="duo-dashboard__body stack stack--4">

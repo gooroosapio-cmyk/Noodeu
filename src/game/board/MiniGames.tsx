@@ -255,15 +255,16 @@ const ROWS = "ABCDEFGHIJ";
 const cellsOf = (s: Ship) => Array.from({ length: s.len }, (_, i) => (s.o === "H" ? `${s.r}:${s.c + i}` : `${s.r + i}:${s.c}`));
 const inBounds = (s: Ship) => (s.o === "H" ? s.c + s.len <= 10 : s.r + s.len <= 10);
 
-/** Plateau dense : affichage complet par défaut, mode agrandi (cibles de 44 px) avec défilement. */
+/** Cibles tactiles de 44 px dès l’ouverture ; vue d’ensemble explicitement non interactive. */
 function Zoomable({ children, zoomClass }: { children: ReactNode; zoomClass: string }) {
-  const [zoom, setZoom] = useState(false);
+  const [zoom, setZoom] = useState(true);
   return (
     <div className="stack stack--2">
       <button type="button" className="btn btn--quiet btn--sm btn--auto" aria-pressed={zoom} onClick={() => setZoom(!zoom)}>
         <Icon name={zoom ? "minus" : "plus"} size={18} />{zoom ? t("mini.zoomOut") : t("mini.zoomIn")}
       </button>
-      <div className={zoom ? `board-zoom ${zoomClass}` : undefined}>{children}</div>
+      <p className="t-meta">{zoom ? "Fais défiler le plateau pour atteindre toutes les cases." : "Vue d’ensemble en lecture seule. Agrandis le plateau pour jouer."}</p>
+      <div className={zoom ? `board-zoom ${zoomClass}` : undefined} inert={!zoom ? true : undefined} tabIndex={zoom ? 0 : undefined} role={zoom ? "region" : undefined} aria-label={zoom ? "Plateau agrandi, défilement horizontal" : undefined}>{children}</div>
     </div>
   );
 }

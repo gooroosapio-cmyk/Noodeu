@@ -5,22 +5,22 @@ import type { SessionState } from "../../lib/types";
 export interface Universe { code: string; name: string; tint: string; accent: string }
 
 const LIST: Universe[] = [
-  { code: "M01", name: "Le salon des galets", tint: "#E8DEF5", accent: "#7654BD" },
-  { code: "M04", name: "La mosaïque du jardin", tint: "#D8EFE6", accent: "#24664D" },
-  { code: "M07", name: "La baie secrète", tint: "#DCEEF1", accent: "#316A7E" },
-  { code: "M09", name: "Le jardin des mots", tint: "#E2EDD8", accent: "#45683D" },
-  { code: "M11", name: "Le petit duel", tint: "#F4E1CF", accent: "#925435" },
-  { code: "M12", name: "Le comptoir des 30", tint: "#E6DFF1", accent: "#7654BD" },
-  { code: "M16", name: "L’atelier des idées", tint: "#FAE9C9", accent: "#86552D" },
-  { code: "G07", name: "Le studio du défi", tint: "#F7DECF", accent: "#A05238" },
-  { code: "G01", name: "Le cabinet des surprises", tint: "#F4DDD6", accent: "#9A4D5A" },
-  { code: "G02", name: "Le passeport des expériences", tint: "#D9E9E4", accent: "#326954" },
-  { code: "G03", name: "Les deux chemins", tint: "#E5DFF3", accent: "#7654BD" },
-  { code: "G04", name: "Sous les projecteurs", tint: "#F6EBCB", accent: "#836021" },
-  { code: "G05", name: "Les messages croisés", tint: "#DBE7F2", accent: "#3B638B" },
-  { code: "G08", name: "Le petit théâtre", tint: "#E9DFF0", accent: "#80518C" },
-  { code: "G09", name: "L’atelier des mots", tint: "#E1EADC", accent: "#4D6D41" },
-  { code: "G10", name: "Le salon des opinions", tint: "#F0DDE3", accent: "#8D4D67" },
+  { code: "M01", name: "Le salon des galets", tint: "#D7ECE9", accent: "#17656B" },
+  { code: "M04", name: "La mosaïque du jardin", tint: "#D7ECE9", accent: "#17656B" },
+  { code: "M07", name: "La baie secrète", tint: "#D7ECE9", accent: "#17656B" },
+  { code: "M09", name: "Le jardin des mots", tint: "#D7ECE9", accent: "#17656B" },
+  { code: "M11", name: "Le petit duel", tint: "#F9DFC9", accent: "#80502E" },
+  { code: "M12", name: "Le comptoir des 30", tint: "#D7ECE9", accent: "#17656B" },
+  { code: "M16", name: "L’atelier des idées", tint: "#F9DFC9", accent: "#80502E" },
+  { code: "G07", name: "Le studio du défi", tint: "#F9DFC9", accent: "#80502E" },
+  { code: "G01", name: "Le cabinet des surprises", tint: "#F9DFC9", accent: "#80502E" },
+  { code: "G02", name: "Le passeport des expériences", tint: "#D7ECE9", accent: "#17656B" },
+  { code: "G03", name: "Les deux chemins", tint: "#D7ECE9", accent: "#17656B" },
+  { code: "G04", name: "Sous les projecteurs", tint: "#F9DFC9", accent: "#80502E" },
+  { code: "G05", name: "Les messages croisés", tint: "#D7ECE9", accent: "#17656B" },
+  { code: "G08", name: "Le petit théâtre", tint: "#D7ECE9", accent: "#17656B" },
+  { code: "G09", name: "L’atelier des mots", tint: "#D7ECE9", accent: "#17656B" },
+  { code: "G10", name: "Le salon des opinions", tint: "#D7ECE9", accent: "#17656B" },
 ];
 const BY_CODE = new Map(LIST.map((u) => [u.code, u]));
 

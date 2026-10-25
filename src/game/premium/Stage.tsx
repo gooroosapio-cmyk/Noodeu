@@ -17,6 +17,6 @@ export function Stage({ u, children, compact = false }: { u: Universe | null; ch
 
 /** Pièce tactile déjà présente dans le kit ; geste PFC original du lot courant. */
 export function Hero({ u, size = 96 }: { u: Universe; size?: number }) {
-  return <img className="stage__hero" src={u.code === "M11" ? "/assets/original/pfc-rock.webp" : `/assets/v2/art/${u.code}.webp`}
+  return <img className="stage__hero" src={u.code === "M11" ? "/assets/original/pfc-rock.webp" : `/assets/original/library/${u.code}.svg`}
     alt="" aria-hidden="true" width={size} height={size} decoding="async" />;
 }

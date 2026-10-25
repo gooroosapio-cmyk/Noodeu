@@ -1,0 +1,14 @@
+PASS invitation et duplication : acceptation explicite, navigation salon
+PASS invitation périmée et fermeture Échap
+PASS aucune invitation modale ni navigation forcée en partie
+PASS hors ligne/reconnexion et refus sans navigation
+PASS note : double clic, une écriture et fermeture
+PASS Google inactif, texte 200 %
+PASS audio : permission au clic seulement, refus micro et repli texte
+PASS naval : sélection agrandie, cellules 44 px minimum
+PASS Petit bac : clavier suivant, hors ligne, brouillon conservé au retour réseau
+PASS changement de salon : réponse tardive du précédent ignorée
+PASS G08 : brouillon et mensonge conservés après rechargement, clé par joueur/séance/manche
+PASS audio : micro libéré si le constructeur du codec échoue
+PASS couverture : faux PNG rejeté avant upload
+PASS espace : actualisation tardive ne remplace pas les notes récentes

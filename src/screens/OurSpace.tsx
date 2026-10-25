@@ -7,7 +7,6 @@ import { useAuth } from "../auth/AuthProvider";
 import { useDuo, type DuoSummary } from "../duo/DuoProvider";
 import { DuoIdentity } from "../duo/DuoIdentity";
 import { MessageList } from "../duo/Chat";
-import { useShell } from "../components/AppShell";
 import { Avatar } from "../components/Avatar";
 import { Alert, ConfirmDialog, Icon, Loading, PageLoading, Sheet, formatDate, useToast } from "../components/ui";
 import type { ChatMessage } from "../lib/types";
@@ -105,7 +104,6 @@ function ArchivedMessages({ coupleId, partnerName }: { coupleId: string; partner
 
 export function OurSpace() {
   const duo = useDuo();
-  const { openChat } = useShell();
   const toast = useToast();
   const navigate = useNavigate();
   const [params, setParams] = useSearchParams();
@@ -157,9 +155,8 @@ export function OurSpace() {
           <Link className="btn" to="/inviter">{t("duo.invite")}</Link>
         </section>
       ) : (
-        <DuoDashboard key={selected.id} coupleId={selected.id} active={selected.active} partner={partnerName}>
+        <DuoDashboard key={selected.id} coupleId={selected.id} active={selected.active} partner={partnerName} identity={<DuoIdentity duo={selected} online={selected.active && duo.partnerOnline} center size={64} />}>
         <section className="space-duo-summary stack stack--3">
-          <DuoIdentity duo={selected} online={selected.active && duo.partnerOnline} />
           <ul className="t-meta plain-list">
             {selected.episodes.map((e, i) => (
               <li key={e.started_at}>
@@ -180,12 +177,6 @@ export function OurSpace() {
             </div>
           ) : selected.active ? (
             <div className="stack">
-              {duo.openSession ? (
-                <Link className="btn" to={`/partie/${duo.openSession.id}`}>{duo.openSession.status === "ended" ? t("home.seeResults") : t("home.resume")}</Link>
-              ) : (
-                <Link className="btn" to="/bibliotheques">{t("home.choose")}</Link>
-              )}
-              <button className="btn btn--secondary" onClick={openChat}><Icon name="chat" />{t("space.openChat")}</button>
               <button className="btn btn--quiet btn--sm" aria-haspopup="dialog" onClick={() => setManage(true)}>
                 <Icon name="settings" size={20} />{t("duo.manage")}
               </button>
