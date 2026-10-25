@@ -1290,3 +1290,24 @@ html.reduced-motion .page-loading__logo { animation:none; }
 .duo-cover > img { max-height:120px; }
 /* Le bouton Stop reste après les huit champs, jamais superposé aux dernières réponses. */
 .pb-stop { position:static; }
+
+/* Lot5 : carte duo en deux niveaux, portraits mis en valeur, sans illustration ni slogan. */
+.home-duo-card { padding:0; gap:0; overflow:hidden; border-color:#43131C; background:#43131C; box-shadow:0 10px 26px #43131C16; }
+.home-duo-card__heading { display:flex; align-items:center; justify-content:space-between; width:100%; padding:16px 20px 0; color:#FCEDEF; }
+.home-duo-card__heading .icon { color:#F4C6AE; }
+.home-duo-card__who { width:100%; padding:20px 16px; color:white; border-radius:20px; }
+.home-duo-card__who .duo-id { gap:18px; }
+.home-duo-card__who .duo-id__pair { padding:4px 8px; gap:18px; border:0; background:transparent; box-shadow:none; }
+.home-duo-card__who .avatar { border-radius:24px; border:5px solid white; box-shadow:0 5px 0 #E8B8BD,0 10px 18px #20081040; transform:rotate(-6deg); }
+.home-duo-card__who .avatar:last-child { transform:rotate(6deg); }
+.home-duo-card__who .avatar img { border-radius:18px; }
+.home-duo-card__who .duo-id__medallion { width:32px; height:32px; background:#6B303D; color:#FBE7E9; border:1px solid #A56673; border-radius:50%; transform:none; }
+.home-duo-card__who .duo-id__medallion svg { transform:none; }
+.home-duo-card__who .duo-id__names .t-card { font-size:1.125rem; line-height:1.4; color:white; }
+.home-duo-card__who .duo-id__names .status { background:#FFF1F1; color:#43131C; }
+.home-duo-card__actions { padding:16px; background:#FFF; gap:10px; }
+.home-duo-card__who:focus-visible { outline:3px solid #F4BD91; outline-offset:-5px; }
+@media (hover:hover) and (prefers-reduced-motion:no-preference) {
+ .home-duo-card__who .avatar { transition:transform .18s ease; }
+ .home-duo-card__who:hover .avatar { transform:rotate(0deg) translateY(-2px); }
+}

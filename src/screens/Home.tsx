@@ -72,7 +72,6 @@ export function Home() {
     <main className="page page--tight">
       <div className="page-header">
         <h1 className="t-page">{active ? t("home.helloDuo") : t("home.hello", { name })}</h1>
-        <p className="t-small muted">{active ? t("home.tagline") : t("home.subtitleSolo")}</p>
       </div>
 
       {duo.error && <Alert>{t("net.loadError")}</Alert>}
@@ -80,9 +79,9 @@ export function Home() {
       {/* Carte principale : la pause à deux (ou l'invitation). */}
       {active ? (
         <section className="home-duo-card" aria-labelledby="home-duo">
-          <h2 className="t-section" id="home-duo">Votre moment à deux</h2>
+          <div className="home-duo-card__heading"><h2 className="t-card" id="home-duo">Votre duo</h2><Icon name="users" size={18} /></div>
           <Link className="home-duo-card__who" to="/espace">
-            <DuoIdentity duo={active} online={duo.partnerOnline} center size={64} />
+            <DuoIdentity duo={active} online={duo.partnerOnline} center size={80} />
           </Link>
           <div className="home-duo-card__actions">
             <Link className="btn" to="/bibliotheques">{t("home.choose")}</Link>
@@ -104,7 +103,6 @@ export function Home() {
           <DuoIdentity duo={null} showStatus={false} center size={60} />
           <div className="stack stack--2">
             <h2 className="t-card">{t("home.soloTitle")}</h2>
-            <p className="t-small muted">{t("home.soloText")}</p>
           </div>
           <Link className="btn hero__cta" to="/inviter">{t("home.invite")}</Link>
           <Link className="btn btn--quiet btn--sm btn--auto" to="/rejoindre">{t("home.haveCode")}</Link>

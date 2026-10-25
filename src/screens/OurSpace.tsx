@@ -64,7 +64,7 @@ function History({ coupleId }: { coupleId: string }) {
         <button className="chip" aria-pressed={onlyKept} onClick={() => setOnlyKept(true)}><Icon name="heart" size={18} />Coffre à souvenirs</button>
       </div>
       <p className="t-meta">{onlyKept ? 'Uniquement les parties que vous avez tous les deux choisi de garder.' : 'Les 30 dernières parties de ce duo.'}</p>
-      {onlyKept && !items.some(h => h.session_players.length === 2 && h.session_players.every(p => p.keep_memory)) && <p className="t-small muted">Votre coffre attend son premier souvenir partagé.</p>}
+      {onlyKept && !items.some(h => h.session_players.length === 2 && h.session_players.every(p => p.keep_memory)) && <p className="t-small muted">Aucun souvenir partagé.</p>}
       <ul className="list">
       {items.filter(h => !onlyKept || (h.session_players.length === 2 && h.session_players.every(p => p.keep_memory))).map((h) => {
         const kept = h.session_players.length === 2 && h.session_players.every((p) => p.keep_memory);
@@ -158,7 +158,7 @@ export function OurSpace() {
           <Link className="btn" to="/inviter">{t("duo.invite")}</Link>
         </section>
       ) : (
-        <DuoDashboard key={selected.id} coupleId={selected.id} active={selected.active} partner={partnerName} activity={currentGame ? <><h2 className="t-card">{currentGame.title}</h2><p className="t-small muted">{currentGame.promise}</p></> : <p className="t-small muted">{selected.active ? "Aucune partie en cours. Vos souvenirs et notes restent ici." : "Les souvenirs conservés de ce duo restent réunis ici."}</p>} identity={<DuoIdentity duo={selected} online={selected.id === duo.active?.id && duo.partnerOnline} center size={64} />}>
+        <DuoDashboard key={selected.id} coupleId={selected.id} active={selected.active} partner={partnerName} activity={currentGame ? <><h2 className="t-card">{currentGame.title}</h2><p className="t-small muted">{currentGame.promise}</p></> : <p className="t-small muted">{selected.active ? "Aucune partie en cours." : "Duo archivé."}</p>} identity={<DuoIdentity duo={selected} online={selected.id === duo.active?.id && duo.partnerOnline} center size={64} />}>
         <section className="space-vault stack stack--3" aria-label="Coffre à souvenirs"><h2 className="t-section row"><Icon name="heart" />Coffre à souvenirs</h2><History key={selected.id} coupleId={selected.id} /></section>
         <section className="space-duo-summary stack stack--3">
           <ul className="t-meta plain-list">

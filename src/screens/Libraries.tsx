@@ -242,7 +242,6 @@ export function Libraries() {
     <main className="page page--tight">
       <div className="page-header">
         <h1 className="t-page">{t("lib.title")}</h1>
-        <p className="t-small muted">{t("lib.subtitle")}</p>
       </div>
       {cat.error && (
         <Alert>{t("lib.error")} <button className="btn btn--quiet btn--auto btn--sm" onClick={() => void cat.reload()}>{t("common.retry")}</button></Alert>
@@ -307,7 +306,6 @@ function RandomLauncher({ game }: { game: Game }) {
         <Art name={artOf(game)} size={56} />
         <div className="stack" style={{ gap: 2 }}>
           <h2 className="t-card" id="rnd-title">{t("lib.random.title")}</h2>
-          <p className="t-meta">{t("lib.random.text")}</p>
         </div>
       </div>
       <div className="chips" role="radiogroup" aria-label={t("lib.random.count")}>

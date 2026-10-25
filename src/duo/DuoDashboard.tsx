@@ -83,10 +83,9 @@ export function DuoDashboard({ coupleId, active, partner, children, identity, ac
       <input ref={fileInput} type="file" className="sr-only" tabIndex={-1} accept="image/jpeg,image/png,image/webp" onChange={e => { const f = e.target.files?.[0]; e.target.value = ''; if (f) void upload(f); }} />
       {error && <Alert>{error}</Alert>}
       {children}
-      <div className="section__head"><h3 className="t-card">Nos petites notes</h3>
+      <div className="section__head"><h3 className="t-card">Notes partagées</h3>
         {active && <button className="btn btn--soft btn--auto" disabled={!space || busy || !online} onClick={() => setEdit(true)}><Icon name="plus" size={18} />Ajouter</button>}</div>
-      <p className="t-meta">Des idées et rappels partagés, sans notification programmée.</p>
-      {unavailable ? <Alert kind="info">Les notes et la photo personnelle ne sont pas disponibles pour le moment. <button className="btn btn--quiet" onClick={() => void refresh()}>Réessayer</button></Alert> : !space ? <Loading /> : !space.notes.length ? <p className="t-small muted">Un rendez-vous à prévoir, une envie à partager… Votre première note trouvera sa place ici.</p> :
+      {unavailable ? <Alert kind="info">Les notes et la photo personnelle ne sont pas disponibles pour le moment. <button className="btn btn--quiet" onClick={() => void refresh()}>Réessayer</button></Alert> : !space ? <Loading /> : !space.notes.length ? <p className="t-small muted">Aucune note pour le moment.</p> :
         <ul className="duo-notes">{space.notes.map(note => <li key={note.id}>
           <label className={`choice${note.done ? ' is-done' : ''}`}><input type="checkbox" checked={note.done} disabled={!active || busy || !online} onChange={() => void save({...note, done: !note.done})} />
             <span className="choice__text"><span>{note.body}</span>{note.due_on && <time className="t-meta" dateTime={note.due_on}>{new Date(`${note.due_on}T12:00:00`).toLocaleDateString('fr-FR')}</time>}</span></label>
