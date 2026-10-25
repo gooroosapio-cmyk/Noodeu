@@ -22,3 +22,6 @@ Les fichiers source des deux nouvelles générations sont conservés dans `/work
 Le prompt Drive `1R0L6xeoinGaz3ftrcyw-EklvOTR4xt-a` a été lu. Les six captures et l'aperçu inspectés dans le fil parent sont des observations du parent, pas des inspections réalisées ici. Cet exécuteur a inspecté ses propres captures de l'application et ses nouvelles générations.
 
 L'image Library `libfile_cf163a84b6a881918e7ecb36194bf3be` a été résolue, mais pas téléchargée : préparation réussie, transfert sans workspace_path, helper officiel terminé avec code 1 et `library file transfer failed: download failed`. Une préparation renouvelée et un essai réseau explicite ont échoué identiquement ; aucun refus d'approbation ni code HTTP n'a été fourni. L'autre image du parent n'a pas été importée. Les nouvelles générations locales sont distinctes de ces deux références.
+
+## Question horaire Home — révision finale
+Réutilisation des quatre banques existantes q_complicite/q_recul/q_emotions/q_reconfort, sans nouvelle importation. Statut C1/C2 de DECISIONS.md conservé : phase de test, droits commerciaux à confirmer. Les12questions originales créées lors de005 restent archivées en table privée mais006 ne les utilise plus. Aucun repli silencieux sur elles. Les protocoles ordonnés, instruments et sources tierces réservées restent hors tirage Home.

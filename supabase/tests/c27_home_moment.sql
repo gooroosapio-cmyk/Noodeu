@@ -12,12 +12,19 @@ insert into auth.users(id,email,raw_user_meta_data) values
 ('00000000-0000-4000-a000-000000000027','a27@noodeu.invalid','{"display_name":"A"}'),
 ('00000000-0000-4000-b000-000000000027','b27@noodeu.invalid','{"display_name":"B"}'),
 ('00000000-0000-4000-c000-000000000027','c27@noodeu.invalid','{"display_name":"C"}');
-do $$ declare a uuid:='00000000-0000-4000-a000-000000000027'; b uuid:='00000000-0000-4000-b000-000000000027'; c uuid:='00000000-0000-4000-c000-000000000027'; ab uuid; ac uuid; first_draw jsonb; second_draw jsonb; before_count bigint;
+do $$ declare a uuid:='00000000-0000-4000-a000-000000000027'; b uuid:='00000000-0000-4000-b000-000000000027'; c uuid:='00000000-0000-4000-c000-000000000027'; ab uuid; ac uuid; sid uuid; first_draw jsonb; second_draw jsonb; before_count bigint;
 begin
  ab:=ts27.pair(a,b); perform ts27.as_user(a);
  first_draw:=public.get_home_moment(ab);
  perform ts27.ok((first_draw->>'ok')::boolean and first_draw->>'question' is not null,'question disponible');
  perform ts27.ok((first_draw->>'games_played')::int=0,'aucune progression inventée');
+ perform ts27.ok((first_draw->>'eligible_count')::int=60,'60 questions réelles éligibles au plafond moyen');
+ update public.profiles set max_intensity='soft' where id=a;
+ perform ts27.ok((select count(*) from private.home_candidates(ab))=57,'57 questions au plafond soft');
+ update public.profiles set max_intensity='moyen' where id=a;
+ perform ts27.ok(first_draw->>'source'='existing_catalogue','catalogue existant, pas banque originale de repli');
+ perform ts27.ok(first_draw->>'rights_status'='commercial_rights_unconfirmed','réserve de droits conservée');
+ perform ts27.ok(not exists(select 1 from private.home_candidates(ab) where bank not in ('q_complicite','q_recul','q_emotions','q_reconfort')),'tests, Aron, séries, tiers réservés et intime exclus');
  perform ts27.as_user(b);second_draw:=public.get_home_moment(ab);
  perform ts27.ok(first_draw->>'question'=second_draw->>'question','même question A et B');
  perform ts27.ok(first_draw->>'expires_at'=second_draw->>'expires_at','même échéance serveur');
@@ -30,7 +37,14 @@ begin
  second_draw:=public.get_home_moment(ab);
  perform ts27.ok(first_draw->>'question'<>second_draw->>'question','pas de répétition immédiate');
  perform ts27.ok((select count(*) from public.game_sessions)=before_count,'aucune partie créée ou modifiée');
- update private.home_questions set enabled=false;
+ insert into public.item_feedback(user_id,bank,item_id,value) values(b,second_draw->>'bank',second_draw->>'item_id','trop_intime');
+ perform ts27.ok(public.get_home_moment(ab)->>'question' is null,'retour privé B masque la carte immédiatement');
+ perform ts27.ok((public.get_home_moment(ab)->>'eligible_count')::int=59,'retour privé réellement exclu du pool');
+ sid:=(public.create_session('ND-Q-RND1')->>'session_id')::uuid;
+ update public.session_prefs set excluded_topics=array['desir'] where session_id=sid and user_id=b;
+ perform ts27.ok((public.get_home_moment(ab)->>'eligible_count')::int=0,'thèmes exclus et cartes non annotées respectés');
+ update public.session_prefs set excluded_topics='{}' where session_id=sid;
+ update public.content_meta set review=true where bank in ('q_complicite','q_recul','q_emotions','q_reconfort');
  perform ts27.ok(public.get_home_moment(ab)->>'question' is null,'contenu retiré non exposé');
  update private.home_moments set slot=slot-1 where couple_id=ab;
  perform ts27.ok(public.get_home_moment(ab)->>'question' is null,'banque vide sans question fictive');

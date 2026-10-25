@@ -147,8 +147,8 @@ export function Home() {
         </article>
         <article className="arcade-progress">
           <h2>Votre parcours</h2>
-          <p>{active && moment.data ? <><strong>{moment.data.games_played}</strong> jeux terminés</> : active ? "Progression indisponible" : "Votre aventure commence à deux"}</p>
-          <div className="arcade-progress__dots" aria-hidden="true">{Array.from({ length: 5 }, (_, i) => <span key={i} className={moment.data && i < moment.data.games_played ? "is-done" : ""} />)}</div>
+          <p>{active && moment.played !== null ? <><strong>{moment.played}</strong> jeux terminés</> : active ? "Progression indisponible" : "Votre aventure commence à deux"}</p>
+          <div className="arcade-progress__dots" aria-hidden="true">{Array.from({ length: 5 }, (_, i) => <span key={i} className={moment.played !== null && i < moment.played ? "is-done" : ""} />)}</div>
         </article>
       </section>
       <section className="section arcade-next" aria-labelledby="arcade-next">
