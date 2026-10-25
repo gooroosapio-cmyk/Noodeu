@@ -10,7 +10,7 @@ type J = any;
 type Play = (type: string, payload?: Record<string, unknown>) => Promise<{ ok: boolean; error?: string; info?: J }>;
 interface V { c: J; priv: J; me: Player; partner?: Player; play: Play; busy: boolean; mine: boolean }
 
-const PIECES = "/assets/v2/jeux";
+const PREMIUM = "/assets/premium";
 const nameOf = (p?: Player) => (p ? (p.is_me ? t("game.you") : p.display_name || "?") : "?");
 const seatName = (me: Player, partner: Player | undefined, seat: number) => nameOf(seat === me.seat ? me : partner);
 
@@ -48,7 +48,7 @@ function TicTacToeBoard({ c, me, partner, play, busy, mine }: V & { readOnly?: b
           <button key={i} type="button" className={`ttt__cell${win.includes(i) ? " ttt__cell--win" : ""}`}
             disabled={busy || !mine || Boolean(v) || c.done} aria-label={label}
             onClick={() => void play("place", { cell: i })}>
-            {v ? <img src={`${PIECES}/pion-${symbolOf(c, v)}.svg`} alt="" width={56} height={56} /> : null}
+            {v ? <img src={`${PREMIUM}/M01/${symbolOf(c, v) === "x" ? "cross" : "ring"}.svg`} alt="" width={64} height={64} /> : null}
           </button>
         );
       })}
@@ -128,9 +128,9 @@ function DotsBoxes(v: V) {
 // Pierre, feuille, ciseaux : choix privé, verrouillage, échéance serveur de 30 s.
 // ---------------------------------------------------------------------------
 const GESTURES = [
-  { id: "rock", img: "pfc-pierre" },
-  { id: "paper", img: "pfc-feuille" },
-  { id: "scissors", img: "pfc-ciseaux" },
+  { id: "rock", img: "rock" },
+  { id: "paper", img: "paper" },
+  { id: "scissors", img: "scissors" },
 ] as const;
 
 function useCountdown(deadline?: string) {
@@ -171,7 +171,7 @@ function Rps({ c, priv, me, partner, play, busy }: V) {
           return (
             <button key={g.id} type="button" role="radio" aria-checked={selected} className="rps__choice"
               disabled={busy || locked || left === 0} onClick={() => setPick(g.id)}>
-              <img src={`${PIECES}/${g.img}.svg`} alt="" width={72} height={72} />
+              <img src={`${PREMIUM}/M11/${g.img}.svg`} alt="" width={72} height={72} />
               <span>{t(`mini.rps.${g.id}` as never)}</span>
             </button>
           );
@@ -283,7 +283,7 @@ function NavalGrid({ label, cell, onCell, disabled }: {
           return (
             <button key={`${r}-${c}`} type="button" role="gridcell" className={`naval__cell ${x.cls}`} aria-label={`${ROWS[r]}${c + 1} : ${x.text}`}
               disabled={!onCell || disabled?.(r, c)} onClick={() => onCell?.(r, c)}>
-              {x.img && <img src={`${PIECES}/${x.img}.svg`} alt="" />}
+              {x.img && <img src={`${PREMIUM}/M07/${x.img}.svg`} alt="" />}
             </button>
           );
         }),
@@ -362,14 +362,15 @@ function Placement({ c, priv, me, partner, play, busy }: V) {
 
 function shotCell(x: J | undefined, unknownText: string) {
   if (!x) return { cls: "", text: unknownText };
-  if (x.res === "miss") return { cls: "naval__cell--miss", text: t("mini.naval.miss"), img: "naval-eau" };
-  if (x.res === "sunk") return { cls: "naval__cell--sunk", text: t("mini.naval.sunkShip", { s: t(`mini.naval.ship.${x.ship}` as never) }), img: "naval-coule" };
-  return { cls: "naval__cell--hit", text: t("mini.naval.hitShip", { s: t(`mini.naval.ship.${x.ship}` as never) }), img: "naval-touche" };
+  if (x.res === "miss") return { cls: "naval__cell--miss", text: t("mini.naval.miss"), img: "miss" };
+  if (x.res === "sunk") return { cls: "naval__cell--sunk", text: t("mini.naval.sunkShip", { s: t(`mini.naval.ship.${x.ship}` as never) }), img: "sunk" };
+  return { cls: "naval__cell--hit", text: t("mini.naval.hitShip", { s: t(`mini.naval.ship.${x.ship}` as never) }), img: "hit" };
 }
 
 function Battleship(v: V) {
   const { c, priv, me, partner, play, busy, mine } = v;
   const [view, setView] = useState<"them" | "me">("them");
+  const [aim, setAim] = useState<{ r: number; c: number } | null>(null);
   if (c.phase === "placement") return <Placement {...v} />;
   const myShots: J[] = c.shots?.[me.seat] ?? [];
   const theirShots: J[] = partner ? c.shots?.[partner.seat] ?? [] : [];
@@ -387,9 +388,19 @@ function Battleship(v: V) {
       {view === "them" ? (
         <>
           {last && <p className="t-small" aria-live="polite">{t("mini.naval.lastShot", { cell: `${ROWS[last.r]}${last.c + 1}`, res: shotCell(last, "").text })}</p>}
-          <NavalGrid label={t("mini.naval.theirGrid")} cell={(r, col) => shotCell(shotAt(myShots, r, col), t("mini.naval.unknown"))}
-            onCell={mine && !busy ? (r, col) => void play("fire", { row: r, col }) : undefined}
+          <NavalGrid label={t("mini.naval.theirGrid")} cell={(r, col) => {
+            const x = shotCell(shotAt(myShots, r, col), t("mini.naval.unknown"));
+            return aim && aim.r === r && aim.c === col ? { ...x, cls: `${x.cls} naval__cell--aim`, img: "target", text: t("mini.naval.aimed") } : x;
+          }}
+            onCell={mine && !busy ? (r, col) => setAim({ r, c: col }) : undefined}
             disabled={(r, col) => Boolean(shotAt(myShots, r, col))} />
+          {mine && (
+            <button className="btn naval-fire" disabled={busy || !aim}
+              onClick={async () => { if (aim && (await play("fire", { row: aim.r, col: aim.c })).ok) setAim(null); }}>
+              <img src={`${PREMIUM}/M07/target.svg`} alt="" width={22} height={22} />
+              {aim ? t("mini.naval.fireAt", { cell: `${ROWS[aim.r]}${aim.c + 1}` }) : t("mini.naval.pickCell")}
+            </button>
+          )}
           {!mine && <p className="t-small muted center">{t("mini.naval.waitingShot", { name: nameOf(partner) })}</p>}
         </>
       ) : (
@@ -432,7 +443,7 @@ export function MiniSolution({ c, players }: { c: J; players: Player[] }) {
             const g = GESTURES.find((x) => x.id === c.gestures[p!.seat]);
             return (
               <div key={p!.seat} className="rps__choice" aria-label={`${nameOf(p)} : ${t(`mini.rps.${g?.id}` as never)}`}>
-                <img src={`${PIECES}/${g?.img}.svg`} alt="" width={72} height={72} />
+                <img src={`${PREMIUM}/M11/${g?.img ?? "hidden"}.svg`} alt="" width={72} height={72} />
                 <span>{nameOf(p)}</span>
               </div>
             );

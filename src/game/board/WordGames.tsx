@@ -13,7 +13,7 @@ type Play = (type: string, payload?: Record<string, unknown>) => Promise<boolean
 
 export const WORD_MECHS = ["nd_hangman", "nd_categories_stop", "nd_name_three_call"];
 export const isWordMech = (m?: string) => Boolean(m && WORD_MECHS.includes(m));
-const PIECES = "/assets/v2/jeux";
+const PREMIUM = "/assets/premium";
 const KNOWN = ["repeated", "too_early", "fields_missing", "time_up", "stale_draft", "call_required", "waiting_ack", "correction_pending", "seen", "invalid_move"];
 const LETTERS = "ABCDEFGHIJKLMNOPQRSTUVWXYZ".split("");
 
@@ -122,7 +122,7 @@ function Hangman({ c, round }: { c: Common; round: CRound }) {
       ) : (
         <div className="stack stack--4">
           <div className="hm-board">
-            <img className="hm-flower" src={`${PIECES}/fleur-${Math.min(errors, 6)}.svg`} alt={t("word.hm.petals", { n: 6 - Math.min(errors, 6) })} width={112} height={112} />
+            <img className="hm-flower" src={`${PREMIUM}/M09/flower-${Math.min(errors, 6)}.svg`} alt={t("word.hm.petals", { n: 6 - Math.min(errors, 6) })} width={112} height={112} />
             <p className="t-meta" aria-live="polite">{t("word.hm.errors", { n: errors, max: 6 })}</p>
           </div>
           <p className="hm-slots" aria-label={t("word.hm.maskLabel", { n: mask.length })}>
@@ -421,7 +421,12 @@ function CiteLive({ c, round, send }: { c: Common; round: CRound; send: Send }) 
       <p className="nd-chip">{forWho(respondent, "word.ct.youAnswer", "word.ct.answers")}</p>
       <article className="q-card"><h2 className="t-question">{card.text}</h2></article>
       <div className="cite-timer">
-        <img src={`${PIECES}/chrono-${Math.min(10, left)}.svg`} alt="" width={96} height={96} />
+        <svg className="cite-dial" viewBox="0 0 120 120" width={120} height={120} aria-hidden="true">
+          <circle cx="60" cy="60" r="52" className="cite-dial__track" />
+          <circle cx="60" cy="60" r="52" className="cite-dial__arc" pathLength={100}
+            strokeDasharray={`${Math.max(0, Math.min(100, (100 * Math.max(0, deadline - now)) / Math.max(1, deadline - starts)))} 100`} />
+          <text x="60" y="70" textAnchor="middle" className="cite-dial__n">{left}</text>
+        </svg>
         <p className="t-meta" role="timer" aria-live="off">{late ? t("word.ct.timeUp") : t("word.seconds", { n: left })}</p>
       </div>
       {isJudge ? (
@@ -429,10 +434,10 @@ function CiteLive({ c, round, send }: { c: Common; round: CRound; send: Send }) 
           <p className="t-small strong">{late ? t("word.ct.judgeLate") : t("word.ct.judgeNow")}</p>
           <div className="q-choices">
             <button className="btn btn--secondary" disabled={busy || !both} onClick={() => void send("verdict", { success: true })}>
-              <img src={`${PIECES}/verdict-reussi.svg`} alt="" width={22} height={22} />{t("word.ct.success")}
+              <img src={`${PREMIUM}/G07/success.svg`} alt="" width={22} height={22} />{t("word.ct.success")}
             </button>
             <button className="btn btn--secondary" disabled={busy || !both} onClick={() => void send("verdict", { success: false })}>
-              <img src={`${PIECES}/verdict-rate.svg`} alt="" width={22} height={22} />{t("word.ct.failure")}
+              <img src={`${PREMIUM}/G07/failure.svg`} alt="" width={22} height={22} />{t("word.ct.failure")}
             </button>
           </div>
           {!both && <p className="t-meta">{t("word.ct.waitAck")}</p>}
@@ -499,7 +504,7 @@ function CiteTrois({ c, round }: { c: Common; round: CRound }) {
               <>
                 {card.text && <CardBox card={card} />}
                 <p className="strong center row" style={{ justifyContent: "center" }}>
-                  <img src={`${PIECES}/${card.verdict ? "verdict-reussi" : "verdict-rate"}.svg`} alt="" width={28} height={28} />
+                  <img src={`${PREMIUM}/G07/${card.verdict ? "success" : "failure"}.svg`} alt="" width={28} height={28} />
                   {card.verdict ? forWho(players.find((p) => p.seat === card.respondent), "word.ct.successMe", "word.ct.successOf")
                     : forWho(players.find((p) => p.seat === card.respondent), "word.ct.failureMe", "word.ct.failureOf")}
                 </p>

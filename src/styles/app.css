@@ -1005,3 +1005,28 @@ button.theatre-tag { min-height: 44px; margin-block: -6px; }
 .pb-cell__label { display: flex; align-items: center; gap: 6px; font: 700 0.75rem/1rem var(--f-heading); color: var(--c-text); overflow-wrap: anywhere; }
 .pb-cell__input { min-height: 48px; font-size: 1rem; line-height: 1.5rem; padding-inline: 10px; min-width: 0; width: 100%; }
 .pb-stop { position: sticky; bottom: 8px; display: flex; flex-direction: column; gap: 6px; padding: var(--s-2) 0; }
+
+/* J3 : pièces premium des mini-jeux (Morpion, PFC, Pendu, Cite trois, plateaux précis). */
+.stage--M01 .ttt { background: #F3EDFB; box-shadow: inset 0 0 0 2px #D9CCF0; padding: 12px; border-radius: 24px; gap: 8px; }
+.stage--M01 .ttt__cell { background: url(/assets/premium/M01/cell.svg) center / cover no-repeat; border: 0; border-radius: 16px; }
+.stage--M01 .ttt__cell--win { box-shadow: 0 0 0 3px var(--u-accent) inset; background-color: var(--c-butter); }
+.ttt__cell img { animation: piece-in 220ms ease-out; }
+@keyframes piece-in { from { transform: scale(.6); opacity: 0; } to { transform: none; opacity: 1; } }
+.stage--M11 .rps__choice { border-radius: 999px 999px var(--r-card) var(--r-card); background: radial-gradient(circle at 50% 38%, #FFF8EF 0 46%, var(--c-surface) 47%); }
+.stage--M11 .rps__choice[aria-checked="true"] { border-color: var(--u-accent); background: radial-gradient(circle at 50% 38%, #FBE6D2 0 46%, var(--c-surface) 47%); }
+.hm-keys { grid-template-columns: repeat(6, minmax(0, 1fr)); }
+.hm-key { min-height: 44px; }
+.stage--M09 .hm-slot--on { border-color: var(--u-accent); color: var(--u-accent); }
+.cite-dial__track { fill: none; stroke: var(--c-border); stroke-width: 10; }
+.cite-dial__arc { fill: none; stroke: var(--u-accent, var(--c-accent)); stroke-width: 10; stroke-linecap: round; transform: rotate(-90deg); transform-origin: 60px 60px; transition: stroke-dasharray 250ms linear; }
+.cite-dial__n { font: 700 34px/1 var(--f-heading); fill: var(--c-text); }
+@media (prefers-reduced-motion: reduce) { .ttt__cell img { animation: none; } .cite-dial__arc { transition: none; } }
+/* Points et carrés : zones de toucher de 28 px sans chevauchement (44 px en mode précis). */
+.dots { grid-template-columns: repeat(4, 28px 1fr) 28px; grid-template-rows: repeat(4, 28px minmax(52px, 1fr)) 28px; }
+.stage--M04 .dots__edge--me::after { background: var(--u-accent); }
+.stage--M04 .dots__box--me { background: #CFE8DD; color: var(--u-accent); }
+.naval__cell { background: #E3F1F4; border-color: #C7E0E6; }
+.naval__cell--ship { background: var(--c-lavender); }
+.naval__cell--aim { background: #FFE9A8; border: 2px solid var(--u-accent, var(--c-accent)); }
+.naval-fire { position: sticky; bottom: calc(var(--nav-h, 0px) + 12px); }
+.seg [role="tab"] { min-height: 44px; }
