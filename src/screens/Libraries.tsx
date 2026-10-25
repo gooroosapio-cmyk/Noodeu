@@ -300,6 +300,15 @@ function RandomLauncher({ game }: { game: Game }) {
   const online = useOnline();
   const { launch, busy, error, dialog } = useLaunch();
   const [n, setN] = useState<number>(10);
+  const [mixedReady, setMixedReady] = useState(false);
+  useEffect(() => {
+    let cancelled = false;
+    setMixedReady(false);
+    void supabase.from("game_versions").select("config").eq("game_id", game.id).eq("version", game.current_version).maybeSingle().then(({data}) => {
+      if (!cancelled) setMixedReady(data?.config?.pack?.mixed_queue === true);
+    });
+    return () => { cancelled = true; };
+  }, [game.id, game.current_version]);
   return (
     <section className="card card--lavender stack stack--3" aria-labelledby="rnd-title">
       <div className="row" style={{ gap: "var(--s-3)" }}>
@@ -313,6 +322,7 @@ function RandomLauncher({ game }: { game: Game }) {
           <button key={c} type="button" className="chip" role="radio" aria-checked={n === c} onClick={() => setN(c)}>{t("lib.random.n", { n: c })}</button>
         ))}
       </div>
+      {!mixedReady && game.id === "ND-Q-RND1" && <p className="t-meta">Tirage classique disponible. L’ajout d’À huis clos attend la mise à jour du serveur.</p>}
       {game.adult_available && <p className="t-meta row"><Icon name="info" size={16} />{t("game.sexualContent")}</p>}
       {error && <Alert>{error}</Alert>}
       {active

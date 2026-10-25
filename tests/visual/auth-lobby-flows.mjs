@@ -18,7 +18,7 @@ try {
   await page.getByRole('button',{name:'Afficher le mot de passe'}).click();assert.equal(await page.locator('#password').getAttribute('type'),'text');
   await page.getByRole('button',{name:'Masquer le mot de passe'}).click();assert.equal(await page.locator('#password').getAttribute('type'),'password');
   assert.equal(await page.getByRole('button',{name:'Continuer avec Google'}).isDisabled(),true);
-  if(mode==='inscription'){await page.locator('#name').fill('Maya');await page.getByRole('checkbox').check();}
+  if(mode==='inscription'){await page.locator('#name').fill('Maya');await page.getByRole('checkbox').check();await page.locator('#password2').fill('different');assert.equal(await page.locator('button[type=submit]').isDisabled(),true);await page.locator('form').evaluate(f=>f.requestSubmit());assert.equal(calls,0);await page.locator('#password2').fill('motdepasse-fictif');}
   await page.locator('form').evaluate(form=>{form.requestSubmit();form.requestSubmit();});await page.getByRole('alert').waitFor();assert.equal(calls,1);assert.ok(page.url().endsWith(mode));
   await page.setViewportSize({width:390,height:450});await page.locator('#password').focus();await page.locator('#password').scrollIntoViewIfNeeded();
   const r=await page.locator('#password').boundingBox();assert.ok(r.y>=0&&r.y+r.height<=450);

@@ -174,4 +174,4 @@ Jeux premium : `c19_g08_simultane.sql` (écriture et devinette simultanées, auc
 l'heure, reprise des affirmations, relance avec ses limites, plus de notification de message), `c20_purete.sql` (indice
 sur 100, « Non » sur 72, réponses partagées par défaut et retrait possible), `c21_de30_petitbac8.sql` (victoire à 30 par
 conservation, 8 rubriques classées, minuterie 120/180 s, lettres couvertes par l'index). Recette visuelle :
-`60-conv-dvm2-*`, `60-test-rice2-*`, `60-mini-*`, `60-mot-*`.
+`60-conv-dvm2-*`, `60-test-rice2-*`, `60-mini-*`, `60-mot-*`, `60-conv-*` (scènes J4). `c22_jamais_libelles.sql` : libellés exacts de Je n'ai jamais. `FULL=1` capture la page entière.

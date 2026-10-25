@@ -7,6 +7,11 @@ export default defineConfig({
   define: { __APP_VERSION__: JSON.stringify(pkg.version) },
   plugins: [
     react(),
+    { name: "noodeu-release", generateBundle() {
+      this.emitFile({ type: "asset", fileName: "assets/noodeu-release.json", source: JSON.stringify({
+        commit: process.env.VERCEL_GIT_COMMIT_SHA ?? "local", branch: process.env.VERCEL_GIT_COMMIT_REF ?? "local", audioEnabled: false, databaseMigrationsAppliedByBuild: false,
+      }) });
+    } },
     VitePWA({
       registerType: "prompt",
       includeAssets: ["assets/noodeu/01_Logos/noodeu-favicon.svg", "assets/noodeu/01_Logos/noodeu-app-icon-180.png"],

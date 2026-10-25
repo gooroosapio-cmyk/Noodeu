@@ -1,3 +1,4 @@
+import { deploymentFeatures } from "../../lib/deploymentFeatures";
 import { useEffect, useRef, useState } from 'react';
 import { Alert, Icon } from '../../components/ui';
 import { rpc, supabase } from '../../lib/supabase';
@@ -17,7 +18,7 @@ export function AudioAnswer({ sessionId, round, disabled, onSend, onBusy }: {
   function stop() { if (recorder.current?.state === 'recording') recorder.current.stop(); stream.current?.getTracks().forEach(t => t.stop()); }
   useEffect(() => {
     alive.current = true;
-    void rpc<{enabled:boolean}>('get_audio_capability').then(r => { if (alive.current) setEnabled(r.ok && r.enabled === true); });
+    if (deploymentFeatures.answerAudio) void rpc<{enabled:boolean}>('get_audio_capability').then(r => { if (alive.current) setEnabled(r.ok && r.enabled === true); });
     const hide = () => { if (document.hidden) stop(); };
     document.addEventListener('visibilitychange', hide);
     return () => { alive.current = false; stop(); if (timer.current) clearTimeout(timer.current); if (tick.current) clearInterval(tick.current);
