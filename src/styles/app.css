@@ -1361,7 +1361,7 @@ html.reduced-motion .page-loading__logo { animation:none; }
 .arcade-feature .game-thumb img { width: 100%; height: 100%; object-fit: contain; }
 .arcade-pagination { display: flex; justify-content: center; align-items: center; }
 .arcade-pagination button { width: 44px; min-height: 44px; display: grid; place-items: center; border: 0; background: none; color: #43131c; }
-.arcade-pagination span { width: 6px; height: 6px; border-radius: 50%; background: #cfb8bd; }
+.arcade-pagination button > span:not(.icon) { width: 6px; height: 6px; border-radius: 50%; background: #cfb8bd; }
 .arcade-pagination [aria-current] span { width: 18px; border-radius: 5px; background: #b72132; }
 .arcade-dashboard { display: grid; grid-template-columns: 44fr 56fr; gap: 10px; }
 .arcade-dashboard article { padding: 14px 12px; border-radius: 20px; min-width: 0; }
@@ -1395,3 +1395,27 @@ html.reduced-motion .page-loading__logo { animation:none; }
 .arcade-feature .game-thumb img { height: auto; aspect-ratio: 1; }
 .arcade-space { text-decoration: none; }
 .arcade-next > div:last-child > a { text-decoration: none; }
+
+/* Ajustements Home demandés : légèreté, typographie et bulle sans rail. */
+.arcade-home h1 { font-size: 1.2rem; }
+.arcade-feature h2 { font-size: 1.15rem; }
+.arcade-home .btn { font-size: .78rem; }
+.arcade-question > p { font-size: .875rem; font-weight: 400; }
+.arcade-space { width: 44px; height: 44px; flex: 0 0 44px; justify-content: center; border-radius: 14px; background: #fbe7e9; }
+.arcade-space > svg:first-child { display: block; }
+.arcade-pagination { flex-wrap: wrap; }
+.arcade-pagination button { flex: 0 0 44px; }
+.arcade-autoplay { border-radius: 50%; }
+.arcade-home .arcade-feature, .arcade-dashboard article, .arcade-next > div:last-child > a { position: relative; isolation: isolate; overflow: hidden; }
+.arcade-home .arcade-feature::before, .arcade-dashboard article::before, .arcade-next > div:last-child > a::before {
+ content: ''; position: absolute; z-index: -1; pointer-events: none; right: -20px; bottom: -20px;
+ width: 112px; height: 112px; background: center / contain no-repeat url('/assets/original/library3d/RND1.webp'); opacity: .065;
+}
+.arcade-home .arcade-feature::before { right: 0; top: 4px; bottom: auto; width: 55px; height: 55px; background-image: url('/assets/original/library3d/G08.webp'); }
+.arcade-dashboard .arcade-question::before { background-image: url('/assets/original/library3d/025.webp'); width: 72px; height: 72px; right: -20px; bottom: 6px; }
+.arcade-dashboard .arcade-resume::before { background-image: url('/assets/original/library3d/M12.webp'); right: -25px; top: 0; bottom: auto; }
+.arcade-dashboard .arcade-progress::before { background-image: url('/assets/original/library3d/G04.webp'); opacity: .12; width: 68px; height: 68px; }
+.arcade-next > div:last-child > a::before { width: 70px; height: 70px; background-image: url('/assets/original/library3d/P01.webp'); opacity: .045; }
+/* La réserve défile avec le contenu : aucune bande opaque ou marge fixe sous la page. */
+.shell > main { margin-bottom: 0; padding-bottom: 88px; scroll-padding-bottom: 88px; }
+.subpage > main, .subpage > .session-with-chat { margin-bottom: 0; padding-bottom: calc(88px + env(safe-area-inset-bottom)); scroll-padding-bottom: 88px; }

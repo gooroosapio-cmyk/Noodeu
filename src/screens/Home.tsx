@@ -4,6 +4,7 @@ import { t } from "../i18n";
 import { useAuth } from "../auth/AuthProvider";
 import { useDuo } from "../duo/DuoProvider";
 import { DuoIdentity } from "../duo/DuoIdentity";
+import { useCarouselAutoplay } from "./useCarouselAutoplay";
 import { useHomeMoment } from "./useHomeMoment";
 import { PendingRequest, useInviteActions } from "../duo/InviteScreens";
 import { Alert, Art, ConfirmDialog, Icon, PageLoading, Sheet, formatDate } from "../components/ui";
@@ -52,11 +53,11 @@ export function Home() {
   const [slide, setSlide] = useState(0);
   const [quick, setQuick] = useState(false);
   function go(index: number) {
+    rotation.setPaused(true);
     const node = carousel.current?.children[index] as HTMLElement | undefined;
     if (node) carousel.current?.scrollTo({ left: node.offsetLeft - (carousel.current.firstElementChild as HTMLElement).offsetLeft, behavior: matchMedia("(prefers-reduced-motion: reduce)").matches ? "instant" : "smooth" });
   }
 
-  if (duo.loading) return <PageLoading />;
   const { active, invitations, openSession } = duo;
 
   let sessionLabel = "", sessionAction = "";
@@ -72,7 +73,9 @@ export function Home() {
   const sessionGame = openSession ? cat.games.find((g) => g.id === openSession.game_id) : undefined;
   const discover = cat.games.filter((g) => g.implementation === "playable" && g.content_level !== "intime" && !g.meta?.random);
   const featured = discover.filter((g) => /^custom-(G|M)/.test(artOf(g))).sort((a, b) => Number(artOf(b) === "custom-G03") - Number(artOf(a) === "custom-G03"));
-  const cards = (quick ? featured.filter((g) => (g.duration_min ?? 99) <= 5) : featured).slice(0, 5);
+  const cards = (quick ? featured.filter((g) => (g.duration_min ?? 99) <= 5) : featured).slice(0, 4);
+  const rotation = useCarouselAutoplay(carousel, cards.length);
+  if (duo.loading) return <PageLoading />;
   const next = discover.filter((g) => ["custom-M01", "custom-P01"].includes(artOf(g))).slice(0, 2);
   const recommendations = next.length === 2 ? next : discover.slice(0, 2);
 
@@ -85,7 +88,7 @@ export function Home() {
       {active ? (
         <section className="arcade-duo" aria-label="Votre duo">
           <DuoIdentity duo={active} online={duo.partnerOnline} size={42} />
-          <Link className="arcade-space" to="/espace"><Icon name="home" size={17} /><span>Notre espace</span><Icon name="chevron-right" size={14} /></Link>
+          <Link className="arcade-space" to="/espace" aria-label="Notre espace"><Icon name="home" size={20} /></Link>
         </section>
       ) : invitations.outgoing?.status === "claimed" ? (
         <PendingRequest />
@@ -108,15 +111,18 @@ export function Home() {
         </section>
       )}
 
-      <section className="arcade-play" aria-labelledby="arcade-title">
+      <section className="arcade-play" aria-labelledby="arcade-title"
+        onMouseEnter={() => rotation.setHover(true)} onMouseLeave={() => rotation.setHover(false)}
+        onFocusCapture={() => rotation.setFocus(true)} onBlurCapture={(event) => { if (!event.currentTarget.contains(event.relatedTarget)) rotation.setFocus(false); }}
+      >
         <h1 id="arcade-title">À quoi on joue ?</h1>
         <div className="arcade-filters">
-          <button className="btn btn--secondary" onClick={() => { setQuick(false); requestAnimationFrame(() => go(Math.floor(Math.random() * Math.max(1, featured.slice(0, 5).length)))); }}>Surprise</button>
+          <button className="btn btn--secondary" onClick={() => { setQuick(false); requestAnimationFrame(() => go(Math.floor(Math.random() * Math.max(1, featured.slice(0, 4).length)))); }}>Surprise</button>
           <button className="btn btn--secondary" aria-pressed={quick} onClick={() => { setQuick(!quick); go(0); }}>5 minutes</button>
           <a className="btn btn--secondary" href="#arcade-resume">À reprendre</a>
         </div>
         {cat.error ? <Alert>Catalogue indisponible. <button className="btn btn--quiet" onClick={() => void cat.reload()}>Réessayer</button></Alert> : cat.loading ? <p>Chargement des jeux…</p> : !cards.length ? <p>Aucun jeu disponible.</p> : <>
-          <div className="arcade-carousel" ref={carousel} aria-label="Jeux à découvrir" onScroll={() => {
+          <div className="arcade-carousel" onPointerDown={() => rotation.setPaused(true)} onKeyDown={() => rotation.setPaused(true)} ref={carousel} aria-label="Jeux à découvrir" onScroll={() => {
             const el = carousel.current; if (!el) return;
             const children = Array.from(el.children) as HTMLElement[];
             const origin = children[0]?.offsetLeft ?? 0;
@@ -129,6 +135,7 @@ export function Home() {
           </div>
           <div className="arcade-pagination">
             {cards.map((g, i) => <button key={g.id} aria-label={`Afficher ${g.title}`} aria-current={slide === i ? "true" : undefined} onClick={() => go(i)}><span /></button>)}
+            {!rotation.reduced && <button className="arcade-autoplay" aria-label={rotation.paused ? "Reprendre le défilement automatique" : "Mettre en pause le défilement automatique"} aria-pressed={rotation.paused} onClick={() => rotation.setPaused(!rotation.paused)}><Icon name={rotation.paused ? "play" : "pause"} size={16} /></button>}
             <button aria-label="Jeu suivant" onClick={() => go((slide + 1) % cards.length)}><Icon name="arrow-right" size={18} /></button>
           </div>
         </>}
