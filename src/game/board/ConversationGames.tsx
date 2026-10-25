@@ -12,6 +12,7 @@ import { Avatar } from "../../components/Avatar";
 import type { Player, SessionState } from "../../lib/types";
 import { NudgeButton } from "../premium/Nudge";
 import { TwoTruthsReveal, TwoTruthsTheatre, theatreScore } from "../premium/TwoTruthsTheatre";
+import { CHOICE_SCENES, ChoiceReveal, TextReveal, TruthDareDone, TruthDareSeals, WaitTurn, pickClass } from "../premium/ConversationScenes";
 
 type J = any;
 type Run = (fn: string, args?: Record<string, unknown>) => Promise<{ ok: boolean; error?: string; info?: any }>;
@@ -89,6 +90,10 @@ function answerText(card: J, a: J, players: Player[]) {
   return a.text ?? "";
 }
 
+const revealLabel = (card: J) => (p: Player) => card.mech === "nd_predict"
+  ? (p.seat === card.subject ? forWho(p, "conv.predict.myAnswer", "conv.predict.subjectAnswer") : forWho(p, "conv.predict.myGuess", "conv.predict.guessOf"))
+  : nameOf(p);
+
 function Reveal({ card, players }: { card: J; players: Player[] }) {
   const me = players.find((p) => p.is_me)!;
   const partner = players.find((p) => !p.is_me);
@@ -96,11 +101,7 @@ function Reveal({ card, players }: { card: J; players: Player[] }) {
     <div className="stack stack--3 enter" aria-live="polite">
       {[me, partner].filter(Boolean).map((p) => (
         <section key={p!.seat} className={`q-answer${p!.is_me ? " q-answer--me" : ""}`}>
-          <h3 className="t-meta strong">
-            {card.mech === "nd_predict"
-              ? (p!.seat === card.subject ? forWho(p, "conv.predict.myAnswer", "conv.predict.subjectAnswer") : forWho(p, "conv.predict.myGuess", "conv.predict.guessOf"))
-              : nameOf(p)}
-          </h3>
+          <h3 className="t-meta strong">{revealLabel(card)(p!)}</h3>
           <p className="q-answer__text">{answerText(card, card.answers?.[p!.seat], players)}</p>
         </section>
       ))}
@@ -154,7 +155,7 @@ function SealedForm({ card, me, partner, players, busy, play }: { card: J; me: P
           <span className="field__hint">{t("conv.textHint", { n: MAX - text.length })}</span>
         </div>
       ) : (
-        <div className={card.options?.length === 2 && m !== "nd_dilemma" ? "q-choices" : "stack stack--2"} role="radiogroup" aria-label={t("conv.choose")}>
+        <div className={pickClass(m)} role="radiogroup" aria-label={t("conv.choose")}>
           {(card.options ?? []).map((o: J) => (
             <button key={o.id} type="button" role="radio" aria-checked={choice === o.id} className="q-choice" disabled={busy} onClick={() => setChoice(o.id)}>
               <span className="q-choice__dot" aria-hidden="true" />{o.text}
@@ -170,24 +171,14 @@ function SealedForm({ card, me, partner, players, busy, play }: { card: J; me: P
 // ---------------------------------------------------------------------------
 // Action ou Vérité
 // ---------------------------------------------------------------------------
-function TruthDare({ card, me, partner, busy, play }: { card: J; me: Player; partner?: Player; busy: boolean; play: (t: string, p?: Record<string, unknown>) => Promise<boolean> }) {
+function TruthDare({ st, card, me, partner, busy, play }: { st: SessionState; card: J; me: Player; partner?: Player; busy: boolean; play: (t: string, p?: Record<string, unknown>) => Promise<boolean> }) {
   const [text, setText] = useState("");
   const active = card.active === me.seat;
   if (!active) {
-    return card.phase === "choice"
-      ? <p className="t-small muted center">{t("conv.td.waitChoice", { name: nameOf(partner) })}</p>
-      : <p className="t-small muted center">{t("conv.td.waitAnswer", { name: nameOf(partner) })}</p>;
+    return <WaitTurn st={st} partner={partner} text={t(card.phase === "choice" ? "conv.td.waitChoice" : "conv.td.waitAnswer", { name: nameOf(partner) })} />;
   }
   if (card.phase === "choice") {
-    return (
-      <div className="stack stack--3">
-        <p className="t-small">{t("conv.td.choose")}</p>
-        <div className="q-choices">
-          <button className="btn" disabled={busy} onClick={() => void play("choose_kind", { kind: "truth" })}>{t("conv.td.truth")}</button>
-          <button className="btn btn--secondary" disabled={busy} onClick={() => void play("choose_kind", { kind: "dare" })}>{t("conv.td.dare")}</button>
-        </div>
-      </div>
-    );
+    return <TruthDareSeals busy={busy} onPick={(kind) => void play("choose_kind", { kind })} />;
   }
   return (
     <div className="stack stack--4">
@@ -304,12 +295,9 @@ function RoundView({ c, round }: { c: Common; round: CRound }) {
         <div className="stack stack--4">
           {card.redacted ? <Alert kind="info">{t("conv.interrupted")}</Alert>
             : card.skipped ? <Alert kind="info">{t("conv.skipped")}</Alert>
-            : m === "nd_truth_dare" ? (
-              <section className="q-answer">
-                <h3 className="t-meta strong">{nameOf(players.find((p) => p.seat === card.active))}</h3>
-                <p className="q-answer__text">{card.response?.text ?? t("conv.td.actionDone")}</p>
-              </section>
-            ) : m === "nd_two_truths" && card.mode === "simultaneous" ? (
+            : m === "nd_truth_dare" ? <TruthDareDone card={card} player={players.find((p) => p.seat === card.active)} />
+            : CHOICE_SCENES.has(m) ? <ChoiceReveal card={card} players={players} />
+            : m === "nd_sentence" || m === "nd_predict" ? <TextReveal card={card} players={players} label={revealLabel(card)} /> : m === "nd_two_truths" && card.mode === "simultaneous" ? (
               <TwoTruthsReveal st={c.st} card={card} me={me} partner={partner} />
             ) : m === "nd_two_truths" ? (
               <div className="stack stack--2">
@@ -340,8 +328,8 @@ function RoundView({ c, round }: { c: Common; round: CRound }) {
                 </div>
               </div>
             ) : (
-              <p className="t-small">{card.verdict === undefined ? t("conv.predict.waitVerdict", { name: nameOf(partner) })
-                : card.verdict ? t("conv.predict.pointWon") : t("conv.predict.noPoint")}</p>
+              card.verdict === undefined ? <WaitTurn st={c.st} partner={partner} text={t("conv.predict.waitVerdict", { name: nameOf(partner) })} />
+                : <p className="t-small">{card.verdict ? t("conv.predict.pointWon") : t("conv.predict.noPoint")}</p>
             )
           )}
 
@@ -351,10 +339,11 @@ function RoundView({ c, round }: { c: Common; round: CRound }) {
               {!continued && <Icon name="arrow-right" />}
             </button>
             {theyContinued && !continued && <p className="t-meta center">{t("conv.partnerContinued", { name: nameOf(partner) })}</p>}
+            {continued && !theyContinued && <NudgeButton st={c.st} partner={partner} />}
           </div>
         </div>
       ) : m === "nd_truth_dare" ? (
-        <TruthDare card={card} me={me} partner={partner} busy={busy} play={play} />
+        <TruthDare st={c.st} card={card} me={me} partner={partner} busy={busy} play={play} />
       ) : m === "nd_two_truths" && card.mode === "simultaneous" ? (
         <TwoTruthsTheatre st={c.st} card={card} priv={round.private} me={me} partner={partner} busy={busy} play={play} />
       ) : m === "nd_two_truths" ? (

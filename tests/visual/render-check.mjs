@@ -2,7 +2,7 @@
 // ⚠️ Les réponses Supabase sont simulées ici UNIQUEMENT pour afficher les écrans connectés :
 // ce script ne teste ni la synchronisation ni la sécurité (voir supabase/tests pour cela).
 // Usage : npm run build && npx vite preview --port 4173 &  puis  node tests/visual/render-check.mjs [dossier]
-// Variables : ONLY=<motif d'écran>, WIDTHS=320,390, ZOOM=2 (texte à 200 %), PW_CHROMIUM=<chemin du navigateur>
+// Variables : ONLY=<motif d'écran>, WIDTHS=320,390, ZOOM=2 (texte à 200 %), PW_CHROMIUM=<chemin du navigateur> FULL=1 (page entière)
 import { chromium } from "@playwright/test";
 import { mkdirSync, readFileSync } from "node:fs";
 
@@ -208,7 +208,7 @@ for (const size of sizes) {
     if (zoom !== 1) await page.addStyleTag({ content: `html { font-size: ${zoom * 100}%; }` });
     if (s.action) { await s.action(page); }
     await page.waitForTimeout(Number(process.env.WAIT ?? 350));
-    await page.screenshot({ path: `${OUT}/${size.width}x${size.height}${zoom !== 1 ? `-z${zoom}` : ""}-${s.name}.png`, fullPage: false });
+    await page.screenshot({ path: `${OUT}/${size.width}x${size.height}${zoom !== 1 ? `-z${zoom}` : ""}-${s.name}.png`, fullPage: process.env.FULL === "1" });
     const report = await page.evaluate(() => {
       const overflow = document.documentElement.scrollWidth - window.innerWidth;
       const culprits = overflow > 0 ? [...document.querySelectorAll("body *")].filter((el) => el.getBoundingClientRect().right > window.innerWidth + 0.5).slice(0, 4).map((el) => `${el.tagName}.${el.className}`) : [];

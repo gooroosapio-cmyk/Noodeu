@@ -4,6 +4,7 @@ import { Avatar } from "../../components/Avatar";
 import { Alert, Icon, Illustration, Loading, Sheet, formatDate } from "../../components/ui";
 import type { Player, SessionState } from "../../lib/types";
 import { StepInput, type StepTexts } from "./inputs";
+import { NudgeButton } from "../premium/Nudge";
 import { AnswerView, SceneView } from "./views";
 import { afterTurns, answerOf, nextTurn, stepSeats, type RRound, type RoundsConfig, type StepDef } from "./logic";
 
@@ -172,6 +173,7 @@ export function RoundsPlaying(c: Common) {
         <h1 className="t-page">{turn.kind === "wait" ? t("rounds.yourTurnSoon") : t("game.sentTitle")}</h1>
         <p>{turn.kind === "wait" ? t("rounds.waitingStep", { name: vars.name }) : t("game.waitingPartner", { name: vars.name })}</p>
       </div>
+      <NudgeButton st={c.st} partner={partner} />
       <Alert kind="info"><Icon name="lock" size={18} />{c.st.game.rules.privacy}</Alert>
       <p className="center t-meta">{t("game.noRush")}</p>
     </section>

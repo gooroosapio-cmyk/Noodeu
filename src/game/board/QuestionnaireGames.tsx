@@ -9,6 +9,7 @@ import { t } from "../../i18n";
 import { Alert, Art, Icon, Loading } from "../../components/ui";
 import type { Player, SessionState } from "../../lib/types";
 import { ART_BY_PACK } from "../../screens/Libraries";
+import { NudgeButton } from "../premium/Nudge";
 
 type J = any;
 type Run = (fn: string, args?: Record<string, unknown>) => Promise<{ ok: boolean; error?: string; info?: any }>;
@@ -160,6 +161,7 @@ function PackPlaying({ c, round }: { c: Common; round: QRound }) {
         <div className="card stack stack--2 center" aria-live="polite">
           <span className="nd-chip"><Icon name="lock-keyhole" size={16} />{t("q.pack.sealed")}</span>
           <p>{theyAnswered ? t("q.pack.bothDone") : t("q.pack.waiting", { name: nameOf(partner) })}</p>
+          {!theyAnswered && <NudgeButton st={c.st} partner={partner} />}
         </div>
       ) : (
         <>
@@ -344,7 +346,7 @@ function TestDone({ c, round }: { c: Common; round: QRound }) {
         {theirs ? <><Scores card={card} scores={theirs} />{theirs.answers && <SharedAnswers card={card} answers={theirs.answers} who={nameOf(partner)} />}</>
           : partner && card.declined?.[partner.seat] ? <p className="muted">{t("q.test.partnerDeclined")}</p>
           : partner && card.completed?.[partner.seat] ? <p className="muted">{t("q.test.partnerPrivate")}</p>
-          : <p className="muted">{t("q.test.partnerInProgress")}</p>}
+          : <><p className="muted">{t("q.test.partnerInProgress")}</p>{c.st.session.status === "playing" && <NudgeButton st={c.st} partner={partner} />}</>}
       </section>
     </div>
   );
