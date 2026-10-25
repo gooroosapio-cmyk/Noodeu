@@ -335,3 +335,25 @@ Migration `20261027000300_multi_duos.sql` (fichier à coller : `docs/sql_editeur
 - Les phrases de règles qui parlaient d'activer le +18 sont retirées (nouvelles versions de règles).
 - Migration `20261028000100_sans_permission_adulte.sql`, tests `c18_sans_permission_adulte.sql`. Les tests c14 à c17
   restent exécutés sur le schéma antérieur à ce retrait, pour lequel ils ont été écrits.
+
+## Jeux premium V4, lots J1 à J3 (28/10/2026)
+
+- Chaque jeu a son univers (décor, matière, accents) servi depuis `public/assets/premium/<code>` ; le décor reste
+  décoratif, sans texte ni interaction. Le serveur reste seul arbitre (tirages, minuteries, scores, secrets).
+- Deux vérités et un mensonge (G08, version 2) : écriture simultanée, « OK, je suis prêt » (modifiable tant que l'autre
+  n'est pas prêt), puis devinette simultanée. Les textes de l'autre ne sont transmis qu'une fois les deux prêts, les
+  mensonges qu'après les deux choix. 4, 6 ou 10 manches, 6 par défaut. Score affiché « X/total ».
+- Relance « je t'attends » : notification de partie dans l'application uniquement (pas de notification push), après
+  20 s d'attente, une toutes les 60 s, 3 par manche et par joueur, vérifiées par le serveur.
+- Notifications : présentation par type (relance, partie proposée, invitation, rappel) ; les messages de discussion ne
+  créent plus de notification (les anciennes ont été supprimées).
+- Test de pureté (ND-Q-011) rangé dans « Se découvrir » : indice sur 100 et nombre de « Non » sur 72 ; « Montrer mes
+  réponses à la fin » activé par défaut, décochable.
+- Le Dé chanceux : 30 points conservés pour gagner ; la victoire n'arrive qu'en conservant.
+- Petit bac : 8 rubriques en grille 2 × 4 (Animal, Ville ; Métier, Objet ; Pays, Prénom ; Fruit ou légume, Célébrité),
+  120 s par défaut ou 180 s, 3 manches (5 ou 7 au choix), barème 5/10/15. Index de validation rédigé par Noodeu
+  (`scripts/petit_bac8_index.py`, banque `petit_bac_huit`, 866 entrées), **à relire** ; une réponse absente de l'index
+  est arbitrée par les deux joueurs.
+- Bataille navale : viser une case puis confirmer le tir (évite les tirs par erreur sur un petit écran). Points et
+  carrés : zones de 28 px sans chevauchement, 44 px avec « Agrandir le plateau ».
+- Migrations `20261028000200` à `20261028000500` ; les parties déjà commencées gardent leur version de règles.

@@ -169,3 +169,9 @@ avec d'anciens réglages restrictifs, pack avec cartes +18 complet, activité À
 accord ; cartes +18 tirées dans un jeu de conversation ; plus aucune règle sur l'activation du +18 ; filtres sans plafond).
 `scripts/run_sql_tests.sh` lance c14 à c17 avant cette migration, puis c18. Recette visuelle : `11-salon`,
 `60-salon-huis-clos` (message dans le salon), `22-parametres` (plus d'interrupteur +18 ni d'intensité).
+
+Jeux premium : `c19_g08_simultane.sql` (écriture et devinette simultanées, aucun texte ni mensonge de l'autre avant
+l'heure, reprise des affirmations, relance avec ses limites, plus de notification de message), `c20_purete.sql` (indice
+sur 100, « Non » sur 72, réponses partagées par défaut et retrait possible), `c21_de30_petitbac8.sql` (victoire à 30 par
+conservation, 8 rubriques classées, minuterie 120/180 s, lettres couvertes par l'index). Recette visuelle :
+`60-conv-dvm2-*`, `60-test-rice2-*`, `60-mini-*`, `60-mot-*`.
