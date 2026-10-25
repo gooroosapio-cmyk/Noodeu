@@ -236,10 +236,9 @@ export function RoundsResults({ c, navigate }: { c: Common; navigate: (to: strin
       {ended && (
         <div className="stack">
           <button className="btn" disabled={c.busy || !c.online} onClick={async () => {
-            await c.run("close_session");
-            navigate(`/bibliotheques/${c.st.session.game_id}`);
+            if ((await c.run("close_session")).ok) navigate(`/bibliotheques/${c.st.session.game_id}`);
           }}>{t("game.replay")}</button>
-          <button className="btn btn--secondary" disabled={c.busy || !c.online} onClick={async () => { await c.run("close_session"); navigate("/bibliotheques"); }}>{t("game.otherGame")}</button>
+          <button className="btn btn--secondary" disabled={c.busy || !c.online} onClick={async () => { if ((await c.run("close_session")).ok) navigate("/bibliotheques"); }}>{t("game.otherGame")}</button>
         </div>
       )}
       <Link className="btn btn--quiet" to="/accueil">{t("game.home")}</Link>

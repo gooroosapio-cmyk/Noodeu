@@ -2,7 +2,7 @@
 // Famille 4 « Mémoire et observation » : écrans de jeu et récapitulatifs.
 // Ce qu'il faut mémoriser n'arrive que dans la part privée (priv.view) ; à la fin de l'observation, l'écran envoie
 // « seen » et le serveur le retire. Les réponses sont notées sur le serveur ; l'écran ne fait qu'afficher.
-import { useEffect, useRef, useState, type ComponentType, type ReactNode } from "react";
+import { useCallback, useEffect, useRef, useState, type ComponentType, type ReactNode } from "react";
 import { t } from "../../i18n";
 import { Icon } from "../../components/ui";
 import type { Player } from "../../lib/types";
@@ -13,7 +13,7 @@ type Play = (type: string, payload?: Record<string, unknown>) => Promise<{ ok: b
 export interface MV { c: J; priv: J; me: Player; partner?: Player; play: Play; busy: boolean; mine: boolean }
 
 const nameOf = (p?: Player) => (p ? (p.is_me ? t("game.you") : p.display_name || "?") : "?");
-const reduceMotion = () => typeof window !== "undefined" && Boolean(window.matchMedia?.("(prefers-reduced-motion: reduce)").matches);
+const reduceMotion = () => typeof window !== "undefined" && Boolean(window.matchMedia?.("(prefers-reduced-motion: reduce)").matches || document.documentElement.classList.contains("reduced-motion"));
 const Waiting = ({ partner }: { partner?: Player }) => <p className="center muted">{t("board.waitingOther", { name: nameOf(partner) })}</p>;
 const kitSrc = (slug: string) => `/assets/jeux/elements/${slug}.svg`;
 
@@ -282,9 +282,17 @@ function tone(freq: number, ms = 300) {
   o.connect(g).connect(ctx.destination); o.start(); o.stop(ctx.currentTime + ms / 1000);
   window.setTimeout(() => void ctx.close(), ms + 200);
 }
+/** Toute lecture est annulée au changement d'étape et à la sortie du jeu. */
+function usePlaybackTimers(){
+  const timers=useRef<number[]>([]);
+  const stop=useCallback(()=>{timers.current.forEach(clearTimeout);timers.current=[];},[]);
+  const later=useCallback((fn:()=>void,delay:number)=>{timers.current.push(window.setTimeout(fn,delay));},[]);
+  useEffect(()=>stop,[stop]);return {stop,later};
+}
 const SIMON_FREQ = [330, 392, 494, 587];
 
 function Simon({ c, priv, me, partner, play, busy }: MV) {
+  const {stop,later}=usePlaybackTimers();
   const [lit, setLit] = useState<number | null>(null);
   const [entry, setEntry] = useState<number[]>([]);
   const [sound, setSound] = useState(false);
@@ -292,13 +300,14 @@ function Simon({ c, priv, me, partner, play, busy }: MV) {
   const seq: number[] | undefined = priv?.view?.sequence;
   const observing = !c.seen?.[me.seat] && Boolean(seq);
   const showSeq = () => {
+    stop();setLit(null);
     if (!seq || reduceMotion()) return;
     seq.forEach((b, i) => {
-      window.setTimeout(() => { setLit(b); if (sound) tone(SIMON_FREQ[b]); }, i * 650);
-      window.setTimeout(() => setLit(null), i * 650 + 450);
+      later(() => { setLit(b); if (sound) tone(SIMON_FREQ[b]); }, i * 650);
+      later(() => setLit(null), i * 650 + 450);
     });
   };
-  useEffect(() => { if (observing) { len.current = seq!.length; setEntry([]); showSeq(); } }, [observing, seq?.length]); // eslint-disable-line react-hooks/exhaustive-deps
+  useEffect(() => { if (observing) { len.current = seq!.length; setEntry([]); showSeq(); } return stop; }, [observing, seq?.length,stop]); // eslint-disable-line react-hooks/exhaustive-deps
   if (c.finished?.[me.seat]) return <div className="stack stack--2"><p className="center">{t("mem.simon.finished", { n: c.scores?.[me.seat] ?? 0 })}</p><Waiting partner={partner} /></div>;
   const press = (b: number) => {
     if (sound) tone(SIMON_FREQ[b], 200);
@@ -337,19 +346,21 @@ function Simon({ c, priv, me, partner, play, busy }: MV) {
 }
 
 function Rhythm({ c, priv, me, partner, play, busy }: MV) {
+  const {stop,later}=usePlaybackTimers();
   const [beat, setBeat] = useState<number | null>(null);
   const [mask, setMask] = useState<boolean[]>(Array(c.beats).fill(false));
   const active: number[] | undefined = priv?.view?.active;
   const step = 60000 / (c.bpm || 80);
   const run = (audio: boolean) => {
+    stop();setBeat(null);
     if (!active) return;
     for (let k = 0; k < c.beats * 2; k++) {
       const b = k % c.beats;
-      window.setTimeout(() => { setBeat(b); if (audio && active.includes(b)) tone(b === 0 ? 660 : 520, 120); }, k * step);
+      later(() => { if(!reduceMotion())setBeat(b); if (audio && active.includes(b)) tone(b === 0 ? 660 : 520, 120); }, k * step);
     }
-    window.setTimeout(() => setBeat(null), c.beats * 2 * step);
+    later(() => setBeat(null), c.beats * 2 * step);
   };
-  useEffect(() => { if (active && !reduceMotion()) run(false); }, [active?.join()]); // eslint-disable-line react-hooks/exhaustive-deps
+  useEffect(() => { if (active && !reduceMotion()) run(false); return stop; }, [active?.join(),stop]); // eslint-disable-line react-hooks/exhaustive-deps
   if (c.submitted?.[me.seat]) return <Waiting partner={partner} />;
   if (!c.seen?.[me.seat]) return (
     <div className="stack stack--3">

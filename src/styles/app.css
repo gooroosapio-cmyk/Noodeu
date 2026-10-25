@@ -1235,3 +1235,20 @@ body:has(.auth-page) { background-image:url('/assets/original/backgrounds/auth-r
 @keyframes logo-breathe { 0%,100% { opacity:.72; transform:scale(.98); } 50% { opacity:1; transform:scale(1.02); } }
 @media (prefers-reduced-motion:reduce) { .page-loading__logo { animation:none; } }
 html.reduced-motion .page-loading__logo { animation:none; }
+
+/* Lot jeux : commandes situées, grille clavier et bilan compact. */
+.naval__row { display:contents; }
+.naval-placement-progress { display:grid; gap:8px; justify-items:start; }
+.result-emblem { display:grid; place-items:center; padding:8px; }
+.result-scores { display:grid; grid-template-columns:repeat(2,minmax(0,1fr)); gap:10px; }
+.result-scores > div { display:flex; align-items:center; justify-content:space-between; gap:8px; padding:14px; background:var(--c-accent-soft); border-radius:14px; }
+.result-scores > div:nth-child(2) { background:var(--c-peach); }
+.result-scores strong { font:700 1.5rem/1.2 var(--f-heading); }
+.result-scores span { overflow-wrap:anywhere; }
+.board-scroll { max-width:100%; overflow:auto; padding:4px; border:1px solid var(--c-border); border-radius:12px; background:var(--c-surface); scrollbar-width:thin; }
+.board-scroll .pixel-grid { width:max(100%,366px); }
+.board-scroll .pixel { min-height:44px; min-width:44px; }
+.beat { min-height:44px; min-width:44px; }
+.naval-placement-tools { display:grid; grid-template-columns:minmax(0,1fr) minmax(0,1fr); gap:10px; align-items:end; }
+.naval-placement-tools .input { width:100%; min-width:0; min-height:48px; padding:8px; }
+.naval-placement-tools .btn { min-height:48px; height:auto; padding:8px; }

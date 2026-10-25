@@ -145,17 +145,22 @@ function Rps({ c, priv, me, partner, play, busy }: V) {
   const left = useCountdown(c.deadline_at);
   const locked = Boolean(c.locked?.[me.seat]);
   const theirs = Boolean(partner && c.locked?.[partner.seat]);
-  const asked = useRef(false);
-  // À l'échéance, on demande au serveur d'annuler la manche ; il vérifie lui-même l'heure.
+  const playRef=useRef(play);playRef.current=play;
+  const expired=left===0;
+  // Requête d'expiration contrôlée par le serveur ; aucun rappel après démontage.
   useEffect(() => {
-    if (left > 0 || c.done || asked.current) return;
-    asked.current = true;
-    const tryExpire = async () => {
-      const r = await play("expire");
-      if (!r.ok && r.error === "too_early") setTimeout(() => void tryExpire(), 1500);
-    };
-    void tryExpire();
-  }, [left, c.done, play]);
+    if(!expired || c.done)return;
+    let active=true,inFlight=false,retries=0;
+    let timer:ReturnType<typeof setTimeout>|undefined;
+    async function expire(){
+      if(!active || inFlight || !navigator.onLine)return;
+      inFlight=true;const result=await playRef.current("expire");inFlight=false;
+      if(active && !result.ok && result.error==="too_early" && retries++<3)timer=setTimeout(()=>void expire(),1500);
+    }
+    const onOnline=()=>{void expire();};
+    window.addEventListener("online",onOnline);void expire();
+    return()=>{active=false;clearTimeout(timer);window.removeEventListener("online",onOnline);};
+  },[expired,c.done,c.deadline_at]);
   const mineGesture = priv?.gesture as string | undefined;
   return (
     <div className="stack stack--4">
@@ -270,23 +275,34 @@ function Zoomable({ children, zoomClass }: { children: ReactNode; zoomClass: str
 function NavalGrid({ label, cell, onCell, disabled }: {
   label: string; cell: (r: number, c: number) => { cls: string; text: string; img?: string }; onCell?: (r: number, c: number) => void; disabled?: (r: number, c: number) => boolean;
 }) {
+  const grid=useRef<HTMLDivElement>(null);
+  const [focused,setFocused]=useState(0);
+  const isDisabled=(i:number)=>!onCell || Boolean(disabled?.(Math.floor(i/10),i%10));
+  const active=isDisabled(focused)?Array.from({length:100},(_,i)=>i).find(i=>!isDisabled(i)):focused;
   return (
     <Zoomable zoomClass="board-zoom--naval">
-    <div className="naval" role="grid" aria-label={label}>
-      <span aria-hidden="true" />
-      {Array.from({ length: 10 }, (_, c) => <span key={`h${c}`} className="naval__head" aria-hidden="true">{c + 1}</span>)}
-      {Array.from({ length: 10 }, (_, r) => [
-        <span key={`r${r}`} className="naval__head" aria-hidden="true">{ROWS[r]}</span>,
-        ...Array.from({ length: 10 }, (_, c) => {
-          const x = cell(r, c);
-          return (
-            <button key={`${r}-${c}`} type="button" role="gridcell" className={`naval__cell ${x.cls}`} aria-label={`${ROWS[r]}${c + 1} : ${x.text}`}
-              disabled={!onCell || disabled?.(r, c)} onClick={() => onCell?.(r, c)}>
-              {x.img && <img src={`${PREMIUM}/M07/${x.img}.svg`} alt="" />}
-            </button>
-          );
-        }),
-      ])}
+    <div className="naval" role="grid" aria-label={label} ref={grid} onKeyDown={e=>{
+      const key=e.key;if(!['ArrowUp','ArrowDown','ArrowLeft','ArrowRight','Home','End'].includes(key))return;
+      const from=Number((e.target as HTMLElement).dataset.cell);if(!Number.isFinite(from))return;
+      e.preventDefault();const row=Math.floor(from/10);let i=key==='Home'?row*10:key==='End'?row*10+9:from;
+      const delta=key==='ArrowUp'?-10:key==='ArrowDown'?10:key==='ArrowLeft'||key==='End'?-1:1;
+      if(key!=='Home'&&key!=='End')i+=delta;
+      while(i>=0&&i<100){
+        if((key==='ArrowLeft'||key==='ArrowRight'||key==='Home'||key==='End')&&Math.floor(i/10)!==row)return;
+        if(!isDisabled(i)){setFocused(i);grid.current?.querySelector<HTMLButtonElement>(`[data-cell="${i}"]`)?.focus();return;}i+=delta;
+      }
+    }}>
+      <div role="row" className="naval__row"><span role="columnheader" aria-label="Ligne" />
+        {Array.from({length:10},(_,c)=><span role="columnheader" key={c} className="naval__head">{c+1}</span>)}
+      </div>
+      {Array.from({length:10},(_,r)=><div role="row" className="naval__row" key={r}>
+        <span role="rowheader" className="naval__head">{ROWS[r]}</span>
+        {Array.from({length:10},(_,c)=>{const x=cell(r,c),i=r*10+c;return <button key={c} type="button" role="gridcell" data-cell={i}
+          tabIndex={active===i?0:-1} className={`naval__cell ${x.cls}`} aria-label={`${ROWS[r]}${c+1} : ${x.text}`}
+          disabled={isDisabled(i)} onFocus={()=>setFocused(i)} onClick={()=>onCell?.(r,c)}>
+          {x.img&&<img src={`${PREMIUM}/M07/${x.img}.svg`} alt=""/>}
+        </button>;})}
+      </div>)}
     </div>
     </Zoomable>
   );
@@ -333,17 +349,17 @@ function Placement({ c, priv, me, partner, play, busy }: V) {
   }
   return (
     <div className="stack stack--4">
-      <p className="t-small">{t("mini.naval.placeHint")}</p>
-      <div className="chips" role="radiogroup" aria-label={t("mini.naval.ships")}>
-        {ships.map((s) => (
-          <button key={s.id} type="button" role="radio" className="chip" aria-checked={sel === s.id} disabled={busy} onClick={() => { setSel(s.id); setPlacementError(null); }}>
-            {draft.some((d) => d.id === s.id) && <Icon name="check" size={14} />}{nameShip(s.id)} · {s.len}
-          </button>
-        ))}
+      <div className="naval-placement-progress"><p className="t-small">{t("mini.naval.placeHint")}</p><span className="nd-chip">{draft.length}/{ships.length} navires placés</span></div>
+      <div className="naval-placement-tools">
+        <label className="field"><span className="field__label">Navire à placer</span>
+          <select className="input" value={sel} disabled={busy} onChange={e=>{setSel(e.target.value);setPlacementError(null);}}>
+            {ships.map(ship=><option key={ship.id} value={ship.id}>{draft.some(d=>d.id===ship.id)?"✓ ":""}{nameShip(ship.id)} · {ship.len}</option>)}
+          </select>
+        </label>
+        <button type="button" className="btn btn--secondary" disabled={busy} onClick={()=>{setO(o==="H"?"V":"H");setPlacementError(null);}}>
+          <Icon name="refresh" size={18}/>{t("mini.naval.rotate",{o:o==="H"?t("mini.naval.horizontal"):t("mini.naval.vertical")})}
+        </button>
       </div>
-      <button type="button" className="btn btn--secondary btn--sm" disabled={busy} onClick={() => { setO(o === "H" ? "V" : "H"); setPlacementError(null); }}>
-        <Icon name="refresh" size={18} />{t("mini.naval.rotate", { o: o === "H" ? t("mini.naval.horizontal") : t("mini.naval.vertical") })}
-      </button>
       {placementError && <Alert kind="info">{placementError}</Alert>}
       <NavalGrid label={t("mini.naval.myFleet")} onCell={busy ? undefined : place}
         cell={(r, col) => taken.has(`${r}:${col}`) ? { cls: `naval__cell--ship${taken.get(`${r}:${col}`) === sel ? " naval__cell--sel" : ""}`, text: nameShip(taken.get(`${r}:${col}`)!) } : { cls: "", text: t("mini.naval.water") }} />
@@ -444,9 +460,9 @@ export function MiniSolution({ c, players }: { c: J; players: Player[] }) {
           {[me, partner].filter(Boolean).map((p) => {
             const g = GESTURES.find((x) => x.id === c.gestures[p!.seat]);
             return (
-              <div key={p!.seat} className="rps__choice" aria-label={`${nameOf(p)} : ${t(`mini.rps.${g?.id}` as never)}`}>
+              <div key={p!.seat} className="rps__choice" aria-label={`${nameOf(p)} : ${g ? t(`mini.rps.${g.id}` as never) : "Choix non révélé"}`}>
                 <img src={g ? `/assets/original/pfc-${g.id}.webp` : `${PREMIUM}/M11/hidden.svg`} alt="" width={72} height={72} />
-                <span>{nameOf(p)}</span>
+                <span>{nameOf(p)}</span><span className="t-meta">{g ? t(`mini.rps.${g.id}` as never) : "Choix non révélé"}</span>
               </div>
             );
           })}

@@ -241,10 +241,10 @@ for (const size of sizes) {
       const navLabels = [...document.querySelectorAll(".nav a")].map((a) => a.innerText.replace(/\s+/g, " ").trim());
       return { overflow, culprits, small, hidden, navLabels };
     });
-    if (await page.locator(".skeleton").count()) errors.push("écran encore en chargement : fixture ou chargement invalide");
+    if (await page.locator(".skeleton, .page-loading").count()) errors.push("écran encore en chargement : fixture ou chargement invalide");
     // L'écran d'erreur du routeur intercepte les exceptions : on le détecte explicitement.
     if (await page.getByText("Unexpected Application Error").count()) errors.push(await page.locator("h3, pre").first().innerText().catch(() => "erreur de rendu"));
-    const bad = report.overflow > 0 || errors.length || report.hidden;
+    const bad = report.overflow > 0 || errors.length || report.hidden || (process.env.STRICT_TARGETS === "1" && report.small.length > 0);
     if (bad) problems++;
     console.log(`${size.width}x${size.height}${zoom !== 1 ? ` texte×${zoom}` : ""} ${s.name}: débordement=${report.overflow}px masqué-sous-nav=${report.hidden} erreurs=${errors.length}`
       + (errors.length ? ` [${errors.join(" | ")}]` : "") + (report.culprits.length ? ` dépassent=${report.culprits.join(",")}` : "")

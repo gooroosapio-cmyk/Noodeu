@@ -1,0 +1,618 @@
+[
+  {
+    "scope": "historique",
+    "id": "N2-001",
+    "mechanic": "conversation",
+    "title": "On se raconte",
+    "fixture": "N2-001-play.json"
+  },
+  {
+    "scope": "historique",
+    "id": "N2-002",
+    "mechanic": "dilemma",
+    "title": "Deux options, ton choix",
+    "fixture": "N2-002-play.json"
+  },
+  {
+    "scope": "historique",
+    "id": "N2-003",
+    "mechanic": "experience",
+    "title": "Déjà vécu ?",
+    "fixture": "N2-003-play.json"
+  },
+  {
+    "scope": "historique",
+    "id": "N2-004",
+    "mechanic": "prediction",
+    "title": "Je mise sur ton choix",
+    "fixture": "N2-004-play.json"
+  },
+  {
+    "scope": "historique",
+    "id": "N2-005",
+    "mechanic": "select_words",
+    "title": "Cinq mots, vraiment toi",
+    "fixture": "N2-005-play.json"
+  },
+  {
+    "scope": "historique",
+    "id": "N2-006",
+    "mechanic": "object_portrait",
+    "title": "Le portrait en objets",
+    "fixture": "N2-006-play.json"
+  },
+  {
+    "scope": "historique",
+    "id": "N2-007",
+    "mechanic": "mood",
+    "title": "La météo intérieure",
+    "fixture": "N2-007-play.json"
+  },
+  {
+    "scope": "historique",
+    "id": "N2-008",
+    "mechanic": "rank",
+    "title": "Tes cinq priorités du moment",
+    "fixture": "N2-008-play.json"
+  },
+  {
+    "scope": "historique",
+    "id": "N2-009",
+    "mechanic": "appreciation",
+    "title": "Le compliment précis",
+    "fixture": "N2-009-play.json"
+  },
+  {
+    "scope": "historique",
+    "id": "N2-010",
+    "mechanic": "listening",
+    "title": "Je t’ai bien compris",
+    "fixture": "N2-010-play.json"
+  },
+  {
+    "scope": "historique",
+    "id": "N2-011",
+    "mechanic": "timeline_personal",
+    "title": "La frise de tes moments",
+    "fixture": "N2-011-play.json"
+  },
+  {
+    "scope": "historique",
+    "id": "N2-012",
+    "mechanic": "capsule",
+    "title": "La capsule à rouvrir",
+    "fixture": "N2-012-play.json"
+  },
+  {
+    "scope": "historique",
+    "id": "N2-013",
+    "mechanic": "budget",
+    "title": "Douze jetons d’envie",
+    "fixture": "N2-013-play.json"
+  },
+  {
+    "scope": "historique",
+    "id": "N2-014",
+    "mechanic": "scene_builder",
+    "title": "Votre coin tranquille",
+    "fixture": "N2-014-play.json"
+  },
+  {
+    "scope": "historique",
+    "id": "N2-015",
+    "mechanic": "attention",
+    "title": "La roue des petits gestes",
+    "fixture": "N2-015-play.json"
+  },
+  {
+    "scope": "historique",
+    "id": "N2-121",
+    "mechanic": "taste_map",
+    "title": "La carte de tes goûts",
+    "fixture": "N2-121-play.json"
+  },
+  {
+    "scope": "historique",
+    "id": "N2-122",
+    "mechanic": "gift_box",
+    "title": "La boîte à surprises",
+    "fixture": "N2-122-play.json"
+  },
+  {
+    "scope": "historique",
+    "id": "N2-123",
+    "mechanic": "zine",
+    "title": "Le mini-fanzine à deux",
+    "fixture": "N2-123-play.json"
+  },
+  {
+    "scope": "historique",
+    "id": "N2-016",
+    "mechanic": "taboo",
+    "title": "Le mot interdit",
+    "fixture": "N2-016-b0.json"
+  },
+  {
+    "scope": "historique",
+    "id": "N2-017",
+    "mechanic": "anagram",
+    "title": "L’anagramme partagée",
+    "fixture": "N2-017-b0.json"
+  },
+  {
+    "scope": "historique",
+    "id": "N2-018",
+    "mechanic": "categories",
+    "title": "La lettre et la case",
+    "fixture": "N2-018-b0.json"
+  },
+  {
+    "scope": "historique",
+    "id": "N2-019",
+    "mechanic": "word_chain",
+    "title": "La chaîne des dernières lettres",
+    "fixture": "N2-019-b0.json"
+  },
+  {
+    "scope": "historique",
+    "id": "N2-020",
+    "mechanic": "convergence",
+    "title": "Le mot en commun",
+    "fixture": "N2-020-b0.json"
+  },
+  {
+    "scope": "historique",
+    "id": "N2-021",
+    "mechanic": "word_ladder",
+    "title": "L’échelle de mots",
+    "fixture": "N2-021-b0.json"
+  },
+  {
+    "scope": "historique",
+    "id": "N2-022",
+    "mechanic": "word_search",
+    "title": "Les mots cachés",
+    "fixture": "N2-022-b0.json"
+  },
+  {
+    "scope": "historique",
+    "id": "N2-023",
+    "mechanic": "masked_word",
+    "title": "Le mot masqué",
+    "fixture": "N2-023-b0.json"
+  },
+  {
+    "scope": "historique",
+    "id": "N2-024",
+    "mechanic": "syllables",
+    "title": "Les syllabes en vrac",
+    "fixture": "N2-024-b0.json"
+  },
+  {
+    "scope": "historique",
+    "id": "N2-025",
+    "mechanic": "letter_market",
+    "title": "Le marché des lettres",
+    "fixture": "N2-025-b0.json"
+  },
+  {
+    "scope": "historique",
+    "id": "N2-026",
+    "mechanic": "semantic_intruder",
+    "title": "Le mot intrus",
+    "fixture": "N2-026-b0.json"
+  },
+  {
+    "scope": "historique",
+    "id": "N2-027",
+    "mechanic": "telegram",
+    "title": "Le télégramme",
+    "fixture": "N2-027-b0.json"
+  },
+  {
+    "scope": "historique",
+    "id": "N2-028",
+    "mechanic": "rhymes",
+    "title": "Rimes en relais",
+    "fixture": "N2-028-b0.json"
+  },
+  {
+    "scope": "historique",
+    "id": "N2-029",
+    "mechanic": "clue_grid",
+    "title": "Un indice, trois cibles",
+    "fixture": "N2-029-b0.json"
+  },
+  {
+    "scope": "historique",
+    "id": "N2-030",
+    "mechanic": "sentence_order",
+    "title": "La phrase coupée",
+    "fixture": "N2-030-b0.json"
+  },
+  {
+    "scope": "historique",
+    "id": "N2-124",
+    "mechanic": "word_growth",
+    "title": "Le mot à rallonge",
+    "fixture": "N2-124-b0.json"
+  },
+  {
+    "scope": "historique",
+    "id": "N2-125",
+    "mechanic": "cross_letters",
+    "title": "Les mots qui se croisent",
+    "fixture": "N2-125-b0.json"
+  },
+  {
+    "scope": "historique",
+    "id": "N2-126",
+    "mechanic": "rebus",
+    "title": "Les rébus en morceaux",
+    "fixture": "N2-126-b0.json"
+  },
+  {
+    "scope": "historique",
+    "id": "N2-031",
+    "mechanic": "draw_guess",
+    "title": "Dessine, je devine",
+    "fixture": "N2-031-b0.json"
+  },
+  {
+    "scope": "historique",
+    "id": "N2-032",
+    "mechanic": "complete_doodle",
+    "title": "Complète mon gribouillis",
+    "fixture": "N2-032-b0.json"
+  },
+  {
+    "scope": "historique",
+    "id": "N2-033",
+    "mechanic": "draw_dictation",
+    "title": "Le dessin dicté",
+    "fixture": "N2-033-b0.json"
+  },
+  {
+    "scope": "historique",
+    "id": "N2-034",
+    "mechanic": "exquisite_drawing",
+    "title": "Le personnage plié",
+    "fixture": "N2-034-b0.json"
+  },
+  {
+    "scope": "historique",
+    "id": "N2-035",
+    "mechanic": "pixel_art",
+    "title": "La mosaïque à deux",
+    "fixture": "N2-035-b0.json"
+  },
+  {
+    "scope": "historique",
+    "id": "N2-036",
+    "mechanic": "tangram",
+    "title": "Sept pièces, une silhouette",
+    "fixture": "N2-036-b0.json"
+  },
+  {
+    "scope": "historique",
+    "id": "N2-037",
+    "mechanic": "jigsaw",
+    "title": "Puzzle de poche",
+    "fixture": "N2-037-b0.json"
+  },
+  {
+    "scope": "historique",
+    "id": "N2-038",
+    "mechanic": "sticker_portrait",
+    "title": "Le portrait en gommettes",
+    "fixture": "N2-038-b0.json"
+  },
+  {
+    "scope": "historique",
+    "id": "N2-039",
+    "mechanic": "emblem",
+    "title": "Votre petit emblème",
+    "fixture": "N2-039-b0.json"
+  },
+  {
+    "scope": "historique",
+    "id": "N2-040",
+    "mechanic": "stroke_budget",
+    "title": "Dix traits et pas un de plus",
+    "fixture": "N2-040-b0.json"
+  },
+  {
+    "scope": "historique",
+    "id": "N2-041",
+    "mechanic": "mirror_draw",
+    "title": "Le miroir créatif",
+    "fixture": "N2-041-b0.json"
+  },
+  {
+    "scope": "historique",
+    "id": "N2-042",
+    "mechanic": "palette",
+    "title": "La palette commune",
+    "fixture": "N2-042-b0.json"
+  },
+  {
+    "scope": "historique",
+    "id": "N2-043",
+    "mechanic": "poster",
+    "title": "L’affiche improbable",
+    "fixture": "N2-043-b0.json"
+  },
+  {
+    "scope": "historique",
+    "id": "N2-044",
+    "mechanic": "silent_comic",
+    "title": "La bande dessinée muette",
+    "fixture": "N2-044-b0.json"
+  },
+  {
+    "scope": "historique",
+    "id": "N2-045",
+    "mechanic": "tile_scene",
+    "title": "L’île en tuiles",
+    "fixture": "N2-045-b0.json"
+  },
+  {
+    "scope": "historique",
+    "id": "N2-127",
+    "mechanic": "constellation",
+    "title": "La constellation sonore",
+    "fixture": "N2-127-b0.json"
+  },
+  {
+    "scope": "historique",
+    "id": "N2-128",
+    "mechanic": "flipbook",
+    "title": "Le flipbook de poche",
+    "fixture": "N2-128-b0.json"
+  },
+  {
+    "scope": "historique",
+    "id": "N2-129",
+    "mechanic": "weaving",
+    "title": "Le petit métier à tisser",
+    "fixture": "N2-129-b0.json"
+  },
+  {
+    "scope": "historique",
+    "id": "N2-046",
+    "mechanic": "memory_pairs",
+    "title": "Les paires cachées",
+    "fixture": "N2-046-b0.json"
+  },
+  {
+    "scope": "historique",
+    "id": "N2-047",
+    "mechanic": "change_detection",
+    "title": "Qu’est-ce qui a bougé ?",
+    "fixture": "N2-047-b0.json"
+  },
+  {
+    "scope": "historique",
+    "id": "N2-048",
+    "mechanic": "differences",
+    "title": "Les cinq différences",
+    "fixture": "N2-048-b0.json"
+  },
+  {
+    "scope": "historique",
+    "id": "N2-049",
+    "mechanic": "zoom_recognition",
+    "title": "L’objet aperçu",
+    "fixture": "N2-049-b0.json"
+  },
+  {
+    "scope": "historique",
+    "id": "N2-050",
+    "mechanic": "visual_search",
+    "title": "La chasse au détail",
+    "fixture": "N2-050-b0.json"
+  },
+  {
+    "scope": "historique",
+    "id": "N2-051",
+    "mechanic": "recall_set",
+    "title": "Le plateau disparu",
+    "fixture": "N2-051-b0.json"
+  },
+  {
+    "scope": "historique",
+    "id": "N2-052",
+    "mechanic": "simon",
+    "title": "La suite lumineuse",
+    "fixture": "N2-052-b0.json"
+  },
+  {
+    "scope": "historique",
+    "id": "N2-053",
+    "mechanic": "rhythm",
+    "title": "Le rythme en écho",
+    "fixture": "N2-053-b0.json"
+  },
+  {
+    "scope": "historique",
+    "id": "N2-054",
+    "mechanic": "ordered_recall",
+    "title": "Le panier dans l’ordre",
+    "fixture": "N2-054-b0.json"
+  },
+  {
+    "scope": "historique",
+    "id": "N2-055",
+    "mechanic": "spatial_recall",
+    "title": "Le plan de mémoire",
+    "fixture": "N2-055-b0.json"
+  },
+  {
+    "scope": "historique",
+    "id": "N2-056",
+    "mechanic": "pixel_recall",
+    "title": "Le pixel retenu",
+    "fixture": "N2-056-b0.json"
+  },
+  {
+    "scope": "historique",
+    "id": "N2-057",
+    "mechanic": "sorting",
+    "title": "Le tri sans hésiter",
+    "fixture": "N2-057-b0.json"
+  },
+  {
+    "scope": "historique",
+    "id": "N2-058",
+    "mechanic": "go_nogo",
+    "title": "Le bon signal",
+    "fixture": "N2-058-b0.json"
+  },
+  {
+    "scope": "historique",
+    "id": "N2-059",
+    "mechanic": "precision",
+    "title": "Le curseur juste",
+    "fixture": "N2-059-b0.json"
+  },
+  {
+    "scope": "historique",
+    "id": "N2-060",
+    "mechanic": "split_memory",
+    "title": "Deux mémoires, un plateau",
+    "fixture": "N2-060-b0.json"
+  },
+  {
+    "scope": "historique",
+    "id": "N2-130",
+    "mechanic": "silhouette",
+    "title": "La silhouette juste",
+    "fixture": "N2-130-b0.json"
+  },
+  {
+    "scope": "historique",
+    "id": "N2-131",
+    "mechanic": "layers",
+    "title": "Qui passe devant ?",
+    "fixture": "N2-131-b0.json"
+  },
+  {
+    "scope": "historique",
+    "id": "N2-132",
+    "mechanic": "rotation",
+    "title": "La vitrine tournante",
+    "fixture": "N2-132-b0.json"
+  },
+  {
+    "scope": "actuel",
+    "id": "N2-076",
+    "mechanic": "tic_tac_toe",
+    "title": "Morpion",
+    "fixture": "c14-progress-n2-076-reveal-1.json"
+  },
+  {
+    "scope": "actuel",
+    "id": "N2-079",
+    "mechanic": "dots_boxes",
+    "title": "Points et carrés",
+    "fixture": "c14-mini-points-jeu.json"
+  },
+  {
+    "scope": "actuel",
+    "id": "N2-083",
+    "mechanic": "rps",
+    "title": "Pierre, feuille, ciseaux",
+    "fixture": "c14-progress-n2-083-reveal-2.json"
+  },
+  {
+    "scope": "actuel",
+    "id": "nd-de-chanceux",
+    "mechanic": "nd_pig",
+    "title": "Le Dé chanceux",
+    "fixture": "c14-mini-de-jeu.json"
+  },
+  {
+    "scope": "actuel",
+    "id": "N2-078",
+    "mechanic": "battleship",
+    "title": "Bataille navale",
+    "fixture": "c14-mini-naval-tirs.json"
+  },
+  {
+    "scope": "actuel",
+    "id": "N2-003",
+    "mechanic": "nd_never",
+    "title": "Je n’ai jamais",
+    "fixture": "c14-conv-jamais-attente.json"
+  },
+  {
+    "scope": "actuel",
+    "id": "N2-002",
+    "mechanic": "nd_dilemma",
+    "title": "Tu préfères",
+    "fixture": "c14-conv-preferes-jeu.json"
+  },
+  {
+    "scope": "actuel",
+    "id": "nd-qui-de-nous-deux",
+    "mechanic": "nd_duo_target",
+    "title": "Qui de nous deux ?",
+    "fixture": "c14-conv-qui-revelation.json"
+  },
+  {
+    "scope": "actuel",
+    "id": "N2-004",
+    "mechanic": "nd_predict",
+    "title": "Devine ma réponse",
+    "fixture": "c14-conv-devine-verdict.json"
+  },
+  {
+    "scope": "actuel",
+    "id": "nd-complete-phrase",
+    "mechanic": "nd_sentence",
+    "title": "Complète la phrase",
+    "fixture": "c14-conv-phrase-jeu.json"
+  },
+  {
+    "scope": "actuel",
+    "id": "nd-accord-desaccord",
+    "mechanic": "nd_opinion",
+    "title": "D’accord ou pas d’accord ?",
+    "fixture": "c14-conv-accord-jeu.json"
+  },
+  {
+    "scope": "actuel",
+    "id": "nd-action-verite",
+    "mechanic": "nd_truth_dare",
+    "title": "Action ou Vérité",
+    "fixture": "c14-conv-av-verite.json"
+  },
+  {
+    "scope": "actuel",
+    "id": "nd-deux-verites-mensonge",
+    "mechanic": "nd_two_truths",
+    "title": "Deux vérités et un mensonge",
+    "fixture": "c14-conv-dvm2-devine.json"
+  },
+  {
+    "scope": "actuel",
+    "id": "N2-023",
+    "mechanic": "nd_hangman",
+    "title": "Le Pendu",
+    "fixture": "c14-mot-pendu-fin.json"
+  },
+  {
+    "scope": "actuel",
+    "id": "N2-018",
+    "mechanic": "nd_categories_stop",
+    "title": "Petit bac",
+    "fixture": "c14-mot-bac-resultat.json"
+  },
+  {
+    "scope": "actuel",
+    "id": "nd-cite-trois",
+    "mechanic": "nd_name_three_call",
+    "title": "Cite trois en 10 secondes",
+    "fixture": "c14-mot-cite-correction.json"
+  }
+]

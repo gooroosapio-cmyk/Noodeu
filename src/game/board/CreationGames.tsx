@@ -320,15 +320,17 @@ function Pixel({ c, me, partner, play, busy }: CV) {
         {mineColors.map((k) => <button key={k} type="button" role="radio" aria-checked={color === k} className="swatch" style={{ background: PIXEL[k] }} aria-label={PIXEL_NAMES[k]} onClick={() => setColor(k)} />)}
         <button type="button" role="radio" aria-checked={color === null} className="chip" onClick={() => setColor(null)}>{t("cr.pixel.erase")}</button>
       </div>
-      <div className="pixel-grid" role="grid" aria-label={t("cr.pixel.grid")}>
+      <p className="t-meta">Fais défiler la mosaïque pour atteindre toutes les cases.</p>
+      <div className="board-scroll" tabIndex={0} role="region" aria-label="Mosaïque, défilement horizontal"><div className="pixel-grid" role="group" aria-label={t("cr.pixel.grid")}>
         {cells.map((v, i) => {
           const theirs = v !== null && !mineColors.includes(v);
           return (
-            <button key={i} type="button" role="gridcell" className="pixel" disabled={busy} style={{ background: v === null ? undefined : PIXEL[v] }}
+            <button key={i} type="button" className="pixel" disabled={busy} style={{ background: v === null ? undefined : PIXEL[v] }}
               aria-label={t("cr.pixel.cell", { r: Math.floor(i / 8) + 1, c: (i % 8) + 1, v: v === null ? t("cr.pixel.empty") : PIXEL_NAMES[v] })}
               onClick={() => void play(theirs ? "propose" : "paint", { i, c: color })} />
           );
         })}
+      </div>
       </div>
       <p className="t-meta">{t("cr.pixel.hint", { name: nameOf(partner) })}</p>
       {toMe.map((p: J) => (

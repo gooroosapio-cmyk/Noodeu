@@ -172,6 +172,7 @@ function PetitBacWrite({ c, round, send }: { c: Common; round: CRound; send: Sen
   const rev = useRef<Record<string, number>>(Object.fromEntries(cats.map((k) => [k, Number(priv.drafts?.[k]?.rev ?? 0)])));
   const [saved, setSaved] = useState<Record<string, boolean>>(() => Object.fromEntries(cats.map((k) => [k, true])));
   const timers = useRef<Record<string, number>>({});
+  const [failed,setFailed]=useState<Record<string,boolean>>({});
   const now = useTicker(true);
   const left = secondsLeft(card.deadline_at, now);
   const canStop = now >= new Date(card.stop_after).getTime() && cats.every((k) => text[k]?.trim());
@@ -187,8 +188,11 @@ function PetitBacWrite({ c, round, send }: { c: Common; round: CRound; send: Sen
     rev.current[k] += 1;
     const r = rev.current[k];
     setSaved((s) => ({ ...s, [k]: false }));
+    setFailed(s=>({...s,[k]:false}));
     void send("save_field", { category_id: k, text: v, draft_revision: r }, true).then((res) => {
-      if (res.ok && rev.current[k] === r) setSaved((s) => ({ ...s, [k]: true }));
+      if(rev.current[k] !== r)return;
+      if (res.ok) setSaved((s) => ({ ...s, [k]: true }));
+      else setFailed(s=>({...s,[k]:true}));
     });
   };
   const wasOnline = useRef(c.online);
@@ -250,6 +254,7 @@ function PetitBacWrite({ c, round, send }: { c: Common; round: CRound; send: Sen
           </div>
         ))}
       </div>
+      {Object.values(failed).some(Boolean) && <Alert kind="info"><div className="stack stack--2"><p>Certaines réponses n’ont pas pu être enregistrées. Elles restent dans cet écran.</p><button type="button" className="btn btn--secondary" disabled={offline || left===0} onClick={()=>{for(const k of cats)if(failed[k])save(k,text[k]??"");}}>Réessayer l’enregistrement</button></div></Alert>}
       <div className="pb-stop">
         <button className="btn" disabled={offline || !canStop || left === 0} onClick={stop}>
           <img src="/assets/premium/M16/stop.svg" alt="" aria-hidden="true" width={22} height={22} />{t("word.pb.stop")}

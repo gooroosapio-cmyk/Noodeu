@@ -456,10 +456,10 @@ export function QuestionnaireResults({ c, navigate }: { c: Common; navigate: (to
       {round && (pack ? <PackResults c={c} /> : <TestDone c={c} round={round} />)}
       {ended && (
         <div className="stack stack--2">
-          <button className="btn" disabled={c.busy || !c.online} onClick={async () => { await c.run("close_session"); navigate(`/bibliotheques/${c.st.session.game_id}`); }}>
+          <button className="btn" disabled={c.busy || !c.online} onClick={async () => { if ((await c.run("close_session")).ok) navigate(`/bibliotheques/${c.st.session.game_id}`); }}>
             {pack ? t("q.pack.continueLater") : t("game.replay")}
           </button>
-          <button className="btn btn--secondary" disabled={c.busy || !c.online} onClick={async () => { await c.run("close_session"); navigate("/bibliotheques"); }}>{t("game.otherGame")}</button>
+          <button className="btn btn--secondary" disabled={c.busy || !c.online} onClick={async () => { if ((await c.run("close_session")).ok) navigate("/bibliotheques"); }}>{t("game.otherGame")}</button>
         </div>
       )}
       <Link className="btn btn--quiet" to="/accueil">{t("game.home")}</Link>

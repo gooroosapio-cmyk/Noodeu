@@ -54,5 +54,13 @@
   "lobby-n2-079": "Points et carrés",
   "lobby-n2-083": "Pierre, feuille, ciseaux",
   "lobby-nd-cite-trois": "Cite trois en 10 secondes",
-  "lobby-nd-de-chanceux": "Le Dé chanceux"
+  "lobby-nd-de-chanceux": "Le Dé chanceux",
+  "progress-n2-076-reveal-1": "playing",
+  "progress-n2-076-results": "ended",
+  "progress-n2-078-results": "ended",
+  "progress-n2-079-results": "ended",
+  "progress-n2-083-reveal-1": "playing",
+  "progress-n2-083-reveal-2": "playing",
+  "progress-n2-083-results": "ended",
+  "progress-nd-de-chanceux-results": "ended"
 }
