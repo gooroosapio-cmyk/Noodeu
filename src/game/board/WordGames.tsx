@@ -194,7 +194,7 @@ function PetitBacWrite({ c, round, send }: { c: Common; round: CRound; send: Sen
   const change = (k: string, v: string) => {
     setText((s) => ({ ...s, [k]: v }));
     clearTimeout(timers.current[k]);
-    timers.current[k] = window.setTimeout(() => save(k, v), 500);
+    timers.current[k] = window.setTimeout(() => save(k, v), 250);
   };
   const stop = () => {
     Object.values(timers.current).forEach((id) => clearTimeout(id));
@@ -203,28 +203,49 @@ function PetitBacWrite({ c, round, send }: { c: Common; round: CRound; send: Sen
     void send("stop", { drafts });
   };
 
+  const filled = cats.filter((k) => text[k]?.trim()).length;
+  const pending = cats.some((k) => !saved[k]);
+  const partner = c.st.players.find((p) => !p.is_me);
   return (
-    <div className="stack stack--4">
+    <div className="stack stack--4 pb">
       <div className="pb-head">
-        <span className="pb-letter" aria-label={t("word.pb.letterIs", { l: card.letter })}>{card.letter}</span>
-        <span className={`pb-time${left <= 15 ? " pb-time--low" : ""}`} role="timer" aria-live={left <= 10 ? "polite" : "off"}>
-          <Icon name="clock" size={18} />{t("word.seconds", { n: left })}
+        <span className="pb-token" aria-label={t("word.pb.letterIs", { l: card.letter })}>
+          <img src="/assets/premium/M16/letter-token.svg" alt="" aria-hidden="true" />
+          <span aria-hidden="true">{card.letter}</span>
         </span>
+        <div className="pb-head__info">
+          <span className={`pb-time${left <= 15 ? " pb-time--low" : ""}`} role="timer" aria-live={left <= 10 ? "polite" : "off"}>
+            {String(Math.floor(left / 60)).padStart(2, "0")}:{String(left % 60).padStart(2, "0")}
+          </span>
+          <span className="t-meta">{t("word.pb.filled", { n: filled, total: cats.length })} · {pending ? t("word.pb.saving") : t("word.pb.saved")}</span>
+        </div>
       </div>
-      <div className="stack stack--3">
+      <div className="pb-grid">
         {cats.map((k) => (
-          <div key={k} className="field pb-field">
-            <label className="field__label row" htmlFor={`pb-${k}`}>
-              <img src={`${PIECES}/categorie-${k}.svg`} alt="" width={28} height={28} />{labels[k] ?? k}
+          <div key={k} className={`pb-cell${text[k]?.trim() ? " is-filled" : ""}`}>
+            <label className="pb-cell__label" htmlFor={`pb-${k}`}>
+              <img src={`/assets/premium/M16/${k}.svg`} alt="" aria-hidden="true" width={22} height={22} />{labels[k] ?? k}
             </label>
-            <input id={`pb-${k}`} className="input" maxLength={80} autoComplete="off" autoCapitalize="words" value={text[k] ?? ""}
-              disabled={offline || left === 0} onChange={(e) => change(k, e.target.value)} onBlur={(e) => { if (!saved[k]) { clearTimeout(timers.current[k]); save(k, e.target.value); } }} />
-            <span className="field__hint">{text[k] ? (saved[k] ? t("word.pb.saved") : t("word.pb.saving")) : t("word.pb.startsWith", { l: card.letter })}</span>
+            <input id={`pb-${k}`} className="input pb-cell__input" type="text" maxLength={80} autoComplete="off" autoCapitalize="words" enterKeyHint="next"
+              placeholder={t("word.pb.placeholder", { l: card.letter })} value={text[k] ?? ""} disabled={offline || left === 0}
+              onChange={(e) => change(k, e.target.value)}
+              onFocus={(e) => { const el = e.currentTarget; window.setTimeout(() => el.scrollIntoView({ block: "center", behavior: "smooth" }), 250); }}
+              onKeyDown={(e) => {
+                if (e.key !== "Enter") return;
+                e.preventDefault();
+                const next = cats[cats.indexOf(k) + 1];
+                if (next) document.getElementById(`pb-${next}`)?.focus();
+              }}
+              onBlur={(e) => { if (!saved[k]) { clearTimeout(timers.current[k]); save(k, e.target.value); } }} />
           </div>
         ))}
       </div>
-      <button className="btn" disabled={offline || !canStop || left === 0} onClick={stop}><Icon name="hand" size={18} />{t("word.pb.stop")}</button>
-      {!canStop && left > 0 && <p className="t-meta center">{t("word.pb.stopHint")}</p>}
+      <div className="pb-stop">
+        <button className="btn" disabled={offline || !canStop || left === 0} onClick={stop}>
+          <img src="/assets/premium/M16/stop.svg" alt="" aria-hidden="true" width={22} height={22} />{t("word.pb.stop")}
+        </button>
+        <p className="t-meta center">{!canStop && left > 0 ? t("word.pb.stopHint8", { total: cats.length }) : t("word.pb.partnerWriting", { name: nameOf(partner) })}</p>
+      </div>
     </div>
   );
 }
@@ -256,7 +277,7 @@ function PetitBacValidation({ c, round, send }: { c: Common; round: CRound; send
         const needSame = !final && a.every((x) => ok(x.e)) && a[0].e.norm !== a[1]?.e.norm && !(a[0].e.acc && a[1]?.e.acc);
         return (
           <section key={k} className="card stack stack--3">
-            <h3 className="t-card row"><img src={`${PIECES}/categorie-${k}.svg`} alt="" width={28} height={28} />{labels[k] ?? k}</h3>
+            <h3 className="t-card row"><img src={`/assets/premium/M16/${k}.svg`} alt="" aria-hidden="true" width={24} height={24} />{labels[k] ?? k}</h3>
             {a.map(({ p, e }) => {
               const st = final ? e.final : e.status;
               return (

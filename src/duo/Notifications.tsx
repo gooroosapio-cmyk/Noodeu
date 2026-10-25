@@ -129,16 +129,17 @@ export function NudgeBanner() {
   const { notifications, markNotificationsRead, activeDuos, active, switchDuo } = useDuo();
   const navigate = useNavigate();
   const { pathname } = useLocation();
-  const seen = useRef<Set<string> | null>(null);
+  const seen = useRef<Set<string>>(new Set());
+  const [openedAt] = useState(() => Date.now());
   const [current, setCurrent] = useState<AppNotification | null>(null);
 
+  // Seules les relances reçues pendant que l'app est ouverte s'affichent ; les plus anciennes restent dans le centre.
   useEffect(() => {
-    const ids = new Set(notifications.map((n) => n.id));
-    if (seen.current === null) { seen.current = ids; return; }
-    const fresh = notifications.find((n) => n.type === "nudge" && !n.read_at && !seen.current!.has(n.id));
-    seen.current = ids;
+    const fresh = notifications.find((n) => n.type === "nudge" && !n.read_at && !seen.current.has(n.id)
+      && new Date(n.created_at).getTime() > openedAt - 5000);
+    notifications.forEach((n) => seen.current.add(n.id));
     if (fresh) setCurrent(fresh);
-  }, [notifications]);
+  }, [notifications, openedAt]);
 
   useEffect(() => {
     if (!current) return;

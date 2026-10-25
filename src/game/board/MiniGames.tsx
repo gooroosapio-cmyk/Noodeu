@@ -192,32 +192,57 @@ function Rps({ c, priv, me, partner, play, busy }: V) {
 // ---------------------------------------------------------------------------
 // Le Dé chanceux : le serveur donne la face ; l'écran ne tire rien.
 // ---------------------------------------------------------------------------
+function PigCounter({ who, value, target, active }: { who: string; value: number; target: number; active: boolean }) {
+  const pct = Math.min(100, (100 * value) / Math.max(1, target));
+  return (
+    <div className={`pig-counter${active ? " is-active" : ""}`}>
+      <span className="pig-counter__who">{who}</span>
+      <span className="pig-counter__val"><strong>{value}</strong>/{target}</span>
+      <span className="pig-counter__bar" aria-hidden="true"><span style={{ width: `${pct}%` }} /></span>
+    </div>
+  );
+}
+
 function Pig({ c, me, partner, play, busy, mine }: V) {
   const last = c.log?.[0];
+  const target = Number(c.target ?? 30);
+  const rolls = (c.rolls as number[] | undefined) ?? [];
+  // Le dé rejoue son animation à chaque nouveau lancer reçu du serveur (jamais avant la réponse).
+  const rollKey = (c.log ?? []).length + ":" + (last?.die ?? last?.hold ?? "");
+  const bust = Boolean(c.bust && last?.die === 1);
   return (
-    <div className="stack stack--4">
-      <Scoreline me={me} partner={partner} values={c.banked} label={t("mini.pig.banked")} />
-      <p className="t-meta center">{t("mini.pig.goal", { n: c.target })}</p>
-      <div className="pig-die" aria-live="polite">
-        {c.die ? <img src={`${PIECES}/de-${c.die}.svg`} alt={t("mini.pig.dieValue", { n: c.die })} width={96} height={96} />
-          : <span className="pig-die__empty" aria-hidden="true" />}
-        <div className="stack stack--2">
-          <span className="t-meta">{t("mini.pig.turnTotal")}</span>
-          <span className="t-score">{c.turn_total}</span>
-          {c.bust && last && <span className="t-small">{t("mini.pig.bust", { name: seatName(me, partner, last.seat) })}</span>}
+    <div className="stack stack--4 pig">
+      <div className="pig-counters">
+        <PigCounter who={nameOf(me)} value={Number(c.banked?.[me.seat] ?? 0)} target={target} active={c.turn === me.seat} />
+        {partner && <PigCounter who={nameOf(partner)} value={Number(c.banked?.[partner.seat] ?? 0)} target={target} active={c.turn === partner.seat} />}
+      </div>
+      <div className="pig-tray" aria-live="polite">
+        <img className="pig-tray__felt" src="/assets/premium/M12/tray.svg" alt="" aria-hidden="true" />
+        <div className="pig-tray__die" key={rollKey}>
+          {c.die ? <img className="pig-die-img" src={`/assets/premium/M12/die-${c.die}.svg`} alt={t("mini.pig.dieValue", { n: c.die })} width={88} height={88} />
+            : <img className="pig-die-img is-idle" src="/assets/premium/M12/die-5.svg" alt="" aria-hidden="true" width={88} height={88} />}
         </div>
       </div>
-      {(c.rolls ?? []).length > 0 && <p className="t-meta">{t("mini.pig.rolls", { list: (c.rolls as number[]).join(" + ") })}</p>}
+      <div className={`pig-pot${bust ? " is-bust" : ""}`}>
+        <img src={`/assets/premium/M12/${bust ? "bust" : "turn-pot"}.svg`} alt="" aria-hidden="true" width={44} height={44} />
+        <div className="grow">
+          <span className="t-meta">{t("mini.pig.turnTotal")}</span>
+          <p className="pig-pot__val">{c.turn_total}</p>
+        </div>
+        {rolls.length > 0 && <span className="t-meta">{rolls.join(" + ")}</span>}
+        {bust && <span className="t-small strong">{t("mini.pig.bust", { name: seatName(me, partner, last.seat) })}</span>}
+      </div>
       {mine ? (
-        <div className="row">
-          <button className="btn grow" disabled={busy} onClick={() => void play("roll")}><Icon name="dices" size={18} />{t("mini.pig.roll")}</button>
-          <button className="btn btn--secondary grow" disabled={busy || c.turn_total <= 0} onClick={() => void play("hold")}>
-            {t("mini.pig.hold", { n: c.turn_total })}
+        <div className="pig-actions">
+          <button className="btn" disabled={busy} aria-busy={busy} onClick={() => void play("roll")}><Icon name="dices" size={18} />{t("mini.pig.roll")}</button>
+          <button className="btn btn--secondary" disabled={busy || c.turn_total <= 0} onClick={() => void play("hold")}>
+            <img src="/assets/premium/M12/bank.svg" alt="" aria-hidden="true" width={22} height={22} />{t("mini.pig.holdPlus", { n: c.turn_total })}
           </button>
         </div>
       ) : (
         <p className="t-small muted center">{t("mini.pig.waiting", { name: nameOf(partner) })}</p>
       )}
+      <p className="t-meta center">{t("mini.pig.goalHold", { n: target })}</p>
     </div>
   );
 }

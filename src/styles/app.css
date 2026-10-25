@@ -967,3 +967,41 @@ button.theatre-tag { min-height: 44px; margin-block: -6px; }
 .nudge-banner .notif__action { margin-top: 0; }
 @keyframes banner-in { from { opacity: 0; transform: translate(-50%, -8px); } to { opacity: 1; transform: translate(-50%, 0); } }
 @media (prefers-reduced-motion: reduce) { .nudge-banner { animation: none; } }
+
+/* M12 · Le comptoir des 30 */
+.pig-counters { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; }
+.pig-counter { display: flex; flex-direction: column; gap: 4px; padding: var(--s-3); border-radius: 16px; background: var(--c-surface); border: 2px solid transparent; }
+.pig-counter.is-active { border-color: var(--u-accent, var(--c-accent)); }
+.pig-counter__who { font: 700 0.75rem/1rem var(--f-heading); color: var(--c-text-2); }
+.pig-counter__val { font-size: 0.875rem; color: var(--c-text-2); }
+.pig-counter__val strong { font: 800 1.5rem/1.75rem var(--f-heading); color: var(--c-text); }
+.pig-counter__bar { height: 6px; border-radius: 3px; background: var(--c-chip); overflow: hidden; }
+.pig-counter__bar span { display: block; height: 100%; background: var(--u-accent, var(--c-accent)); transition: width 240ms cubic-bezier(.2,.8,.2,1); }
+.pig-tray { position: relative; display: grid; place-items: center; aspect-ratio: 320 / 226; max-width: 360px; width: 100%; margin-inline: auto; }
+.pig-tray__felt { position: absolute; inset: 0; width: 100%; height: 100%; }
+.pig-tray__die { position: relative; animation: die-roll 420ms cubic-bezier(.2,.8,.2,1) both; }
+.pig-die-img { display: block; filter: drop-shadow(0 6px 6px rgb(48 40 62 / 18%)); }
+.pig-die-img.is-idle { opacity: .55; }
+@keyframes die-roll { 0% { transform: translate(-40px, -20px) rotate(-200deg) scale(.85); } 70% { transform: translate(4px, 2px) rotate(12deg); } 100% { transform: none; } }
+.pig-pot { display: flex; align-items: center; gap: var(--s-3); padding: var(--s-3) var(--s-4); border-radius: 18px; background: var(--c-surface); flex-wrap: wrap; }
+.pig-pot__val { font: 800 1.75rem/2rem var(--f-heading); }
+.pig-pot.is-bust { background: #FBE7EA; animation: pot-out 180ms ease-out; }
+@keyframes pot-out { from { transform: scale(1.03); } }
+.pig-actions { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; }
+@media (prefers-reduced-motion: reduce) { .pig-tray__die, .pig-pot.is-bust { animation: none; } }
+
+/* M16 · L'atelier des idées : carnet 2 × 4 */
+.pb-head { display: flex; align-items: center; gap: var(--s-4); }
+.pb-token { position: relative; display: grid; place-items: center; width: 72px; height: 72px; flex: none; }
+.pb-token img { position: absolute; inset: 0; width: 100%; height: 100%; }
+.pb-token span { position: relative; font: 800 2.25rem/1 var(--f-heading); color: var(--u-accent, #86552D); }
+.pb-head__info { display: flex; flex-direction: column; gap: 2px; }
+.pb .pb-time { font: 800 1.75rem/2rem var(--f-heading); font-variant-numeric: tabular-nums; color: var(--c-text); background: none; padding: 0; }
+.pb .pb-time--low { color: var(--c-danger); }
+.pb-grid { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 10px; }
+.pb-cell { display: flex; flex-direction: column; gap: 6px; min-height: 90px; padding: 10px; border-radius: 16px; background: #FFFDF8;
+  border: 1px solid color-mix(in srgb, var(--u-accent, #86552D) 22%, transparent); box-shadow: 0 2px 0 color-mix(in srgb, var(--u-accent, #86552D) 12%, transparent); }
+.pb-cell.is-filled { background: #FFF9EC; }
+.pb-cell__label { display: flex; align-items: center; gap: 6px; font: 700 0.75rem/1rem var(--f-heading); color: var(--c-text); overflow-wrap: anywhere; }
+.pb-cell__input { min-height: 48px; font-size: 1rem; line-height: 1.5rem; padding-inline: 10px; min-width: 0; width: 100%; }
+.pb-stop { position: sticky; bottom: 8px; display: flex; flex-direction: column; gap: 6px; padding: var(--s-2) 0; }
