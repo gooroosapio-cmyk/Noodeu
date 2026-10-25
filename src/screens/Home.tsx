@@ -9,7 +9,6 @@ import { PendingRequest, useInviteActions } from "../duo/InviteScreens";
 import { Alert, Art, ConfirmDialog, Icon, PageLoading, Sheet, formatDate } from "../components/ui";
 import { GameThumb, TileGrid } from "./Libraries";
 import { useCatalog } from "./catalog";
-import { DailyCard } from "../parcours/DailyCard";
 
 function PendingInvitationCard() {
   const { out, share, copy, revoke } = useInviteActions();
@@ -126,8 +125,6 @@ export function Home() {
           </Link>
         </section>
       )}
-
-      <DailyCard />
 
       {favorites.length > 0 && (
         <section className="section" aria-labelledby="home-fav">
