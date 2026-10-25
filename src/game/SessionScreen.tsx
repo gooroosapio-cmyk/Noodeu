@@ -269,13 +269,10 @@ function Lobby({ st, me, partner, partnerHere, busy, online, run, onOptions }: {
       ))}
       </div>
       {Object.keys(settings).length>0 && <p className="t-meta">{t("game.settingsReset")}</p>}
-      <LobbyFacts st={st} />
-
       <div className="action-bar">
         <button className="btn" disabled={busy || !online || launching} onClick={() => { if(me?.ready) void run("set_ready",{p_ready:false}); else setLaunching(true); }}>
           {launching ? "Préparation…" : busy ? t("common.sending") : me?.ready ? t("game.notReady") : t("game.ready")}
         </button>
-        <p className="t-meta center">{t("game.lobbyText")}</p>
       </div>
       {me?.ready && partner && !partner.ready && <NudgeButton st={st} partner={partner} />}
       {launching && me && <LaunchFilm sessionId={st.session.id} userId={me.user_id ?? `seat-${me.seat}`} title={st.game.title} onComplete={() => { setLaunching(false); if(online) void run("set_ready",{p_ready:true}); }} />}

@@ -33,7 +33,7 @@ const messages: Record<string, string> = {
   already_submitted: "Ta réponse était déjà enregistrée.",
   previous_step_missing: "Termine d'abord l'étape précédente.",
   invalid_answer: "Choisis exactement le nombre de mots demandé.",
-  not_enough_cards: "Ce jeu n'a pas assez de cartes publiées pour l'instant.",
+  not_enough_cards: "Pas assez de cartes disponibles pour ces réglages.",
   session_closed: "Ce duo est archivé : la discussion est en lecture seule.",
   invalid_message: "Ton message est vide ou trop long (1000 caractères maximum).",
   not_ended: "La partie n'est pas encore terminée.",

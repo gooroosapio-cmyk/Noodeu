@@ -1311,3 +1311,26 @@ html.reduced-motion .page-loading__logo { animation:none; }
  .home-duo-card__who .avatar { transition:transform .18s ease; }
  .home-duo-card__who:hover .avatar { transform:rotate(0deg) translateY(-2px); }
 }
+/* Lot6 : paire sans emblème, cartes de même famille, commandes de tirage alignées. */
+.duo-id__pair { justify-content:center; gap:28px; }
+.home-duo-card__who .duo-id__pair { gap:32px; }
+.cat-banner:not(.cat-banner--lavender):not(.cat-banner--butter) { background:#F4E3E8; color:var(--c-text); box-shadow:0 2px 0 #E6CAD3; }
+.cat-banner:not(.cat-banner--lavender):not(.cat-banner--butter) .cat-banner__text,
+.cat-banner:not(.cat-banner--lavender):not(.cat-banner--butter) > .icon { color:var(--c-text-2); }
+.cat-banner:not(.cat-banner--lavender):not(.cat-banner--butter) .art { background:transparent; padding:0; border-radius:0; }
+.random-counts { display:grid; grid-template-columns:repeat(3,minmax(0,1fr)); gap:6px; }
+.random-counts .chip { min-width:0; width:100%; min-height:44px; height:100%; padding:8px 4px; white-space:normal; text-align:center; }
+.stage { width:100%; margin-inline:auto; }
+.rps,.simon-grid,.pig-die,.word-grid,.letter-row { margin-inline:auto; }
+.rps { width:min(100%,440px); }
+.simon-grid { width:min(100%,360px); }
+.pig-die { width:min(100%,440px); }
+.board-scroll { margin-inline:auto; }
+.gtile { text-align:center; }
+.gtile .gtile__title { text-align:center; }
+.gtile { align-items:center; min-height:132px; padding:12px; gap:8px; }
+.gtile__title { max-width:100%; width:100%; }
+.gtile .art { position:static; transform:none; width:80px; height:72px; margin-top:auto; }
+.gtile__soon { align-self:center; }
+/* Les réglages restent lisibles quand le salon nécessite un défilement. */
+.lobby .action-bar { position:static; }

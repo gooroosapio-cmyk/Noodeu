@@ -13,7 +13,7 @@ const catalogue = fixture("catalogue.json");
 // Catalogue final : questionnaire aléatoire de « Se découvrir » (bouton dédié, jamais listé comme un pack).
 if (!catalogue.games.some((g) => g.id === "ND-Q-RND1")) {
   catalogue.games.push({ ...catalogue.games.find((g) => g.mechanic === "pack_conversation"), id: "ND-Q-RND1", title: "Questionnaire aléatoire",
-    sort: 0, meta: { random: true, code: "RND1" }, implementation: "playable" });
+    sort: 0, adult_available: true, content_level: "standard", meta: { random: true, code: "RND1" }, implementation: "playable" });
 }
 const playable = Object.keys(fixture("index.json"));
 

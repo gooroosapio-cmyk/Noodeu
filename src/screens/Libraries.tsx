@@ -308,11 +308,12 @@ function RandomLauncher({ game }: { game: Game }) {
           <h2 className="t-card" id="rnd-title">{t("lib.random.title")}</h2>
         </div>
       </div>
-      <div className="chips" role="radiogroup" aria-label={t("lib.random.count")}>
+      <div className="random-counts" role="radiogroup" aria-label={t("lib.random.count")}>
         {COUNTS.map((c) => (
           <button key={c} type="button" className="chip" role="radio" aria-checked={n === c} onClick={() => setN(c)}>{t("lib.random.n", { n: c })}</button>
         ))}
       </div>
+      {game.adult_available && <p className="t-meta row"><Icon name="info" size={16} />{t("game.sexualContent")}</p>}
       {error && <Alert>{error}</Alert>}
       {active
         ? <button className="btn" disabled={busy || !online} onClick={() => void launch(game.id, game.title, { questions: n })}>{busy ? t("common.sending") : t("lib.random.go", { n })}<Icon name="arrow-right" /></button>
