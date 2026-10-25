@@ -1,0 +1,59 @@
+{
+  "generation": "ImageGen, 2026-10-25, inspected locally",
+  "sources": [
+    {
+      "name": "exec-2041c335-fd10-4812-95f1-7686c6164c83.png",
+      "sha256": "b09d46cc13682e46af7f8fd49bc94a85d3e9dfef70c512df6fb4d6403d147abf"
+    },
+    {
+      "name": "exec-6ff4d6e0-7553-477e-9a67-4bced2a70b38.png",
+      "sha256": "ce9a7d2b236f27c01c69d9d68da30f5ec62fd936f7c8465cf65fbbbb3d23284d"
+    }
+  ],
+  "files": [
+    {
+      "file": "duo-cover.webp",
+      "sha256": "6c3ec254529e06f0d21e6dda1a0ab8e981f13392af8b71876da8a175ebf9500c",
+      "width": 1400,
+      "height": 560,
+      "bytes": 175658,
+      "decorative": true,
+      "source": "exec-2041c335-fd10-4812-95f1-7686c6164c83.png",
+      "usage": "duo_cover",
+      "license_status": "generated_for_project_no_third_party_asset_copied"
+    },
+    {
+      "file": "pfc-paper.webp",
+      "sha256": "61ce93e858864706d5947df732c75ca94bafa6665150befe447cc643e815b741",
+      "width": 272,
+      "height": 272,
+      "bytes": 11582,
+      "decorative": true,
+      "source": "exec-6ff4d6e0-7553-477e-9a67-4bced2a70b38.png",
+      "usage": "rps_gesture",
+      "license_status": "generated_for_project_no_third_party_asset_copied"
+    },
+    {
+      "file": "pfc-rock.webp",
+      "sha256": "78edaec734294d9490dfae6164ae91e712e59bcb9fbf9a4cbd6082191aa6c9bf",
+      "width": 272,
+      "height": 272,
+      "bytes": 9572,
+      "decorative": true,
+      "source": "exec-6ff4d6e0-7553-477e-9a67-4bced2a70b38.png",
+      "usage": "rps_gesture",
+      "license_status": "generated_for_project_no_third_party_asset_copied"
+    },
+    {
+      "file": "pfc-scissors.webp",
+      "sha256": "087ce722b253690c7892e826e81c3669e16c157c88d19c37e8379331248b8854",
+      "width": 272,
+      "height": 272,
+      "bytes": 8714,
+      "decorative": true,
+      "source": "exec-6ff4d6e0-7553-477e-9a67-4bced2a70b38.png",
+      "usage": "rps_gesture",
+      "license_status": "generated_for_project_no_third_party_asset_copied"
+    }
+  ]
+}

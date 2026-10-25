@@ -2,11 +2,12 @@
 // Deux vérités et un mensonge, version 2 (« Le petit théâtre ») : écriture simultanée en coulisses,
 // « OK, je suis prêt », puis devinette simultanée sur scène. Le serveur ne transmet les textes de l'autre
 // qu'une fois les deux prêts, et les mensonges qu'après les deux choix.
-import { useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import { t } from "../../i18n";
 import { rpc } from "../../lib/supabase";
 import { Icon } from "../../components/ui";
 import type { Player, SessionState } from "../../lib/types";
+import { useDraft } from "../useSession";
 import { NudgeButton } from "./Nudge";
 
 type J = any;
@@ -19,9 +20,12 @@ export function theatreScore(st: SessionState, seat: number) {
   return (st.rounds as unknown as { card: J }[]).reduce((n, r) => n + (r.card?.done && !r.card.skipped ? Number(r.card.scores?.[seat] ?? 0) : 0), 0);
 }
 
-function Backstage({ busy, play, sessionId, partner }: { busy: boolean; play: Play; sessionId: string; partner?: Player }) {
-  const [texts, setTexts] = useState(["", "", ""]);
-  const [lie, setLie] = useState<string | null>(null);
+function Backstage({ busy, play, sessionId, partner, draft, updateDraft }: { busy: boolean; play: Play; sessionId: string; partner?: Player; draft: string[]; updateDraft: (value: string[]) => void }) {
+  const texts = IDS.map((_, i) => draft[i] ?? "");
+  const lie = draft[3] || null;
+  const setTexts = (next: string[]) => updateDraft([...next, lie ?? ""]);
+  const setLie = (next: string | null) => updateDraft([...texts, next ?? ""]);
+  const submitting = useRef(false);
   const [idea, setIdea] = useState<string | null>(null);
   const filled = texts.every((x) => x.trim());
   const distinct = new Set(texts.map((x) => x.trim().toLowerCase())).size === 3;
@@ -30,7 +34,11 @@ function Backstage({ busy, play, sessionId, partner }: { busy: boolean; play: Pl
   return (
     <form className="stack stack--4" onSubmit={(e) => {
       e.preventDefault();
-      if (ready) void play("publish_three", { confirmed_truths: true, lie_statement_id: lie, statements: texts.map((x, i) => ({ id: IDS[i], text: x.trim() })) });
+      if (ready && !busy && !submitting.current) {
+        submitting.current = true;
+        void play("publish_three", { confirmed_truths: true, lie_statement_id: lie, statements: texts.map((x, i) => ({ id: IDS[i], text: x.trim() })) })
+          .finally(() => { submitting.current = false; });
+      }
     }}>
       <div className="stack stack--1">
         <h2 className="q-title">{t("tt2.writeTitle")}</h2>
@@ -87,11 +95,13 @@ export function TwoTruthsTheatre({ st, card, priv, me, partner, busy, play }: {
   st: SessionState; card: J; priv: J; me: Player; partner?: Player; busy: boolean; play: Play;
 }) {
   const [guess, setGuess] = useState<string | null>(null);
+  const [draft, updateDraft, clearDraft] = useDraft(`two-truths:${me.user_id}:${st.session.id}:${st.session.current_round}`);
+  useEffect(() => { if (card.phase !== "write") clearDraft(); }, [card.phase, clearDraft]);
   const meReady = Boolean(card.ready?.[me.seat]);
   const meGuessed = Boolean(card.guessed?.[me.seat]);
   const theirs: { id: string; text: string }[] = partner ? card.statements?.[partner.seat] ?? [] : [];
 
-  if (card.phase === "write" && !meReady) return <Backstage busy={busy} play={play} sessionId={st.session.id} partner={partner} />;
+  if (card.phase === "write" && !meReady) return <Backstage busy={busy} play={play} sessionId={st.session.id} partner={partner} draft={draft} updateDraft={updateDraft} />;
 
   if (card.phase === "write") {
     return (

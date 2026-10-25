@@ -171,7 +171,7 @@ function Rps({ c, priv, me, partner, play, busy }: V) {
           return (
             <button key={g.id} type="button" role="radio" aria-checked={selected} className="rps__choice"
               disabled={busy || locked || left === 0} onClick={() => setPick(g.id)}>
-              <img src={`${PREMIUM}/M11/${g.img}.svg`} alt="" width={72} height={72} />
+              <img src={`/assets/original/pfc-${g.id}.webp`} alt="" width={72} height={72} />
               <span>{t(`mini.rps.${g.id}` as never)}</span>
             </button>
           );
@@ -443,7 +443,7 @@ export function MiniSolution({ c, players }: { c: J; players: Player[] }) {
             const g = GESTURES.find((x) => x.id === c.gestures[p!.seat]);
             return (
               <div key={p!.seat} className="rps__choice" aria-label={`${nameOf(p)} : ${t(`mini.rps.${g?.id}` as never)}`}>
-                <img src={`${PREMIUM}/M11/${g?.img ?? "hidden"}.svg`} alt="" width={72} height={72} />
+                <img src={g ? `/assets/original/pfc-${g.id}.webp` : `${PREMIUM}/M11/hidden.svg`} alt="" width={72} height={72} />
                 <span>{nameOf(p)}</span>
               </div>
             );

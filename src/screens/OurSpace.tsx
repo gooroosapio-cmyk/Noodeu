@@ -11,6 +11,7 @@ import { useShell } from "../components/AppShell";
 import { Avatar } from "../components/Avatar";
 import { Alert, ConfirmDialog, Icon, Loading, PageLoading, Sheet, formatDate, useToast } from "../components/ui";
 import type { ChatMessage } from "../lib/types";
+import { DuoDashboard } from "../duo/DuoDashboard";
 import { MyItems, ProgressSection } from "../parcours/Progress";
 
 interface HistoryItem {
@@ -41,22 +42,32 @@ function DuoSelector({ duos, selected, onSelect }: { duos: DuoSummary[]; selecte
 }
 
 function History({ coupleId }: { coupleId: string }) {
+  const [onlyKept, setOnlyKept] = useState(false);
   const [items, setItems] = useState<HistoryItem[] | null>(null);
   const [error, setError] = useState(false);
   useEffect(() => {
-    setItems(null);
+    let cancelled = false;
+    setItems(null); setError(false);
     void supabase.from("game_sessions")
       .select("id, status, created_at, ended_at, games(title), session_players(keep_memory)")
       .eq("couple_id", coupleId).in("status", ["ended", "closed", "abandoned"])
       .order("created_at", { ascending: false }).limit(30)
-      .then(({ data, error: e }) => { setError(Boolean(e)); setItems((data as unknown as HistoryItem[]) ?? []); });
+      .then(({ data, error: e }) => { if (!cancelled) { setError(Boolean(e)); setItems((data as unknown as HistoryItem[]) ?? []); } });
+    return () => { cancelled = true; };
   }, [coupleId]);
   if (error) return <Alert>{t("net.loadError")}</Alert>;
   if (!items) return <Loading />;
   if (!items.length) return <p className="t-small muted">{t("space.historyEmpty")}</p>;
   return (
-    <ul className="list">
-      {items.map((h) => {
+    <div className="stack stack--3">
+      <div className="action-pair" aria-label="Afficher les parties">
+        <button className="chip" aria-pressed={!onlyKept} onClick={() => setOnlyKept(false)}>Parties récentes</button>
+        <button className="chip" aria-pressed={onlyKept} onClick={() => setOnlyKept(true)}><Icon name="heart" size={18} />Coffre à souvenirs</button>
+      </div>
+      <p className="t-meta">{onlyKept ? 'Uniquement les parties que vous avez tous les deux choisi de garder.' : 'Les 30 dernières parties de ce duo.'}</p>
+      {onlyKept && !items.some(h => h.session_players.length === 2 && h.session_players.every(p => p.keep_memory)) && <p className="t-small muted">Votre coffre attend son premier souvenir partagé.</p>}
+      <ul className="list">
+      {items.filter(h => !onlyKept || (h.session_players.length === 2 && h.session_players.every(p => p.keep_memory))).map((h) => {
         const kept = h.session_players.length === 2 && h.session_players.every((p) => p.keep_memory);
         const label = h.status === "abandoned" ? t("space.abandoned") : h.status === "ended" ? t("game.endTitle") : kept ? t("space.kept") : t("space.notKept");
         const body = (
@@ -72,6 +83,7 @@ function History({ coupleId }: { coupleId: string }) {
         return <li key={h.id}>{h.status === "abandoned" ? <div className="list-row">{body}</div> : <Link className="list-row" to={`/partie/${h.id}`}>{body}</Link>}</li>;
       })}
     </ul>
+    </div>
   );
 }
 
@@ -129,7 +141,10 @@ export function OurSpace() {
       {error && <Alert>{error}</Alert>}
 
       {duo.duos.length > 1 && selectedId && (
-        <DuoSelector duos={duo.duos} selected={selectedId} onSelect={(id) => setParams({ duo: id }, { replace: true })} />
+        <details className="disclosure space-selector">
+          <summary><span>Espace avec {partnerName}</span><Icon name="chevron-down" /></summary>
+          <DuoSelector duos={duo.duos} selected={selectedId} onSelect={(id) => setParams({ duo: id }, { replace: true })} />
+        </details>
       )}
 
       {!selected ? (
@@ -142,7 +157,8 @@ export function OurSpace() {
           <Link className="btn" to="/inviter">{t("duo.invite")}</Link>
         </section>
       ) : (
-        <section className="card stack stack--4">
+        <DuoDashboard key={selected.id} coupleId={selected.id} active={selected.active} partner={partnerName}>
+        <section className="space-duo-summary stack stack--3">
           <DuoIdentity duo={selected} online={selected.active && duo.partnerOnline} />
           <ul className="t-meta plain-list">
             {selected.episodes.map((e, i) => (
@@ -190,12 +206,13 @@ export function OurSpace() {
             </div>
           )}
         </section>
+        </DuoDashboard>
       )}
 
       {selected && (
         <section className="section">
           <h2 className="t-section">{t("space.history")}</h2>
-          <History coupleId={selected.id} />
+          <History key={selected.id} coupleId={selected.id} />
         </section>
       )}
 

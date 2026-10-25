@@ -191,6 +191,15 @@ function PetitBacWrite({ c, round, send }: { c: Common; round: CRound; send: Sen
       if (res.ok && rev.current[k] === r) setSaved((s) => ({ ...s, [k]: true }));
     });
   };
+  const wasOnline = useRef(c.online);
+  useEffect(() => {
+    if (c.online && !wasOnline.current && left > 0) {
+      for (const k of cats) if (!saved[k]) save(k, text[k] ?? "");
+    }
+    wasOnline.current = c.online;
+    // Les valeurs courantes sont reprises au retour réseau, sans réinitialiser le chrono serveur.
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [c.online]);
   const change = (k: string, v: string) => {
     setText((s) => ({ ...s, [k]: v }));
     clearTimeout(timers.current[k]);
@@ -229,7 +238,7 @@ function PetitBacWrite({ c, round, send }: { c: Common; round: CRound; send: Sen
             <input id={`pb-${k}`} className="input pb-cell__input" type="text" maxLength={80} autoComplete="off" autoCapitalize="words" enterKeyHint="next"
               placeholder={t("word.pb.placeholder", { l: card.letter })} value={text[k] ?? ""} disabled={offline || left === 0}
               onChange={(e) => change(k, e.target.value)}
-              onFocus={(e) => { const el = e.currentTarget; window.setTimeout(() => el.scrollIntoView({ block: "center", behavior: "smooth" }), 250); }}
+              onFocus={(e) => { const el = e.currentTarget; window.setTimeout(() => el.scrollIntoView({ block: "center", behavior: window.matchMedia("(prefers-reduced-motion: reduce)").matches || document.documentElement.classList.contains("reduced-motion") ? "instant" : "smooth" }), 250); }}
               onKeyDown={(e) => {
                 if (e.key !== "Enter") return;
                 e.preventDefault();

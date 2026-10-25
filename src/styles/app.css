@@ -1074,3 +1074,54 @@ button.theatre-tag { min-height: 44px; margin-block: -6px; }
 @media (prefers-reduced-motion: reduce) { .reveal__tile, .reveal__ribbon, .reveal__envelope { animation: none; } .seal { transition: none; } }
 /* Rythme (N2-053) : 2 rangées de 4 temps sur petit écran, cibles d'au moins 44 px. */
 @media (max-width: 430px) { .beats { grid-template-columns: repeat(4, 1fr); gap: 6px; } .beat { min-height: 44px; } }
+
+/* Actions de même rang : dimensions égales et texte libre de revenir à la ligne. */
+.action-pair { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 12px; }
+.action-pair .btn { width: 100%; min-width: 0; white-space: normal; overflow-wrap: anywhere; }
+.invitation-summary { display: flex; align-items: center; gap: 16px; padding: 16px; background: var(--c-peach); border-radius: 16px; }
+.invitation-summary > div { min-width: 0; overflow-wrap: anywhere; }
+
+/* Tableau de bord : une scène réservée à la couverture, jamais derrière les champs. */
+.duo-dashboard { border-radius: 20px; overflow: hidden; background: var(--c-surface); border: 1px solid var(--c-border); }
+.duo-dashboard__body { padding: 16px; }
+.duo-cover { position: relative; background: #eee2d8; }
+.duo-cover > img { width: 100%; height: auto; aspect-ratio: 2 / 1; object-fit: cover; object-position: center 57%; display: block; }
+.duo-cover__caption { background: #f6eee6; padding: 12px 16px; }
+.duo-cover__caption .t-meta { letter-spacing: .08em; }
+.duo-notes { list-style: none; padding: 0; margin: 0; display: grid; gap: 8px; }
+.duo-notes .choice { background: #fffaf0; border-color: transparent; align-items: flex-start; }
+.duo-notes .choice__text { min-width: 0; overflow-wrap: anywhere; }
+.duo-notes .is-done .choice__text > span { text-decoration: line-through; color: var(--c-text-2); }
+@media (min-width: 768px) { .duo-cover > img { aspect-ratio: 5 / 2; } }
+/* La bulle reste flottante mais suit la colonne de lecture sur grand écran. */
+.chat-launcher { right: max(16px, calc((100vw - 632px) / 2 + 16px)); color: white; }
+
+body:has([role="dialog"]) .chat-launcher { visibility: hidden; }
+.btn { white-space: normal; overflow-wrap: anywhere; }
+.pb-grid { grid-template-columns: repeat(auto-fit, minmax(min(100%, 9rem), 1fr)); }
+
+.audio-answer { padding: 12px; background: var(--c-surface-soft); border-radius: 12px; }
+audio { display: block; width: 100%; min-width: 0; }
+
+.space-selector { margin-bottom: 0; }
+.space-duo-summary { border-bottom: 1px solid var(--c-border); padding-bottom: 16px; }
+.space-duo-summary .duo-identity { margin: 0; }
+
+/* La bulle flotte dans sa propre zone réservée : aucun champ ni bouton ne passe dessous. */
+.shell { height: 100dvh; min-height: 0; overflow: hidden; padding-bottom: var(--nav-total); }
+.shell > .topbar { flex: none; }
+.shell > main { flex: 1; min-height: 0; overflow-y: auto; overscroll-behavior-y: contain; padding-bottom: 24px; }
+.chat-dock { flex: none; width: 100%; max-width: calc(var(--shell) + 2 * var(--gutter)); margin: 0 auto;
+ display: flex; align-items: center; justify-content: space-between; padding: 8px var(--gutter) 12px; background: var(--c-bg); }
+.chat-dock .chat-launcher { position: relative; right: auto; bottom: auto; flex: none; }
+.section__head .btn { white-space: normal; }
+.topbar__title { white-space: normal; overflow: visible; text-overflow: clip; }
+
+.health-resources a { display: inline-flex; align-items: center; min-height: 44px; min-width: 44px; }
+/* Recomposition premium : pas de grands arcs géométriques derrière les commandes. */
+.stage { background: color-mix(in srgb, var(--u-tint, var(--c-lavender)) 38%, var(--c-surface)); border: 1px solid var(--c-border); }
+.stage__heading { display: flex; align-items: center; justify-content: center; min-height: 24px; }
+.stage__hero { object-fit: contain; }
+.stage--M11 .rps__choice { background: var(--c-surface); border-radius: 18px; }
+.stage--M11 .rps__choice[aria-checked="true"] { background: #FFF5E9; }
+.shell > main { grid-auto-rows: max-content; }

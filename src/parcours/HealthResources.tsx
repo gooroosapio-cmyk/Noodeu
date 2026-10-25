@@ -38,7 +38,7 @@ export function HealthResources() {
   const country = profile?.country ?? null;
   const list = country ? RESOURCES[country] : null;
   return (
-    <section className="card stack stack--4" aria-labelledby="health-title">
+    <section className="card stack stack--4 health-resources" aria-labelledby="health-title">
       <h2 className="t-card row" id="health-title"><Icon name="shield-check" size={20} />{t("health.title")}</h2>
       {!country ? (
         <p className="t-small">{t("health.noCountry")} <Link to="/reglages">{t("health.setCountry")}</Link></p>

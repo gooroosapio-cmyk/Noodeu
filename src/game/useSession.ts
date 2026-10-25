@@ -18,9 +18,14 @@ export function useSession(sessionId: string, userId: string | null) {
   const [channel, setChannel] = useState<ChannelStatus>("connecting");
   const [present, setPresent] = useState<string[]>([]);
   const versionRef = useRef(0);
+  const contextKey = `${sessionId}:${userId ?? ""}`;
+  const contextRef = useRef(contextKey);
+  contextRef.current = contextKey;
 
   const load = useCallback(async () => {
+    const requestedContext = `${sessionId}:${userId ?? ""}`;
     const res = await rpc<SessionState>("get_session_state", { p_session: sessionId });
+    if (contextRef.current !== requestedContext) return;
     setLoading(false);
     if (!res.ok) {
       if (res.error !== "network") setError(res.error);
@@ -33,11 +38,12 @@ export function useSession(sessionId: string, userId: string | null) {
       setState(next);
       setError(null);
     }
-  }, [sessionId]);
+  }, [sessionId, userId]);
 
   useEffect(() => {
     versionRef.current = 0;
     setLoading(true);
+    setState(null); setError(null); setPresent([]);
     void load();
     return onResume(() => void load());
   }, [load]);
@@ -76,7 +82,8 @@ export function useSession(sessionId: string, userId: string | null) {
     [sessionId, load],
   );
 
-  return { state, error, loading, channel, present, load, act };
+  const currentState = state?.session.id === sessionId ? state : null;
+  return { state: currentState, error, loading: loading || (state !== null && currentState === null), channel, present, load, act };
 }
 
 /** Brouillon local d'une étape (survit au rafraîchissement, effacé à la fermeture de l'onglet). */

@@ -81,7 +81,10 @@ export function AppShell() {
         <TopBar onOpenNotifications={() => setPanel("notifications")} />
         <Outlet />
         <BottomNav />
-        {panel === null && <ChatLauncher onOpen={() => setPanel("chat")} />}
+        <div className="chat-dock" aria-label="Discussion permanente du duo">
+          <span className="t-small muted">Votre discussion</span>
+          <ChatLauncher onOpen={() => setPanel("chat")} />
+        </div>
         {panel === "chat" && <ChatPanel onClose={() => setPanel(null)} />}
         {panel === "notifications" && <NotificationCenter onClose={() => setPanel(null)} onOpenChat={() => setPanel("chat")} />}
       </div>

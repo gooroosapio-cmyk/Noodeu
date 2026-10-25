@@ -90,6 +90,7 @@ export function DuoProvider({ children }: { children: ReactNode }) {
   const active = activeDuos.find((d) => d.current) ?? activeDuos[0] ?? null;
   const activeId = active?.id ?? null;
   const activeRef = useRef<string | null>(null);
+  const refreshGeneration = useRef(0);
   activeRef.current = activeId;
 
   const loadNotifications = useCallback(async () => {
@@ -120,11 +121,13 @@ export function DuoProvider({ children }: { children: ReactNode }) {
 
   const refresh = useCallback(async () => {
     if (!userId) return;
+    const request = ++refreshGeneration.current;
     const [d, inv, open] = await Promise.all([
       supabase.rpc("get_my_duos"),
       supabase.rpc("get_invitation_status"),
       supabase.rpc("get_open_session"),
     ]);
+    if (request !== refreshGeneration.current) return;
     if (d.error) {
       setError(true);
       setLoading(false);
