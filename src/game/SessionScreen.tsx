@@ -6,7 +6,7 @@ import { rpc } from "../lib/supabase";
 import { useOnline } from "../lib/useOnline";
 import { useAuth } from "../auth/AuthProvider";
 import { useDuo } from "../duo/DuoProvider";
-import { ChatPanel } from "../duo/Chat";
+import { ChatPanel, ChatLauncher } from "../duo/Chat";
 import { SubPage } from "../components/AppShell";
 import { Avatar } from "../components/Avatar";
 import { Alert, Art, ConfirmDialog, Icon, Illustration, Loading, PageLoading, Sheet } from "../components/ui";
@@ -79,7 +79,6 @@ export function SessionScreen() {
   const partner = st.players.find((p) => !p.is_me);
   const partnerName = partner?.display_name || "?";
   const partnerHere = Boolean(partner?.user_id && s.present.includes(partner.user_id));
-  const live = ["lobby", "playing", "paused", "ended"].includes(st.session.status) && !st.session.read_only;
   const rounds = isRounds(st);
   const board = isBoard(st);
   const questionnaire = board && isQuestionnaireMech((st.game.config as unknown as { mechanic?: string }).mechanic);
@@ -93,18 +92,11 @@ export function SessionScreen() {
   const showOptions = rounds && hasOptions(st) && ["lobby", "playing", "paused"].includes(st.session.status) && !st.session.read_only;
 
   return (
-    <SubPage
+    <SubPage chatManaged
       backTo="/accueil"
       title={st.session.status === "lobby" ? t("game.roomTitle") : st.game.title}
       actions={
         <>
-          {live && (
-            <button className="icon-btn icon-btn--soft" onClick={() => setChat(true)}
-              aria-label={duo.chatUnread ? t("chat.openUnread", { n: duo.chatUnread }) : t("game.chat")}>
-              <Icon name="chat" />
-              {duo.chatUnread > 0 && <span className="badge-count" aria-hidden="true">{duo.chatUnread}</span>}
-            </button>
-          )}
           {showOptions && (
             <button className="icon-btn icon-btn--soft" onClick={() => setOptions(true)} aria-label={t("rounds.options")}>
               <Icon name="settings" />
@@ -119,7 +111,7 @@ export function SessionScreen() {
         </>
       }
     >
-      <main className="page page--bare page--read">
+      <main className="page page--bare page--read session-with-chat">
         <div className="session-exit">
           {["lobby", "playing", "paused"].includes(st.session.status) && !st.session.read_only
             ? <button className="btn btn--secondary" disabled={busy} onClick={() => setConfirmQuit(true)}><Icon name="logout" size={18} />Quitter la partie</button>
@@ -128,7 +120,7 @@ export function SessionScreen() {
         <ConnectionNotice online={online} channel={s.channel} networkError={s.error === "network"} onRetry={() => void s.load()} />
         {actionError && <Alert>{actionError}</Alert>}
 
-        {st.session.status === "lobby" && <Lobby st={st} me={me} partner={partner} partnerHere={partnerHere} busy={busy} online={online} run={run} onChat={() => setChat(true)}
+        {st.session.status === "lobby" && <Lobby st={st} me={me} partner={partner} partnerHere={partnerHere} busy={busy} online={online} run={run}
           onOptions={showOptions ? () => setOptions(true) : undefined} />}
         {st.session.status === "playing" && adultStart && <Alert kind="info"><Icon name="shield-check" size={18} />{t("rhythm.adultBanner")}</Alert>}
         {st.session.status === "playing" && <Stage u={universe} compact>{word ? <WordPlaying c={common} /> : conversation ? <ConversationPlaying c={common} /> : questionnaire ? <QuestionnairePlaying c={common} /> : board ? <BoardPlaying {...common} /> : rounds ? <RoundsPlaying {...common} /> : <Playing st={st} partnerName={partnerName} partner={partner} busy={busy} online={online} run={run} />}</Stage>}
@@ -165,6 +157,7 @@ export function SessionScreen() {
           {actionError && <Alert>{actionError}</Alert>}
         </ConfirmDialog>
       )}
+      {duo.active && <ChatLauncher withNav={false} onOpen={() => setChat(true)} />}
       {chat && <ChatPanel inGame onClose={() => setChat(false)} />}
       {options && <OptionsSheet c={common} onClose={() => setOptions(false)} />}
     </SubPage>
@@ -218,8 +211,8 @@ function LobbyFacts({st}:{st:SessionState}) {
  return <div className="lobby-facts" aria-label="Règles de cette activité">{facts.map(f=><span className="t-meta" key={f}>{f}</span>)}</div>;
 }
 
-function Lobby({ st, me, partner, partnerHere, busy, online, run, onChat, onOptions }: {
-  st: SessionState; me?: Player; partner?: Player; partnerHere: boolean; busy: boolean; online: boolean; run: Run; onChat: () => void; onOptions?: () => void;
+function Lobby({ st, me, partner, partnerHere, busy, online, run, onOptions }: {
+  st: SessionState; me?: Player; partner?: Player; partnerHere: boolean; busy: boolean; online: boolean; run: Run; onOptions?: () => void;
 }) {
   const [showRules, setShowRules] = useState(false);
   const [showDescription, setShowDescription] = useState(false);
@@ -250,7 +243,6 @@ function Lobby({ st, me, partner, partnerHere, busy, online, run, onChat, onOpti
         {universeOf(st) ? <Hero u={universeOf(st)!} size={88} /> : <Art name={lobbyArt(st)} size={88} />}
         <div className="room-game__body">
           <span className="t-card">{st.game.title}</span>
-          {st.game.rules.objective && st.game.rules.objective !== st.game.title && <span className="t-meta">{st.game.rules.objective}</span>}
           <span className="nd-chip nd-chip--mint">{t("game.twoPeople")}</span>
         </div>
       </div>
@@ -261,11 +253,11 @@ function Lobby({ st, me, partner, partnerHere, busy, online, run, onChat, onOpti
       </div>
       <div className="lobby-links">
         {onOptions && <button className="btn btn--secondary" onClick={onOptions}><Icon name="settings" size={18} />{t("rounds.options")}</button>}
-        <button className="btn btn--secondary" onClick={onChat}><Icon name="chat" size={18} />{t("game.chat")}</button>
       </div>
 
       {sexual && <p className="t-meta row"><Icon name="info" size={18} />{t("game.sexualContent")}</p>}
 
+      {st.game.rules.objective && <p className="lobby-description t-small">{st.game.rules.objective}</p>}
       <div className="lobby-settings">
       {Object.entries(settings).map(([key, def]) => (
         <label className="field" key={key}><span className="field__label">{def.label}</span>

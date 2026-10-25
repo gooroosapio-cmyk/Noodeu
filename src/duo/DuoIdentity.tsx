@@ -17,7 +17,7 @@ export function DuoIdentity({ duo, online = false, size = 52, showStatus = true,
     <div className={center ? "duo-id duo-id--center" : "duo-id"}>
       <div className="duo-id__pair">
         <Avatar name={me} path={profile?.avatar_path} size={size} me />
-        <span className="duo-id__link" aria-hidden="true" />
+        <span className="duo-id__medallion" aria-hidden="true"><Icon name="users" size={20} /></span>
         {partner ? (
           <Avatar name={partner.name || "?"} path={partner.avatar_path} size={size} />
         ) : (

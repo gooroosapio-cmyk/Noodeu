@@ -17,7 +17,7 @@ export type IconName =
 /** Illustrations de l'interface v2 (cellules découpées des atlas du kit, PNG transparents convertis en WebP). */
 export type ArtName = string;
 export function Art({ name, size = 72, className = "", alt = "" }: { name: ArtName; size?: number; className?: string; alt?: string }) {
-  return <img className={`art ${className}`} src={name.startsWith("custom-") ? `/assets/original/library/${name.slice(7)}.svg` : `/assets/v2/art/${name}.webp`} width={size} height={size} alt={alt} loading="lazy" decoding="async" />;
+  return <img className={`art ${className}`} src={name.startsWith("custom-") ? (name === "custom-G06" ? "/assets/original/library/G06.svg" : `/assets/original/library3d/${name.slice(7)}.webp`) : `/assets/v2/art/${name}.webp`} width={size} height={size} alt={alt} loading="lazy" decoding="async" />;
 }
 
 /** Icône du kit (masque CSS : hérite de la couleur du texte). Décorative sauf si `label` est fourni. */

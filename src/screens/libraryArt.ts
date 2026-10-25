@@ -1,4 +1,4 @@
-// Identifiants du catalogue audité ; motifs SVG originaux distincts.
+// Identifiants du catalogue audité ; illustrations 3D bitmap originales distinctes.
 export const LIBRARY_ART: Record<string,string> = {
   "N2-076": "M01",
   "N2-079": "M04",

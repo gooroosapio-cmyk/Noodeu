@@ -1252,3 +1252,41 @@ html.reduced-motion .page-loading__logo { animation:none; }
 .naval-placement-tools { display:grid; grid-template-columns:minmax(0,1fr) minmax(0,1fr); gap:10px; align-items:end; }
 .naval-placement-tools .input { width:100%; min-width:0; min-height:48px; padding:8px; }
 .naval-placement-tools .btn { min-height:48px; height:auto; padding:8px; }
+
+/* Lot4 : identité vivante, art3D et commandes compactes sans réduire les cibles. */
+.duo-id__pair { gap: 14px; padding: 10px 18px; border-radius: 28px; background: linear-gradient(120deg,#FFF,#FBE7E9); border: 1px solid #EFD8DB; box-shadow: 0 8px 22px #43131C0C; }
+.duo-id__pair .avatar { border: 3px solid white; box-shadow: 0 5px 12px #43131C18; }
+.duo-id__medallion { display:grid; place-items:center; width:36px; height:36px; border-radius:14px; background:#43131C; color:white; transform:rotate(-8deg); }
+.duo-id__medallion svg { transform:rotate(8deg); }
+.duo-id__names .status { padding:4px 10px; border-radius:99px; background:var(--c-surface-soft); }
+.space-duo-summary .btn--quiet { width:fit-content; min-height:44px; justify-self:center; font-size:.875rem; }
+.space-vault { border:1px solid var(--c-border); padding:14px; border-radius:20px; background:var(--c-surface); }
+.duo-cover__caption { padding:0 16px 12px; }
+.duo-cover__caption .t-small { margin-top:4px; }
+.duo-cover > img { max-height:180px; }
+.lobby-description { margin:0; color:var(--c-text-secondary); }
+.lobby-guide__button { min-height:48px; box-shadow:0 2px 0 #43131C18; color:var(--c-deep,var(--c-accent)); }
+.lobby-links:empty { display:none; }
+.input, input:not([type=checkbox]):not([type=radio]):not([type=range]), select, textarea { font-size:max(1rem,16px); }
+.gtile--peach { background:#F8E5DF; box-shadow:0 2px 0 #EBCFC6; }
+.gtile--butter { background:#F6ECE5; box-shadow:0 2px 0 #E8D7C9; }
+.gtile--sage { background:#F4E3E8; box-shadow:0 2px 0 #E6CAD3; }
+.gtile--lavender { background:#EFE6E9; box-shadow:0 2px 0 #DDCDD3; }
+.cat-banner--lavender { background:#F4E3E8; }
+.cat-banner--butter { background:#F8E5DF; }
+.chat-dock { position:fixed; right:max(16px,calc((100vw - 632px)/2 + 16px)); bottom:calc(var(--nav-total) + 12px); width:auto; padding:0; z-index:28; background:transparent; }
+.chat-dock > span { display:none; }
+.chat-dock .chat-launcher { position:relative; }
+.shell > main { padding-bottom:88px; scroll-padding-bottom:88px; }
+.session-with-chat { padding-bottom:96px; scroll-padding-bottom:96px; }
+@media (prefers-reduced-motion:no-preference) { .duo-id__pair { animation:enter .3s ease-out both; } }
+/* Rail réservé à la bulle : elle reste fixe sans recouvrir les commandes qui défilent. */
+.shell > main { margin-bottom:72px; padding-bottom:24px; scroll-padding-bottom:24px; }
+.subpage { height:100dvh; display:flex; flex-direction:column; overflow:hidden; }
+.subpage > .topbar { flex:none; }
+.subpage > .session-with-chat { flex:1; min-height:0; overflow-y:auto; width:100%; margin-bottom:calc(76px + env(safe-area-inset-bottom)); padding-bottom:24px; }
+
+.subpage > main { flex:1; min-height:0; overflow-y:auto; width:100%; margin-bottom:calc(76px + env(safe-area-inset-bottom)); padding-bottom:24px; scroll-padding-bottom:24px; }
+.duo-cover > img { max-height:120px; }
+/* Le bouton Stop reste après les huit champs, jamais superposé aux dernières réponses. */
+.pb-stop { position:static; }

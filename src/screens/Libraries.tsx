@@ -304,7 +304,7 @@ function RandomLauncher({ game }: { game: Game }) {
   return (
     <section className="card card--lavender stack stack--3" aria-labelledby="rnd-title">
       <div className="row" style={{ gap: "var(--s-3)" }}>
-        <Icon name="dices" size={28} />
+        <Art name={artOf(game)} size={56} />
         <div className="stack" style={{ gap: 2 }}>
           <h2 className="t-card" id="rnd-title">{t("lib.random.title")}</h2>
           <p className="t-meta">{t("lib.random.text")}</p>

@@ -93,15 +93,18 @@ export function AppShell() {
 }
 
 /** Sous-pages et écran de jeu : retour explicite, sans navigation basse. */
-export function SubPage({ title, backTo, children, actions }: { title?: string; backTo: string; children: ReactNode; actions?: ReactNode }) {
+export function SubPage({ title, backTo, children, actions, chatManaged = false }: { title?: string; backTo: string; children: ReactNode; actions?: ReactNode; chatManaged?: boolean }) {
+  const [chat, setChat] = useState(false);
   return (
-    <>
+    <div className="subpage">
       <header className="topbar">
         <Link className="icon-btn icon-btn--soft" to={backTo} aria-label={t("common.back")}><Icon name="arrow-left" /></Link>
         {title && <span className="topbar__title">{title}</span>}
         <div className="row" style={{ gap: 4 }}>{actions}</div>
       </header>
       {children}
-    </>
+      {!chatManaged && <ChatLauncher withNav={false} onOpen={() => setChat(true)} />}
+      {chat && <ChatPanel onClose={() => setChat(false)} />}
+    </div>
   );
 }

@@ -11,6 +11,7 @@ import { Avatar } from "../components/Avatar";
 import { Alert, ConfirmDialog, Icon, Loading, PageLoading, Sheet, formatDate, useToast } from "../components/ui";
 import type { ChatMessage } from "../lib/types";
 import { DuoDashboard } from "../duo/DuoDashboard";
+import { useCatalog } from "./catalog";
 import { MyItems, ProgressSection } from "../parcours/Progress";
 
 interface HistoryItem {
@@ -41,7 +42,7 @@ function DuoSelector({ duos, selected, onSelect }: { duos: DuoSummary[]; selecte
 }
 
 function History({ coupleId }: { coupleId: string }) {
-  const [onlyKept, setOnlyKept] = useState(false);
+  const [onlyKept, setOnlyKept] = useState(true);
   const [items, setItems] = useState<HistoryItem[] | null>(null);
   const [error, setError] = useState(false);
   useEffect(() => {
@@ -56,7 +57,6 @@ function History({ coupleId }: { coupleId: string }) {
   }, [coupleId]);
   if (error) return <Alert>{t("net.loadError")}</Alert>;
   if (!items) return <Loading />;
-  if (!items.length) return <p className="t-small muted">{t("space.historyEmpty")}</p>;
   return (
     <div className="stack stack--3">
       <div className="action-pair" aria-label="Afficher les parties">
@@ -104,6 +104,8 @@ function ArchivedMessages({ coupleId, partnerName }: { coupleId: string; partner
 
 export function OurSpace() {
   const duo = useDuo();
+  const { userId } = useAuth();
+  const { games } = useCatalog(userId);
   const toast = useToast();
   const navigate = useNavigate();
   const [params, setParams] = useSearchParams();
@@ -115,6 +117,7 @@ export function OurSpace() {
   if (duo.loading) return <PageLoading />;
   const selectedId = params.get("duo") && duo.duos.some((d) => d.id === params.get("duo")) ? params.get("duo")! : (duo.active?.id ?? duo.duos[0]?.id);
   const selected = duo.duos.find((d) => d.id === selectedId) ?? null;
+  const currentGame = selected?.id === duo.active?.id && duo.openSession ? games.find(g => g.id === duo.openSession?.game_id) : undefined;
   const partnerName = selected?.partner?.deleted ? t("duo.deleted") : selected?.partner?.name || "?";
 
   async function endDuo() {
@@ -155,7 +158,8 @@ export function OurSpace() {
           <Link className="btn" to="/inviter">{t("duo.invite")}</Link>
         </section>
       ) : (
-        <DuoDashboard key={selected.id} coupleId={selected.id} active={selected.active} partner={partnerName} identity={<DuoIdentity duo={selected} online={selected.active && duo.partnerOnline} center size={64} />}>
+        <DuoDashboard key={selected.id} coupleId={selected.id} active={selected.active} partner={partnerName} activity={currentGame ? <><h2 className="t-card">{currentGame.title}</h2><p className="t-small muted">{currentGame.promise}</p></> : <p className="t-small muted">{selected.active ? "Aucune partie en cours. Vos souvenirs et notes restent ici." : "Les souvenirs conservés de ce duo restent réunis ici."}</p>} identity={<DuoIdentity duo={selected} online={selected.id === duo.active?.id && duo.partnerOnline} center size={64} />}>
+        <section className="space-vault stack stack--3" aria-label="Coffre à souvenirs"><h2 className="t-section row"><Icon name="heart" />Coffre à souvenirs</h2><History key={selected.id} coupleId={selected.id} /></section>
         <section className="space-duo-summary stack stack--3">
           <ul className="t-meta plain-list">
             {selected.episodes.map((e, i) => (
@@ -198,13 +202,6 @@ export function OurSpace() {
           )}
         </section>
         </DuoDashboard>
-      )}
-
-      {selected && (
-        <section className="section">
-          <h2 className="t-section">{t("space.history")}</h2>
-          <History key={selected.id} coupleId={selected.id} />
-        </section>
       )}
 
       {selected?.active && selected.id === duo.active?.id && (

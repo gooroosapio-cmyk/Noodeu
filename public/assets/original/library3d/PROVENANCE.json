@@ -1,0 +1,391 @@
+{
+  "origin": "Images générées avec imagegen pour Noodeu, 25 octobre 2026. Pas de copie d’actifs WePlay.",
+  "rights": "Créations générées pour ce projet ; aucune licence tierce attribuée ni exclusivité juridique revendiquée. Les licences du catalogue de textes restent distinctes.",
+  "processing": "Extraction grille4x4 et optimisation WebP alpha256. Originaux conservés dans generated_images.",
+  "assets": [
+    {
+      "code": "G01",
+      "file": "G01.webp",
+      "source": "exec-e05b2ad8-8b09-44ee-b22f-977662227b6f.png",
+      "source_sha256": "35595090ed48e7abdbf8cf09316f5034ce626c3edbc79b7ee2a6b2c7eeee8a95",
+      "cell": 0,
+      "bytes": 10872
+    },
+    {
+      "code": "G02",
+      "file": "G02.webp",
+      "source": "exec-e05b2ad8-8b09-44ee-b22f-977662227b6f.png",
+      "source_sha256": "35595090ed48e7abdbf8cf09316f5034ce626c3edbc79b7ee2a6b2c7eeee8a95",
+      "cell": 1,
+      "bytes": 14302
+    },
+    {
+      "code": "G03",
+      "file": "G03.webp",
+      "source": "exec-e05b2ad8-8b09-44ee-b22f-977662227b6f.png",
+      "source_sha256": "35595090ed48e7abdbf8cf09316f5034ce626c3edbc79b7ee2a6b2c7eeee8a95",
+      "cell": 2,
+      "bytes": 14534
+    },
+    {
+      "code": "G04",
+      "file": "G04.webp",
+      "source": "exec-e05b2ad8-8b09-44ee-b22f-977662227b6f.png",
+      "source_sha256": "35595090ed48e7abdbf8cf09316f5034ce626c3edbc79b7ee2a6b2c7eeee8a95",
+      "cell": 3,
+      "bytes": 18918
+    },
+    {
+      "code": "G05",
+      "file": "G05.webp",
+      "source": "exec-e05b2ad8-8b09-44ee-b22f-977662227b6f.png",
+      "source_sha256": "35595090ed48e7abdbf8cf09316f5034ce626c3edbc79b7ee2a6b2c7eeee8a95",
+      "cell": 4,
+      "bytes": 16912
+    },
+    {
+      "code": "G07",
+      "file": "G07.webp",
+      "source": "exec-e05b2ad8-8b09-44ee-b22f-977662227b6f.png",
+      "source_sha256": "35595090ed48e7abdbf8cf09316f5034ce626c3edbc79b7ee2a6b2c7eeee8a95",
+      "cell": 5,
+      "bytes": 18684
+    },
+    {
+      "code": "G08",
+      "file": "G08.webp",
+      "source": "exec-e05b2ad8-8b09-44ee-b22f-977662227b6f.png",
+      "source_sha256": "35595090ed48e7abdbf8cf09316f5034ce626c3edbc79b7ee2a6b2c7eeee8a95",
+      "cell": 6,
+      "bytes": 16730
+    },
+    {
+      "code": "G09",
+      "file": "G09.webp",
+      "source": "exec-e05b2ad8-8b09-44ee-b22f-977662227b6f.png",
+      "source_sha256": "35595090ed48e7abdbf8cf09316f5034ce626c3edbc79b7ee2a6b2c7eeee8a95",
+      "cell": 7,
+      "bytes": 14220
+    },
+    {
+      "code": "G10",
+      "file": "G10.webp",
+      "source": "exec-e05b2ad8-8b09-44ee-b22f-977662227b6f.png",
+      "source_sha256": "35595090ed48e7abdbf8cf09316f5034ce626c3edbc79b7ee2a6b2c7eeee8a95",
+      "cell": 8,
+      "bytes": 15078
+    },
+    {
+      "code": "M01",
+      "file": "M01.webp",
+      "source": "exec-e05b2ad8-8b09-44ee-b22f-977662227b6f.png",
+      "source_sha256": "35595090ed48e7abdbf8cf09316f5034ce626c3edbc79b7ee2a6b2c7eeee8a95",
+      "cell": 9,
+      "bytes": 16602
+    },
+    {
+      "code": "M04",
+      "file": "M04.webp",
+      "source": "exec-e05b2ad8-8b09-44ee-b22f-977662227b6f.png",
+      "source_sha256": "35595090ed48e7abdbf8cf09316f5034ce626c3edbc79b7ee2a6b2c7eeee8a95",
+      "cell": 10,
+      "bytes": 17326
+    },
+    {
+      "code": "M07",
+      "file": "M07.webp",
+      "source": "exec-e05b2ad8-8b09-44ee-b22f-977662227b6f.png",
+      "source_sha256": "35595090ed48e7abdbf8cf09316f5034ce626c3edbc79b7ee2a6b2c7eeee8a95",
+      "cell": 11,
+      "bytes": 16452
+    },
+    {
+      "code": "M09",
+      "file": "M09.webp",
+      "source": "exec-e05b2ad8-8b09-44ee-b22f-977662227b6f.png",
+      "source_sha256": "35595090ed48e7abdbf8cf09316f5034ce626c3edbc79b7ee2a6b2c7eeee8a95",
+      "cell": 12,
+      "bytes": 16340
+    },
+    {
+      "code": "M11",
+      "file": "M11.webp",
+      "source": "exec-e05b2ad8-8b09-44ee-b22f-977662227b6f.png",
+      "source_sha256": "35595090ed48e7abdbf8cf09316f5034ce626c3edbc79b7ee2a6b2c7eeee8a95",
+      "cell": 13,
+      "bytes": 18416
+    },
+    {
+      "code": "M12",
+      "file": "M12.webp",
+      "source": "exec-e05b2ad8-8b09-44ee-b22f-977662227b6f.png",
+      "source_sha256": "35595090ed48e7abdbf8cf09316f5034ce626c3edbc79b7ee2a6b2c7eeee8a95",
+      "cell": 14,
+      "bytes": 10228
+    },
+    {
+      "code": "M16",
+      "file": "M16.webp",
+      "source": "exec-e05b2ad8-8b09-44ee-b22f-977662227b6f.png",
+      "source_sha256": "35595090ed48e7abdbf8cf09316f5034ce626c3edbc79b7ee2a6b2c7eeee8a95",
+      "cell": 15,
+      "bytes": 13840
+    },
+    {
+      "code": "012",
+      "file": "012.webp",
+      "source": "exec-ca3e9541-7e91-4a56-88f0-6bed2a8e3add.png",
+      "source_sha256": "7f453de9773c3664f3524b9eda31a6e035f2a9eead7bef27dcf8fabf0d4dbedb",
+      "cell": 0,
+      "bytes": 18510
+    },
+    {
+      "code": "011",
+      "file": "011.webp",
+      "source": "exec-ca3e9541-7e91-4a56-88f0-6bed2a8e3add.png",
+      "source_sha256": "7f453de9773c3664f3524b9eda31a6e035f2a9eead7bef27dcf8fabf0d4dbedb",
+      "cell": 1,
+      "bytes": 15026
+    },
+    {
+      "code": "021",
+      "file": "021.webp",
+      "source": "exec-ca3e9541-7e91-4a56-88f0-6bed2a8e3add.png",
+      "source_sha256": "7f453de9773c3664f3524b9eda31a6e035f2a9eead7bef27dcf8fabf0d4dbedb",
+      "cell": 2,
+      "bytes": 18756
+    },
+    {
+      "code": "022",
+      "file": "022.webp",
+      "source": "exec-ca3e9541-7e91-4a56-88f0-6bed2a8e3add.png",
+      "source_sha256": "7f453de9773c3664f3524b9eda31a6e035f2a9eead7bef27dcf8fabf0d4dbedb",
+      "cell": 3,
+      "bytes": 26764
+    },
+    {
+      "code": "024",
+      "file": "024.webp",
+      "source": "exec-ca3e9541-7e91-4a56-88f0-6bed2a8e3add.png",
+      "source_sha256": "7f453de9773c3664f3524b9eda31a6e035f2a9eead7bef27dcf8fabf0d4dbedb",
+      "cell": 4,
+      "bytes": 22760
+    },
+    {
+      "code": "025",
+      "file": "025.webp",
+      "source": "exec-ca3e9541-7e91-4a56-88f0-6bed2a8e3add.png",
+      "source_sha256": "7f453de9773c3664f3524b9eda31a6e035f2a9eead7bef27dcf8fabf0d4dbedb",
+      "cell": 5,
+      "bytes": 23850
+    },
+    {
+      "code": "027",
+      "file": "027.webp",
+      "source": "exec-ca3e9541-7e91-4a56-88f0-6bed2a8e3add.png",
+      "source_sha256": "7f453de9773c3664f3524b9eda31a6e035f2a9eead7bef27dcf8fabf0d4dbedb",
+      "cell": 6,
+      "bytes": 24520
+    },
+    {
+      "code": "P14",
+      "file": "P14.webp",
+      "source": "exec-ca3e9541-7e91-4a56-88f0-6bed2a8e3add.png",
+      "source_sha256": "7f453de9773c3664f3524b9eda31a6e035f2a9eead7bef27dcf8fabf0d4dbedb",
+      "cell": 7,
+      "bytes": 19928
+    },
+    {
+      "code": "P13",
+      "file": "P13.webp",
+      "source": "exec-ca3e9541-7e91-4a56-88f0-6bed2a8e3add.png",
+      "source_sha256": "7f453de9773c3664f3524b9eda31a6e035f2a9eead7bef27dcf8fabf0d4dbedb",
+      "cell": 8,
+      "bytes": 23940
+    },
+    {
+      "code": "P12",
+      "file": "P12.webp",
+      "source": "exec-ca3e9541-7e91-4a56-88f0-6bed2a8e3add.png",
+      "source_sha256": "7f453de9773c3664f3524b9eda31a6e035f2a9eead7bef27dcf8fabf0d4dbedb",
+      "cell": 9,
+      "bytes": 34002
+    },
+    {
+      "code": "P11",
+      "file": "P11.webp",
+      "source": "exec-ca3e9541-7e91-4a56-88f0-6bed2a8e3add.png",
+      "source_sha256": "7f453de9773c3664f3524b9eda31a6e035f2a9eead7bef27dcf8fabf0d4dbedb",
+      "cell": 10,
+      "bytes": 21606
+    },
+    {
+      "code": "P03",
+      "file": "P03.webp",
+      "source": "exec-ca3e9541-7e91-4a56-88f0-6bed2a8e3add.png",
+      "source_sha256": "7f453de9773c3664f3524b9eda31a6e035f2a9eead7bef27dcf8fabf0d4dbedb",
+      "cell": 11,
+      "bytes": 32940
+    },
+    {
+      "code": "P15",
+      "file": "P15.webp",
+      "source": "exec-ca3e9541-7e91-4a56-88f0-6bed2a8e3add.png",
+      "source_sha256": "7f453de9773c3664f3524b9eda31a6e035f2a9eead7bef27dcf8fabf0d4dbedb",
+      "cell": 12,
+      "bytes": 20360
+    },
+    {
+      "code": "P24",
+      "file": "P24.webp",
+      "source": "exec-ca3e9541-7e91-4a56-88f0-6bed2a8e3add.png",
+      "source_sha256": "7f453de9773c3664f3524b9eda31a6e035f2a9eead7bef27dcf8fabf0d4dbedb",
+      "cell": 13,
+      "bytes": 22006
+    },
+    {
+      "code": "P20",
+      "file": "P20.webp",
+      "source": "exec-ca3e9541-7e91-4a56-88f0-6bed2a8e3add.png",
+      "source_sha256": "7f453de9773c3664f3524b9eda31a6e035f2a9eead7bef27dcf8fabf0d4dbedb",
+      "cell": 14,
+      "bytes": 20520
+    },
+    {
+      "code": "P01",
+      "file": "P01.webp",
+      "source": "exec-ca3e9541-7e91-4a56-88f0-6bed2a8e3add.png",
+      "source_sha256": "7f453de9773c3664f3524b9eda31a6e035f2a9eead7bef27dcf8fabf0d4dbedb",
+      "cell": 15,
+      "bytes": 24418
+    },
+    {
+      "code": "P22",
+      "file": "P22.webp",
+      "source": "exec-fdde0616-96be-4031-83a3-27891fea24ea.png",
+      "source_sha256": "299d7231f06002de391fcaa19cb57ff933110d021a981ab97322c8d9ad038a24",
+      "cell": 0,
+      "bytes": 23020
+    },
+    {
+      "code": "P23",
+      "file": "P23.webp",
+      "source": "exec-fdde0616-96be-4031-83a3-27891fea24ea.png",
+      "source_sha256": "299d7231f06002de391fcaa19cb57ff933110d021a981ab97322c8d9ad038a24",
+      "cell": 1,
+      "bytes": 15736
+    },
+    {
+      "code": "P21",
+      "file": "P21.webp",
+      "source": "exec-fdde0616-96be-4031-83a3-27891fea24ea.png",
+      "source_sha256": "299d7231f06002de391fcaa19cb57ff933110d021a981ab97322c8d9ad038a24",
+      "cell": 2,
+      "bytes": 21826
+    },
+    {
+      "code": "H01",
+      "file": "H01.webp",
+      "source": "exec-fdde0616-96be-4031-83a3-27891fea24ea.png",
+      "source_sha256": "299d7231f06002de391fcaa19cb57ff933110d021a981ab97322c8d9ad038a24",
+      "cell": 3,
+      "bytes": 19836
+    },
+    {
+      "code": "H02",
+      "file": "H02.webp",
+      "source": "exec-fdde0616-96be-4031-83a3-27891fea24ea.png",
+      "source_sha256": "299d7231f06002de391fcaa19cb57ff933110d021a981ab97322c8d9ad038a24",
+      "cell": 4,
+      "bytes": 18436
+    },
+    {
+      "code": "H03",
+      "file": "H03.webp",
+      "source": "exec-fdde0616-96be-4031-83a3-27891fea24ea.png",
+      "source_sha256": "299d7231f06002de391fcaa19cb57ff933110d021a981ab97322c8d9ad038a24",
+      "cell": 5,
+      "bytes": 18716
+    },
+    {
+      "code": "H04",
+      "file": "H04.webp",
+      "source": "exec-fdde0616-96be-4031-83a3-27891fea24ea.png",
+      "source_sha256": "299d7231f06002de391fcaa19cb57ff933110d021a981ab97322c8d9ad038a24",
+      "cell": 6,
+      "bytes": 17362
+    },
+    {
+      "code": "H05",
+      "file": "H05.webp",
+      "source": "exec-fdde0616-96be-4031-83a3-27891fea24ea.png",
+      "source_sha256": "299d7231f06002de391fcaa19cb57ff933110d021a981ab97322c8d9ad038a24",
+      "cell": 7,
+      "bytes": 22162
+    },
+    {
+      "code": "H06",
+      "file": "H06.webp",
+      "source": "exec-fdde0616-96be-4031-83a3-27891fea24ea.png",
+      "source_sha256": "299d7231f06002de391fcaa19cb57ff933110d021a981ab97322c8d9ad038a24",
+      "cell": 8,
+      "bytes": 15464
+    },
+    {
+      "code": "H07",
+      "file": "H07.webp",
+      "source": "exec-fdde0616-96be-4031-83a3-27891fea24ea.png",
+      "source_sha256": "299d7231f06002de391fcaa19cb57ff933110d021a981ab97322c8d9ad038a24",
+      "cell": 9,
+      "bytes": 22032
+    },
+    {
+      "code": "H08",
+      "file": "H08.webp",
+      "source": "exec-fdde0616-96be-4031-83a3-27891fea24ea.png",
+      "source_sha256": "299d7231f06002de391fcaa19cb57ff933110d021a981ab97322c8d9ad038a24",
+      "cell": 10,
+      "bytes": 19822
+    },
+    {
+      "code": "RND1",
+      "file": "RND1.webp",
+      "source": "exec-fdde0616-96be-4031-83a3-27891fea24ea.png",
+      "source_sha256": "299d7231f06002de391fcaa19cb57ff933110d021a981ab97322c8d9ad038a24",
+      "cell": 11,
+      "bytes": 17878
+    },
+    {
+      "code": "RND2",
+      "file": "RND2.webp",
+      "source": "exec-fdde0616-96be-4031-83a3-27891fea24ea.png",
+      "source_sha256": "299d7231f06002de391fcaa19cb57ff933110d021a981ab97322c8d9ad038a24",
+      "cell": 12,
+      "bytes": 17668
+    },
+    {
+      "code": "questions",
+      "file": "questions.webp",
+      "source": "exec-fdde0616-96be-4031-83a3-27891fea24ea.png",
+      "source_sha256": "299d7231f06002de391fcaa19cb57ff933110d021a981ab97322c8d9ad038a24",
+      "cell": 13,
+      "bytes": 14228
+    },
+    {
+      "code": "tests",
+      "file": "tests.webp",
+      "source": "exec-fdde0616-96be-4031-83a3-27891fea24ea.png",
+      "source_sha256": "299d7231f06002de391fcaa19cb57ff933110d021a981ab97322c8d9ad038a24",
+      "cell": 14,
+      "bytes": 17228
+    },
+    {
+      "code": "huisclos",
+      "file": "huisclos.webp",
+      "source": "exec-fdde0616-96be-4031-83a3-27891fea24ea.png",
+      "source_sha256": "299d7231f06002de391fcaa19cb57ff933110d021a981ab97322c8d9ad038a24",
+      "cell": 15,
+      "bytes": 16104
+    }
+  ]
+}
