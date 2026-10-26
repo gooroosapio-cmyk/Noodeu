@@ -8,15 +8,13 @@ import { Avatar } from "../components/Avatar";
 import { Alert, Icon, Sheet } from "../components/ui";
 import type { ChatMessage } from "../lib/types";
 import { useDuo } from "./DuoProvider";
-
-function draftKey(coupleId: string) {
-  return `noodeu.chat.draft.${coupleId}`;
-}
+import { useChatDraft } from "./chatDraft";
+import { supabase } from "../lib/supabase";
 
 /** Accès à la discussion : bouton fixe, non déplaçable, dans une zone réservée (V7).
  *  Au-dessus de la navigation principale ; en bas à droite sur les sous-pages. Il ne bouge jamais pour éviter
  *  le contenu : c'est la mise en page qui lui réserve sa place (voir styles/v7.css). */
-export { draftKey };
+export { draftKey } from "./chatDraft";
 
 export function ChatLauncher({ onOpen, withNav = true }: { onOpen: () => void; withNav?: boolean }) {
   const { chatUnread } = useDuo();
@@ -88,31 +86,23 @@ function chatDay(iso: string) {
 }
 
 export function ChatPanel({ onClose, inGame = false }: { onClose: () => void; inGame?: boolean }) {
+  const { active } = useDuo();
+  const { userId } = useAuth();
+  return <ChatContent key={`${userId}:${active?.id ?? ""}`} onClose={onClose} inGame={inGame} />;
+}
+
+function ChatContent({ onClose, inGame }: { onClose: () => void; inGame: boolean }) {
   const { active, messages, sendMessage, markChatRead } = useDuo();
   const { userId, profile } = useAuth();
   const online = useOnline();
   const coupleId = active?.id ?? null;
-  const [draft, setDraft] = useState("");
+  const [draft, setDraft, restoreDraft] = useChatDraft(coupleId, userId);
   const [error, setError] = useState<string | null>(null);
+  const [sending, setSending] = useState(false);
+  const sendingRef = useRef(false), alive = useRef(true);
+  useEffect(() => { alive.current = true; return () => { alive.current = false; }; }, []);
   const partnerName = active?.partner?.name || "?";
 
-  // Brouillon propre à chaque duo : jamais envoyé à une autre personne.
-  useEffect(() => {
-    if (!coupleId) return;
-    try {
-      setDraft(sessionStorage.getItem(draftKey(coupleId)) ?? "");
-    } catch {
-      setDraft("");
-    }
-  }, [coupleId]);
-  useEffect(() => {
-    if (!coupleId) return;
-    try {
-      sessionStorage.setItem(draftKey(coupleId), draft);
-    } catch {
-      /* stockage indisponible */
-    }
-  }, [draft, coupleId]);
   useEffect(() => {
     if (coupleId) void markChatRead();
   }, [coupleId, messages.length, markChatRead]);
@@ -120,10 +110,21 @@ export function ChatPanel({ onClose, inGame = false }: { onClose: () => void; in
   async function submit(e?: FormEvent) {
     e?.preventDefault();
     const body = draft.trim();
-    if (!body || !coupleId) return;
-    setDraft("");
-    const res = await sendMessage(body);
-    setError(res.ok ? null : errorMessage(res.error));
+    if (!body || !coupleId || !userId || !online || sendingRef.current) return;
+    sendingRef.current = true; setSending(true); setError(null);
+    const revision = setDraft("");
+    const failed = async (code?: string) => {
+      try {
+        const { data } = await supabase.auth.getSession();
+        if (data.session?.user.id === userId) restoreDraft(body, revision);
+      } catch { restoreDraft(body, revision, true); }
+      if (alive.current) setError(errorMessage(code ?? "network"));
+    };
+    try {
+      const res = await sendMessage(body);
+      if (!res.ok) await failed(res.error);
+    } catch { await failed("network"); }
+    finally { sendingRef.current = false; if (alive.current) setSending(false); }
   }
 
   if (!active) {
@@ -142,12 +143,12 @@ export function ChatPanel({ onClose, inGame = false }: { onClose: () => void; in
       onClose={onClose}
       closeLabel={inGame ? "Fermer la conversation et revenir au jeu" : t("chat.minimize")}
       closeIcon={inGame ? "close" : "minus"}
-      headerExtra={inGame ? <button type="button" className="btn btn--quiet btn--sm btn--auto" onClick={onClose}>Retour au jeu</button> : undefined}
+      headerExtra={inGame ? <button type="button" className="btn btn--quiet btn--sm btn--auto chat-head__return" onClick={onClose}>Retour au jeu</button> : undefined}
       title={
         <div className="row chat-head">
           {!inGame && <button type="button" className="icon-btn chat-head__back" onClick={onClose} aria-label={t("common.back")}><Icon name="back" size={22} /></button>}
           <Avatar name={partnerName} path={active.partner?.avatar_path} size={40} />
-          <div className="stack" style={{ gap: 0 }}>
+          <div className="stack chat-head__identity" style={{ gap: 0 }}>
             <h2 className="t-card">{partnerName}</h2>
             <span className="t-meta">{inGame ? t("chat.gameContinues") : "Votre conversation"}</span>
           </div>
@@ -189,7 +190,7 @@ export function ChatPanel({ onClose, inGame = false }: { onClose: () => void; in
                 }
               }}
             />
-            <button className="icon-btn" type="submit" disabled={!online || !draft.trim()} aria-label={t("chat.send")}>
+            <button className="icon-btn" type="submit" disabled={sending || !online || !draft.trim()} aria-label={t("chat.send")}>
               <Icon name="send" />
             </button>
           </form>

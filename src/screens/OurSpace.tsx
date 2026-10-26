@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { Link, useNavigate, useSearchParams } from "react-router";
 import { t } from "../i18n";
 import { rpc } from "../lib/supabase";
@@ -35,15 +35,33 @@ function DuoSelector({ duos, selected, onSelect }: { duos: DuoSummary[]; selecte
 }
 
 function ArchivedMessages({ coupleId, partnerName }: { coupleId: string; partnerName: string }) {
-  const { loadArchive } = useDuo();
   const { userId, profile } = useAuth();
+  return <ArchiveMessagesContent key={`${userId}:${coupleId}`} coupleId={coupleId} partnerName={partnerName}
+    userId={userId} myName={profile?.display_name ?? ""} />;
+}
+
+function ArchiveMessagesContent({ coupleId, partnerName, userId, myName }: {
+  coupleId: string; partnerName: string; userId: string | null; myName: string;
+}) {
+  const { loadArchive } = useDuo();
+  const [open, setOpen] = useState(false);
+  const [retry, setRetry] = useState(0);
   const [messages, setMessages] = useState<ChatMessage[] | null>(null);
+  const [error, setError] = useState(false);
+  useEffect(() => {
+    if (!open || !userId) return;
+    let cancelled = false;
+    setError(false);
+    void loadArchive(coupleId).then(result => { if (!cancelled) setMessages(result); })
+      .catch(() => { if (!cancelled) setError(true); });
+    return () => { cancelled = true; };
+  }, [open, coupleId, userId, loadArchive, retry]);
   return (
-    <details className="disclosure" onToggle={(e) => (e.currentTarget.open && !messages) && void loadArchive(coupleId).then(setMessages)}>
+    <details className="disclosure" onToggle={e => setOpen(e.currentTarget.open)}>
       <summary>{t("space.messages")}<Icon name="chevron-down" /></summary>
       <div>
-        {!messages ? <Loading /> : messages.length === 0 ? <p className="t-small muted">{t("space.messagesEmpty")}</p> : (
-          <MessageList messages={messages} myId={userId} myName={profile?.display_name ?? ""} partnerName={partnerName} />
+        {error ? <Alert>{t("net.loadError")} <button className="btn btn--quiet" onClick={() => setRetry(n => n + 1)}>{t("common.retry")}</button></Alert> : !messages ? <Loading /> : messages.length === 0 ? <p className="t-small muted">{t("space.messagesEmpty")}</p> : (
+          <MessageList messages={messages} myId={userId} myName={myName} partnerName={partnerName} />
         )}
       </div>
     </details>
