@@ -116,6 +116,15 @@ export function useSession(sessionId: string, userId: string | null) {
 }
 
 /** Brouillon local d'une étape (survit au rafraîchissement, effacé à la fermeture de l'onglet). */
+/** Oublie un brouillon d'onglet sans le monter (manche terminée, passée ou interrompue). */
+export function forgetDraft(key: string) {
+  try {
+    sessionStorage.removeItem(`noodeu.draft.${key}`);
+  } catch {
+    /* rien */
+  }
+}
+
 export function useDraft(key: string) {
   const storageKey = `noodeu.draft.${key}`;
   const read = () => {

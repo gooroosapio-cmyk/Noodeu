@@ -151,7 +151,7 @@ export function TwoTruthsRed({ st, round, card, priv, me, partner, busy, play, a
   const setTexts = (tx: string[]) => save({ texts: tx });
   const setLie = (id: string) => save({ lie: id });
   const setTruthOk = (ok: boolean) => save({ truthOk: ok });
-  useEffect(() => { if (card.phase !== "write" || card.author !== me.seat) clearDraft(); }, [card.phase, card.author, me.seat, clearDraft]);
+  useEffect(() => { if (card.done || card.phase !== "write" || card.author !== me.seat) clearDraft(); }, [card.done, card.phase, card.author, me.seat, clearDraft]);
   const [guess, setGuess] = useState<string | null>(null);
   const [idea, setIdea] = useState<string | null>(null);
   const author = card.author === me.seat;

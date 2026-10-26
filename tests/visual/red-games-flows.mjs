@@ -67,6 +67,20 @@ try{
   await expect(page.getByRole('radio',{name:'Mon mensonge'}).nth(2)).toBeChecked();
   await expect(page.getByRole('checkbox')).toBeChecked();
  });
+ for(const [label,file,field] of [['tour par tour','rouge-g08-ecriture.json','Affirmation 1'],['simultané','c14-conv-dvm2-ecriture.json',null]]){
+  const state=fixture(file);
+  await scenario(`G08 ${label} : brouillon oublié après « Passer cette carte »`,state,async page=>{
+   const input=field?page.getByLabel(field):page.locator('input, textarea').first();
+   await input.fill('Brouillon à oublier');
+   const drafts=()=>page.evaluate(()=>Object.keys(sessionStorage).filter(k=>k.includes('two-truths')).length);
+   await expect.poll(drafts).toBe(1);
+   const card=state.rounds.find(r=>r.round_no===state.session.current_round).card;
+   Object.assign(card,{done:true,skipped:true,skipped_by:1});state.session.state_version++;
+   await page.evaluate(()=>window.dispatchEvent(new Event('focus')));
+   await expect(page.getByText('passée',{exact:false}).first()).toBeVisible();
+   await expect.poll(drafts).toBe(0);
+  });
+ }
  await scenario('G08 devineur pendant l’écriture : rien à lire, pas de champ',fixture('rouge-g08-attente.json'),async page=>{
   assert.equal(await page.locator('input, textarea').count(),0);
   await expect(page.getByText('écrit ses trois affirmations',{exact:false})).toBeVisible();

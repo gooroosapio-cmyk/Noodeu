@@ -14,6 +14,7 @@ import { NudgeButton } from "../premium/Nudge";
 import { TwoTruthsReveal, TwoTruthsTheatre, theatreScore } from "../premium/TwoTruthsTheatre";
 import { CHOICE_SCENES, ChoiceIllustration, ChoiceReveal, TextReveal, TruthDareDone, WaitTurn, pickClass } from "../premium/ConversationScenes";
 import { ReadingRegion } from "../ReadingRegion";
+import { forgetDraft } from "../useSession";
 import { TruthDareRed, TwoTruthsRed, neverToken } from "../red/ConversationRed";
 import { redKitOf } from "../red/kit";
 import { GameHero } from "../red/ui";
@@ -310,6 +311,11 @@ function RoundView({ c, round }: { c: Common; round: CRound }) {
   const curId = (card as { card_id?: string }).card_id;
   const continued = Boolean(card.continue?.[me.seat]);
   const theyContinued = Boolean(partner && card.continue?.[partner.seat]);
+  // Deux vérités : dès que la manche est close côté serveur (révélée, passée ou interrompue), le brouillon
+  // d'onglet de cette manche est oublié, quel que soit l'écran qui l'avait écrit.
+  useEffect(() => {
+    if (m === "nd_two_truths" && card.done) forgetDraft(`two-truths:${me.user_id}:${c.st.session.id}:${round.round_no}`);
+  }, [m, card.done, me.user_id, c.st.session.id, round.round_no]);
   // Kit rouge : G01 oral (version de règles « answer: oral ») et G08 tour par tour ont leur propre écran.
   const oral = (c.st.game.config as unknown as { answer?: string }).answer === "oral";
   if (m === "nd_truth_dare" && oral) return <TruthDareRed key={round.round_no} st={c.st} round={round} card={card} me={me} partner={partner} busy={busy} play={play} after={after} err={err} />;

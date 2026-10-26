@@ -101,3 +101,7 @@ inscrits et d'accord, le bouton « Lancer » de l'hôte n'est actif que si l'aut
   recharger la page effaçait les trois propositions non verrouillées. Corrigé : brouillon de l'auteur conservé dans le
   stockage de l'onglet (`useDraft`, comme la version simultanée), effacé à la déconnexion et dès la fin de l'écriture ;
   rien n'est envoyé avant le verrouillage. Test ajouté dans `tests/visual/red-games-flows.mjs`.
+- Second retour de Codex sur `fe0dc90` (de nouveau revenu à `28ac1bb`) : après « Passer cette carte », le brouillon
+  restait dans l'onglet (aucune transmission). Corrigé : dès que la manche est close côté serveur (révélée, passée ou
+  interrompue), le brouillon Deux vérités de cette manche est oublié, en tour par tour comme en simultané.
+  Tests ajoutés pour les deux modes.
