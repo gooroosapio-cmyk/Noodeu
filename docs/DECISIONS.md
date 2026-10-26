@@ -399,3 +399,10 @@ Migration `20261027000300_multi_duos.sql` (fichier à coller : `docs/sql_editeur
 - Supprimés à la demande du propriétaire : l'encadré « Santé sexuelle et dépistage » (Réglages et page À huis clos)
   et le choix du pays, qui ne servait qu'à ces ressources. La colonne `profiles.country` reste en base, sans usage.
 - Les questions des packs (dont « Protection et décisions partagées ») ne sont pas concernées.
+
+## Tu préfères : situations sexuelles drôles ou gênantes (26/10/2026)
+
+- 30 cartes du PDF « Noodeu – Tu préfères : situations sexuelles drôles / gênantes » ajoutées au jeu Tu préfères
+  (banque `conv_dilemma`, identifiants TPS-001 à TPS-030), +18, intensité « hot », marquées « à relire ».
+- Texte repris tel quel ; les deux propositions sont découpées autour du « ou ». Modifiables dans l'administration.
+- Migration `20261029000200_tu_preferes_situations.sql`, test `c24_tu_preferes_situations.sql`.
