@@ -429,3 +429,7 @@ Migration `20261027000300_multi_duos.sql` (fichier à coller : `docs/sql_editeur
 - Google : bouton inactif (aucun OAuth configuré). Audio : désactivé (`deploymentFeatures.answerAudio=false`).
 - Supabase : migrations `20261030000x00` non appliquées en ligne à cette date (voir DEPLOIEMENT.md). L'interface
   utilise ses replis (notes/couverture indisponibles, tirage classique, compteur d'accueil existant).
+- Mise à jour du 26/10/2026 (accord du propriétaire) : migrations `20261030000300` à `20261030000800` appliquées en
+  ligne une par une et vérifiées (pack_draws, enveloppes du tirage avec saut des questions supprimées, 14 packs en ordre
+  aléatoire, RND1 mixte, question horaire, normalisation Petit bac, validation navale). `20261030000100` (espace duo :
+  bucket et règles de stockage) et `20261030000200` (audio) restent non appliquées.
