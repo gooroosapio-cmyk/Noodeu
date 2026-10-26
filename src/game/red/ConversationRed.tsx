@@ -2,13 +2,14 @@
 // Kit rouge : Action ou vérité (sans saisie) et Deux vérités et un mensonge (tour par tour).
 // Le serveur reste autoritaire : l'auteur, l'acteur, la phase et le mensonge ne sont jamais déduits ici ;
 // le devineur ne reçoit les trois textes qu'après verrouillage, et le mensonge qu'à la révélation.
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { t } from "../../i18n";
 import { rpc } from "../../lib/supabase";
 import { Alert, Icon } from "../../components/ui";
 import type { Player, SessionState } from "../../lib/types";
 import { NudgeButton } from "../premium/Nudge";
 import { LaterButton } from "../Later";
+import { useDraft } from "../useSession";
 import { redIllustration } from "./kit";
 import { ChoiceCard, GameActions, GameHero, QuestionCard, ReadyStatus } from "./ui";
 
@@ -137,9 +138,20 @@ export function TruthDareRed({ st, round, card, me, partner, busy, play, after, 
 export function TwoTruthsRed({ st, round, card, priv, me, partner, busy, play, after, err }: {
   st: SessionState; round: { round_no: number }; card: J; priv: J; me: Player; partner?: Player; busy: boolean; play: Play; after: After; err: string | null;
 }) {
-  const [texts, setTexts] = useState(["", "", ""]);
-  const [lie, setLie] = useState<string | null>(null);
-  const [truthOk, setTruthOk] = useState(false);
+  // Brouillon de l'auteur conservé au rechargement, comme la version simultanée : stockage de l'onglet
+  // (sessionStorage, effacé à la déconnexion), jamais envoyé avant le verrouillage, oublié dès la fin de l'écriture.
+  const [draft, updateDraft, clearDraft] = useDraft(`two-truths:${me.user_id}:${st.session.id}:${round.round_no}`);
+  const texts = [0, 1, 2].map((i) => draft[i] ?? "");
+  const lie = draft[3] || null;
+  const truthOk = draft[4] === "1";
+  const save = (next: { texts?: string[]; lie?: string | null; truthOk?: boolean }) => {
+    const tx = next.texts ?? texts;
+    updateDraft([tx[0], tx[1], tx[2], (next.lie !== undefined ? next.lie : lie) ?? "", (next.truthOk ?? truthOk) ? "1" : ""]);
+  };
+  const setTexts = (tx: string[]) => save({ texts: tx });
+  const setLie = (id: string) => save({ lie: id });
+  const setTruthOk = (ok: boolean) => save({ truthOk: ok });
+  useEffect(() => { if (card.phase !== "write" || card.author !== me.seat) clearDraft(); }, [card.phase, card.author, me.seat, clearDraft]);
   const [guess, setGuess] = useState<string | null>(null);
   const [idea, setIdea] = useState<string | null>(null);
   const author = card.author === me.seat;

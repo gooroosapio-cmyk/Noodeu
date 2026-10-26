@@ -56,6 +56,17 @@ try{
   assert.equal(moves[0].p_type,'publish_three');assert.equal(moves[0].p_payload.lie_statement_id,'s2');
   assert.equal(moves[0].p_payload.statements.length,3);
  });
+ await scenario('G08 auteur : le brouillon survit au rechargement',fixture('rouge-g08-ecriture.json'),async page=>{
+  await page.getByLabel('Affirmation 1').fill('Brouillon un');
+  await page.getByLabel('Affirmation 3').fill('Brouillon trois');
+  await page.getByRole('radio',{name:'Mon mensonge'}).nth(2).check();
+  await page.getByRole('checkbox').check();
+  await page.reload();
+  await expect(page.getByLabel('Affirmation 1')).toHaveValue('Brouillon un');
+  await expect(page.getByLabel('Affirmation 3')).toHaveValue('Brouillon trois');
+  await expect(page.getByRole('radio',{name:'Mon mensonge'}).nth(2)).toBeChecked();
+  await expect(page.getByRole('checkbox')).toBeChecked();
+ });
  await scenario('G08 devineur pendant l’écriture : rien à lire, pas de champ',fixture('rouge-g08-attente.json'),async page=>{
   assert.equal(await page.locator('input, textarea').count(),0);
   await expect(page.getByText('écrit ses trois affirmations',{exact:false})).toBeVisible();

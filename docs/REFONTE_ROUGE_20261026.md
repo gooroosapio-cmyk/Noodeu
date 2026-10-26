@@ -92,3 +92,12 @@ inscrits et d'accord, le bouton « Lancer » de l'hôte n'est actif que si l'aut
   dé 30, petit bac 8 rubriques en 2×4, Cite trois 10 s / +3 / 30).
 - La présence de deux sessions réelles n'a pas pu être testée de bout en bout ici (temps réel Supabase inaccessible
   depuis le conteneur) : les règles serveur sont testées en SQL, l'interface avec des réponses simulées.
+
+## Suivi du 26/10/2026
+
+- Migration `20261030001200` appliquée en ligne (API de gestion Supabase, une transaction) et vérifiée : colonnes,
+  déclencheurs, fonctions, droits (`launch_session` pour `authenticated` seulement), G01 v3 orale, G08 v3 3/5/7.
+- Front `d31cf64` promu par Codex, puis retour à `28ac1bb` (`dpl_6MGBcRboRkJGoAbpmbddhTDxspaW`) : en G08 tour par tour,
+  recharger la page effaçait les trois propositions non verrouillées. Corrigé : brouillon de l'auteur conservé dans le
+  stockage de l'onglet (`useDraft`, comme la version simultanée), effacé à la déconnexion et dès la fin de l'écriture ;
+  rien n'est envoyé avant le verrouillage. Test ajouté dans `tests/visual/red-games-flows.mjs`.
