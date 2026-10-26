@@ -278,8 +278,9 @@ function NavalGrid({ label, cell, onCell, disabled }: {
   const [focused,setFocused]=useState(0);
   const isDisabled=(i:number)=>!onCell || Boolean(disabled?.(Math.floor(i/10),i%10));
   const active=isDisabled(focused)?Array.from({length:100},(_,i)=>i).find(i=>!isDisabled(i)):focused;
+  // Plateau entier, toujours jouable : le tir se fait en deux temps (viser puis « Tirer »).
   return (
-    <Zoomable zoomClass="board-zoom--naval">
+    <div className="naval-whole">
     <div className="naval" role="grid" aria-label={label} ref={grid} onKeyDown={e=>{
       const key=e.key;if(!['ArrowUp','ArrowDown','ArrowLeft','ArrowRight','Home','End'].includes(key))return;
       const from=Number((e.target as HTMLElement).dataset.cell);if(!Number.isFinite(from))return;
@@ -303,7 +304,7 @@ function NavalGrid({ label, cell, onCell, disabled }: {
         </button>;})}
       </div>)}
     </div>
-    </Zoomable>
+    </div>
   );
 }
 

@@ -70,7 +70,7 @@ export function GamePlayers({ st, partnerHere }: { st: SessionState; partnerHere
   return (
     <section className="game-players" aria-label="Les joueurs">
       <Person p={me} here value={board ? board.scores[me?.seat ?? 1] : undefined} label={label} />
-      {board?.target ? <span className="game-players__goal"><small>Objectif</small><strong>{board.target}</strong></span> : <span className="game-players__sep" aria-hidden="true" />}
+      <span className="game-players__sep" aria-hidden="true" />
       <Person p={partner} here={partnerHere} value={board && partner ? board.scores[partner.seat] : undefined} label={label} />
     </section>
   );
