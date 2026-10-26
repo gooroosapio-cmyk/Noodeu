@@ -62,7 +62,7 @@ Tu reprends le projet Noodeu, une PWA en React, TypeScript et Vite, dans le dép
 2. Sous `supabase/`, seuls ces fichiers sont attendus :
    - les migrations 1500 et 1600 ;
    - les tests `c43` et `c44` ;
-   - la simulation `tests/local_shim.sql`.
+   - la simulation `supabase/tests/local_shim.sql`.
 
    Ce sont des fichiers, pas des actions à exécuter.
 3. Vérifie en lecture seule (base de production) :
