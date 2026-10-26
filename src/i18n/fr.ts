@@ -190,6 +190,7 @@ export const fr = {
   "lib.countMini": "{n} mini-jeux",
   "lib.choosePack": "Packs de questions",
   "lib.chooseTest": "Questionnaires",
+  "lib.chooseGame": "Jeux pour en parler",
   "lib.huisclosText": "Questionnaires sur l'intimité et la sexualité, pour adultes.",
   "lib.huisclosOff": "À huis clos est désactivé pour toi. Tu peux l'activer dans Réglages ; chaque activité demandera aussi l'accord de vous deux avant de commencer.",
   "lib.huisclosActivate": "Ouvrir les réglages",

@@ -331,8 +331,10 @@ export function ShelfPage({ shelf: asked }: { shelf: "questions" | "tests" | "hu
   if (cat.loading) return <PageLoading />;
   const games = cat.games.filter((g) => shelfOf(g) === shelf && intensityRank(g.intensity) <= cap);
   const random = games.find((g) => g.meta?.random && g.implementation === "playable");
-  const packs = games.filter((g) => !g.meta?.random && g.mechanic !== "test_form");
+  const packs = games.filter((g) => !g.meta?.random && g.mechanic === "pack_conversation");
   const tests = games.filter((g) => g.mechanic === "test_form");
+  // Jeux de conversation rangés dans la rubrique (Complète la phrase, D'accord ou pas d'accord).
+  const others = games.filter((g) => !g.meta?.random && g.mechanic !== "pack_conversation" && g.mechanic !== "test_form");
   return (
     <SubPage backTo="/bibliotheques" title={shelfTitle(cat.categories, shelf)}>
       <main className="page page--bare page--tight">
@@ -356,7 +358,13 @@ export function ShelfPage({ shelf: asked }: { shelf: "questions" | "tests" | "hu
                 <PackList games={tests} />
               </section>
             )}
-            {!packs.length && !tests.length && <div className="card stack center"><p className="t-card">{t("lib.emptyCatalog")}</p></div>}
+            {others.length > 0 && (
+              <section className="section" aria-labelledby="shelf-games">
+                <h2 className="t-section" id="shelf-games">{t("lib.chooseGame")}</h2>
+                <PackList games={others} />
+              </section>
+            )}
+            {!packs.length && !tests.length && !others.length && <div className="card stack center"><p className="t-card">{t("lib.emptyCatalog")}</p></div>}
           </>
         )}
       </main>

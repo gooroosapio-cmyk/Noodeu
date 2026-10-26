@@ -406,3 +406,12 @@ Migration `20261027000300_multi_duos.sql` (fichier à coller : `docs/sql_editeur
   (banque `conv_dilemma`, identifiants TPS-001 à TPS-030), +18, intensité « hot », marquées « à relire ».
 - Texte repris tel quel ; les deux propositions sont découpées autour du « ou ». Modifiables dans l'administration.
 - Migration `20261029000200_tu_preferes_situations.sql`, test `c24_tu_preferes_situations.sql`.
+
+## Complète la phrase et D'accord ou pas d'accord dans « Se découvrir » (26/10/2026)
+
+- Les deux jeux quittent « À huis clos » pour « Se découvrir », section « Jeux pour en parler ». Le salon affiche
+  toujours « Ce contenu contient des questions relatives au sexe ».
+- PDF « D'accord ou pas d'accord ? + Complète la phrase » : 26 affirmations et 29 amorces étaient déjà présentes ;
+  4 affirmations prennent la formulation du PDF (PK-G10-003, 004, 006, 016) ; l'amorce « Le fantasme que je garde
+  encore pour moi c'est… » est ajoutée (ACS-S-030). Aucune question existante supprimée.
+- Migration `20261029000300_accord_phrase_se_decouvrir.sql`, test `c25_accord_phrase.sql`.
