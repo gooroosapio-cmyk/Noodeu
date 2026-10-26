@@ -1,5 +1,4 @@
-import { useEffect } from "react";
-import { AdminQuestions } from "./admin/AdminQuestions";
+import { Suspense, lazy, useEffect, type ComponentType } from "react";
 import { Navigate, Outlet, createBrowserRouter, useLocation } from "react-router";
 import { Ambient } from "./components/Ambient";
 import { useKeyboardInset } from "./lib/useKeyboardInset";
@@ -21,7 +20,34 @@ import { HistoryPage } from "./screens/History";
 import { VaultPage } from "./screens/Vault";
 import { ProfileEdit, Settings } from "./screens/Settings";
 import { Tips } from "./screens/Tips";
-import { SessionScreen } from "./game/SessionScreen";
+
+/** Écran chargé à la demande. Après un déploiement, un ancien fichier peut avoir disparu :
+ *  on recharge alors la page une seule fois (garde en sessionStorage) au lieu d'afficher une erreur. */
+function deferred(load: () => Promise<ComponentType>) {
+  const Screen = lazy(() => load().then(
+    (component) => { try { sessionStorage.removeItem("noodeu.chunk-reload"); } catch { /* stockage indisponible */ } return { default: component }; },
+    (error: unknown) => {
+      let retried = true;
+      try { retried = sessionStorage.getItem("noodeu.chunk-reload") === "1"; sessionStorage.setItem("noodeu.chunk-reload", "1"); } catch { /* stockage indisponible */ }
+      if (!retried) { window.location.reload(); return new Promise<never>(() => undefined); }
+      throw error;
+    },
+  ));
+  return function DeferredScreen() { return <Suspense fallback={<PageLoading />}><Screen /></Suspense>; };
+}
+const loadSession = () => import("./game/SessionScreen").then((m) => m.SessionScreen);
+const SessionScreen = deferred(loadSession);
+const AdminQuestions = deferred(() => import("./admin/AdminQuestions").then((m) => m.AdminQuestions));
+
+/** Une fois connecté, l'écran de jeu est préchargé pendant un temps mort : entrer en partie reste immédiat. */
+function usePrefetchGame() {
+  useEffect(() => {
+    const idle = window.requestIdleCallback ?? ((cb: () => void) => window.setTimeout(cb, 2500));
+    const cancel = window.cancelIdleCallback ?? window.clearTimeout;
+    const id = idle(() => void loadSession().catch(() => undefined));
+    return () => cancel(id);
+  }, []);
+}
 
 /** Ancienne adresse « Notre espace » : redirigée vers l'Espace (paramètres conservés). */
 function LegacySpace() {
@@ -91,6 +117,11 @@ function RequireAuth() {
   }
   if (!profile) return <PageLoading />;
   if (needsOnboarding(profile)) return <Onboarding />;
+  return <SignedIn />;
+}
+
+function SignedIn() {
+  usePrefetchGame();
   return (
     <DuoProvider>
       <Outlet />

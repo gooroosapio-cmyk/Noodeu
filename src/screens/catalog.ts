@@ -1,17 +1,18 @@
-import { useCallback, useEffect, useState } from "react";
+import { useCallback, useEffect, useRef, useState } from "react";
 import { rpc, supabase } from "../lib/supabase";
 import type { Category, Format, Game, Intensity } from "../lib/types";
 
-export function useCatalog(userId: string | null) {
-  const [categories, setCategories] = useState<Category[]>([]);
-  const [games, setGames] = useState<Game[]>([]);
-  const [favorites, setFavorites] = useState<Set<string>>(new Set());
-  const [recent, setRecent] = useState<string[]>([]);
-  const [loading, setLoading] = useState(true);
-  const [error, setError] = useState(false);
+interface CatalogSnapshot { categories: Category[]; games: Game[]; favorites: Set<string>; recent: string[]; error: boolean }
 
-  const load = useCallback(async () => {
-    setError(false);
+// Catalogue partagé entre les écrans, en mémoire seulement (jamais sur disque) et propre à un compte :
+// les requêtes simultanées n'en font qu'une, et un retour sur un écran s'affiche sans attendre.
+const FRESH_MS = 30_000;
+let cache: { userId: string | null; at: number; snap: CatalogSnapshot } | null = null;
+let inflight: { userId: string | null; promise: Promise<CatalogSnapshot> } | null = null;
+
+function fetchCatalog(userId: string | null) {
+  if (inflight?.userId === userId) return inflight.promise;
+  const promise = (async (): Promise<CatalogSnapshot> => {
     const [c, g, f, r] = await Promise.all([
       supabase.from("game_categories").select("id, title, promise, sort, is_demo, family_no").eq("status", "published").order("sort"),
       supabase.from("games").select("id, category_id, mechanic, title, promise, hook, style, duration_min, duration_max, content_level, current_version, sort, is_demo, implementation, adult_available, mute_ok, difficulties, thumbnail, meta, intensity, formats, duration_kind").eq("status", "published").order("sort"),
@@ -19,17 +20,53 @@ export function useCatalog(userId: string | null) {
       // Parties du duo (lisibles par ses seuls membres) : activités récemment jouées.
       supabase.from("game_sessions").select("game_id, created_at").order("created_at", { ascending: false }).limit(40),
     ]);
-    if (c.error || g.error) setError(true);
-    setCategories((c.data as Category[]) ?? []);
-    setGames((g.data as Game[]) ?? []);
-    setFavorites(new Set(((f.data as { game_id: string }[]) ?? []).map((x) => x.game_id)));
-    setRecent([...new Set(((r.data as { game_id: string }[]) ?? []).map((x) => x.game_id))]);
+    const snap = {
+      categories: (c.data as Category[]) ?? [],
+      games: (g.data as Game[]) ?? [],
+      favorites: new Set(((f.data as { game_id: string }[]) ?? []).map((x) => x.game_id)),
+      recent: [...new Set(((r.data as { game_id: string }[]) ?? []).map((x) => x.game_id))],
+      error: Boolean(c.error || g.error),
+    };
+    if (!snap.error) cache = { userId, at: Date.now(), snap };
+    return snap;
+  })().finally(() => { if (inflight?.promise === promise) inflight = null; });
+  inflight = { userId, promise };
+  return promise;
+}
+
+export function useCatalog(userId: string | null) {
+  const cached = cache?.userId === userId ? cache : null;
+  const [categories, setCategories] = useState<Category[]>(cached?.snap.categories ?? []);
+  const [games, setGames] = useState<Game[]>(cached?.snap.games ?? []);
+  const [favorites, setFavorites] = useState<Set<string>>(cached?.snap.favorites ?? new Set());
+  const [recent, setRecent] = useState<string[]>(cached?.snap.recent ?? []);
+  const [loading, setLoading] = useState(!cached);
+  const [error, setError] = useState(false);
+  const alive = useRef(true);
+  useEffect(() => { alive.current = true; return () => { alive.current = false; }; }, []);
+
+  const apply = useCallback((snap: CatalogSnapshot) => {
+    if (!alive.current) return;
+    setError(snap.error);
+    setCategories(snap.categories);
+    setGames(snap.games);
+    setFavorites(snap.favorites);
+    setRecent(snap.recent);
     setLoading(false);
-  }, [userId]);
+  }, []);
+  const load = useCallback(async () => {
+    setError(false);
+    apply(await fetchCatalog(userId));
+  }, [userId, apply]);
 
   useEffect(() => {
-    void load();
-  }, [load]);
+    const hit = cache?.userId === userId ? cache : null;
+    if (hit) apply(hit.snap);
+    if (!hit || Date.now() - hit.at > FRESH_MS) void fetchCatalog(userId).then(apply);
+  }, [userId, apply]);
+
+  // Les favoris changés ici restent justes pour les autres écrans.
+  useEffect(() => { if (cache?.userId === userId) cache.snap = { ...cache.snap, favorites }; }, [favorites, userId]);
 
   /** Favoris personnels : jamais visibles par l'autre membre du duo. Renvoie false en cas d'échec. */
   const toggleFavorite = useCallback(

@@ -74,6 +74,24 @@ Demande du propriétaire : rester entièrement fidèle aux témoins pour l'accue
 - Les flèches de pagination gardent une cible de 44 px (règle d'accessibilité du kit).
 - Le contenu (titres, dates, durées, notes) est celui du compte ; les témoins montrent des données fictives.
 
-Vérifications de cette passe : lint, typecheck, tests unitaires, build ; `v7-flows.mjs` (11 scénarios, dont la conversation
+Vérifications de cette passe : lint, typecheck, tests unitaires, build ; `v7-flows.mjs` (9 scénarios, dont la conversation
 plein écran et l'aperçu de l'espace), salon (5), G01/G08 (10), clavier (6) ; `render-check.mjs` à 360/390/412 et texte
 à 200 % sur accueil, espace, coffre, historique et conversation. Comparaisons côte à côte dans `docs/captures/v7-20261026/fidelite-*.jpg`.
+
+## Optimisations avant mise en ligne (fluidité, rapidité)
+
+Mesures sur le build local (Chromium émulé, réponses Supabase simulées).
+
+| Mesure | Avant | Après | Changement |
+|---|---|---|---|
+| JavaScript au premier affichage (gzip) | 297 ko, 1 fichier | 217 ko : appli 60 + React 99 + Supabase 55 | Écran de jeu et administration chargés à la demande ; jeu préchargé en temps mort après connexion |
+| Ce qu'un déploiement fait retélécharger | 297 ko | ≈ 60 ko (+ écran de jeu modifié) | Bibliothèques (React, routeur, Supabase) dans des fichiers stables |
+| Requêtes Supabase à l'ouverture de l'Espace | 20 | 16 | Catalogue partagé en mémoire, requêtes simultanées fusionnées, réutilisé 30 s entre écrans |
+| Retour sur un écran déjà vu | catalogue rechargé, chargement visible | affichage immédiat, relecture en arrière-plan | idem |
+| Préchargement hors ligne | polices cyrillique et vietnamienne incluses | exclues (servies si jamais nécessaires) | `vite.config.ts` |
+| Connexion à Supabase | ouverte après le chargement du code | ouverte dès le HTML (`preconnect`, URL publique) | `vite.config.ts` |
+| Fichiers compilés (nom haché) | revalidés à chaque ouverture | cache permanent (`immutable`) | `vercel.json` (à contrôler en ligne) |
+
+Sécurité du découpage : si un ancien fichier a disparu après un déploiement, la page se recharge une seule fois
+(garde en `sessionStorage`) au lieu d'afficher une erreur. Le catalogue en mémoire est propre au compte ; rien
+n'est écrit sur disque, aucune réponse de jeu ou message n'est mis en cache.
