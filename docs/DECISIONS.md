@@ -415,3 +415,17 @@ Migration `20261027000300_multi_duos.sql` (fichier à coller : `docs/sql_editeur
   4 affirmations prennent la formulation du PDF (PK-G10-003, 004, 006, 016) ; l'amorce « Le fantasme que je garde
   encore pour moi c'est… » est ajoutée (ACS-S-030). Aucune question existante supprimée.
 - Migration `20261029000300_accord_phrase_se_decouvrir.sql`, test `c25_accord_phrase.sql`.
+
+## Intégration du bundle « salon » 104564d (26/10/2026)
+
+- Bundle vérifié (empreinte du manifeste, HEAD 104564d, arbre 4e90997, base 49d3c1e présente) et importé dans
+  `import/noodeu-astra-104564d`, puis fusionné (merge sans avance rapide) dans `integration/noodeu-astra-admin-104564d`
+  à partir de `ccr-7a7de876-azitw6`. Conflits résolus à la main : CSS (les deux blocs gardés), ressources santé
+  (retrait conservé). Admin, Tu préfères, Se découvrir et retrait santé conservés.
+- Migrations du bundle renumérotées `20261030000100` à `800` (les numéros `20261029000x00` étaient déjà pris par les
+  migrations appliquées en ligne) ; tests renumérotés `c30` à `c37`. Les deux nouveaux tirages (`random_packs`,
+  `random_mixed`) sautent aussi une question supprimée par l'administration.
+- Accueil Arcade : le sélecteur de duo (plusieurs duos actifs) est remis dans la carte duo, il avait disparu.
+- Google : bouton inactif (aucun OAuth configuré). Audio : désactivé (`deploymentFeatures.answerAudio=false`).
+- Supabase : migrations `20261030000x00` non appliquées en ligne à cette date (voir DEPLOIEMENT.md). L'interface
+  utilise ses replis (notes/couverture indisponibles, tirage classique, compteur d'accueil existant).

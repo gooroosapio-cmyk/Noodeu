@@ -9,6 +9,7 @@ import { AuthForm, Onboarding, Welcome, needsOnboarding } from "./auth/AuthScree
 import { DuoProvider } from "./duo/DuoProvider";
 import { InvitePage } from "./duo/InviteScreens";
 import { Alert, EmptyState, NetworkBanner, PageLoading, ToastProvider } from "./components/ui";
+import { GameInvitation } from "./duo/GameInvitation";
 import { NudgeBanner } from "./duo/Notifications";
 import { AppShell } from "./components/AppShell";
 import { Home } from "./screens/Home";
@@ -88,6 +89,7 @@ function RequireAuth() {
     <DuoProvider>
       <Outlet />
       <NudgeBanner />
+      <GameInvitation />
     </DuoProvider>
   );
 }

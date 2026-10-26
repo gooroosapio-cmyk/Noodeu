@@ -1,4 +1,4 @@
-import { useEffect, useState, type FormEvent } from "react";
+import { useRef, useState, type FormEvent } from "react";
 import { Link, Navigate, useLocation, useNavigate } from "react-router";
 import { t } from "../i18n";
 import { supabase } from "../lib/supabase";
@@ -14,55 +14,19 @@ function useNextPath() {
   return next && next.startsWith("/") && !next.startsWith("//") ? next : "/accueil";
 }
 
-/**
- * Google n'est proposé que si le fournisseur est réellement activé dans Supabase
- * (lecture des réglages publics d'authentification). Sinon, aucun faux bouton.
- */
-let googleCache: Promise<boolean> | null = null;
-function useGoogleEnabled() {
-  const [enabled, setEnabled] = useState(false);
-  useEffect(() => {
-    const url = import.meta.env.VITE_SUPABASE_URL;
-    const key = import.meta.env.VITE_SUPABASE_PUBLISHABLE_KEY;
-    if (!url || !key) return;
-    googleCache ??= fetch(`${url}/auth/v1/settings`, { headers: { apikey: key } })
-      .then((r) => (r.ok ? r.json() : null))
-      .then((s) => Boolean(s?.external?.google))
-      .catch(() => false);
-    void googleCache.then(setEnabled);
-  }, []);
-  return enabled;
-}
-
-function GoogleButton({ next, onError }: { next: string; onError: (m: string) => void }) {
-  const [busy, setBusy] = useState(false);
-  async function go() {
-    setBusy(true);
-    const { error } = await supabase.auth.signInWithOAuth({ provider: "google", options: { redirectTo: `${window.location.origin}${next}` } });
-    if (error) {
-      setBusy(false);
-      onError(authErrorMessage(error.message));
-    }
-    // En cas de succès, le navigateur part vers Google : rien d'autre à afficher.
-  }
-  return (
-    <button className="btn btn-google" onClick={go} disabled={busy}>
-      <svg viewBox="0 0 48 48" aria-hidden="true">
-        <path fill="#EA4335" d="M24 9.5c3.54 0 6.71 1.22 9.21 3.6l6.85-6.85C35.9 2.38 30.47 0 24 0 14.62 0 6.51 5.38 2.56 13.22l7.98 6.19C12.43 13.72 17.74 9.5 24 9.5z" />
-        <path fill="#4285F4" d="M46.98 24.55c0-1.57-.15-3.09-.38-4.55H24v9.02h12.94c-.58 2.96-2.26 5.48-4.78 7.18l7.73 6c4.51-4.18 7.09-10.36 7.09-17.65z" />
-        <path fill="#FBBC05" d="M10.53 28.59A14.5 14.5 0 0 1 9.5 24c0-1.59.28-3.14.76-4.59l-7.98-6.19A23.94 23.94 0 0 0 0 24c0 3.87.92 7.54 2.56 10.78l7.97-6.19z" />
-        <path fill="#34A853" d="M24 48c6.48 0 11.93-2.13 15.89-5.81l-7.73-6c-2.15 1.45-4.92 2.3-8.16 2.3-6.26 0-11.57-4.22-13.47-9.91l-7.98 6.19C6.51 42.62 14.62 48 24 48z" />
-      </svg>
-      {busy ? t("auth.googleWaiting") : t("auth.google")}
+/** Emplacement réservé : aucun appel OAuth tant que le propriétaire n'a pas branché Google. */
+function GooglePlaceholder() {
+  return <div className="stack stack--2">
+    <button className="btn btn--secondary" type="button" disabled aria-describedby="google-pending">
+      {t("auth.google")}
     </button>
-  );
+    <p id="google-pending" className="t-small muted center">Connexion Google bientôt disponible. Utilise ton adresse e-mail pour le moment.</p>
+  </div>;
 }
 
 export function Welcome() {
   const { session } = useAuth();
   const next = useNextPath();
-  const google = useGoogleEnabled();
-  const [error, setError] = useState<string | null>(null);
   const suffix = next !== "/accueil" ? `?next=${encodeURIComponent(next)}` : "";
   if (session) return <Navigate to={next} replace />;
   return (
@@ -75,13 +39,8 @@ export function Welcome() {
           <p className="muted">{t("welcome.subtitle")}</p>
         </div>
         <div className="public__actions">
-          {error && <Alert>{error}</Alert>}
-          {google && (
-            <>
-              <GoogleButton next={next} onError={setError} />
-              <div className="divider">{t("auth.or")}</div>
-            </>
-          )}
+          <GooglePlaceholder />
+          <div className="divider">{t("auth.or")}</div>
           <Link className="btn" to={`/inscription${suffix}`}>{t("welcome.create")}</Link>
           <Link className="btn btn--quiet" to={`/connexion${suffix}`}>{t("welcome.login")}</Link>
         </div>
@@ -95,9 +54,10 @@ export function AuthForm({ mode }: { mode: "signup" | "login" }) {
   const { session } = useAuth();
   const navigate = useNavigate();
   const next = useNextPath();
-  const google = useGoogleEnabled();
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
+  const [showPassword, setShowPassword] = useState(false);
+  const authLock = useRef(false);
   const [confirm, setConfirm] = useState("");
   const [name, setName] = useState("");
   const [adult, setAdult] = useState(false);
@@ -112,14 +72,13 @@ export function AuthForm({ mode }: { mode: "signup" | "login" }) {
 
   async function submit(e: FormEvent) {
     e.preventDefault();
-    if (busy) return;
-    if (signup && password !== confirm) {
-      setError(t("auth.passwordMismatch"));
-      return;
-    }
+    if (authLock.current) return;
+    if (signup && password !== confirm) { setError(t("auth.passwordMismatch")); return; }
+    authLock.current = true;
     setBusy(true);
     setError(null);
     setInfo(null);
+    try {
     if (signup) {
       const { data, error } = await supabase.auth.signUp({
         email: email.trim(),
@@ -134,7 +93,8 @@ export function AuthForm({ mode }: { mode: "signup" | "login" }) {
       if (error) setError(authErrorMessage(error.message));
       else navigate(next, { replace: true });
     }
-    setBusy(false);
+    } catch { setError("Connexion impossible pour le moment. Réessaie dans un instant."); }
+    finally { authLock.current = false; setBusy(false); }
   }
 
   async function forgot() {
@@ -142,47 +102,46 @@ export function AuthForm({ mode }: { mode: "signup" | "login" }) {
       setError(t("auth.emailRequired"));
       return;
     }
-    await supabase.auth.resetPasswordForEmail(email.trim(), { redirectTo: `${window.location.origin}/reglages/profil` });
-    setInfo(t("auth.resetSent"));
+    if(authLock.current) return;
+    authLock.current=true;setBusy(true);setError(null);setInfo(null);
+    try {
+      const {error}=await supabase.auth.resetPasswordForEmail(email.trim(), { redirectTo: `${window.location.origin}/reglages/profil` });
+      if(error)setError(authErrorMessage(error.message));else setInfo(t("auth.resetSent"));
+    } catch {setError("Envoi impossible pour le moment. Réessaie dans un instant.");}
+    finally {authLock.current=false;setBusy(false);}
   }
 
   return (
-    <main className="page page--bare page--narrow">
+    <main className={`page page--bare page--narrow auth-page ${signup ? "auth-page--signup" : "auth-page--login"}`}>
       <header className="topbar" style={{ padding: 0 }}>
         <Link className="icon-btn icon-btn--soft" to={`/${suffix}`} aria-label={t("common.back")}><Icon name="arrow-left" /></Link>
         <Logo width={96} />
       </header>
-      <h1 className="t-page">{signup ? t("auth.signupTitle") : t("auth.loginTitle")}</h1>
-      {google && (
-        <div className="stack">
-          <GoogleButton next={next} onError={setError} />
-          <div className="divider">{t("auth.or")}</div>
-        </div>
-      )}
+      <div className="auth-heading"><h1>{signup ? "Créer un compte" : "Bonjour"}</h1><p>{signup ? "Un espace pour vous retrouver à deux." : "Connecte-toi à ton espace Noodeu."}</p></div>
       <form className="stack stack--4" onSubmit={submit}>
         {signup && (
           <div className="field">
             <label className="field__label" htmlFor="name">{t("auth.firstName")}</label>
-            <input id="name" className="input" required maxLength={40} autoComplete="given-name" value={name} onChange={(e) => setName(e.target.value)} aria-describedby="name-hint" />
+            <div className="auth-input"><Icon name="user" size={20} /><input id="name" className="input" required maxLength={40} autoComplete="given-name" value={name} onChange={(e) => setName(e.target.value)} aria-describedby="name-hint" disabled={busy} /></div>
             <span id="name-hint" className="field__hint">{t("auth.firstNameHint")}</span>
           </div>
         )}
         <div className="field">
           <label className="field__label" htmlFor="email">{t("auth.email")}</label>
-          <input id="email" className="input" type="email" required inputMode="email" autoComplete="email" value={email} onChange={(e) => setEmail(e.target.value)} />
+          <div className="auth-input"><Icon name="send" size={20} /><input id="email" className="input" type="email" required inputMode="email" autoComplete="email" value={email} onChange={(e) => setEmail(e.target.value)} disabled={busy} spellCheck={false} autoCapitalize="none" /></div>
         </div>
         <div className="field">
           <label className="field__label" htmlFor="password">{t("auth.password")}</label>
-          <input id="password" className="input" type="password" required minLength={8} autoComplete={signup ? "new-password" : "current-password"}
-            value={password} onChange={(e) => setPassword(e.target.value)} aria-describedby={signup ? "pw-hint" : undefined} />
+          <div className="auth-input auth-input--password"><Icon name="lock" size={20} /><input id="password" className="input" type={showPassword ? "text" : "password"} required minLength={8} autoComplete={signup ? "new-password" : "current-password"}
+            value={password} onChange={(e) => setPassword(e.target.value)} aria-describedby={signup ? "pw-hint" : undefined} disabled={busy} /><button type="button" className="icon-btn" aria-label={showPassword ? "Masquer le mot de passe" : "Afficher le mot de passe"} aria-pressed={showPassword} onClick={() => setShowPassword(v=>!v)}><Icon name={showPassword ? "eye-off" : "eye"} size={20} /></button></div>
           {signup && <span id="pw-hint" className="field__hint">{t("auth.passwordHint")}</span>}
         </div>
         {signup && (
           <div className="field">
             <label className="field__label" htmlFor="password2">{t("auth.passwordConfirm")}</label>
-            <input id="password2" className="input" type="password" required minLength={8} autoComplete="new-password"
+            <div className="auth-input"><Icon name="lock" size={20} /><input id="password2" className="input" type={showPassword ? "text" : "password"} required minLength={8} autoComplete="new-password" disabled={busy}
               value={confirm} onChange={(e) => setConfirm(e.target.value)}
-              aria-invalid={mismatch} aria-describedby={mismatch ? "pw2-error" : undefined} />
+              aria-invalid={mismatch} aria-describedby={mismatch ? "pw2-error" : undefined} /></div>
             {mismatch && <span id="pw2-error" className="field__error" role="alert">{t("auth.passwordMismatch")}</span>}
           </div>
         )}
@@ -194,11 +153,12 @@ export function AuthForm({ mode }: { mode: "signup" | "login" }) {
         )}
         {error && <Alert>{error}</Alert>}
         {info && <Alert kind="info">{info}</Alert>}
-        <button className="btn" type="submit" disabled={busy || (signup && (!adult || !name.trim() || password.length < 8 || confirm !== password))}>
-          {busy ? t("common.sending") : signup ? t("auth.signup") : t("auth.login")}
+        <button className="btn auth-submit" type="submit" disabled={busy || (signup && (!adult || !name.trim() || password.length < 8 || confirm !== password))}>
+          <span>{busy ? t("common.sending") : signup ? t("auth.signup") : t("auth.login")}</span><span className="auth-submit__arrow"><Icon name="arrow-right" /></span>
         </button>
-        {!signup && <button type="button" className="btn btn--quiet" onClick={forgot}>{t("auth.forgot")}</button>}
+        {!signup && <button type="button" className="btn btn--quiet" disabled={busy} onClick={forgot}>{t("auth.forgot")}</button>}
       </form>
+      <div className="auth-google"><GooglePlaceholder /></div>
       <Link className="btn btn--quiet" to={`${signup ? "/connexion" : "/inscription"}${suffix}`}>{signup ? t("auth.toLogin") : t("auth.toSignup")}</Link>
     </main>
   );

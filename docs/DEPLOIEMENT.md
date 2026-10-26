@@ -1,5 +1,8 @@
 # Déploiement
 
+> Livraison refonte du 25 octobre 2026 : les migrations `20261030000100` à `20261030000400` (renumérotées à l’intégration du 26/10/2026) sont préparées et testées localement, **pas appliquées à Supabase par ce déploiement**. Les mentions historiques ci-dessous ne prouvent pas leur état actuel. Notes/couverture affichent un état indisponible si leur RPC manque. Le tirage mixte indique une mise à jour serveur en attente si sa configuration manque. L’audio reste désactivé dans `deploymentFeatures.ts`, Google reste un emplacement inactif, et la vidéo n’est pas intégrée. Aucun build ne lance de migration.
+
+
 ## 1. Supabase (déjà fait pour le projet « Noodeu »)
 
 Les migrations de `supabase/migrations/` sont appliquées au projet `uqyrjdaonqqkkpzyjfcg` (région eu-west-1).

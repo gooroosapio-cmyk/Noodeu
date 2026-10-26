@@ -1,0 +1,5 @@
+320x780 texte×2 60-mini-points-jeu: débordement=0px masqué-sous-nav=false erreurs=0
+320x780 texte×2 60-mini-naval-tirs: débordement=0px masqué-sous-nav=false erreurs=0
+390x780 texte×2 60-mini-points-jeu: débordement=0px masqué-sous-nav=false erreurs=0
+390x780 texte×2 60-mini-naval-tirs: débordement=0px masqué-sous-nav=false erreurs=0
+Aucun débordement, contenu masqué ni erreur JavaScript.

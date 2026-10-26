@@ -1,0 +1,31 @@
+# Accueil Arcade — révision locale du 25 octobre 2026
+
+## Périmètre
+Suite à la référence « 02 · Arcade boutique » : bandeau duo horizontal compact (avatars réels chevauchants, noms, statut en ligne seulement si vrai, accès Notre espace), trois filtres égaux, carrousel manuel avec Tu préfères en premier, grille asymétrique question/reprise/progression, deux prochaines activités réelles. Palette cerise/bordeaux conservée. La navigation et le chat flottant restent accessibles. Aucun autre écran refait, aucune publication.
+
+Le parent a inspecté la référence et transmis sa description. Préparation Library réussie pour libfile_7d3b9970ffc08191bfec087c8a967bc6 ; téléchargement par helper dans cet exécuteur terminé en erreur « library file transfer failed: download failed » (exit 1). Aucun fichier local de référence exploitable, pas de nouvelle tentative. Comparaison de composition seulement : ne pas affirmer une correspondance pixel à pixel. Captures nouvelles inspectées réellement sur fixtures fictives.
+
+## Question du moment
+Les migrations préparées `20261030000500_home_moment.sql` puis `20261030000600_home_catalogue.sql` ont été testées uniquement sur PostgreSQL Docker jetable. La révision finale tire dans les banques existantes q_complicite, q_recul, q_emotions et q_reconfort : 60 questions sur le catalogue local (12 + 23 + 5 + 20), dont 57 au plafond doux. Ce nombre varie avec les exclusions et le catalogue ; le serveur retourne eligible_count, aucun total n'est codé dans l'interface.
+
+Conditions : question libre, standalone, sans review, non adulte dans metadata ET contenu, activité publiée non intime, intensité compatible avec le minimum personnel des deux membres. Retours trop_intime de l'un des deux exclus. Les thèmes exclus dans les séances de ce duo sont conservés conservativement ; sans topic_tags une carte est alors exclue. Pas de lecture des préférences d'un autre duo. Les banques Gottman/USU, instruments, Aron, séries P20, questions intimes sont hors pool. Les sources et positions originales restent intactes, aucun contenu importé/copié ou réordonné dans les banques.
+
+Droits : DECISIONS.md autorise les C1/C2 en phase de test avec réserve commerciale ; la réutilisation technique ne prouve pas une licence commerciale. Le serveur conserve explicitement rights_status=commercial_rights_unconfirmed. La vérification des droits avant exploitation demeure nécessaire. Les 12 questions originales de005 sont conservées sans suppression mais ne sont plus une source ni un repli automatique : elles étaient un choix trop restrictif de la première itération.
+
+RPC get_home_moment(p_couple) : appartenance active, verrou par duo, créneau UTC de3600secondes calculé serveur, tirage persisté et exclusion de la question précédente. Une carte devenue inéligible est masquée ; une banque vide retourne null. Aucun cron/notification ni changement des parties/réponses en cours. Requête initiale, timer calculé depuis server_now/expires_at, renouvellement au créneau suivant (avec latence réseau), rechargement à visibilitychange/online. Pas de tirage local ni compteur dérivant. Les réponses tardives sont rejetées et un changement de duo masque immédiatement l'ancien contenu.
+
+En l'absence de RPC horaire, la question affiche son indisponibilité mais le compteur utilise l'API existante game_sessions, filtre couple_id explicite, statuts ended/closed, lecture paginée et dédoublonnage des game_id. Erreur de cette API : compteur indisponible, pas zéro inventé. Un refus d'appartenance RPC ne déclenche pas ce repli. Aucun besoin de nouvelle migration pour le compteur ; les deux migrations restent nécessaires pour la question horaire du catalogue. Les cinq pastilles restent un indicateur plafonné à cinq et le nombre exact est affiché.
+
+## Vérification exécutée
+- Types, lint et build : réussis. Correction de l'accès non typé à process dans vite.config.ts via loadEnv limité au préfixe VERCEL_GIT_ ; aucun secret publié.
+- Unitaires existants : 13/13 réussis.
+- SQL c27 : réussi sur Docker jetable, transaction rollback. A/B même question et échéance, C rejeté, A–B et A–C isolés, B ne lit pas A–C, progression vide réelle, changement de créneau sans répétition, banque désactivée/vide, droits anonymes et accès direct refusés. Révision finale :60/57 candidats selon intensité, sources/limites de droits, retour privé B retiré immédiatement, exclusions de thèmes, banque existante vide. Un premier test du plafond doux a révélé que l’ancien helper couple_cap renvoie toujours3 ; corrigé en lisant directement le minimum des préférences max_intensity des deux membres. Test final réussi.
+- Navigateur simulé : 11 contrôles réussis (échéance serveur, erreur sans contenu périmé, vide, foreground, carrousel, filtre, clavier/Surprise, reduced-motion). Le repli compteur sans RPC, son filtre duo et ses statuts ont également été vérifiés. Le premier essai de navigation avec horloge virtuelle et scroll animé a échoué ; passage testé en mouvement réduit/instantané. Le scroll doux reste non automatisé dans ce test.
+- 18 rendus : trois états Home (sans duo, avec partie, sans partie), 320/360/390/430/768/1440 px. Aucun débordement horizontal, contenu inaccessible sous nav, erreur JS ou cible mesurée <44px.
+- 4 rendus texte 200 % : 320/390 avec/sans partie, mêmes contrôles réussis. Défilement vertical conservé pour ne pas rogner le contenu. La rangée de filtres reste égale, le texte peut revenir à la ligne.
+- Captures haut/bas du nouvel accueil, données fictives ; aucun compte réel utilisé. Les images3D existantes originales sont réutilisées (portes, tasse, dé, jeux), aucune nouvelle génération ni dépense.
+
+## Limites et suite
+Aucun test de production, de latence réelle multi-appareils, de fermeture navigateur à la frontière horaire, ni revue Admin Claude. Les tests réseau sont simulés, l'isolation SQL est réellement exécutée. Pas d'inspection des pixels de référence faute de téléchargement. Pas de capture avant garantie au SHA1263757, ni comparaison graphique automatisée. Pas de nouvelle vérification distante demandée ; conserver Admin Claude lors de la future réconciliation.
+
+Audio reste désactivé, Google non configuré, vidéo non intégrée. Pause de publication maintenue ; aucune tentative GitHub/Vercel. La passation1263757 reste intacte et le nouveau bundle inclut ce commit comme ancêtre.

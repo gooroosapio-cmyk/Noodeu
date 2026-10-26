@@ -1,6 +1,7 @@
 /* eslint-disable @typescript-eslint/no-explicit-any */
 // Packs de questions (C01) et questionnaires (C02) : textes, ordre, échelles et calculs viennent du serveur.
 // L'écran n'affiche jamais une réponse du partenaire avant la révélation : il ne la reçoit pas.
+import { AudioAnswer, AudioPlayback } from "../audio/AudioAnswer";
 import { LaterButton } from "../Later";
 import { DeepToggle, IntensityTransition, useSessionMeta } from "../../parcours/meta";
 import { useEffect, useMemo, useState } from "react";
@@ -8,8 +9,9 @@ import { Link } from "react-router";
 import { t } from "../../i18n";
 import { Alert, Art, Icon, Loading } from "../../components/ui";
 import type { Player, SessionState } from "../../lib/types";
-import { ART_BY_PACK } from "../../screens/Libraries";
+import { ART_BY_PACK, artOf } from "../../screens/Libraries";
 import { NudgeButton } from "../premium/Nudge";
+import { ReadingRegion } from "../ReadingRegion";
 
 type J = any;
 type Run = (fn: string, args?: Record<string, unknown>) => Promise<{ ok: boolean; error?: string; info?: any }>;
@@ -29,7 +31,7 @@ function moveError(code?: string) {
 // ---------------------------------------------------------------------------
 // Packs de questions
 // ---------------------------------------------------------------------------
-type PackAnswer = { choice: "share" | "private" | "pass"; text?: string; value?: number } | null;
+type PackAnswer = { choice: "share" | "private" | "pass"; text?: string; value?: number; audio_id?: string; expires_at?: string } | null;
 
 function optionLabel(card: J, value: number | undefined) {
   if (value === undefined || value === null) return null;
@@ -46,7 +48,7 @@ function AnswerView({ card, a, mine }: { card: J; a: PackAnswer; mine?: PackAnsw
   return (
     <div className="stack stack--2">
       {shown.value !== undefined && <p className="strong">{optionLabel(card, shown.value)}</p>}
-      {shown.text && <p className="q-answer__text">{shown.text}</p>}
+      {shown.audio_id && shown.expires_at ? <AudioPlayback key={shown.audio_id} id={shown.audio_id} expiresAt={shown.expires_at} /> : shown.text && <p className="q-answer__text">{shown.text}</p>}
       {a.choice !== "share" && <p className="t-meta row"><Icon name="lock-keyhole" size={16} />{t("q.pack.onlyYou")}</p>}
     </div>
   );
@@ -76,18 +78,20 @@ function PackRevealed({ c, round, me, partner }: { c: Common; round: QRound; me:
   );
 }
 
-function PackForm({ card, busy, onSend }: { card: J; busy: boolean; onSend: (p: Record<string, unknown>) => Promise<boolean> }) {
+function PackForm({ card, busy, onSend, sessionId, round }: { card: J; busy: boolean; sessionId: string; round: number; onSend: (p: Record<string, unknown>) => Promise<boolean> }) {
+  const [audioBusy, setAudioBusy] = useState(false);
+  const blocked = busy || audioBusy;
   const tf = card.item.response === "true_false" || (card.item.options ?? []).length > 0;
   const [text, setText] = useState("");
   const [value, setValue] = useState<number | null>(null);
   const has = Boolean(text.trim()) || value !== null;
   const payload = (choice: string) => ({ choice, ...(text.trim() ? { text: text.trim() } : {}), ...(value !== null ? { value } : {}) });
   return (
-    <form className="stack stack--4" onSubmit={(e) => { e.preventDefault(); if (has) void onSend(payload("share")); }}>
+    <form className="stack stack--4" onSubmit={(e) => { e.preventDefault(); if (has && !blocked) void onSend(payload("share")); }}>
       {tf && (
         <div className="q-choices" role="radiogroup" aria-label={t("q.pack.yourAnswer")}>
           {(card.item.options ?? []).map((o: J) => (
-            <button key={o.value} type="button" role="radio" aria-checked={value === o.value} className="q-choice" disabled={busy}
+            <button key={o.value} type="button" role="radio" aria-checked={value === o.value} className="q-choice" disabled={blocked}
               onClick={() => setValue(value === o.value ? null : o.value)}>
               <span className="q-choice__dot" aria-hidden="true" />{o.label_fr}
             </button>
@@ -96,16 +100,17 @@ function PackForm({ card, busy, onSend }: { card: J; busy: boolean; onSend: (p: 
       )}
       <div className="field">
         <label className="field__label" htmlFor="q-text">{tf ? t("q.pack.comment") : t("q.pack.yourAnswer")}</label>
-        <textarea id="q-text" className="input q-textarea" maxLength={MAX_TEXT} value={text} disabled={busy}
+        <textarea id="q-text" className="input q-textarea" maxLength={MAX_TEXT} value={text} disabled={blocked}
           onChange={(e) => setText(e.target.value)} placeholder={tf ? "" : t("q.pack.placeholder")} />
         <span className="field__hint">{t("q.pack.hint", { n: MAX_TEXT - text.length })}</span>
       </div>
+      {!tf && <AudioAnswer key={`${sessionId}:${round}`} sessionId={sessionId} round={round} disabled={busy} onSend={onSend} onBusy={setAudioBusy} />}
       <div className="stack stack--2">
-        <button className="btn" type="submit" disabled={busy || !has}><Icon name="send" size={18} />{t("q.pack.sendShare")}</button>
-        <button className="btn btn--secondary" type="button" disabled={busy || !has} onClick={() => void onSend(payload("private"))}>
+        <button className="btn" type="submit" disabled={blocked || !has}><Icon name="send" size={18} />{t("q.pack.sendShare")}</button>
+        <button className="btn btn--secondary" type="button" disabled={blocked || !has} onClick={() => void onSend(payload("private"))}>
           <Icon name="lock-keyhole" size={18} />{t("q.pack.sendPrivate")}
         </button>
-        <button className="btn btn--quiet" type="button" disabled={busy} onClick={() => void onSend({ choice: "pass" })}>{t("q.pack.pass")}</button>
+        <button className="btn btn--quiet" type="button" disabled={blocked} onClick={() => void onSend({ choice: "pass" })}>{t("q.pack.pass")}</button>
       </div>
     </form>
   );
@@ -132,7 +137,7 @@ function PackPlaying({ c, round }: { c: Common; round: QRound }) {
   }
 
   return (
-    <section className="stack stack--5" key={round.round_no}>
+    <section className="pack-playing reading-games stack stack--5" key={round.round_no}>
       <div className="q-progress">
         <span className="t-meta">
           {card.set_no ? t("q.pack.set", { s: card.set_no, n: (card.index % card.set_size) + 1, size: card.set_size }) : t("q.pack.card", { n: card.index + 1, count: card.count })}
@@ -143,17 +148,17 @@ function PackPlaying({ c, round }: { c: Common; round: QRound }) {
         <div className="nd-progress__fill" style={{ width: `${(100 * (card.index + 1)) / card.count}%` }} />
       </div>
       <IntensityTransition prev={prevItem ? meta[prevItem] : undefined} cur={meta[card.item.id]} />
-      <article className="q-card">
+      <ReadingRegion className="console-question pack-question" label="Question du pack" resetKey={card.item.id}>
         <div className="q-card__head">
           {card.item.adult && <span className="nd-chip nd-chip--peach">+18</span>}
           <span className="nd-chip">{card.set_no ? t("q.pack.setChip", { s: card.set_no }) : t("q.pack.cardChip", { n: card.index + 1 })}</span>
-          <Art name={ART_BY_PACK[(c.st.game.config as any).pack?.code ?? ""] ?? "c01-generic"} size={64} />
+          <Art name={ART_BY_PACK[(c.st.game.config as any).pack?.code ?? ""] ?? artOf({id:c.st.session.game_id,meta:{},mechanic:"pack_conversation"})} size={64} />
         </div>
         <h2 className={`t-question${card.item.text.length > 140 ? " t-question--long" : ""}`}>{card.item.text}</h2>
         <p className="t-meta">{first?.is_me ? t("q.pack.youFirst") : t("q.pack.firstSpeaker", { name: nameOf(first) })}</p>
         {!card.done && <DeepToggle followup={meta[card.item.id]?.long_followup} roundKey={round.round_no} />}
         {!c.st.session.read_only && <LaterButton sessionId={c.st.session.id} round={round.round_no} disabled={!c.online} />}
-      </article>
+      </ReadingRegion>
 
       {card.done ? (
         <PackRevealed c={c} round={round} me={me} partner={partner} />
@@ -166,7 +171,7 @@ function PackPlaying({ c, round }: { c: Common; round: QRound }) {
       ) : (
         <>
           {theyAnswered && <p className="t-meta row"><Icon name="check" size={16} />{t("q.pack.partnerDone", { name: nameOf(partner) })}</p>}
-          <PackForm key={round.round_no} card={card} busy={c.busy || !c.online} onSend={send} />
+          <PackForm key={round.round_no} sessionId={c.st.session.id} round={round.round_no} card={card} busy={c.busy || !c.online} onSend={send} />
         </>
       )}
       {err && <Alert>{err}</Alert>}
@@ -255,6 +260,7 @@ function PurityScore({ scores, total }: { scores: Record<string, number>; total:
     <div className="purity-score">
       <p className="purity-score__main"><strong>{scores.indice}</strong>/100</p>
       <p className="t-small">{t("q.purity.nonOf", { n: scores.non, total })}</p>
+      <p className="t-meta">Indice adapté : nombre de « Non » ÷ {total} × 100, arrondi. Ce questionnaire n’est pas un test scientifique validé.</p>
     </div>
   );
 }
@@ -306,7 +312,7 @@ function TestDone({ c, round }: { c: Common; round: QRound }) {
   const noScore = Object.keys(card.axes ?? {}).length === 0;
   if (noScore) {
     return (
-      <div className="stack stack--4 enter" aria-live="polite">
+      <div className="reading-games stack stack--4 enter" aria-live="polite">
         <section className="card stack stack--3">
           <div className="q-result-head">
             <Art name="result-private" size={96} />
@@ -320,7 +326,7 @@ function TestDone({ c, round }: { c: Common; round: QRound }) {
     );
   }
   return (
-    <div className="stack stack--4 enter" aria-live="polite">
+    <div className="reading-games stack stack--4 enter" aria-live="polite">
       <section className="card stack stack--3">
         <div className="q-result-head">
           <Art name="result-private" size={96} />
@@ -387,7 +393,7 @@ function TestPlaying({ c, round }: { c: Common; round: QRound }) {
   const busy = c.busy || !c.online;
 
   return (
-    <section className="stack stack--5">
+    <section className="questionnaire-playing reading-games stack stack--5">
       <div className="q-progress">
         <span className="t-meta">{t("q.test.page", { n: page + 1, total: pages })}</span>
         <span className="t-meta">{t("q.test.answered", { n: answeredCount, total: items.length })}</span>
@@ -443,7 +449,7 @@ export function QuestionnaireResults({ c, navigate }: { c: Common; navigate: (to
   const ended = c.st.session.status === "ended" && !c.st.session.read_only;
   const pack = round?.card?.mech === "pack_conversation";
   return (
-    <section className="stack stack--5">
+    <section className="reading-games stack stack--5">
       <div className="page-header">
         <h1 className="t-page">{pack ? t("q.pack.endTitle") : t("q.test.endTitle")}</h1>
         <p className="t-small muted">{c.st.game.title}</p>
@@ -451,10 +457,10 @@ export function QuestionnaireResults({ c, navigate }: { c: Common; navigate: (to
       {round && (pack ? <PackResults c={c} /> : <TestDone c={c} round={round} />)}
       {ended && (
         <div className="stack stack--2">
-          <button className="btn" disabled={c.busy || !c.online} onClick={async () => { await c.run("close_session"); navigate(`/bibliotheques/${c.st.session.game_id}`); }}>
+          <button className="btn" disabled={c.busy || !c.online} onClick={async () => { if ((await c.run("close_session")).ok) navigate(`/bibliotheques/${c.st.session.game_id}`); }}>
             {pack ? t("q.pack.continueLater") : t("game.replay")}
           </button>
-          <button className="btn btn--secondary" disabled={c.busy || !c.online} onClick={async () => { await c.run("close_session"); navigate("/bibliotheques"); }}>{t("game.otherGame")}</button>
+          <button className="btn btn--secondary" disabled={c.busy || !c.online} onClick={async () => { if ((await c.run("close_session")).ok) navigate("/bibliotheques"); }}>{t("game.otherGame")}</button>
         </div>
       )}
       <Link className="btn btn--quiet" to="/accueil">{t("game.home")}</Link>

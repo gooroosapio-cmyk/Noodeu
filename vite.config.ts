@@ -1,12 +1,19 @@
-import { defineConfig } from "vite";
+import { defineConfig, loadEnv } from "vite";
 import react from "@vitejs/plugin-react";
 import { VitePWA } from "vite-plugin-pwa";
 import pkg from "./package.json" with { type: "json" };
+
+const releaseEnv = loadEnv("production", ".", "VERCEL_GIT_");
 
 export default defineConfig({
   define: { __APP_VERSION__: JSON.stringify(pkg.version) },
   plugins: [
     react(),
+    { name: "noodeu-release", generateBundle() {
+      this.emitFile({ type: "asset", fileName: "assets/noodeu-release.json", source: JSON.stringify({
+        commit: releaseEnv.VERCEL_GIT_COMMIT_SHA ?? "local", branch: releaseEnv.VERCEL_GIT_COMMIT_REF ?? "local", audioEnabled: false, databaseMigrationsAppliedByBuild: false,
+      }) });
+    } },
     VitePWA({
       registerType: "prompt",
       includeAssets: ["assets/noodeu/01_Logos/noodeu-favicon.svg", "assets/noodeu/01_Logos/noodeu-app-icon-180.png"],
@@ -19,8 +26,8 @@ export default defineConfig({
         scope: "/",
         display: "standalone",
         orientation: "portrait",
-        background_color: "#FFF8F0",
-        theme_color: "#FFF8F0",
+        background_color: "#F7F1F1",
+        theme_color: "#F7F1F1",
         icons: [
           { src: "/assets/noodeu/01_Logos/noodeu-app-icon-192.png", sizes: "192x192", type: "image/png", purpose: "any" },
           { src: "/assets/noodeu/01_Logos/noodeu-app-icon-512.png", sizes: "512x512", type: "image/png", purpose: "any maskable" },

@@ -13,11 +13,11 @@ const catalogue = fixture("catalogue.json");
 // Catalogue final : questionnaire aléatoire de « Se découvrir » (bouton dédié, jamais listé comme un pack).
 if (!catalogue.games.some((g) => g.id === "ND-Q-RND1")) {
   catalogue.games.push({ ...catalogue.games.find((g) => g.mechanic === "pack_conversation"), id: "ND-Q-RND1", title: "Questionnaire aléatoire",
-    sort: 0, meta: { random: true, code: "RND1" }, implementation: "playable" });
+    sort: 0, adult_available: true, content_level: "standard", meta: { random: true, code: "RND1" }, implementation: "playable" });
 }
 const playable = Object.keys(fixture("index.json"));
 
-const BASE = "http://localhost:4173";
+const BASE = process.env.BASE ?? "http://localhost:4173";
 const OUT = process.argv[2] ?? "test-results/visual";
 mkdirSync(OUT, { recursive: true });
 const REF = "uqyrjdaonqqkkpzyjfcg";
@@ -53,7 +53,7 @@ const pick = (ids) => ({ words: ids.map((i) => `portrait.${i}`) });
 const notifications = [
   { id: "n0", type: "nudge", couple_id: DUO, data: { name: "Alex", title: "Deux vérités et un mensonge", session_id: SESSION }, created_at: new Date(Date.now() - 30000).toISOString(), read_at: null },
   { id: "n9", type: "message", couple_id: DUO, data: { name: "Alex", count: 3 }, created_at: new Date(Date.now() - 60000).toISOString(), read_at: null },
-  { id: "n1", type: "game_proposed", couple_id: DUO, data: { name: "Alex", title: game.title, session_id: SESSION }, created_at: new Date(Date.now() - 600000).toISOString(), read_at: null },
+  { id: "n1", type: "game_proposed", couple_id: DUO, data: { name: "Alex", title: game.title, session_id: SESSION }, created_at: new Date(Date.now() - 600000).toISOString(), read_at: "2026-10-25T19:00:00Z" },
   { id: "n2", type: "invitation_accepted", couple_id: DUO, data: { name: "Alex" }, created_at: "2026-10-01T10:00:00Z", read_at: "2026-10-01T11:00:00Z" },
 ];
 const messages = [
@@ -62,6 +62,7 @@ const messages = [
 ];
 
 async function setup(page, scenario) {
+  await page.routeWebSocket("**", socket => socket.close());
   const exp = Math.floor(Date.now() / 1000) + 3600;
   const b64 = (o) => Buffer.from(JSON.stringify(o)).toString("base64url");
   const jwt = `${b64({ alg: "HS256", typ: "JWT" })}.${b64({ sub: ME, role: "authenticated", exp })}.sig`;
@@ -75,9 +76,13 @@ async function setup(page, scenario) {
     if (p.endsWith("/auth/v1/settings")) return json({ external: { google: true, email: true } });
     if (p.endsWith("/profiles")) return json([{ id: ME, display_name: "Maya", word_form: "f", intimate_opt_in: Boolean(scenario.intimate), reduced_motion: false, avatar_path: null }]);
     if (p.endsWith("/rpc/get_my_duos")) return json(scenario.duos ?? []);
+    if (p.endsWith("/rpc/get_audio_capability")) return json({ok:true,enabled:false});
+    if (p.endsWith("/rpc/get_duo_space")) return json({ok:true,cover_path:null,version:0,notes:[{id:"note1",body:"Choisir une idée pour notre prochain week-end",due_on:null,done:false,version:0}]});
     if (p.endsWith("/rpc/get_open_session")) return json(scenario.open ?? null);
     if (p.endsWith("/rpc/get_invitation_status")) return json(scenario.invitations ?? { outgoing: null, incoming: null });
-    if (p.endsWith("/rpc/get_session_state")) return json(scenario.state);
+    if (p.endsWith("/rpc/get_session_state")) return json(scenario.state ? {
+      ...scenario.state, session: { ...scenario.state.session, id: route.request().postDataJSON().p_session }
+    } : {ok:false,error:"not_found"});
     if (p.endsWith("/rpc/get_chat_unread")) return json(scenario.unread ?? 0);
     if (p.endsWith("/notifications")) return json(scenario.notifications ?? []);
     if (p.endsWith("/duo_messages")) return json(scenario.duos?.length ? messages : []);
@@ -97,6 +102,7 @@ async function setup(page, scenario) {
       shared: Boolean(scenario.duos?.length), card: { text: "Quel souvenir de notre première année te fait encore sourire ?", theme: "Conversations à prendre le temps d'avoir",
         intensity: "soft", duration_kind: "discussion", minutes_min: 5, minutes_max: 10, long_followup: "Peux-tu donner un exemple précis ?" } });
     if (p.endsWith("/rpc/get_daily_themes")) return json(["Conversations à prendre le temps d'avoir", "Se retrouver"]);
+    if (p.endsWith("/rpc/get_home_moment")) return json({ ok: true, question: "Quelle activité toute simple aimerais-tu essayer à deux ?", games_played: 3, server_now: new Date().toISOString(), expires_at: new Date(Date.now() + 3600000).toISOString() });
     if (p.endsWith("/rpc/get_progress")) return json({ ok: true, games: { "ND-Q-P01": { kind: "pack", count: 36, cards_done: 12, completed: false, viewed: 14, answered: 11, passed: 2 },
       "ND-Q-012": { kind: "test", me: "completed", partner: "pending" } } });
     if (p.endsWith("/rpc/get_my_items")) return json({ ok: true, later: [], favorites: [{ kind: "question", bank: "q_usu_roadtrip", item_id: "R-03",
@@ -113,6 +119,7 @@ const solo = { duos: [] };
 const duo = { duos: [activeDuo, archivedDuo], unread: 2, notifications, history: [{ id: SESSION, status: "closed", created_at: "2026-10-20T20:00:00Z", ended_at: "2026-10-20T20:10:00Z", games: { title: game.title }, session_players: [{ keep_memory: true }, { keep_memory: true }] }] };
 const allScreens = [
   { name: "01-bienvenue", path: "/", scenario: { auth: false } },
+  { name: "02a-connexion", path: "/connexion", scenario: { auth: false } },
   { name: "02-inscription", path: "/inscription", scenario: { auth: false } },
   { name: "70-admin-questions", path: "/admin/questions", scenario: { ...solo, admin: true } },
   { name: "70b-admin-sous-categorie", path: "/admin/questions", scenario: { ...solo, admin: true },
@@ -195,11 +202,13 @@ allScreens.push({ name: "52-N2-001-salon-options", path: `/partie/${SESSION}`, s
 const rebase = (o) => (Array.isArray(o) ? o.map(rebase) : o && typeof o === "object"
   ? ("__rel" in o ? new Date(Date.now() + o.__rel * 1000).toISOString() : Object.fromEntries(Object.entries(o).map(([k, v]) => [k, rebase(v)]))) : o);
 for (const key of Object.keys(fixture("index_c14.json"))) {
-  allScreens.push({ name: `60-${key}`, path: `/partie/${SESSION}`, scenario: { ...duo, intimate: key === "salon-huis-clos" || key === "conv-salon", state: rebase(fixture(`c14-${key}.json`)) } });
+  allScreens.push({ name: `60-${key}`, path: `/partie/${SESSION}`, scenario: { ...duo, intimate: key === "salon-huis-clos" || key === "conv-salon", state: fixture(`c14-${key}.json`) } });
 }
+export { setup, duo, sessionState, SESSION, ME, PARTNER, activeDuo };
+if (!process.env.NOODEU_FIXTURES_ONLY) {
 const ONLY = process.env.ONLY;
-const screens = ONLY ? allScreens.filter((s) => s.name.includes(ONLY)) : allScreens;
-const sizes = (process.env.WIDTHS ?? "320,360,390,430,768,1440").split(",").map((w) => ({ width: Number(w), height: Number(w) >= 768 ? 900 : 780 }));
+const screens = process.env.SCREENS ? allScreens.filter(s => new RegExp(process.env.SCREENS).test(s.name)) : ONLY ? allScreens.filter((s) => s.name.includes(ONLY)) : allScreens;
+const sizes = (process.env.WIDTHS ?? "320,360,390,430,768,1440").split(",").map((w) => ({ width: Number(w), height: Number(process.env.HEIGHT ?? (Number(w) >= 768 ? 900 : 780)) }));
 if (!process.env.WIDTHS) sizes.push({ width: 390, height: 560, label: "basse" });
 const zoom = Number(process.env.ZOOM ?? 1);
 
@@ -211,8 +220,10 @@ for (const size of sizes) {
     const page = await ctx.newPage();
     const errors = [];
     page.on("pageerror", (e) => errors.push(e.message));
-    await setup(page, s.scenario);
+    // Chaque capture commence avec la même durée restante, même après une longue matrice.
+    await setup(page, rebase(s.scenario));
     await page.goto(BASE + s.path, { waitUntil: "networkidle" });
+    await page.locator("#root > *").first().waitFor();
     if (zoom !== 1) await page.addStyleTag({ content: `html { font-size: ${zoom * 100}%; }` });
     if (s.action) { await s.action(page); }
     await page.waitForTimeout(Number(process.env.WAIT ?? 350));
@@ -225,23 +236,25 @@ for (const size of sizes) {
         // Un contrôle placé dans une étiquette entièrement cliquable hérite de sa zone tactile.
         const zone = el.closest("label") ?? el;
         const z = zone.getBoundingClientRect();
-        return r.width > 0 && r.height > 0 && (z.height < 44 || z.width < 44) && !el.closest(".game-card__main");
+        return r.width > 0 && r.height > 0 && (z.height < 44 || z.width < 44) && !el.closest(".game-card__main, [inert]");
       }).map((el) => (el.getAttribute("aria-label") || el.textContent || el.tagName).trim().slice(0, 24));
       // Contenu caché sous la navigation : le dernier élément de la page doit rester atteignable.
       const nav = document.querySelector(".nav");
       const page = document.querySelector("main");
       let hidden = false;
       if (nav && page && !document.querySelector(".sheet")) {
-        window.scrollTo(0, document.documentElement.scrollHeight);
+        if (page.scrollHeight > page.clientHeight && getComputedStyle(page).overflowY === "auto") page.scrollTop = page.scrollHeight;
+        else window.scrollTo(0, document.documentElement.scrollHeight);
         const last = page.lastElementChild?.getBoundingClientRect();
         hidden = Boolean(last && last.bottom > nav.getBoundingClientRect().top + 1);
       }
       const navLabels = [...document.querySelectorAll(".nav a")].map((a) => a.innerText.replace(/\s+/g, " ").trim());
       return { overflow, culprits, small, hidden, navLabels };
     });
+    if (await page.locator(".skeleton, .page-loading").count()) errors.push("écran encore en chargement : fixture ou chargement invalide");
     // L'écran d'erreur du routeur intercepte les exceptions : on le détecte explicitement.
     if (await page.getByText("Unexpected Application Error").count()) errors.push(await page.locator("h3, pre").first().innerText().catch(() => "erreur de rendu"));
-    const bad = report.overflow > 0 || errors.length || report.hidden;
+    const bad = report.overflow > 0 || errors.length || report.hidden || (process.env.STRICT_TARGETS === "1" && report.small.length > 0);
     if (bad) problems++;
     console.log(`${size.width}x${size.height}${zoom !== 1 ? ` texte×${zoom}` : ""} ${s.name}: débordement=${report.overflow}px masqué-sous-nav=${report.hidden} erreurs=${errors.length}`
       + (errors.length ? ` [${errors.join(" | ")}]` : "") + (report.culprits.length ? ` dépassent=${report.culprits.join(",")}` : "")
@@ -251,3 +264,6 @@ for (const size of sizes) {
 }
 await browser.close();
 console.log(problems ? `${problems} écran(s) à corriger` : "Aucun débordement, contenu masqué ni erreur JavaScript.");
+if (problems) process.exitCode = 1;
+
+}

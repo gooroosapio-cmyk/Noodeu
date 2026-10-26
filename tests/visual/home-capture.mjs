@@ -1,0 +1,10 @@
+process.env.NOODEU_FIXTURES_ONLY='1';
+const {setup,duo,SESSION}=await import('./render-check.mjs');
+const {chromium}=await import('@playwright/test');
+const browser=await chromium.launch({executablePath:'/usr/bin/chromium',headless:true,args:['--no-sandbox']});
+const context=await browser.newContext({viewport:{width:390,height:844},serviceWorkers:'block'});const page=await context.newPage();
+await setup(page,{...duo,open:{id:SESSION,game_id:'ND-G-G03',status:'playing',title:'Tu préfères'}});
+await page.goto('http://127.0.0.1:4193/accueil');await page.getByText('Question du moment').waitFor();await page.waitForTimeout(500);await page.screenshot({path:'/workspace/noodeu-home-captures/home-haut.png'});
+await page.locator('.arcade-next').scrollIntoViewIfNeeded();await page.screenshot({path:'/workspace/noodeu-home-captures/home-bas.png'});
+await page.setViewportSize({width:320,height:780});await page.reload();await page.getByText('Question du moment').waitFor();await page.waitForTimeout(500);await page.screenshot({path:'/workspace/noodeu-home-captures/home-320.png'});
+await browser.close();

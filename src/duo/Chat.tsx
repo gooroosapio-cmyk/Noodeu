@@ -16,8 +16,101 @@ function draftKey(coupleId: string) {
 /** Bulle flottante : ouvre la discussion avec la personne du duo actif. */
 export function ChatLauncher({ onOpen, withNav = true }: { onOpen: () => void; withNav?: boolean }) {
   const { chatUnread } = useDuo();
+  const launcher = useRef<HTMLButtonElement>(null);
+  const [position, setPosition] = useState<{ left: number; top: number; headerSlot?: boolean }>();
+  useEffect(() => {
+    let frame = 0;
+    let reserveHeader = false;
+    function place() {
+      cancelAnimationFrame(frame);
+      frame = requestAnimationFrame(() => {
+        const button = launcher.current;
+        if (!button || document.querySelector('[role="dialog"]')) return;
+        const box = button.getBoundingClientRect();
+        const header = document.querySelector('.session-toolbar');
+        const headerPosition = () => {
+          const r = header!.getBoundingClientRect();
+          return { left: Math.min(innerWidth - box.width - 16, r.right - box.width - 12), top: r.top + Math.max(12, parseFloat(getComputedStyle(header!).paddingTop) || 0), headerSlot: true };
+        };
+        if (reserveHeader && header) {
+          const next = headerPosition();
+          setPosition(old => old?.left === next.left && old?.top === next.top && old?.headerSlot ? old : next);
+          return;
+        }
+        const edge = Math.max(16, (innerWidth - 632) / 2 + 16);
+        const viewportTop = visualViewport?.offsetTop ?? 0;
+        const viewportBottom = viewportTop + (visualViewport?.height ?? innerHeight);
+        const floor = Math.min(viewportBottom, withNav ? document.querySelector('.nav')?.getBoundingClientRect().top ?? viewportBottom : viewportBottom);
+        const main = document.querySelector('main');
+        const ceiling = Math.max(viewportTop + 8, main?.getBoundingClientRect().top ?? 72);
+        const clippingParents = new Map<Element, { rect: DOMRect; x: boolean; y: boolean }>();
+        const clip = (r: DOMRect, element: Element | null) => {
+          let left = r.left, right = r.right, top = r.top, bottom = r.bottom;
+          // Le texte hors d'une région défilable n'occupe pas l'écran. Respecter
+          // tous les ancêtres, sinon une longue question repousse le chat et les CTA.
+          for (let parent = element; parent; parent = parent.parentElement) {
+            let bounds = clippingParents.get(parent);
+            if (!bounds) {
+              const style = getComputedStyle(parent);
+              bounds = { rect: parent.getBoundingClientRect(), x: /^(auto|scroll|hidden|clip)$/.test(style.overflowX), y: /^(auto|scroll|hidden|clip)$/.test(style.overflowY) };
+              clippingParents.set(parent, bounds);
+            }
+            if (bounds.x) { left = Math.max(left, bounds.rect.left); right = Math.min(right, bounds.rect.right); }
+            if (bounds.y) { top = Math.max(top, bounds.rect.top); bottom = Math.min(bottom, bounds.rect.bottom); }
+          }
+          return new DOMRect(left, top, Math.max(0, right - left), Math.max(0, bottom - top));
+        };
+        // Une grille dense peut ne laisser aucune place parmi quatre positions fixes.
+        // On cherche le bord libre sur toute la hauteur, sans dock ni espace fixe ajouté.
+        const controls = Array.from(document.querySelectorAll('main a, main button, main input, main select, main textarea, main label, main img, .session-toolbar a, .session-toolbar button')).filter((el) => el !== button).map((el) => clip(el.getBoundingClientRect(), el.parentElement)).filter((r) => r.width && r.height);
+        const textRects: DOMRect[] = [];
+        for (const region of [main, header]) {
+          if (!region) continue;
+          const walker = document.createTreeWalker(region, NodeFilter.SHOW_TEXT);
+          while (walker.nextNode()) {
+            const node = walker.currentNode;
+            if (!node.textContent?.trim() || node.parentElement?.closest('[aria-hidden="true"], .sr-only')) continue;
+            const range = document.createRange();
+            range.selectNodeContents(node);
+            textRects.push(...Array.from(range.getClientRects()).map(r => clip(r, node.parentElement)).filter((r) => r.width && r.height));
+          }
+        }
+        const candidates: { left: number; top: number }[] = [];
+        for (let top = floor - box.height - 16; top >= ceiling; top -= 4) {
+          candidates.push({ left: innerWidth - edge - box.width, top }, { left: edge, top });
+        }
+        if (!candidates.length) candidates.push({ left: edge, top: Math.max(0, floor - box.height - 16) });
+        const area = (p: { left: number; top: number }, rects: DOMRect[]) => rects.reduce((sum, r) => sum + Math.max(0, Math.min(p.left + box.width + 4, r.right) - Math.max(p.left - 4, r.left)) * Math.max(0, Math.min(p.top + box.height + 4, r.bottom) - Math.max(p.top - 4, r.top)), 0);
+        const overlap = (p: { left: number; top: number }) => area(p, controls) * 100 + area(p, textRects);
+        let best = candidates[0], score = overlap(best);
+        for (const candidate of candidates.slice(1)) {
+          if (score === 0) break;
+          const next = overlap(candidate);
+          if (next < score) { best = candidate; score = next; }
+        }
+        // Si le texte agrandi remplit toute la hauteur, une place réelle est réservée
+        // dans la barre de commandes. Aucun recouvrement n'est choisi par défaut.
+        if (score > 0 && header) {
+          reserveHeader = true;
+          setPosition(headerPosition());
+        } else setPosition((old) => old?.left === best.left && old?.top === best.top && !old?.headerSlot ? old : best);
+      });
+    }
+    place();
+    window.addEventListener('scroll', place, true);
+    window.addEventListener('resize', place);
+    visualViewport?.addEventListener('resize', place);
+    visualViewport?.addEventListener('scroll', place);
+    window.addEventListener('focusin', place);
+    const observer = new MutationObserver(place);
+    observer.observe(document.body, { childList: true, subtree: true });
+    const resize = new ResizeObserver(place);
+    const main = document.querySelector('main');
+    if (main) resize.observe(main);
+    return () => { cancelAnimationFrame(frame); observer.disconnect(); resize.disconnect(); window.removeEventListener('scroll', place, true); window.removeEventListener('resize', place); window.removeEventListener('focusin', place); visualViewport?.removeEventListener('resize', place); visualViewport?.removeEventListener('scroll', place); };
+  }, [withNav]);
   return (
-    <button className={`chat-launcher ${withNav ? "" : "chat-launcher--nonav"}`} onClick={onOpen}
+    <button ref={launcher} data-header-slot={position?.headerSlot || undefined} style={position ? { left: position.left, top: position.top, right: "auto", bottom: "auto" } : undefined} className={`chat-launcher ${withNav ? "" : "chat-launcher--nonav"}`} onClick={onOpen}
       aria-label={chatUnread ? t("chat.openUnread", { n: chatUnread }) : t("chat.open")}>
       <Icon name="chat" size={26} />
       {chatUnread > 0 && <span className="badge-count" aria-hidden="true">{chatUnread > 99 ? "99+" : chatUnread}</span>}

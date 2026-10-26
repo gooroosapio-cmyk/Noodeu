@@ -28,7 +28,10 @@ export function useLaunch() {
       setError(errorMessage(res.error));
       return;
     }
-    if (p.settings) await rpc("update_session_settings", { p_session: res.session_id, p_settings: p.settings });
+    if (p.settings) {
+      const settingsResult = await rpc("update_session_settings", { p_session: res.session_id, p_settings: p.settings });
+      if (!settingsResult.ok) { setError(errorMessage(settingsResult.error)); return; }
+    }
     navigate(`/partie/${res.session_id}`);
   }
 

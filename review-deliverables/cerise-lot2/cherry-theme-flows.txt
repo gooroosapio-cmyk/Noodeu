@@ -1,0 +1,5 @@
+PASS accueil : avatars centrés et CTA égaux ; espace sans actions redondantes
+PASS invitation : centrage, égalité, focus contenu, retour et reduced-motion
+PASS quitter lobby : annuler, hors ligne, échec visible, confirmation et double clic
+PASS quitter playing : annuler, hors ligne, échec visible, confirmation et double clic
+PASS quitter paused : annuler, hors ligne, échec visible, confirmation et double clic

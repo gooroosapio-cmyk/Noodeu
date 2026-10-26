@@ -1,0 +1,4 @@
+PASS connexion: mot de passe, Google inactif, double envoi bloqué, erreur visible, petite hauteur
+PASS inscription: mot de passe, Google inactif, double envoi bloqué, erreur visible, petite hauteur
+PASS salon : panneaux distincts, géométrie, réglages réels, attente avant prêt, 404 sans blocage, double clic, non-rejeu, hors ligne/reconnexion
+PASS reduced-motion : vidéo ignorée sans requête, prêt confirmé

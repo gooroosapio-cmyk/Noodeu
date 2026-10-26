@@ -1,0 +1,13 @@
+320x780 02a-connexion: débordement=0px masqué-sous-nav=false erreurs=0
+320x780 02-inscription: débordement=0px masqué-sous-nav=false erreurs=0
+360x780 02a-connexion: débordement=0px masqué-sous-nav=false erreurs=0
+360x780 02-inscription: débordement=0px masqué-sous-nav=false erreurs=0
+390x780 02a-connexion: débordement=0px masqué-sous-nav=false erreurs=0
+390x780 02-inscription: débordement=0px masqué-sous-nav=false erreurs=0
+430x780 02a-connexion: débordement=0px masqué-sous-nav=false erreurs=0
+430x780 02-inscription: débordement=0px masqué-sous-nav=false erreurs=0
+768x900 02a-connexion: débordement=0px masqué-sous-nav=false erreurs=0
+768x900 02-inscription: débordement=0px masqué-sous-nav=false erreurs=0
+1440x900 02a-connexion: débordement=0px masqué-sous-nav=false erreurs=0
+1440x900 02-inscription: débordement=0px masqué-sous-nav=false erreurs=0
+Aucun débordement, contenu masqué ni erreur JavaScript.

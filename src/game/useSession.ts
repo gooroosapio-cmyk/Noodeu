@@ -17,27 +17,53 @@ export function useSession(sessionId: string, userId: string | null) {
   const [loading, setLoading] = useState(true);
   const [channel, setChannel] = useState<ChannelStatus>("connecting");
   const [present, setPresent] = useState<string[]>([]);
+  // Une rupture de transport ne doit pas transformer le prochain snapshot en événement animé.
+  // L'époque est publiée avec ce snapshot, pas au début de la panne : après ce rattrapage,
+  // les relectures régulières restent des mises à jour normales, même sans WebSocket.
+  const [recoveryEpoch, setRecoveryEpoch] = useState(0);
+  const recoveryPending = useRef(false);
+  const recoveryGeneration = useRef(0);
+  const channelRef = useRef<ChannelStatus>("connecting");
   const versionRef = useRef(0);
+  const contextKey = `${sessionId}:${userId ?? ""}`;
+  const contextRef = useRef(contextKey);
+  contextRef.current = contextKey;
 
   const load = useCallback(async () => {
+    const requestedContext = `${sessionId}:${userId ?? ""}`;
+    const requestedGeneration = recoveryGeneration.current;
     const res = await rpc<SessionState>("get_session_state", { p_session: sessionId });
+    if (contextRef.current !== requestedContext) return;
     setLoading(false);
     if (!res.ok) {
-      if (res.error !== "network") setError(res.error);
+      recoveryPending.current = true;
+      recoveryGeneration.current += 1;
+      setError(res.error);
       return;
     }
+    // Une réponse lancée avant la rupture ne prouve pas que le transport a repris.
+    if (recoveryPending.current && requestedGeneration !== recoveryGeneration.current) return;
     const next = res as unknown as SessionState;
     // On n'applique jamais un état plus ancien que celui déjà affiché.
     if (next.session.state_version >= versionRef.current) {
       versionRef.current = next.session.state_version;
+      if (recoveryPending.current) {
+        recoveryPending.current = false;
+        setRecoveryEpoch((epoch) => epoch + 1);
+      }
       setState(next);
       setError(null);
     }
-  }, [sessionId]);
+  }, [sessionId, userId]);
 
   useEffect(() => {
     versionRef.current = 0;
+    recoveryPending.current = false;
+    recoveryGeneration.current = 0;
+    channelRef.current = "connecting";
+    setRecoveryEpoch(0);
     setLoading(true);
+    setState(null); setError(null); setPresent([]);
     void load();
     return onResume(() => void load());
   }, [load]);
@@ -48,6 +74,11 @@ export function useSession(sessionId: string, userId: string | null) {
       presenceKey: userId,
       onPresence: setPresent,
       onStatus: (s) => {
+        if ((channelRef.current === "live" && s === "down") || (channelRef.current === "down" && s === "live")) {
+          recoveryPending.current = true;
+          recoveryGeneration.current += 1;
+        }
+        channelRef.current = s;
         setChannel(s);
         if (s === "live") void load(); // rattrape ce qui a pu se passer pendant la coupure
       },
@@ -70,13 +101,18 @@ export function useSession(sessionId: string, userId: string | null) {
   const act = useCallback(
     async (fn: string, args: Record<string, unknown>) => {
       const res = await rpc(fn, { p_session: sessionId, ...args });
+      if (!res.ok && res.error === "network") {
+        recoveryPending.current = true;
+        recoveryGeneration.current += 1;
+      }
       await load();
       return res;
     },
     [sessionId, load],
   );
 
-  return { state, error, loading, channel, present, load, act };
+  const currentState = state?.session.id === sessionId ? state : null;
+  return { state: currentState, error, loading: loading || (state !== null && currentState === null), channel, present, recoveryEpoch, load, act };
 }
 
 /** Brouillon local d'une étape (survit au rafraîchissement, effacé à la fermeture de l'onglet). */

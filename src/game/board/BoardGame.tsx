@@ -4,7 +4,7 @@
 import { useEffect, useState, type ComponentType, type ReactNode } from "react";
 import { Link } from "react-router";
 import { t, type MessageKey } from "../../i18n";
-import { Alert, Icon, Illustration, Loading } from "../../components/ui";
+import { Alert, Art, Icon, Illustration, Loading } from "../../components/ui";
 import type { Player, SessionState } from "../../lib/types";
 import { CREATION_VIEWS, CreationSolution, isCreationMech } from "./CreationGames";
 import { MEMORY_VIEWS, MemorySolution, isMemoryMech } from "./MemoryGames";
@@ -683,7 +683,7 @@ export function BoardResults({ c, navigate }: { c: Common; navigate: (to: string
   const bothKeep = c.st.players.every((p) => p.keep_memory);
   return (
     <section className="stack stack--6">
-      <Illustration name="11-fin-de-partie" className="public__art" />
+      {isMiniMech(c.st.game.mechanic) ? <div className="result-emblem"><Art name={`custom-${(c.st.game.config as unknown as {code:string}).code}`} size={72} /></div> : <Illustration name="11-fin-de-partie" className="public__art" />}
       <div className="page-header center">
         <h1 className="t-page">{t("game.endTitle")}</h1>
         <p>{t("game.endText", { title: c.st.game.title })}</p>
@@ -691,7 +691,7 @@ export function BoardResults({ c, navigate }: { c: Common; navigate: (to: string
       {result?.points && (
         <div className="card stack stack--2">
           <h2 className="t-card">{isMiniMech(c.st.game.mechanic) ? t("mini.finalScore") : t("rounds.points")}</h2>
-          {c.st.players.map((p) => <p key={p.seat}>{nameOf(p)} : {result.points![String(p.seat)] ?? 0}</p>)}
+          <div className="result-scores">{c.st.players.map((p) => <div key={p.seat}><span>{nameOf(p)}</span><strong>{result.points![String(p.seat)] ?? 0}</strong></div>)}</div>
         </div>
       )}
       {result?.common !== undefined && !creation && (
@@ -727,8 +727,8 @@ export function BoardResults({ c, navigate }: { c: Common; navigate: (to: string
       )}
       {ended && (
         <div className="stack">
-          <button className="btn" disabled={c.busy || !c.online} onClick={async () => { await c.run("close_session"); navigate(`/bibliotheques/${c.st.session.game_id}`); }}>{t("game.replay")}</button>
-          <button className="btn btn--secondary" disabled={c.busy || !c.online} onClick={async () => { await c.run("close_session"); navigate("/bibliotheques"); }}>{t("game.otherGame")}</button>
+          <button className="btn" disabled={c.busy || !c.online} onClick={async () => { if ((await c.run("close_session")).ok) navigate(`/bibliotheques/${c.st.session.game_id}`); }}>{t("game.replay")}</button>
+          <button className="btn btn--secondary" disabled={c.busy || !c.online} onClick={async () => { if ((await c.run("close_session")).ok) navigate("/bibliotheques"); }}>{t("game.otherGame")}</button>
         </div>
       )}
       <Link className="btn btn--quiet" to="/accueil">{t("game.home")}</Link>

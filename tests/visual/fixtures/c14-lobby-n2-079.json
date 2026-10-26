@@ -1,0 +1,92 @@
+{
+  "ok": true,
+  "game": {
+    "rules": {
+      "how_to": [
+        "Le premier joueur est tiré au sort. Chacun son tour, trace un trait entre deux points voisins, à l'horizontale ou à la verticale.",
+        "Fermer le quatrième côté d'une case te la donne : 1 point par case, 2 si ton trait en ferme deux.",
+        "Tant que tu fermes au moins une case, tu rejoues ; sinon la main passe.",
+        "Quand les 16 cases sont fermées, le plus de cases l'emporte ; 8 à 8, c'est une égalité."
+      ],
+      "details": [
+        "Score : 1 point par carré, maximum total 16.",
+        "Adaptation Noodeu : Taille mobile 5 × 5 points.",
+        "Source de mécanique : Put Yourself in a Box — NRICH / University of Cambridge (https://nrich.maths.org/games/put-yourself-box).",
+        "Règles rédigées par Noodeu (règles originales Noodeu, sources séparées)."
+      ],
+      "privacy": "Le plateau est visible par vous deux ; le serveur attribue les carrés.",
+      "objective": "Fermez des carrés et gardez la main tant que vous en complétez.",
+      "step_texts": {}
+    },
+    "title": "Points et carrés",
+    "config": {
+      "code": "M04",
+      "turn": "alternate",
+      "score": "duel",
+      "engine": "board",
+      "rounds": 1,
+      "version": "noodeu-c34-1.0.0",
+      "mechanic": "dots_boxes",
+      "parameters": {
+        "boxes": 16,
+        "edges": 40,
+        "dot_rows": 5,
+        "turn_timer": null,
+        "dot_columns": 5
+      }
+    },
+    "mechanic": "dots_boxes",
+    "intensity": "soft",
+    "thumbnail": "/assets/c14/M04.webp",
+    "adult_active": true,
+    "content_level": "standard",
+    "adult_available": false
+  },
+  "rounds": [],
+  "my_seat": 1,
+  "players": [
+    {
+      "seat": 1,
+      "is_me": true,
+      "ready": false,
+      "user_id": "11111111-1111-4111-8111-111111111111",
+      "word_form": "n",
+      "avatar_path": null,
+      "keep_memory": false,
+      "display_name": "Maya"
+    },
+    {
+      "seat": 2,
+      "is_me": false,
+      "ready": false,
+      "user_id": "22222222-2222-4222-8222-222222222222",
+      "word_form": "n",
+      "avatar_path": null,
+      "keep_memory": false,
+      "display_name": "Alex"
+    }
+  ],
+  "session": {
+    "id": "d29d4e43-35f2-47a7-b209-1b1e2eba609c",
+    "result": {},
+    "status": "lobby",
+    "game_id": "N2-079",
+    "ended_at": null,
+    "settings": {},
+    "closed_at": null,
+    "paused_by": null,
+    "read_only": false,
+    "created_at": "2026-10-25T21:00:31.543775+00:00",
+    "server_now": "2026-10-25T21:00:31.543775+00:00",
+    "started_at": null,
+    "pause_state": null,
+    "game_version": 1,
+    "total_rounds": 1,
+    "current_round": 0,
+    "state_version": 2
+  },
+  "my_prefs": {
+    "adult": false,
+    "excluded_topics": []
+  }
+}

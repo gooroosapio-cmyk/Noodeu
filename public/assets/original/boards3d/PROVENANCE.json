@@ -1,0 +1,268 @@
+{
+  "generation": "Images originales générées avec OpenAI ImageGen pour Noodeu, 25 octobre 2026. Aucun actif tiers copié. Pas de garantie juridique d’exclusivité.",
+  "processing": "Recadrage des cellules, redimensionnement et encodage WebP alpha ; pas de retouche des objets.",
+  "sources": [
+    {
+      "file": "exec-2cb8e0cd-d739-4fee-89ab-cece9dea48d1.png",
+      "sha256": "6c7bd236fb72bb818d30a2e5d3d86983806f50a320382da66cb3c68d4276b011"
+    },
+    {
+      "file": "exec-9ed4ac41-6d00-43bd-b147-bcc55af66e74.png",
+      "sha256": "f548cdd17e43d7a13cd9e762de2be2da720966c7b6ab97a16e57ba56d48d9c70"
+    }
+  ],
+  "files": [
+    {
+      "file": "cross.webp",
+      "source": "exec-2cb8e0cd-d739-4fee-89ab-cece9dea48d1.png",
+      "crop": [
+        0,
+        0,
+        390,
+        470
+      ],
+      "alpha_bbox": [
+        43,
+        115,
+        373,
+        443
+      ],
+      "bytes": 15928,
+      "sha256": "2b77ce03abf6d90cc735e116210e93ea33ecc2600e9af9b731d731ea55ec3f5d"
+    },
+    {
+      "file": "ring.webp",
+      "source": "exec-2cb8e0cd-d739-4fee-89ab-cece9dea48d1.png",
+      "crop": [
+        400,
+        0,
+        800,
+        480
+      ],
+      "alpha_bbox": [
+        18,
+        97,
+        374,
+        452
+      ],
+      "bytes": 16338,
+      "sha256": "4bf200dbc81080935bdf287d5229d9f59a040a975b1bae8336d0153847041dd2"
+    },
+    {
+      "file": "flower-base.webp",
+      "source": "exec-2cb8e0cd-d739-4fee-89ab-cece9dea48d1.png",
+      "crop": [
+        810,
+        0,
+        1185,
+        505
+      ],
+      "alpha_bbox": [
+        14,
+        75,
+        349,
+        491
+      ],
+      "bytes": 8940,
+      "sha256": "cc61dc25cac3e0d1bbc33f6bb17b09732c4d3e20d49b071296bfd34fc4fbce92"
+    },
+    {
+      "file": "flower-petal.webp",
+      "source": "exec-2cb8e0cd-d739-4fee-89ab-cece9dea48d1.png",
+      "crop": [
+        1190,
+        0,
+        1536,
+        500
+      ],
+      "alpha_bbox": [
+        63,
+        55,
+        273,
+        471
+      ],
+      "bytes": 9912,
+      "sha256": "2d946a5c85d11bc3181b689c6f2cd7dc66ef8de9d87608e9dd24b86d51a41822"
+    },
+    {
+      "file": "naval-ship.webp",
+      "source": "exec-2cb8e0cd-d739-4fee-89ab-cece9dea48d1.png",
+      "crop": [
+        40,
+        470,
+        360,
+        1024
+      ],
+      "alpha_bbox": [
+        74,
+        9,
+        257,
+        507
+      ],
+      "bytes": 12390,
+      "sha256": "d2471f0ca44a9c00d6a16e68a5ea86d9d7cb613929249b975765c2b3694d7f7c"
+    },
+    {
+      "file": "action.webp",
+      "source": "exec-2cb8e0cd-d739-4fee-89ab-cece9dea48d1.png",
+      "crop": [
+        410,
+        500,
+        770,
+        1024
+      ],
+      "alpha_bbox": [
+        41,
+        19,
+        308,
+        463
+      ],
+      "bytes": 10266,
+      "sha256": "d1e60678c928def01aa8a21d1153a0986693436ff750a0918fbabeb2ce1befe9"
+    },
+    {
+      "file": "truth.webp",
+      "source": "exec-2cb8e0cd-d739-4fee-89ab-cece9dea48d1.png",
+      "crop": [
+        780,
+        530,
+        1190,
+        1024
+      ],
+      "alpha_bbox": [
+        13,
+        56,
+        392,
+        397
+      ],
+      "bytes": 20886,
+      "sha256": "2100267811f4eb7157a9cee9be6685efa93fb263a18bb8adf56cdf9de0aa2b2f"
+    },
+    {
+      "file": "token.webp",
+      "source": "exec-2cb8e0cd-d739-4fee-89ab-cece9dea48d1.png",
+      "crop": [
+        1190,
+        515,
+        1536,
+        1024
+      ],
+      "alpha_bbox": [
+        11,
+        95,
+        329,
+        405
+      ],
+      "bytes": 14316,
+      "sha256": "59219aecaca4bc6be5eff9f691a40c25dd9cd14c16ca0f32981bb842f38dfeab"
+    },
+    {
+      "file": "die-1.webp",
+      "source": "exec-9ed4ac41-6d00-43bd-b147-bcc55af66e74.png",
+      "crop": [
+        0,
+        0,
+        512,
+        512
+      ],
+      "alpha_bbox": [
+        73,
+        50,
+        476,
+        470
+      ],
+      "bytes": 17886,
+      "sha256": "92bae629d76c2b4a24832ce04722c9973a82293ba1cd0aa0370450b62a430902"
+    },
+    {
+      "file": "die-2.webp",
+      "source": "exec-9ed4ac41-6d00-43bd-b147-bcc55af66e74.png",
+      "crop": [
+        512,
+        0,
+        1024,
+        512
+      ],
+      "alpha_bbox": [
+        57,
+        50,
+        459,
+        470
+      ],
+      "bytes": 17968,
+      "sha256": "8532b4ffcc071872c509d5c11df366a96489f00c240520d3bb4682911d8669e0"
+    },
+    {
+      "file": "die-3.webp",
+      "source": "exec-9ed4ac41-6d00-43bd-b147-bcc55af66e74.png",
+      "crop": [
+        1024,
+        0,
+        1536,
+        512
+      ],
+      "alpha_bbox": [
+        41,
+        49,
+        442,
+        469
+      ],
+      "bytes": 17944,
+      "sha256": "9da50c1eb4252cbada9944420357f1c146017fabb6516bf3d40a3e837259de7a"
+    },
+    {
+      "file": "die-4.webp",
+      "source": "exec-9ed4ac41-6d00-43bd-b147-bcc55af66e74.png",
+      "crop": [
+        0,
+        512,
+        512,
+        1024
+      ],
+      "alpha_bbox": [
+        72,
+        28,
+        476,
+        447
+      ],
+      "bytes": 17906,
+      "sha256": "62a470aab209d72070b0a55f856ea3ce27b76e4530a4ae7ac7173608af7c31b9"
+    },
+    {
+      "file": "die-5.webp",
+      "source": "exec-9ed4ac41-6d00-43bd-b147-bcc55af66e74.png",
+      "crop": [
+        512,
+        512,
+        1024,
+        1024
+      ],
+      "alpha_bbox": [
+        57,
+        28,
+        460,
+        447
+      ],
+      "bytes": 18102,
+      "sha256": "868acdf866e18bf1ac213dd16a65bc1a732c4bdcba6070045f94b0f63c011279"
+    },
+    {
+      "file": "die-6.webp",
+      "source": "exec-9ed4ac41-6d00-43bd-b147-bcc55af66e74.png",
+      "crop": [
+        1024,
+        512,
+        1536,
+        1024
+      ],
+      "alpha_bbox": [
+        40,
+        28,
+        442,
+        447
+      ],
+      "bytes": 18254,
+      "sha256": "b48d75ebecb368136b0c13a96430b33d2f2f9512c363ee33305f373e800c7449"
+    }
+  ]
+}

@@ -17,7 +17,7 @@ export type IconName =
 /** Illustrations de l'interface v2 (cellules découpées des atlas du kit, PNG transparents convertis en WebP). */
 export type ArtName = string;
 export function Art({ name, size = 72, className = "", alt = "" }: { name: ArtName; size?: number; className?: string; alt?: string }) {
-  return <img className={`art ${className}`} src={`/assets/v2/art/${name}.webp`} width={size} height={size} alt={alt} loading="lazy" decoding="async" />;
+  return <img className={`art ${className}`} src={name.startsWith("custom-") ? (name === "custom-G06" ? "/assets/original/library/G06.svg" : `/assets/original/library3d/${name.slice(7)}.webp`) : `/assets/v2/art/${name}.webp`} width={size} height={size} alt={alt} loading="lazy" decoding="async" />;
 }
 
 /** Icône du kit (masque CSS : hérite de la couleur du texte). Décorative sauf si `label` est fourni. */
@@ -57,14 +57,12 @@ export function Loading({ label = t("common.loading") }: { label?: string }) {
 }
 
 export function PageLoading() {
-  return (
-    <div className="page" aria-busy="true">
-      <span className="sr-only" role="status">{t("common.loading")}</span>
-      <div className="skeleton" style={{ height: 32, width: "60%" }} />
-      <div className="skeleton" style={{ height: 140 }} />
-      <div className="skeleton" style={{ height: 96 }} />
-    </div>
-  );
+  const [delayed,setDelayed]=useState(false);
+  useEffect(()=>{const timer=setTimeout(()=>setDelayed(true),1200);return()=>clearTimeout(timer);},[]);
+  return <div className="page-loading" aria-busy="true" aria-label="Chargement">
+    <div className="page-loading__logo"><Logo width={160} /></div>
+    <p className="t-small" role="status">{delayed ? "Un instant…" : ""}</p>
+  </div>;
 }
 
 export function EmptyState({ illustration, title, text, children }: { illustration?: IllustrationName; title: string; text?: string; children?: ReactNode }) {
@@ -136,8 +134,8 @@ function registerSheet(close: () => void) {
  * Fenêtre (feuille basse sur mobile, panneau latéral possible sur grand écran).
  * Garde le focus à l'intérieur, se ferme avec Échap ou le bouton retour, rend le focus au déclencheur.
  */
-export function Sheet({ title, onClose, children, footer, side = false, tall = false, headerExtra, closeLabel = t("common.close"), closeIcon = "close" }: {
-  title: ReactNode; onClose: () => void; children: ReactNode; footer?: ReactNode; side?: boolean; tall?: boolean;
+export function Sheet({ title, onClose, children, footer, side = false, tall = false, centered = false, headerExtra, closeLabel = t("common.close"), closeIcon = "close" }: {
+  title: ReactNode; onClose: () => void; children: ReactNode; footer?: ReactNode; side?: boolean; tall?: boolean; centered?: boolean;
   headerExtra?: ReactNode; closeLabel?: string; closeIcon?: IconName;
 }) {
   const ref = useRef<HTMLDivElement>(null);
@@ -152,11 +150,12 @@ export function Sheet({ title, onClose, children, footer, side = false, tall = f
     first?.focus();
     const onKey = (e: KeyboardEvent) => {
       if (e.key === "Escape" && sheetStack[sheetStack.length - 1] === topClose.current) closeRef.current();
-      if (e.key !== "Tab" || !ref.current) return;
+      if (e.key !== "Tab" || !ref.current || sheetStack[sheetStack.length - 1] !== topClose.current) return;
       const items = [...ref.current.querySelectorAll<HTMLElement>("a[href], button:not([disabled]), input:not([disabled]), textarea:not([disabled]), select, [tabindex]:not([tabindex='-1'])")];
       if (!items.length) return;
       const [a, z] = [items[0], items[items.length - 1]];
-      if (e.shiftKey && document.activeElement === a) { e.preventDefault(); z.focus(); }
+      if (!ref.current.contains(document.activeElement) || document.activeElement === ref.current) { e.preventDefault(); (e.shiftKey ? z : a).focus(); }
+      else if (e.shiftKey && document.activeElement === a) { e.preventDefault(); z.focus(); }
       else if (!e.shiftKey && document.activeElement === z) { e.preventDefault(); a.focus(); }
     };
     const close = () => closeRef.current();
@@ -177,7 +176,7 @@ export function Sheet({ title, onClose, children, footer, side = false, tall = f
   }, []);
 
   return (
-    <div className={`sheet-backdrop ${side ? "sheet-backdrop--side" : ""}`} onClick={(e) => e.target === e.currentTarget && onClose()}>
+    <div className={`sheet-backdrop ${side ? "sheet-backdrop--side" : ""} ${centered ? "sheet-backdrop--centered" : ""}`} onClick={(e) => e.target === e.currentTarget && onClose()}>
       <div className={`sheet ${tall ? "sheet--tall" : ""}`} role="dialog" aria-modal="true" aria-labelledby={titleId} tabIndex={-1} ref={ref}>
         <div className="sheet__head">
           <div className="sheet__title" id={titleId}>{title}</div>
@@ -198,10 +197,10 @@ export function ConfirmDialog({ title, text, confirmLabel, danger = false, busy 
   return (
     <Sheet
       title={<h2 className="t-section">{title}</h2>}
-      onClose={onCancel}
+      onClose={() => { if (!busy) onCancel(); }}
       footer={
         <div className="sheet__foot">
-          <button className="btn btn--secondary btn--auto" onClick={onCancel} data-autofocus>{t("common.cancel")}</button>
+          <button className="btn btn--secondary btn--auto" disabled={busy} onClick={onCancel} data-autofocus>{t("common.cancel")}</button>
           <button className={`btn ${danger ? "btn--danger-solid" : ""}`} disabled={busy || disabled} onClick={onConfirm}>{busy ? t("common.sending") : confirmLabel}</button>
         </div>
       }
