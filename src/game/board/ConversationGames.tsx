@@ -13,6 +13,7 @@ import type { Player, SessionState } from "../../lib/types";
 import { NudgeButton } from "../premium/Nudge";
 import { TwoTruthsReveal, TwoTruthsTheatre, theatreScore } from "../premium/TwoTruthsTheatre";
 import { CHOICE_SCENES, ChoiceReveal, TextReveal, TruthDareDone, WaitTurn, pickClass } from "../premium/ConversationScenes";
+import { ReadingRegion } from "../ReadingRegion";
 
 type J = any;
 type Run = (fn: string, args?: Record<string, unknown>) => Promise<{ ok: boolean; error?: string; info?: any }>;
@@ -60,7 +61,19 @@ export function useMoves(c: Common, round: CRound, known: string[] = []) {
 // ---------------------------------------------------------------------------
 // Éléments communs
 // ---------------------------------------------------------------------------
-export function CardBox({ card, label }: { card: J; label?: string }) {
+export function CardBox({ card, label, reading = false }: { card: J; label?: string; reading?: boolean }) {
+  if (reading) return <ReadingRegion label={card.redacted ? "Carte de jeu" : "Question de la manche"} resetKey={card.card_id ?? card.text ?? card.prompt}>
+    {card.redacted ? <p className="muted">{t("conv.redacted")}</p> : <>
+      <div className="q-card__head">
+        <span className="row row--wrap" style={{ gap: 6 }}>
+          {label && <span className="nd-chip">{label}</span>}
+          {card.adult && <span className="nd-chip nd-chip--peach">{t("conv.adultChip")}</span>}
+        </span>
+        {card.theme && <span className="t-meta">{card.theme}</span>}
+      </div>
+      {(card.text || card.prompt) && <h2 className="t-question">{card.text || card.prompt}</h2>}
+    </>}
+  </ReadingRegion>;
   if (card.redacted) return <article className="q-card" role="region" aria-label="Carte de jeu" tabIndex={0}><p className="muted">{t("conv.redacted")}</p></article>;
   return (
     <article className="q-card" role="region" aria-label="Question de la manche" tabIndex={0}>
@@ -133,7 +146,8 @@ function SealedForm({ card, me, partner, players, busy, play }: { card: J; me: P
   const ready = textual ? Boolean(text.trim()) : m === "nd_duo_target" ? seat !== null : choice !== null;
   const payload = textual ? { text: text.trim() } : m === "nd_duo_target" ? { seat } : { choice };
   return (
-    <form className="console-answer-form stack stack--4" onSubmit={(e) => { e.preventDefault(); if (ready) void play("lock", payload); }}>
+    <form className="console-answer-form reading-answer-form" onSubmit={(e) => { e.preventDefault(); if (ready) void play("lock", payload); }}>
+      <div className="reading-answer-form__content" role="region" aria-label="Réponses proposées" tabIndex={0}>
       {role && (
         <p className="nd-chip">{role === "subject" ? t("conv.predict.youSubject") : t("conv.predict.youPredict", { name: nameOf(partner) })}</p>
       )}
@@ -163,6 +177,7 @@ function SealedForm({ card, me, partner, players, busy, play }: { card: J; me: P
           ))}
         </div>
       )}
+      </div>
       <button className="btn" type="submit" disabled={busy || !ready}><Icon name="lock-keyhole" size={18} />{t("conv.lock")}</button>
     </form>
   );
@@ -293,7 +308,7 @@ function RoundView({ c, round }: { c: Common; round: CRound }) {
     : m === "nd_predict" ? forWho(players.find((p) => p.seat === card.subject), "conv.predict.subjectIsMe", "conv.predict.subjectIs") : undefined;
 
   return (
-    <section className={`console-round conversation-console${m === "nd_truth_dare" ? " truth-dare-console" : ""}`} key={round.round_no} data-phase={card.done ? "reveal" : card.phase ?? (card.locked?.[me.seat] ? "waiting" : "answer")}>
+    <section className={`console-round conversation-console reading-games${m === "nd_truth_dare" ? " truth-dare-console" : ""}`} key={round.round_no} data-phase={card.done ? "reveal" : card.phase ?? (card.locked?.[me.seat] ? "waiting" : "answer")}>
       <div className="console-progress">
       <div className="q-progress">
         <span className="t-meta">{t("conv.round", { n: round.round_no, total })}</span>
@@ -304,11 +319,11 @@ function RoundView({ c, round }: { c: Common; round: CRound }) {
       <IntensityTransition prev={prevId ? meta[prevId] : undefined} cur={curId ? meta[curId] : undefined} />
       </div>
       <div className="console-question">
-        {(card.text || card.redacted) ? <CardBox card={card} label={label} /> : <article className="q-card" role="region" aria-label="Consigne de la manche" tabIndex={0}>
+        {(card.text || card.prompt || card.redacted) ? <CardBox card={card} label={label} reading /> : <ReadingRegion label="Consigne de la manche" resetKey={round.round_no}>
           <span className="t-meta">{m === "nd_truth_dare" ? "À chacun son tour" : c.st.game.title}</span>
           <h2 className="t-question">{m === "nd_truth_dare" ? "Action ou Vérité ?" : m === "nd_two_truths" ? "Deux vérités. Un mensonge." : "À vous de jouer"}</h2>
           {m === "nd_truth_dare" && <p className="t-small">La carte est tirée après ton choix.</p>}
-        </article>}
+        </ReadingRegion>}
       </div>
 
       <div className="console-answer-zone" role="region" aria-label="Réponses de la manche" tabIndex={0}>
@@ -406,7 +421,7 @@ export function ConversationResults({ c, navigate }: { c: Common; navigate: (to:
   const rounds = roundsOf(c.st).filter((r) => r.card?.done);
   const ended = c.st.session.status === "ended" && !c.st.session.read_only;
   return (
-    <section className="stack stack--5">
+    <section className="reading-games stack stack--5">
       <div className="q-result-head">
         <Art name="trophy" size={96} />
         <h1 className="t-page">{t("conv.endTitle")}</h1>

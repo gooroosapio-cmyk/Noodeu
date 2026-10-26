@@ -46,7 +46,7 @@ try {
     assert.ok(await question.evaluate(element => element.scrollHeight > element.clientHeight));
     await question.focus();
     await page.keyboard.press('End');
-    await page.waitForFunction(() => document.querySelector('.pack-question').scrollTop > 0);
+    await page.waitForFunction(() => document.querySelector('.pack-question .question-reading__scroll').scrollTop > 0);
     await page.screenshot({ path: `${OUT}/pack-long-${width}-${zoom}.png` });
     let move;
     await page.route('**/rpc/play_move', route => { move = route.request().postDataJSON(); return route.fulfill({ json: { ok: true } }); });

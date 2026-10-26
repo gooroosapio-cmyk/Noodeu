@@ -11,6 +11,7 @@ import { Alert, Art, Icon, Loading } from "../../components/ui";
 import type { Player, SessionState } from "../../lib/types";
 import { ART_BY_PACK, artOf } from "../../screens/Libraries";
 import { NudgeButton } from "../premium/Nudge";
+import { ReadingRegion } from "../ReadingRegion";
 
 type J = any;
 type Run = (fn: string, args?: Record<string, unknown>) => Promise<{ ok: boolean; error?: string; info?: any }>;
@@ -136,7 +137,7 @@ function PackPlaying({ c, round }: { c: Common; round: QRound }) {
   }
 
   return (
-    <section className="pack-playing stack stack--5" key={round.round_no}>
+    <section className="pack-playing reading-games stack stack--5" key={round.round_no}>
       <div className="q-progress">
         <span className="t-meta">
           {card.set_no ? t("q.pack.set", { s: card.set_no, n: (card.index % card.set_size) + 1, size: card.set_size }) : t("q.pack.card", { n: card.index + 1, count: card.count })}
@@ -147,7 +148,7 @@ function PackPlaying({ c, round }: { c: Common; round: QRound }) {
         <div className="nd-progress__fill" style={{ width: `${(100 * (card.index + 1)) / card.count}%` }} />
       </div>
       <IntensityTransition prev={prevItem ? meta[prevItem] : undefined} cur={meta[card.item.id]} />
-      <article className="q-card console-question pack-question" role="region" aria-label="Question du pack" tabIndex={0}>
+      <ReadingRegion className="console-question pack-question" label="Question du pack" resetKey={card.item.id}>
         <div className="q-card__head">
           {card.item.adult && <span className="nd-chip nd-chip--peach">+18</span>}
           <span className="nd-chip">{card.set_no ? t("q.pack.setChip", { s: card.set_no }) : t("q.pack.cardChip", { n: card.index + 1 })}</span>
@@ -157,7 +158,7 @@ function PackPlaying({ c, round }: { c: Common; round: QRound }) {
         <p className="t-meta">{first?.is_me ? t("q.pack.youFirst") : t("q.pack.firstSpeaker", { name: nameOf(first) })}</p>
         {!card.done && <DeepToggle followup={meta[card.item.id]?.long_followup} roundKey={round.round_no} />}
         {!c.st.session.read_only && <LaterButton sessionId={c.st.session.id} round={round.round_no} disabled={!c.online} />}
-      </article>
+      </ReadingRegion>
 
       {card.done ? (
         <PackRevealed c={c} round={round} me={me} partner={partner} />
@@ -311,7 +312,7 @@ function TestDone({ c, round }: { c: Common; round: QRound }) {
   const noScore = Object.keys(card.axes ?? {}).length === 0;
   if (noScore) {
     return (
-      <div className="stack stack--4 enter" aria-live="polite">
+      <div className="reading-games stack stack--4 enter" aria-live="polite">
         <section className="card stack stack--3">
           <div className="q-result-head">
             <Art name="result-private" size={96} />
@@ -325,7 +326,7 @@ function TestDone({ c, round }: { c: Common; round: QRound }) {
     );
   }
   return (
-    <div className="stack stack--4 enter" aria-live="polite">
+    <div className="reading-games stack stack--4 enter" aria-live="polite">
       <section className="card stack stack--3">
         <div className="q-result-head">
           <Art name="result-private" size={96} />
@@ -392,7 +393,7 @@ function TestPlaying({ c, round }: { c: Common; round: QRound }) {
   const busy = c.busy || !c.online;
 
   return (
-    <section className="questionnaire-playing stack stack--5">
+    <section className="questionnaire-playing reading-games stack stack--5">
       <div className="q-progress">
         <span className="t-meta">{t("q.test.page", { n: page + 1, total: pages })}</span>
         <span className="t-meta">{t("q.test.answered", { n: answeredCount, total: items.length })}</span>
@@ -448,7 +449,7 @@ export function QuestionnaireResults({ c, navigate }: { c: Common; navigate: (to
   const ended = c.st.session.status === "ended" && !c.st.session.read_only;
   const pack = round?.card?.mech === "pack_conversation";
   return (
-    <section className="stack stack--5">
+    <section className="reading-games stack stack--5">
       <div className="page-header">
         <h1 className="t-page">{pack ? t("q.pack.endTitle") : t("q.test.endTitle")}</h1>
         <p className="t-small muted">{c.st.game.title}</p>

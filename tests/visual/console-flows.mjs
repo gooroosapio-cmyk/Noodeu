@@ -78,7 +78,7 @@ try {
     const question = page.getByRole('region', { name: 'Question de la manche' });
     assert.ok(await question.evaluate(el => el.scrollHeight > el.clientHeight));
     await question.focus(); await page.keyboard.press('End');
-    await page.waitForFunction(() => document.querySelector('.console-question > .q-card')?.scrollTop > 0);
+    await page.waitForFunction(() => document.querySelector('.console-question .question-reading__scroll')?.scrollTop > 0);
     await capture(page, 'question-longue-scroll-390');
     const moves = [];
     await page.route('**/rpc/play_move', route => { moves.push(route.request().postDataJSON()); return route.fulfill({ json: { ok: true } }); });

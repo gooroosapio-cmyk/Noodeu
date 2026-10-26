@@ -1,0 +1,39 @@
+/* Lecture des conversations et questionnaires uniquement : aucun texte raccourci ou masqué. */
+.session-console .conversation-console.reading-games { --console-question-height: clamp(10.5rem, 23dvh, 12rem); }
+.session-shell.session-console .question-reading.q-card {
+  display: grid; grid-template-rows: minmax(0, 1fr) auto; gap: 6px;
+  height: var(--console-question-height, 9rem); min-height: 0;
+  padding: 12px 14px 8px; overflow: visible;
+}
+.question-reading__scroll {
+  min-width: 0; min-height: 0; overflow: auto; overscroll-behavior: contain;
+  scrollbar-gutter: stable; scrollbar-width: thin; padding: 2px;
+}
+.question-reading__scroll:focus-visible { outline: 2px solid var(--c-accent); outline-offset: -2px; border-radius: 6px; }
+.question-reading__content { min-width: 0; display: grid; align-content: start; gap: 8px; overflow-wrap: anywhere; }
+.question-reading__hint {
+  display: block; min-height: 1.35em; color: var(--c-text-2);
+  font-size: .75rem; line-height: 1.35; text-align: right;
+}
+.session-console .reading-games :is(.t-question, .t-question--long) { font-size: 1.125rem; line-height: 1.5; }
+.session-shell .reading-games :is(.q-choice, .q-answer__text, .reveal__text, .q-check__row) {
+  font-size: .875rem; line-height: 1.5; overflow-wrap: anywhere;
+}
+.session-shell .reading-games :is(.q-choice, .reveal__text, .q-check__row) { white-space: normal; }
+.session-shell .reading-games .q-choice { border-radius: 18px; }
+.session-shell .reading-games .q-answer__text { white-space: pre-wrap; }
+.session-shell .reading-games .q-item__text { font-size: .9375rem; line-height: 1.5; }
+.session-shell .reading-games :is(textarea, input[type="text"], input:not([type])) { font-size: max(16px, 1rem); line-height: 1.5; }
+.session-shell .reading-games :is(button, .btn, .q-check__row) { min-height: 44px; }
+.session-shell .reading-games .audio-answer { font-size: .875rem; line-height: 1.5; }
+.session-console .conversation-console.reading-games > .console-answer-zone { contain: size; }
+.session-console .reading-games .reading-answer-form {
+  display: grid; grid-template-rows: minmax(0, 1fr) auto; gap: 12px;
+  height: 100%; min-height: 0;
+}
+.reading-answer-form__content {
+  min-height: 0; min-width: 0; display: grid; align-content: start; gap: 12px;
+  overflow: auto; overscroll-behavior: contain; scrollbar-width: thin;
+  scrollbar-gutter: stable; padding: 2px;
+}
+.reading-answer-form__content:focus-visible { outline: 2px solid var(--c-accent); outline-offset: -2px; border-radius: 6px; }

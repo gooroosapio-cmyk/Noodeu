@@ -43,15 +43,26 @@ export function ChatLauncher({ onOpen, withNav = true }: { onOpen: () => void; w
         const floor = Math.min(viewportBottom, withNav ? document.querySelector('.nav')?.getBoundingClientRect().top ?? viewportBottom : viewportBottom);
         const main = document.querySelector('main');
         const ceiling = Math.max(viewportTop + 8, main?.getBoundingClientRect().top ?? 72);
-        const mainRect = main?.getBoundingClientRect();
-        const clip = (r: DOMRect, inMain: boolean) => {
-          if (!inMain || !mainRect || !main || getComputedStyle(main).overflowY === 'visible') return r;
-          const left = Math.max(r.left, mainRect.left), top = Math.max(r.top, mainRect.top);
-          return new DOMRect(left, top, Math.max(0, Math.min(r.right, mainRect.right) - left), Math.max(0, Math.min(r.bottom, mainRect.bottom) - top));
+        const clippingParents = new Map<Element, { rect: DOMRect; x: boolean; y: boolean }>();
+        const clip = (r: DOMRect, element: Element | null) => {
+          let left = r.left, right = r.right, top = r.top, bottom = r.bottom;
+          // Le texte hors d'une région défilable n'occupe pas l'écran. Respecter
+          // tous les ancêtres, sinon une longue question repousse le chat et les CTA.
+          for (let parent = element; parent; parent = parent.parentElement) {
+            let bounds = clippingParents.get(parent);
+            if (!bounds) {
+              const style = getComputedStyle(parent);
+              bounds = { rect: parent.getBoundingClientRect(), x: /^(auto|scroll|hidden|clip)$/.test(style.overflowX), y: /^(auto|scroll|hidden|clip)$/.test(style.overflowY) };
+              clippingParents.set(parent, bounds);
+            }
+            if (bounds.x) { left = Math.max(left, bounds.rect.left); right = Math.min(right, bounds.rect.right); }
+            if (bounds.y) { top = Math.max(top, bounds.rect.top); bottom = Math.min(bottom, bounds.rect.bottom); }
+          }
+          return new DOMRect(left, top, Math.max(0, right - left), Math.max(0, bottom - top));
         };
         // Une grille dense peut ne laisser aucune place parmi quatre positions fixes.
         // On cherche le bord libre sur toute la hauteur, sans dock ni espace fixe ajouté.
-        const controls = Array.from(document.querySelectorAll('main a, main button, main input, main select, main textarea, main label, main img, .session-toolbar a, .session-toolbar button')).filter((el) => el !== button).map((el) => clip(el.getBoundingClientRect(), Boolean(main?.contains(el)))).filter((r) => r.width && r.height);
+        const controls = Array.from(document.querySelectorAll('main a, main button, main input, main select, main textarea, main label, main img, .session-toolbar a, .session-toolbar button')).filter((el) => el !== button).map((el) => clip(el.getBoundingClientRect(), el.parentElement)).filter((r) => r.width && r.height);
         const textRects: DOMRect[] = [];
         for (const region of [main, header]) {
           if (!region) continue;
@@ -61,7 +72,7 @@ export function ChatLauncher({ onOpen, withNav = true }: { onOpen: () => void; w
             if (!node.textContent?.trim() || node.parentElement?.closest('[aria-hidden="true"], .sr-only')) continue;
             const range = document.createRange();
             range.selectNodeContents(node);
-            textRects.push(...Array.from(range.getClientRects()).map(r => clip(r, region === main)).filter((r) => r.width && r.height));
+            textRects.push(...Array.from(range.getClientRects()).map(r => clip(r, node.parentElement)).filter((r) => r.width && r.height));
           }
         }
         const candidates: { left: number; top: number }[] = [];
