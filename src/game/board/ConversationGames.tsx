@@ -7,13 +7,16 @@ import { IntensityTransition, useSessionMeta } from "../../parcours/meta";
 import { useEffect, useState } from "react";
 import { Link } from "react-router";
 import { t } from "../../i18n";
-import { Alert, Art, Icon, Loading } from "../../components/ui";
+import { Alert, Icon, Loading } from "../../components/ui";
 import { Avatar } from "../../components/Avatar";
 import type { Player, SessionState } from "../../lib/types";
 import { NudgeButton } from "../premium/Nudge";
 import { TwoTruthsReveal, TwoTruthsTheatre, theatreScore } from "../premium/TwoTruthsTheatre";
 import { CHOICE_SCENES, ChoiceIllustration, ChoiceReveal, TextReveal, TruthDareDone, WaitTurn, pickClass } from "../premium/ConversationScenes";
 import { ReadingRegion } from "../ReadingRegion";
+import { TruthDareRed, TwoTruthsRed, neverToken } from "../red/ConversationRed";
+import { redKitOf } from "../red/kit";
+import { GameHero } from "../red/ui";
 import "../../styles/board-cards-refinement.css";
 
 type J = any;
@@ -173,7 +176,7 @@ function SealedForm({ card, me, partner, players, busy, play }: { card: J; me: P
         <div className={pickClass(m)} role="radiogroup" aria-label={t("conv.choose")}>
           {(card.options ?? []).map((o: J, index: number) => (
             <button key={o.id} type="button" role="radio" aria-checked={choice === o.id} className="q-choice" disabled={busy} onClick={() => setChoice(o.id)}>
-              <ChoiceIllustration mech={m} index={index} />
+              {m === "nd_never" && neverToken(o.text) ? <img className="red-choice__img" src={neverToken(o.text)} alt="" width={112} height={112} loading="lazy" /> : <ChoiceIllustration mech={m} index={index} />}
               <span className="q-choice__label">{o.text}</span>
               <span className="q-choice__dot" aria-hidden="true" />
             </button>
@@ -307,6 +310,10 @@ function RoundView({ c, round }: { c: Common; round: CRound }) {
   const curId = (card as { card_id?: string }).card_id;
   const continued = Boolean(card.continue?.[me.seat]);
   const theyContinued = Boolean(partner && card.continue?.[partner.seat]);
+  // Kit rouge : G01 oral (version de règles « answer: oral ») et G08 tour par tour ont leur propre écran.
+  const oral = (c.st.game.config as unknown as { answer?: string }).answer === "oral";
+  if (m === "nd_truth_dare" && oral) return <TruthDareRed key={round.round_no} st={c.st} round={round} card={card} me={me} partner={partner} busy={busy} play={play} after={after} err={err} />;
+  if (m === "nd_two_truths" && card.mode !== "simultaneous") return <TwoTruthsRed key={round.round_no} st={c.st} round={round} card={card} priv={round.private} me={me} partner={partner} busy={busy} play={play} after={after} err={err} />;
   const label = m === "nd_truth_dare" && card.kind ? t(card.kind === "truth" ? "conv.td.truth" : "conv.td.dare")
     : m === "nd_predict" ? forWho(players.find((p) => p.seat === card.subject), "conv.predict.subjectIsMe", "conv.predict.subjectIs") : undefined;
 
@@ -314,13 +321,13 @@ function RoundView({ c, round }: { c: Common; round: CRound }) {
     <section className={`console-round conversation-console reading-games card-board card-board--${m}${m === "nd_truth_dare" ? " truth-dare-console" : ""}`} key={round.round_no} data-phase={card.done ? "reveal" : card.phase ?? (card.locked?.[me.seat] ? "waiting" : "answer")}>
       <div className="console-progress">
       <div className="q-progress">
-        <span className="t-meta">{t("conv.round", { n: round.round_no, total })}</span>
         {m === "nd_truth_dare" && <span className="t-meta">{forWho(players.find((p) => p.seat === card.active), "conv.td.yourTurn", "conv.td.turnOf")}</span>}
         {m === "nd_two_truths" && card.mode !== "simultaneous" && <span className="t-meta">{forWho(players.find((p) => p.seat === card.author), "conv.tt.youAuthor", "conv.tt.authorIs")}</span>}
         {m === "nd_two_truths" && card.mode === "simultaneous" && <span className="nd-chip nd-chip--mint">{card.phase === "write" ? t("tt2.simultaneous") : t("tt2.score", { n: theatreScore(c.st, me.seat), total })}</span>}
       </div>
       <IntensityTransition prev={prevId ? meta[prevId] : undefined} cur={curId ? meta[curId] : undefined} />
       </div>
+      {!card.done && <GameHero hero={redKitOf(c.st).hero} size="sm" />}
       <div className="console-question">
         {(card.text || card.prompt || card.redacted) ? <CardBox card={card} label={label} reading /> : <ReadingRegion label="Consigne de la manche" resetKey={round.round_no}>
           <span className="t-meta">{m === "nd_truth_dare" ? "À chacun son tour" : c.st.game.title}</span>
@@ -426,7 +433,8 @@ export function ConversationResults({ c, navigate }: { c: Common; navigate: (to:
   return (
     <section className="reading-games stack stack--5">
       <div className="q-result-head">
-        <Art name="trophy" size={96} />
+        <GameHero size="sm" eager hero={scored && players.length === 2 && result?.points
+          ? (result.points["1"] ?? 0) === (result.points["2"] ?? 0) ? "trophees_egalite" : "trophee_victoire" : redKitOf(c.st).hero} />
         <h1 className="t-page">{t("conv.endTitle")}</h1>
         <p className="t-small muted">{t("conv.endText", { n: rounds.length, title: c.st.game.title })}</p>
         {result?.shortened && <p className="t-meta">{cite ? t("word.ct.shortened") : t("conv.shortened")}</p>}

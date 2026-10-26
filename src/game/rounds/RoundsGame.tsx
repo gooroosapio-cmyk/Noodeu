@@ -28,11 +28,11 @@ function people(st: SessionState) {
 
 /** Carte du tour (question tirée) ; mention +18 explicite, jamais seulement par la couleur. */
 function CardFace({ round, total }: { round: RRound; total: number }) {
-  if (!round.card.text) return total > 1 ? <p className="t-meta">{t("rounds.cardOf", { n: round.round_no, total })}</p> : null;
+  if (!round.card.text) return total > 1 ? <p className="t-meta round-counter">{t("rounds.cardOf", { n: round.round_no, total })}</p> : null;
   return (
     <div className="play-card">
       <div className="row row--between">
-        <span className="t-meta">{total > 1 ? t("rounds.cardOf", { n: round.round_no, total }) : ""}</span>
+        <span className="t-meta round-counter">{total > 1 ? t("rounds.cardOf", { n: round.round_no, total }) : ""}</span>
         {round.card.adult && <span className="tag tag--adult">{t("rounds.adultTag")}</span>}
       </div>
       <p className="play-card__text">{round.card.text}</p>

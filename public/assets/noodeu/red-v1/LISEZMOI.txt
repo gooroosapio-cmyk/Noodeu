@@ -1,0 +1,10 @@
+Kit rouge Noodeu v1 (26/10/2026) — ressources de production importées depuis Noodeu_Rouge_Kit_Complet.zip
+(dossier Drive du propriétaire, fourni pour ce projet). Fichiers copiés sans modification.
+
+fonds/          02_fonds : 6 textures portrait et 6 scènes, sans texte (décor haut de page, jamais étirées en plein écran)
+illustrations/  03_illustrations : 36 WebP avec transparence (héros, pièces, états)
+composants/     04_composants : skins sans libellé (WebP et SVG), six faces exactes du dé, manches, plateau vierge
+
+manifest.json reprend dimensions, canal alpha et empreintes SHA-256 du manifest du kit pour les 70 WebP
+(70/70 vérifiées à l'import). Les maquettes (01_maquettes) restent des références et ne sont pas servies.
+Le mapping typé par jeu est dans src/game/red/kit.ts. Tous les textes, scores et choix sont rendus par le code.

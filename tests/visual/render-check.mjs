@@ -196,13 +196,17 @@ allScreens.push({ name: "54-N2-128-export-png", path: `/partie/${SESSION}`, scen
     console.log(`export PNG : ${name}`);
   } });
 allScreens.push({ name: "52-N2-001-salon-options", path: `/partie/${SESSION}`, scenario: { ...duo, state: fixture("N2-001-lobby.json") },
-  action: async (page) => page.getByRole("button", { name: "Options" }).first().click() });
+  action: async (page) => page.getByRole("button", { name: /options/i }).first().click() });
 // Catégories 1 et 2 : packs de questions et questionnaires (tests/visual/make_fixtures_c14.py).
 // Échéances relatives ({ __rel: secondes }) recalées sur l'heure du rendu.
 const rebase = (o) => (Array.isArray(o) ? o.map(rebase) : o && typeof o === "object"
   ? ("__rel" in o ? new Date(Date.now() + o.__rel * 1000).toISOString() : Object.fromEntries(Object.entries(o).map(([k, v]) => [k, rebase(v)]))) : o);
 for (const key of Object.keys(fixture("index_c14.json"))) {
   allScreens.push({ name: `60-${key}`, path: `/partie/${SESSION}`, scenario: { ...duo, intimate: key === "salon-huis-clos" || key === "conv-salon", state: fixture(`c14-${key}.json`) } });
+}
+// Refonte rouge : salon à révision, G01 oral, G08 tour par tour (tests/visual/make_fixtures_rouge.py).
+for (const key of Object.keys(fixture("index_rouge.json"))) {
+  allScreens.push({ name: `80-rouge-${key}`, path: `/partie/${SESSION}`, scenario: { ...duo, state: fixture(`rouge-${key}.json`) } });
 }
 export { setup, duo, sessionState, SESSION, ME, PARTNER, activeDuo };
 if (!process.env.NOODEU_FIXTURES_ONLY) {

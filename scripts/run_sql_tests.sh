@@ -17,6 +17,10 @@ for f in supabase/tests/ancienne_base/slice*.sql; do echo "== $f"; psql_ -d nood
 SANS18=supabase/migrations/20261028000100_sans_permission_adulte.sql
 for f in supabase/migrations/*.sql; do [[ "$f" < "$PURGE" || ! "$f" < "$SANS18" ]] || run "$f"; done
 for f in supabase/tests/c1[4-7]_*.sql; do echo "== $f"; psql_ -d noodeu -v ON_ERROR_STOP=1 -q -At -f "$f" || exit 1; done
-# 4. Migrations suivantes, puis tests du comportement actuel (+18 sans permission).
-for f in supabase/migrations/*.sql; do [[ "$f" < "$SANS18" ]] || run "$f"; done
-for f in supabase/tests/c1[8-9]_*.sql supabase/tests/c[2-9][0-9]_*.sql; do [ -e "$f" ] || continue; echo "== $f"; psql_ -d noodeu -v ON_ERROR_STOP=1 -q -At -f "$f" || exit 1; done
+# 4. Migrations suivantes jusqu'à la refonte rouge exclue, puis tests c18 à c40 (+18 sans permission ; G08 v2 simultané).
+ROUGE=supabase/migrations/20261030001200_salon_revision_g01_oral_g08_tours.sql
+for f in supabase/migrations/*.sql; do [[ "$f" < "$SANS18" || ! "$f" < "$ROUGE" ]] || run "$f"; done
+for f in supabase/tests/c1[8-9]_*.sql supabase/tests/c[23][0-9]_*.sql supabase/tests/c40_*.sql; do [ -e "$f" ] || continue; echo "== $f"; psql_ -d noodeu -v ON_ERROR_STOP=1 -q -At -f "$f" || exit 1; done
+# 5. Refonte rouge et suivantes : révision du salon, lancement de l'hôte, G01 oral, G08 tour par tour.
+for f in supabase/migrations/*.sql; do [[ "$f" < "$ROUGE" ]] || run "$f"; done
+for f in supabase/tests/c4[1-9]_*.sql supabase/tests/c[5-9][0-9]_*.sql; do [ -e "$f" ] || continue; echo "== $f"; psql_ -d noodeu -v ON_ERROR_STOP=1 -q -At -f "$f" || exit 1; done

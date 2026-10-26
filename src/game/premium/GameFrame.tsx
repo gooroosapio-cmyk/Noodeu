@@ -26,7 +26,7 @@ export function GameHeader({ title, reduceTo, onReduce, onHelp }: { title: strin
 }
 
 /** Score courant si le jeu en tient un (séries, points conservés, cases, navires coulés, points des manches). */
-function scoreboard(st: SessionState): { scores: Record<number, number>; target?: number } | null {
+export function scoreboard(st: SessionState): { scores: Record<number, number>; target?: number } | null {
   const rounds = st.rounds as unknown as { round_no: number; card?: J }[];
   const card = rounds.find((r) => r.round_no === st.session.current_round)?.card ?? rounds[rounds.length - 1]?.card;
   if (!card) return null;

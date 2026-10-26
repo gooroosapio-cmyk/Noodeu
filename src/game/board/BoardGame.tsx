@@ -1,10 +1,12 @@
 /* eslint-disable @typescript-eslint/no-explicit-any */
 // Moteur « plateau » (familles 2 à 4) : l'état public vient de la base, la part privée de l'appelant aussi.
 // L'écran ne décide de rien : chaque coup part au serveur, qui l'accepte ou le refuse avec une raison.
+import { redKitOf } from "../red/kit";
+import { GameHero } from "../red/ui";
 import { useEffect, useState, type ComponentType, type ReactNode } from "react";
 import { Link } from "react-router";
 import { t, type MessageKey } from "../../i18n";
-import { Alert, Icon, Illustration, Loading } from "../../components/ui";
+import { Alert, Icon, Loading } from "../../components/ui";
 import type { Player, SessionState } from "../../lib/types";
 import { CREATION_VIEWS, CreationSolution, isCreationMech } from "./CreationGames";
 import { MEMORY_VIEWS, MemorySolution, isMemoryMech } from "./MemoryGames";
@@ -657,7 +659,7 @@ export function BoardPlaying(c: Common) {
   return (
     <section className="stack stack--5" key={round.round_no}>
       <div className="row row--between">
-        <span className="t-meta">{t("board.roundOf", { n: round.round_no, total })}</span>
+        <span className="t-meta round-counter">{t("board.roundOf", { n: round.round_no, total })}</span>
         {turnBased && !card.done && <Turn mine={mine} other={nameOf(partner)} />}
       </div>
       {card.done ? <RoundEnd c={c} round={round} /> : View ? <View c={card} priv={round.private} me={me} partner={partner} play={play} busy={c.busy || !c.online} mine={mine} /> : null}
@@ -690,7 +692,9 @@ export function BoardResults({ c, navigate }: { c: Common; navigate: (to: string
     : t("game.endTitle");
   return (
     <section className="stack stack--6 session-result-refinement">
-      {isMiniMech(c.st.game.mechanic) ? <div className="session-result-refinement__object" aria-hidden="true"><img className="session-result-refinement__cup" src="/assets/original/refinement3d/result-cup.webp" alt="" width={112} height={112} /><img className="session-result-refinement__game" src={`/assets/original/library3d/${(c.st.game.config as unknown as {code:string}).code}.webp`} alt="" width={64} height={64} /></div> : <Illustration name="11-fin-de-partie" className="public__art" />}
+      {/* Kit rouge : trophée, égalité ou cœur « on réessaie », selon le résultat réel ; sinon l'univers du jeu. */}
+      <GameHero size="sm" eager hero={isMiniMech(c.st.game.mechanic) && scoredPlayers.length === 2
+        ? winners.length === 2 ? "trophees_egalite" : winners[0].is_me ? "trophee_victoire" : "coeur_reessayer" : redKitOf(c.st).hero} />
       <div className="page-header center">
         <h1 className="t-page">{verdict}</h1>
         <p>{t("game.endText", { title: c.st.game.title })}</p>

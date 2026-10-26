@@ -1,0 +1,571 @@
+{
+ "version": "1.0",
+ "palette": {
+  "primary": "#B51F36",
+  "ink": "#431820",
+  "cream": "#FFF9F1",
+  "blush": "#F7E5E7"
+ },
+ "assets": [
+  {
+   "id": "salon_fauteuils",
+   "path": "illustrations/salon_fauteuils.webp",
+   "width": 512,
+   "height": 512,
+   "alpha": true,
+   "sha256": "83de37441fccd4ba183161ffd1096bb986e5572e62efd040f1822299240cfa89"
+  },
+  {
+   "id": "cartes_action_verite",
+   "path": "illustrations/cartes_action_verite.webp",
+   "width": 512,
+   "height": 512,
+   "alpha": true,
+   "sha256": "db75c5a7c2245103c6859a4cf4143341daa4862561a445b37ecada62ab8f8cb2"
+  },
+  {
+   "id": "masque_trois_cartes",
+   "path": "illustrations/masque_trois_cartes.webp",
+   "width": 512,
+   "height": 512,
+   "alpha": true,
+   "sha256": "7c37ad697d34a80f69b725a26ad935fe3fd4fb517346c1c67ee84f4b66de27ed"
+  },
+  {
+   "id": "enveloppe_verrouillee",
+   "path": "illustrations/enveloppe_verrouillee.webp",
+   "width": 512,
+   "height": 512,
+   "alpha": true,
+   "sha256": "c744b0bab12a1c1f11c7dc36715260739cd63dfb2eea4bab49cefc3f168de02e"
+  },
+  {
+   "id": "coeurs_duo",
+   "path": "illustrations/coeurs_duo.webp",
+   "width": 512,
+   "height": 512,
+   "alpha": true,
+   "sha256": "710552a89e9bf13bfab6da8d4a26fbb3b03b306a305cdc2c7ab804706e5b0f2e"
+  },
+  {
+   "id": "portes_dilemme",
+   "path": "illustrations/portes_dilemme.webp",
+   "width": 512,
+   "height": 512,
+   "alpha": true,
+   "sha256": "6c76cb55c9f129699d2f967b59df7f119a3d5f4968b2cea1b461ef6b27743303"
+  },
+  {
+   "id": "cadres_duo",
+   "path": "illustrations/cadres_duo.webp",
+   "width": 512,
+   "height": 512,
+   "alpha": true,
+   "sha256": "9429d5ced1507aaa88896a4d490cfd5986875c27595d77c1c8d4379a89e00f28"
+  },
+  {
+   "id": "balance_avis",
+   "path": "illustrations/balance_avis.webp",
+   "width": 512,
+   "height": 512,
+   "alpha": true,
+   "sha256": "52651af8df966c38a067d1aaa57f51201310540357dbc827ee33443cd0c8709f"
+  },
+  {
+   "id": "carnet_phrase",
+   "path": "illustrations/carnet_phrase.webp",
+   "width": 512,
+   "height": 512,
+   "alpha": true,
+   "sha256": "d70fec375834ac92203c657fa109dd72065f51e0a789f0527076c44a9b652480"
+  },
+  {
+   "id": "cartes_questionnaire",
+   "path": "illustrations/cartes_questionnaire.webp",
+   "width": 512,
+   "height": 512,
+   "alpha": true,
+   "sha256": "504c193ab848b402ac7b15828bc26dcefa20b4ea76f1234f9595404a77e2940e"
+  },
+  {
+   "id": "quiz_astronomie",
+   "path": "illustrations/quiz_astronomie.webp",
+   "width": 512,
+   "height": 512,
+   "alpha": true,
+   "sha256": "04cfd6c7feae0a95c444e6bb6b03b909f4858924f61a36f759a0fd1c46ecc582"
+  },
+  {
+   "id": "sablier",
+   "path": "illustrations/sablier.webp",
+   "width": 512,
+   "height": 512,
+   "alpha": true,
+   "sha256": "efb9a829173cad7230a3e97faa0ae7edc623bda4de46f41b3962a060973aa79a"
+  },
+  {
+   "id": "pion_x",
+   "path": "illustrations/pion_x.webp",
+   "width": 512,
+   "height": 512,
+   "alpha": true,
+   "sha256": "af13c34ca2b12576ab849a72875fc4e9808fa1524280324635986e92bdfbce2b"
+  },
+  {
+   "id": "pion_o",
+   "path": "illustrations/pion_o.webp",
+   "width": 512,
+   "height": 512,
+   "alpha": true,
+   "sha256": "e210c859be0a5d64834f7f7914069d16b68397d78e9a2571b40dc1afe02905fd"
+  },
+  {
+   "id": "jeton_deja",
+   "path": "illustrations/jeton_deja.webp",
+   "width": 512,
+   "height": 512,
+   "alpha": true,
+   "sha256": "eea12cbf783ad939449c6e088b38194a178e932ccecdbe75335a3fe9f5a35c41"
+  },
+  {
+   "id": "jeton_jamais",
+   "path": "illustrations/jeton_jamais.webp",
+   "width": 512,
+   "height": 512,
+   "alpha": true,
+   "sha256": "78e6d375ca1f5ee9eeaa29ee579292845be148760b2095e694af5fbb3d64f533"
+  },
+  {
+   "id": "geste_pierre",
+   "path": "illustrations/geste_pierre.webp",
+   "width": 512,
+   "height": 512,
+   "alpha": true,
+   "sha256": "d8d51cb97eaeb3514275e2ce069450e38ce03d203f50825bcae9e9a232bcf46f"
+  },
+  {
+   "id": "geste_feuille",
+   "path": "illustrations/geste_feuille.webp",
+   "width": 512,
+   "height": 512,
+   "alpha": true,
+   "sha256": "162691e75679fd8443d20c33fec988f89a50fd1a370aa3dd3adb1d00c84ce9c5"
+  },
+  {
+   "id": "geste_ciseaux",
+   "path": "illustrations/geste_ciseaux.webp",
+   "width": 512,
+   "height": 512,
+   "alpha": true,
+   "sha256": "e7448eae123e8718d41da4c7fe15d43355c2be20ff858deeec643c089b5b2a46"
+  },
+  {
+   "id": "ballon_pendu",
+   "path": "illustrations/ballon_pendu.webp",
+   "width": 512,
+   "height": 512,
+   "alpha": true,
+   "sha256": "0162a4e0571afadccc404a0f8b6c5b0643ccc303ed43e6b5e9e38ff280987533"
+  },
+  {
+   "id": "trophee_victoire",
+   "path": "illustrations/trophee_victoire.webp",
+   "width": 512,
+   "height": 512,
+   "alpha": true,
+   "sha256": "df209a38de161258ef951e3756ec22b64a1fa29c88391a50f71b0b76dfe83188"
+  },
+  {
+   "id": "trophees_egalite",
+   "path": "illustrations/trophees_egalite.webp",
+   "width": 512,
+   "height": 512,
+   "alpha": true,
+   "sha256": "64cb7cce685ca79aeb0b724ab4ad3fa385d5945265703f8e5c4c813605985a13"
+  },
+  {
+   "id": "coeur_reessayer",
+   "path": "illustrations/coeur_reessayer.webp",
+   "width": 512,
+   "height": 512,
+   "alpha": true,
+   "sha256": "8e024b5c0bc242a8d2eee4d1eded0e629311646c7cf70535eacd3239d91c5de8"
+  },
+  {
+   "id": "pause_reconnexion",
+   "path": "illustrations/pause_reconnexion.webp",
+   "width": 512,
+   "height": 512,
+   "alpha": true,
+   "sha256": "a21a9ccd5cab737c05d501360c509e97208d82b716efeb9fb0b18e61d5e0dd42"
+  },
+  {
+   "id": "navire_porte_avions",
+   "path": "illustrations/navire_porte_avions.webp",
+   "width": 512,
+   "height": 512,
+   "alpha": true,
+   "sha256": "644ed79bcf669cf41453ab3df1b8967bae04b5a3529d51fe1fee195b4b5ada12"
+  },
+  {
+   "id": "navire_cuirasse",
+   "path": "illustrations/navire_cuirasse.webp",
+   "width": 512,
+   "height": 512,
+   "alpha": true,
+   "sha256": "fcb56e94ca7c8f7a3b86caf1750cc485effbb6e533f59eb84967d2fde8a06d5d"
+  },
+  {
+   "id": "navire_croiseur",
+   "path": "illustrations/navire_croiseur.webp",
+   "width": 512,
+   "height": 512,
+   "alpha": true,
+   "sha256": "0a961f13b894459b984d47733b068aa3e965812eab99add4bbec3d6feed23114"
+  },
+  {
+   "id": "navire_sous_marin",
+   "path": "illustrations/navire_sous_marin.webp",
+   "width": 512,
+   "height": 512,
+   "alpha": true,
+   "sha256": "6717dea65fd76f866c0f5b4965dcea249a610e35cb158bfcfc16903451f43704"
+  },
+  {
+   "id": "navire_patrouilleur",
+   "path": "illustrations/navire_patrouilleur.webp",
+   "width": 512,
+   "height": 512,
+   "alpha": true,
+   "sha256": "a2d2cba1460e493b9d79a2439f0095fca4550c4b98326adce71b8f5f257701e0"
+  },
+  {
+   "id": "piste_de",
+   "path": "illustrations/piste_de.webp",
+   "width": 512,
+   "height": 512,
+   "alpha": true,
+   "sha256": "cd69bcf3213d8a51b05f2dfd28f71f467e5cca8864216931a23d286ab229b82f"
+  },
+  {
+   "id": "de_decoratif",
+   "path": "illustrations/de_decoratif.webp",
+   "width": 512,
+   "height": 512,
+   "alpha": true,
+   "sha256": "5af6c243e5d06cc99537bb52ed4668675f888340917eb832d0ca076cd15d3fe4"
+  },
+  {
+   "id": "tuiles_petit_bac",
+   "path": "illustrations/tuiles_petit_bac.webp",
+   "width": 512,
+   "height": 512,
+   "alpha": true,
+   "sha256": "f5a097c82027ab8c5e91e74f3c5b510e6a19980e3d46332af062102964e532da"
+  },
+  {
+   "id": "planete_venus",
+   "path": "illustrations/planete_venus.webp",
+   "width": 512,
+   "height": 512,
+   "alpha": true,
+   "sha256": "95ff75b82ef9c270bcec09be68fd0e1cf02de0033dd80eee083b230430005445"
+  },
+  {
+   "id": "planete_mars",
+   "path": "illustrations/planete_mars.webp",
+   "width": 512,
+   "height": 512,
+   "alpha": true,
+   "sha256": "a35f2b8ada4c0312f7f2ca0049bc0552c4e4a3fbd5be1f8aeb8ac11b6e79bc48"
+  },
+  {
+   "id": "planete_jupiter",
+   "path": "illustrations/planete_jupiter.webp",
+   "width": 512,
+   "height": 512,
+   "alpha": true,
+   "sha256": "a4183f162b1c782930efff29b673261fd6d8188f9722f61f5f0b24f3defba44c"
+  },
+  {
+   "id": "planete_saturne",
+   "path": "illustrations/planete_saturne.webp",
+   "width": 512,
+   "height": 512,
+   "alpha": true,
+   "sha256": "da7f6e80d25e9062fda5bc9a508011925be293636ef39ef406ff8e5ae116446e"
+  },
+  {
+   "id": "fond_salon",
+   "path": "fonds/fond_salon.webp",
+   "width": 412,
+   "height": 621,
+   "alpha": false,
+   "sha256": "a055527733c7180188f0b7dcb15e66c3b48111b2598a49bae8215a29f17cea5b"
+  },
+  {
+   "id": "fond_papeterie",
+   "path": "fonds/fond_papeterie.webp",
+   "width": 412,
+   "height": 621,
+   "alpha": false,
+   "sha256": "7215934b937e67c9df9d8f1db67fdcf33da9ded6464ac4e057b81a423c9f00a7"
+  },
+  {
+   "id": "fond_jetons",
+   "path": "fonds/fond_jetons.webp",
+   "width": 412,
+   "height": 621,
+   "alpha": false,
+   "sha256": "ede3c671febcd987a9da0f11c20a351b382228c35e2e047b235dab9bf1077e1c"
+  },
+  {
+   "id": "fond_pierre",
+   "path": "fonds/fond_pierre.webp",
+   "width": 412,
+   "height": 621,
+   "alpha": false,
+   "sha256": "2f68bdee59c8a38697a8917ebf4ea6e596ed6f94ecf9f8d9079f345c6fc87bb6"
+  },
+  {
+   "id": "fond_cosmos",
+   "path": "fonds/fond_cosmos.webp",
+   "width": 412,
+   "height": 621,
+   "alpha": false,
+   "sha256": "1218c500d5f528cfdb9abb393f19af58f558a28c8a7aa30a926d24c48ea95ebf"
+  },
+  {
+   "id": "fond_carnet",
+   "path": "fonds/fond_carnet.webp",
+   "width": 412,
+   "height": 621,
+   "alpha": false,
+   "sha256": "7dd553afa471809a85a0402e622679e253e6e25ef22abf1437ef1f683ca06010"
+  },
+  {
+   "id": "salon_contemporain",
+   "path": "fonds/salon_contemporain.webp",
+   "width": 720,
+   "height": 358,
+   "alpha": false,
+   "sha256": "da24b09d6edeb148e03980c76fc7c6488071a9cdd2944d891402edb89a4a5a7d"
+  },
+  {
+   "id": "carte_verite_vierge",
+   "path": "fonds/carte_verite_vierge.webp",
+   "width": 720,
+   "height": 358,
+   "alpha": false,
+   "sha256": "85d0cc65f37dcfd827f444edafe2877f80eb45feeedd8ba29ce90cd2b5c96437"
+  },
+  {
+   "id": "choix_mer",
+   "path": "fonds/choix_mer.webp",
+   "width": 720,
+   "height": 358,
+   "alpha": false,
+   "sha256": "9320838f36de554b478b2b30cd1ff5f8d062eef5abe1fe0c0d0cc39ae9129590"
+  },
+  {
+   "id": "choix_montagne",
+   "path": "fonds/choix_montagne.webp",
+   "width": 720,
+   "height": 358,
+   "alpha": false,
+   "sha256": "0050960036535340cb609f75abe250c371793d0c1ac3795d8e8864fb1b729e4f"
+  },
+  {
+   "id": "podium",
+   "path": "fonds/podium.webp",
+   "width": 720,
+   "height": 358,
+   "alpha": false,
+   "sha256": "ccb3d22ffa5344de7f1c3a2bc685e59a08fedf4f6e2ff48ee0aba5444cf4f2c4"
+  },
+  {
+   "id": "table_jeu",
+   "path": "fonds/table_jeu.webp",
+   "width": 720,
+   "height": 358,
+   "alpha": false,
+   "sha256": "677bfe127c169bfc7f7b9c44a2b8a2476873a4cec8bc5f675f0311fae8166acf"
+  },
+  {
+   "id": "bouton_repos",
+   "path": "composants/bouton_repos.webp",
+   "width": 720,
+   "height": 96,
+   "alpha": true,
+   "sha256": "ebc3ecec791a5e298d4f3dcd3fcfa1347b3be5fadeee63b0a9501f61b5265c77"
+  },
+  {
+   "id": "bouton_presse",
+   "path": "composants/bouton_presse.webp",
+   "width": 720,
+   "height": 96,
+   "alpha": true,
+   "sha256": "3a4da02b28d8454ab31dae32100f9b8313c59c5861e9ee059dca78c9661a2804"
+  },
+  {
+   "id": "bouton_selectionne",
+   "path": "composants/bouton_selectionne.webp",
+   "width": 720,
+   "height": 96,
+   "alpha": true,
+   "sha256": "482fa847050ecca034ef50b0399b71683e26d6595583d1c468eb23c9b52d944f"
+  },
+  {
+   "id": "bouton_secondaire",
+   "path": "composants/bouton_secondaire.webp",
+   "width": 720,
+   "height": 96,
+   "alpha": true,
+   "sha256": "d4f1b4c490cebd86b1331555dd4f96fc55575084769eff858e78741b70ccd802"
+  },
+  {
+   "id": "bouton_desactive",
+   "path": "composants/bouton_desactive.webp",
+   "width": 720,
+   "height": 96,
+   "alpha": true,
+   "sha256": "d8fd81fa82129021de4eb05b6cf6d9757690ac9803d41cb03b0899fb5605519d"
+  },
+  {
+   "id": "bouton_correct",
+   "path": "composants/bouton_correct.webp",
+   "width": 720,
+   "height": 96,
+   "alpha": true,
+   "sha256": "f80698b63f578ee8e8646a7433e3b769e634869a39482fc6338b40f64e6bccdd"
+  },
+  {
+   "id": "bouton_incorrect",
+   "path": "composants/bouton_incorrect.webp",
+   "width": 720,
+   "height": 96,
+   "alpha": true,
+   "sha256": "708ad9407d5a922cbedb3f1d23edbf552c9a8259ed812b7ca54d7299fad9d858"
+  },
+  {
+   "id": "carte_neutre",
+   "path": "composants/carte_neutre.webp",
+   "width": 360,
+   "height": 240,
+   "alpha": true,
+   "sha256": "9077e3fd95ed5ba1c34fa691c8c11c7ab166f906383c349c3fcdc94dfd51a11f"
+  },
+  {
+   "id": "carte_selectionnee",
+   "path": "composants/carte_selectionnee.webp",
+   "width": 360,
+   "height": 240,
+   "alpha": true,
+   "sha256": "6b8cd610493d45159d2c2d8519db3839afc3b3fef1bc82b34a3f23432d05e6ca"
+  },
+  {
+   "id": "carte_verrouillee",
+   "path": "composants/carte_verrouillee.webp",
+   "width": 360,
+   "height": 240,
+   "alpha": true,
+   "sha256": "1abaddb3f553dff5793dd4ed125ad6666364fb4480305cff348f566e6bc84983"
+  },
+  {
+   "id": "carte_correcte",
+   "path": "composants/carte_correcte.webp",
+   "width": 360,
+   "height": 240,
+   "alpha": true,
+   "sha256": "5f836119d43427c38490da4579d1298524bb89ed8818770ce5f78ad47a2846d2"
+  },
+  {
+   "id": "carte_incorrecte",
+   "path": "composants/carte_incorrecte.webp",
+   "width": 360,
+   "height": 240,
+   "alpha": true,
+   "sha256": "c59059e6f4906b156ee0c4fcfd8fcef624a7a23cf6bb1eb9fa64f45e82c572ff"
+  },
+  {
+   "id": "de_face_1",
+   "path": "composants/de_face_1.webp",
+   "width": 180,
+   "height": 180,
+   "alpha": true,
+   "sha256": "d58920f3a28e2d1957f6d5305596f32945daa9f81cd2f5504c1da7c4be7961ae"
+  },
+  {
+   "id": "de_face_2",
+   "path": "composants/de_face_2.webp",
+   "width": 180,
+   "height": 180,
+   "alpha": true,
+   "sha256": "a112efbd577afcf97898d7e25a69a04d180d6ce7c9e75c69ee01738a9ec2d76f"
+  },
+  {
+   "id": "de_face_3",
+   "path": "composants/de_face_3.webp",
+   "width": 180,
+   "height": 180,
+   "alpha": true,
+   "sha256": "cb320d8fc53cefe562b9dcb9aec9b9cebe1e538a39bef99d4c5abb7e6fdde515"
+  },
+  {
+   "id": "de_face_4",
+   "path": "composants/de_face_4.webp",
+   "width": 180,
+   "height": 180,
+   "alpha": true,
+   "sha256": "8aec00c096f6b2665c1fede49ea20aec5d9d93f3cc3d2895b932e8296bc8851f"
+  },
+  {
+   "id": "de_face_5",
+   "path": "composants/de_face_5.webp",
+   "width": 180,
+   "height": 180,
+   "alpha": true,
+   "sha256": "417d862ed6538d1c4003908c47e9bd7b1405d16e23d0af537d66af9255cbfc92"
+  },
+  {
+   "id": "de_face_6",
+   "path": "composants/de_face_6.webp",
+   "width": 180,
+   "height": 180,
+   "alpha": true,
+   "sha256": "dabfeb7cb5b001facdb9736fd60951810858732f3fb6f9b298defe81e8ea5e7a"
+  },
+  {
+   "id": "manche_terminee",
+   "path": "composants/manche_terminee.webp",
+   "width": 64,
+   "height": 16,
+   "alpha": true,
+   "sha256": "dae728d2bf2022937b536f5296b267fbd6af25f19eb2b5e6ee79e6047116d5c8"
+  },
+  {
+   "id": "manche_active",
+   "path": "composants/manche_active.webp",
+   "width": 64,
+   "height": 16,
+   "alpha": true,
+   "sha256": "43fe1d8c24ea833f1a457f46841bf1c4fc01ded1e2f152379bbcef3cea3f1dc3"
+  },
+  {
+   "id": "manche_future",
+   "path": "composants/manche_future.webp",
+   "width": 64,
+   "height": 16,
+   "alpha": true,
+   "sha256": "13630fb9f942bd96fb4903dccbba829fea7745ff2820d2c401c554e9ada8ba21"
+  },
+  {
+   "id": "plateau_morpion_vierge",
+   "path": "composants/plateau_morpion_vierge.webp",
+   "width": 720,
+   "height": 720,
+   "alpha": true,
+   "sha256": "5d5598e062cb5750ba4ea78c0a728efaf6bf62ca2b7c81a4ec06d8fdd0c9c5df"
+  }
+ ]
+}

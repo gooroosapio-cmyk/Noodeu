@@ -1,5 +1,6 @@
 import { createContext, useContext, useEffect, useLayoutEffect, useRef, useState, type CSSProperties, type ImgHTMLAttributes } from "react";
 import "../../styles/astra-boards.css";
+import { RED_PIECES } from "../red/kit";
 
 const PIECES = "/assets/original/boards3d";
 export const SessionRecoveryContext = createContext(0);
@@ -94,11 +95,14 @@ export function ExpiryRetry({ expiry }: { expiry: ReturnType<typeof useServerExp
   </div>;
 }
 
-/** Les bitmaps sont décoratifs ; la valeur accessible vient toujours de l'état reçu. */
+/** Les bitmaps sont décoratifs ; la valeur accessible vient toujours de l'état reçu.
+ *  Pièce du kit rouge d'abord (faces exactes du dé, pions), puis l'ancienne image, puis le SVG de secours. */
 export function BoardPiece({ piece, fallback, ...props }: ImgHTMLAttributes<HTMLImageElement> & { piece: string; fallback: string }) {
-  return <img {...props} src={`${PIECES}/${piece}.webp`} onError={event => {
+  const chain = [RED_PIECES[piece], `${PIECES}/${piece}.webp`, fallback].filter(Boolean) as string[];
+  return <img {...props} src={chain[0]} onError={event => {
     const img = event.currentTarget;
-    if (!img.src.endsWith(fallback)) img.src = fallback;
+    const next = chain.findIndex(src => img.src.endsWith(src)) + 1;
+    if (next > 0 && next < chain.length) img.src = chain[next];
   }} />;
 }
 

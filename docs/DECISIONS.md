@@ -454,3 +454,9 @@ Migration `20261027000300_multi_duos.sql` (fichier à coller : `docs/sql_editeur
   choix segmentés, état de l'autre, « Valider les réglages » / « Modifier les réglages », relance), sans photo de
   couverture. Plus de rond « Objectif » entre les deux noms. Bataille navale : plateau entier affiché et jouable
   (tir en deux temps), plus de zoom par défaut.
+- Refonte rouge du 26/10/2026 (branche `refonte/rouge-20261026`, détail dans `docs/REFONTE_ROUGE_20261026.md`) :
+  kit `Noodeu_Rouge` importé dans `public/assets/noodeu/red-v1`, mapping typé par jeu (`src/game/red/kit.ts`),
+  composants partagés, en-tête court avec conversation intégrée (plus de bulle flottante en partie). Salon : validation
+  liée à une révision des réglages, lancement explicite par l'hôte (atomique, idempotent). G01 sans aucune saisie
+  (« C'est répondu » / « C'est fait »). G08 de nouveau à tour de rôle, 3 / 5 / 7 tours. Migration
+  `20261030001200` non destructive, non appliquée en ligne sans autorisation.

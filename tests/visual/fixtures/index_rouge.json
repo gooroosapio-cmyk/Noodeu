@@ -1,0 +1,18 @@
+{
+ "salon-preparer": "lobby",
+ "salon-attente": "lobby",
+ "salon-pret-hote": "lobby",
+ "salon-pret-invite": "lobby",
+ "salon-naval": "lobby",
+ "g01-choix": "playing",
+ "g01-verite": "playing",
+ "g01-repondu": "playing",
+ "g01-observe": "playing",
+ "g01-action-observe": "playing",
+ "g01-action": "playing",
+ "g08-ecriture": "playing",
+ "g08-auteur-attend": "playing",
+ "g08-revelation": "playing",
+ "g08-attente": "playing",
+ "g08-devine": "playing"
+}

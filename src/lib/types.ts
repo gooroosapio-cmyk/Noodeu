@@ -74,6 +74,8 @@ export interface Player {
   word_form: WordForm;
   avatar_path?: string | null;
   ready: boolean;
+  /** Révision des réglages acceptée par ce joueur (serveur à partir de la migration 20261030001200). */
+  ready_rev?: number | null;
   keep_memory: boolean;
 }
 
@@ -91,6 +93,9 @@ export interface SessionState {
     pause_state?: { paused_at: string; by: string; resume: number[] } | null;
     server_now?: string;
     state_version: number;
+    /** Révision courante des réglages du salon et siège de l'hôte (absents d'un serveur plus ancien). */
+    settings_rev?: number;
+    host_seat?: number;
     read_only: boolean;
     created_at: string;
     ended_at: string | null;

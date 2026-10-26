@@ -104,7 +104,7 @@ function Hangman({ c, round }: { c: Common; round: CRound }) {
   return (
     <section className="stack stack--5 astra-board astra-board--hangman word-board">
       <div className="q-progress">
-        <span className="t-meta">{t("word.round", { n: round.round_no, total: c.st.session.total_rounds })}</span>
+        <span className="t-meta round-counter">{t("word.round", { n: round.round_no, total: c.st.session.total_rounds })}</span>
         <span className="t-meta">{forWho(giver, "word.hm.youGive", "word.hm.gives")}</span>
       </div>
 
@@ -376,7 +376,7 @@ function PetitBac({ c, round }: { c: Common; round: CRound }) {
   return (
     <section className="stack stack--5 astra-board astra-board--petitbac word-board">
       <div className="q-progress">
-        <span className="t-meta">{t("word.round", { n: round.round_no, total: c.st.session.total_rounds })}</span>
+        <span className="t-meta round-counter">{t("word.round", { n: round.round_no, total: c.st.session.total_rounds })}</span>
         {card.letter && <span className="t-meta">{t("word.pb.letterIs", { l: card.letter })}</span>}
       </div>
       {card.phase === "loaded" ? (
