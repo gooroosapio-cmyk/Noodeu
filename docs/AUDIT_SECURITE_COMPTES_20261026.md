@@ -110,7 +110,7 @@ Codex a relevé trois défauts dans la première version (`0922497`, non mise en
 
 Correctifs :
 
-- **Fonction serveur `change_password`** (migration `20261030001600_change_password.sql`, à appliquer avec accord). Elle vérifie le mot de passe actuel (bcrypt) et enregistre le nouveau, en une seule opération liée au jeton de l'appelant. Aucune session n'est ouverte ni remplacée côté navigateur. Règles :
+- **Fonction serveur `change_password`** (migration `20261030001600_change_password.sql`, appliquée en ligne le 26/10 après accord écrit, puis vérifiée). Elle vérifie le mot de passe actuel (bcrypt) et enregistre le nouveau, en une seule opération liée au jeton de l'appelant. Aucune session n'est ouverte ni remplacée côté navigateur. Règles :
   - de 8 caractères à 72 octets ;
   - le nouveau mot de passe doit différer de l'actuel ;
   - 5 échecs en 15 minutes bloquent le compte concerné seulement ;
@@ -130,3 +130,5 @@ Preuves :
 
   Résultat : **OK**. Migration appliquée sans erreur sur une copie de l'état de production (transaction annulée).
 - `tests/visual/password-flows.mjs` : 6 scénarios **PASS**. Le dernier simule une déconnexion depuis un autre onglet pendant la requête : la réponse est ignorée et aucune session n'est recréée. Dans tous les cas, aucun appel de reconnexion ni de mise à jour directe du compte depuis le navigateur.
+
+Contact de récupération choisi par le propriétaire : `gooroosapio@gmail.com`. Codex le règle dans Vercel (`VITE_SUPPORT_EMAIL`) : la connexion Vercel de Claude est refusée.

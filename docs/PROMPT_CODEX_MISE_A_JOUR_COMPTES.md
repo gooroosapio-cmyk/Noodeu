@@ -10,8 +10,8 @@ Réponds en français. Fais un audit avant toute action.
   - **Test SQL et rapport.** Nouveau test d'isolation `supabase/tests/c43_isolation_comptes.sql` et rapport `docs/AUDIT_SECURITE_COMPTES_20261026.md`.
   - **Fusion sans conflit** de ton commit `0ee5ebf`.
 - **Correctif de ton audit.** Le changement de mot de passe passe désormais par la fonction serveur `change_password` (migration `20261030001600_change_password.sql`), sans reconnexion dans le navigateur. Les pannes réseau ne sont plus présentées comme un mauvais mot de passe. Le contact de récupération vient de `VITE_SUPPORT_EMAIL`. Détails et preuves : fin de `docs/AUDIT_SECURITE_COMPTES_20261026.md`.
-- **Base de données : tu n'appliques aucune migration.** Les migrations 1500 et 0100 sont en ligne. La 1600 est appliquée par Claude après accord du propriétaire. Avant la mise en production, vérifie en lecture seule que `to_regprocedure('public.change_password(text,text)')` n'est pas nul. S'il l'est, n'envoie pas en production : l'écran afficherait « Modification impossible ».
-- **Variable `VITE_SUPPORT_EMAIL`.** Si le propriétaire te donne l'adresse de contact, ajoute-la aux variables d'environnement Vercel (Production et Preview) avant le build. C'est une adresse publique, pas un secret.
+- **Base de données : tu n'appliques aucune migration.** Les migrations 1500, 0100 et 1600 sont déjà en ligne : Claude les a appliquées après accord écrit du propriétaire, et la 1600 a été vérifiée le 26/10. Avant la mise en production, vérifie quand même en lecture seule que `to_regprocedure('public.change_password(text,text)')` n'est pas nul.
+- **Variable `VITE_SUPPORT_EMAIL` à créer par toi.** Le propriétaire a choisi `gooroosapio@gmail.com` comme adresse de contact publique pour « mot de passe oublié ». Ajoute `VITE_SUPPORT_EMAIL=gooroosapio@gmail.com` (type texte simple) aux variables d'environnement Vercel du projet, pour Production et Preview, avant le build. Claude n'a pas pu le faire : sa connexion Vercel est refusée. Ce n'est pas un secret. Ne la mets pas dans le code.
 
 ## Règles
 
@@ -33,7 +33,7 @@ Réponds en français. Fais un audit avant toute action.
      - après déconnexion, on se reconnecte avec le nouveau mot de passe ;
    - **Espace → couverture et « Nos notes »** : une note ajoutée apparaît, et la photo de couverture se change. Ces fonctions ne sont plus « pas disponibles » ;
    - supprime ensuite ce compte de test (Réglages → Supprimer mon compte) ;
-   - l'écran de connexion affiche le contact de récupération (lien e-mail si `VITE_SUPPORT_EMAIL` est défini), sans bouton d'envoi d'e-mail.
+   - l'écran de connexion affiche « Mot de passe oublié ? Écris-nous depuis l'adresse de ton compte… » avec le lien `gooroosapio@gmail.com`, sans bouton d'envoi d'e-mail.
 4. **Production.** Le propriétaire autorise la mise en production de ce commit précis, une fois tous les contrôles de la preview verts. Promeus cette preview validée, et aucun autre commit.
 5. **Après la mise en production.** Refais les contrôles 3 sur noodeu.vercel.app. Au moindre défaut bloquant, reviens au déploiement de `0ee5ebf` et signale-le avec ses preuves.
 
