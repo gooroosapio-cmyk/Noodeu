@@ -134,9 +134,9 @@ function registerSheet(close: () => void) {
  * Fenêtre (feuille basse sur mobile, panneau latéral possible sur grand écran).
  * Garde le focus à l'intérieur, se ferme avec Échap ou le bouton retour, rend le focus au déclencheur.
  */
-export function Sheet({ title, onClose, children, footer, side = false, tall = false, centered = false, headerExtra, closeLabel = t("common.close"), closeIcon = "close" }: {
+export function Sheet({ title, onClose, children, footer, side = false, tall = false, centered = false, headerExtra, closeLabel = t("common.close"), closeIcon = "close", className = "" }: {
   title: ReactNode; onClose: () => void; children: ReactNode; footer?: ReactNode; side?: boolean; tall?: boolean; centered?: boolean;
-  headerExtra?: ReactNode; closeLabel?: string; closeIcon?: IconName;
+  headerExtra?: ReactNode; closeLabel?: string; closeIcon?: IconName; className?: string;
 }) {
   const ref = useRef<HTMLDivElement>(null);
   const titleId = useRef(`sheet-${Math.random().toString(36).slice(2)}`).current;
@@ -177,7 +177,7 @@ export function Sheet({ title, onClose, children, footer, side = false, tall = f
 
   return (
     <div className={`sheet-backdrop ${side ? "sheet-backdrop--side" : ""} ${centered ? "sheet-backdrop--centered" : ""}`} onClick={(e) => e.target === e.currentTarget && onClose()}>
-      <div className={`sheet ${tall ? "sheet--tall" : ""}`} role="dialog" aria-modal="true" aria-labelledby={titleId} tabIndex={-1} ref={ref}>
+      <div className={`sheet ${tall ? "sheet--tall" : ""} ${className}`} role="dialog" aria-modal="true" aria-labelledby={titleId} tabIndex={-1} ref={ref}>
         <div className="sheet__head">
           <div className="sheet__title" id={titleId}>{title}</div>
           {headerExtra}

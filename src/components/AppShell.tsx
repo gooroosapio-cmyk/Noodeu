@@ -41,7 +41,7 @@ function BottomNav() {
     <nav className="nav" aria-label={t("nav.label")} ref={ref}>
       {tabs.map((tab) => (
         <NavLink key={tab.to} to={tab.to}>
-          <Icon name={tab.icon} size={23} />
+          <Icon name={tab.icon} size={20} />
           <span>{tab.label}</span>
         </NavLink>
       ))}

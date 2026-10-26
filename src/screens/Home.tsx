@@ -132,7 +132,7 @@ export function Home() {
             setSlide(children.reduce((best, child, i) => Math.abs(child.offsetLeft - origin - el.scrollLeft) < Math.abs(children[best].offsetLeft - origin - el.scrollLeft) ? i : best, 0));
           }}>
             {cards.map((g, i) => <article className="arcade-feature" key={g.id} aria-label={`${i + 1} sur ${cards.length}`}>
-              <div><h2>{g.title}</h2><p>{g.duration_min ? `${g.duration_min}–${g.duration_max ?? g.duration_min} min · À deux` : "À votre rythme"}</p><Link className="btn" to={`/bibliotheques/${g.id}`}>Jouer <Icon name="play" size={18} /></Link></div>
+              <div><h2>{g.title}</h2>{(g.hook || g.promise) && <p className="arcade-feature__desc">{g.hook || g.promise}</p>}<p className="arcade-feature__time">{g.duration_min ? `${g.duration_min}–${g.duration_max ?? g.duration_min} min` : "À votre rythme"}</p><Link className="btn" to={`/bibliotheques/${g.id}`}>Jouer <Icon name="play" size={18} /></Link></div>
               <GameThumb game={g} size="lg" />
             </article>)}
           </div>
@@ -144,7 +144,7 @@ export function Home() {
         </>}
       </section>
       <section className="arcade-dashboard" aria-label="Votre rendez-vous à deux">
-        <article className="arcade-question">
+        <article className="arcade-question v7-question-moment">
           <h2>Question du moment</h2>
           <p aria-live="polite">{!active ? "Créez votre duo pour découvrir votre question." : moment.loading ? "Votre question arrive…" : moment.data?.question ?? "Question indisponible pour le moment."}</p>
           {moment.error && <button className="btn btn--quiet" onClick={moment.refresh}>Réessayer</button>}

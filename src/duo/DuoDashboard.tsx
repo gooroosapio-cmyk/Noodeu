@@ -73,7 +73,7 @@ export function DuoDashboard({ coupleId, active, partner, children, identity, ac
   const submit = (e: FormEvent) => { e.preventDefault(); void save({ id: noteId.current, body: body.trim(), due_on: due || null, done: false, version: 0 }); };
   return <section className="duo-dashboard" aria-label={`Votre espace avec ${partner}`}>
     <div className="duo-cover">
-      <img src={url ?? '/assets/original/duo-cover.webp'} alt="" width={1400} height={560} />
+      <img src={url ?? '/assets/noodeu/v7/duo-living-room.webp'} alt="" width={1280} height={430} />
       <div className="duo-cover__identity">{identity}</div>
       <div className="duo-cover__caption">{activity}</div>
     </div>

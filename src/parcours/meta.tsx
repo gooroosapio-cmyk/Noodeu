@@ -26,18 +26,3 @@ export function IntensityTransition({ prev, cur }: { prev?: Meta; cur?: Meta }) 
   return <p className="t-small transition-note"><Icon name="leaf" size={16} />{t(cur.intensity === "hot" ? "transition.hot" : "transition.moyen")}</p>;
 }
 
-/** Version courte (la question telle quelle) ou approfondie (une relance en plus, jamais une réécriture). */
-export function DeepToggle({ followup, roundKey }: { followup?: string; roundKey: number }) {
-  const [deep, setDeep] = useState(false);
-  useEffect(() => setDeep(false), [roundKey]);
-  if (!followup) return null;
-  return (
-    <div className="stack stack--2">
-      <div className="chips" role="radiogroup" aria-label={t("daily.version")}>
-        <button type="button" className="chip" role="radio" aria-checked={!deep} onClick={() => setDeep(false)}>{t("daily.short")}</button>
-        <button type="button" className="chip" role="radio" aria-checked={deep} onClick={() => setDeep(true)}>{t("daily.deep")}</button>
-      </div>
-      {deep && <p className="t-small"><Icon name="sparkles" size={16} /> {followup}</p>}
-    </div>
-  );
-}

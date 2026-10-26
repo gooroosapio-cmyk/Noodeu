@@ -13,6 +13,7 @@ import type { ChatMessage } from "../lib/types";
 import { DuoDashboard } from "../duo/DuoDashboard";
 import { useCatalog } from "./catalog";
 import { MyItems, ProgressSection } from "../parcours/Progress";
+import { HistoryList } from "./History";
 
 interface HistoryItem {
   id: string;
@@ -63,25 +64,11 @@ function History({ coupleId }: { coupleId: string }) {
         <button className="chip" aria-pressed={!onlyKept} onClick={() => setOnlyKept(false)}>Parties récentes</button>
         <button className="chip" aria-pressed={onlyKept} onClick={() => setOnlyKept(true)}><Icon name="heart" size={18} />Coffre à souvenirs</button>
       </div>
-      <p className="t-meta">{onlyKept ? 'Uniquement les parties que vous avez tous les deux choisi de garder.' : 'Les 30 dernières parties de ce duo.'}</p>
+      <p className="t-meta">{onlyKept ? 'Uniquement les parties que vous avez tous les deux choisi de garder.' : 'Les trois dernières parties de ce duo.'}</p>
       {onlyKept && !items.some(h => h.session_players.length === 2 && h.session_players.every(p => p.keep_memory)) && <p className="t-small muted">Aucun souvenir partagé.</p>}
-      <ul className="list">
-      {items.filter(h => !onlyKept || (h.session_players.length === 2 && h.session_players.every(p => p.keep_memory))).map((h) => {
-        const kept = h.session_players.length === 2 && h.session_players.every((p) => p.keep_memory);
-        const label = h.status === "abandoned" ? t("space.abandoned") : h.status === "ended" ? t("game.endTitle") : kept ? t("space.kept") : t("space.notKept");
-        const body = (
-          <>
-            <Icon name="cards" />
-            <span className="list-row__body">
-              <span className="t-card">{h.games?.title}</span>
-              <span className="t-meta">{formatDate(h.ended_at ?? h.created_at)} · {label}</span>
-            </span>
-            {h.status !== "abandoned" && <Icon name="arrow-right" size={18} />}
-          </>
-        );
-        return <li key={h.id}>{h.status === "abandoned" ? <div className="list-row">{body}</div> : <Link className="list-row" to={`/partie/${h.id}`}>{body}</Link>}</li>;
-      })}
-    </ul>
+      {/* V7 : aperçu limité aux trois plus récentes ; « Tout voir » mène à l'historique paginé par cinq. */}
+      <HistoryList rows={items.filter(h => !onlyKept || (h.session_players.length === 2 && h.session_players.every(p => p.keep_memory))).slice(0, 3)} />
+      <Link className="btn btn--quiet btn--sm btn--auto" to={`/espace/historique?duo=${coupleId}`}>Tout voir<Icon name="chevron-right" size={18} /></Link>
     </div>
   );
 }
@@ -158,7 +145,7 @@ export function OurSpace() {
           <Link className="btn" to="/inviter">{t("duo.invite")}</Link>
         </section>
       ) : (
-        <DuoDashboard key={selected.id} coupleId={selected.id} active={selected.active} partner={partnerName} activity={currentGame ? <><h2 className="t-card">{currentGame.title}</h2><p className="t-small muted">{currentGame.promise}</p></> : <p className="t-small muted">{selected.active ? "Aucune partie en cours." : "Duo archivé."}</p>} identity={<DuoIdentity duo={selected} online={selected.id === duo.active?.id && duo.partnerOnline} center size={64} />}>
+        <DuoDashboard key={selected.id} coupleId={selected.id} active={selected.active} partner={partnerName} activity={currentGame ? <><h2 className="t-card">{currentGame.title}</h2><p className="t-small muted">{currentGame.promise}</p></> : <p className="t-small muted">{selected.active ? "Aucune partie en cours." : "Duo archivé."}</p>} identity={<DuoIdentity duo={selected} online={selected.id === duo.active?.id && duo.partnerOnline} size={40} />}>
         <section className="space-vault stack stack--3" aria-label="Coffre à souvenirs"><h2 className="t-section row"><Icon name="heart" />Coffre à souvenirs</h2><History key={selected.id} coupleId={selected.id} /></section>
         <section className="space-duo-summary stack stack--3">
           <ul className="t-meta plain-list">

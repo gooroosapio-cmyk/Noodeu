@@ -32,6 +32,7 @@ import "../styles/red-kit.css";
 import { redKitOf, RED_SCREENS } from "./red/kit";
 import { DuoStrip, GameHeader, GameHero, GameShell, ReconnectBanner, RoundProgress } from "./red/ui";
 import { RedLobby } from "./red/Lobby";
+import { GameComposer } from "./red/GameComposer";
 import { scoreboard } from "./premium/GameFrame";
 
 type Run = (fn: string, args?: Record<string, unknown>) => Promise<{ ok: boolean }>;
@@ -117,7 +118,7 @@ export function SessionScreen() {
       <GameShell background={background}>
       <GameHeader title={st.session.status === "lobby" ? "Préparer la partie" : st.game.title} reduceTo="/accueil"
         onReduce={() => { leavingSession.current = true; }} onMenu={() => setCommands(true)} menuOpen={commands}
-        onChat={duo.active ? () => setChat(true) : undefined} chatUnread={duo.chatUnread ?? 0} />
+ />
       <main className="page page--bare page--read session-with-chat red-main" aria-label={playing ? "Console de jeu" : "Partie"}>
         <div className="session-notices">
           <ReconnectBanner online={online} networkError={s.error === "network"} onRetry={() => void s.load()} />
@@ -154,6 +155,8 @@ export function SessionScreen() {
 
       </main>
       </GameShell>
+      {/* V7 : en jeu, la navigation principale laisse place à une vraie saisie vers la conversation du duo. */}
+      {duo.active && !st.session.read_only && <GameComposer key={chat ? "chat-open" : "chat-closed"} onOpen={() => setChat(true)} />}
 
       {commands && <Sheet title="Commandes de la partie" onClose={() => setCommands(false)}>
         <div className="session-command-menu stack stack--2">

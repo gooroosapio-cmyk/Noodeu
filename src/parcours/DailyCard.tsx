@@ -23,7 +23,6 @@ export function DailyCard() {
   const [themes, setThemes] = useState<string[]>([]);
   const [error, setError] = useState<string | null>(null);
   const [busy, setBusy] = useState(false);
-  const [deep, setDeep] = useState(false);
   const [choose, setChoose] = useState(false);
 
   const load = useCallback(async (mode?: Mode, theme?: string) => {
@@ -33,7 +32,6 @@ export function DailyCard() {
     setBusy(false);
     if (res.ok) {
       setDaily(res as unknown as Daily);
-      setDeep(false);
       setChoose(false);
     } else setError(res.error === "no_card_for_filter" ? t("daily.noneForFilter") : res.error === "no_card" ? t("daily.none") : t("daily.error"));
   }, []);
@@ -78,15 +76,6 @@ export function DailyCard() {
         <article className="card daily-card stack stack--4">
           <ItemChips v={daily.card} />
           <p className="t-question">{itemText(daily.card)}</p>
-          {daily.card.long_followup && (
-            <div className="stack stack--2">
-              <div className="chips" role="radiogroup" aria-label={t("daily.version")}>
-                <button className="chip" role="radio" aria-checked={!deep} onClick={() => setDeep(false)}>{t("daily.short")}</button>
-                <button className="chip" role="radio" aria-checked={deep} onClick={() => setDeep(true)}>{t("daily.deep")}</button>
-              </div>
-              {deep && <p className="t-small"><Icon name="sparkles" size={16} /> {daily.card.long_followup}</p>}
-            </div>
-          )}
           <p className="t-meta row"><Icon name={daily.shared ? "users" : "user"} size={16} />{daily.shared ? t("daily.sharedHint") : t("daily.soloHint")}</p>
           <ItemActions bank={daily.bank} itemId={daily.item_id} />
         </article>

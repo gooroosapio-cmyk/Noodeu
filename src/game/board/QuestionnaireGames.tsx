@@ -3,7 +3,7 @@
 // L'écran n'affiche jamais une réponse du partenaire avant la révélation : il ne la reçoit pas.
 import { AudioAnswer, AudioPlayback } from "../audio/AudioAnswer";
 import { LaterButton } from "../Later";
-import { DeepToggle, IntensityTransition, useSessionMeta } from "../../parcours/meta";
+import { IntensityTransition, useSessionMeta } from "../../parcours/meta";
 import { useEffect, useMemo, useState } from "react";
 import { Link } from "react-router";
 import { t } from "../../i18n";
@@ -142,15 +142,7 @@ function PackPlaying({ c, round }: { c: Common; round: QRound }) {
 
   return (
     <section className="pack-playing pack-board reading-games stack stack--5" key={round.round_no}>
-      <div className="q-progress">
-        <span className="t-meta">
-          {card.set_no ? t("q.pack.set", { s: card.set_no, n: (card.index % card.set_size) + 1, size: card.set_size }) : t("q.pack.card", { n: card.index + 1, count: card.count })}
-        </span>
-        <span className="t-meta">{t("q.pack.session", { n: round.round_no, total })}</span>
-      </div>
-      <div className="nd-progress" role="progressbar" aria-label={t("q.pack.progress")} aria-valuemin={0} aria-valuemax={card.count} aria-valuenow={card.index + 1}>
-        <div className="nd-progress__fill" style={{ width: `${(100 * (card.index + 1)) / card.count}%` }} />
-      </div>
+      {/* V7 : une seule progression, celle du cadre de jeu (Manche i/N) ; plus de doublon Carte / Série / Séance. */}
       <IntensityTransition prev={prevItem ? meta[prevItem] : undefined} cur={meta[card.item.id]} />
       <ReadingRegion className="console-question pack-question" label="Question du pack" resetKey={card.item.id}>
         <div className="q-card__head">
@@ -162,7 +154,6 @@ function PackPlaying({ c, round }: { c: Common; round: QRound }) {
         </div>
         <h2 className={`t-question${card.item.text.length > 140 ? " t-question--long" : ""}`}>{card.item.text}</h2>
         <p className="t-meta">{first?.is_me ? t("q.pack.youFirst") : t("q.pack.firstSpeaker", { name: nameOf(first) })}</p>
-        {!card.done && <DeepToggle followup={meta[card.item.id]?.long_followup} roundKey={round.round_no} />}
         {!c.st.session.read_only && <LaterButton sessionId={c.st.session.id} round={round.round_no} disabled={!c.online} />}
       </ReadingRegion>
 

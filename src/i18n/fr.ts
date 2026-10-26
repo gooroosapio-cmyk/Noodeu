@@ -805,7 +805,7 @@ export const fr = {
   "settings.editProfile": "Modifier mon profil",
   "settings.preferences": "Préférences",
   "settings.reducedMotion": "Réduire les animations",
-  "settings.reducedMotionHint": "S'ajoute au réglage de ton appareil.",
+  "settings.reducedMotionHint": "S'ajoute au réglage de ton appareil. Fige aussi le fond décoratif.",
   "settings.privacy": "Confidentialité et contenus",
   "settings.intimate": "Activer À huis clos",
   "settings.intimateHint": "Facultatif, pour adultes. Une activité À huis clos ne démarre que si vous l'avez activé tous les deux et l'acceptez dans le salon.",

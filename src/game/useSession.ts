@@ -5,7 +5,13 @@ import { onResume } from "../lib/useOnline";
 import type { SessionState } from "../lib/types";
 
 const POLL_LIVE_MS = 20000; // filet de sécurité même quand le temps réel fonctionne
-const POLL_DOWN_MS = 4000; // temps réel indisponible : relecture fréquente
+const POLL_DOWN_MIN_MS = 4000; // temps réel indisponible : relecture, puis espacement progressif
+const POLL_DOWN_MAX_MS = 30000;
+/** Délai borné avec jitter (±20 %) : pas de relecture rapide permanente pendant une coupure. */
+const downDelay = (attempt: number) => {
+  const base = Math.min(POLL_DOWN_MAX_MS, POLL_DOWN_MIN_MS * 2 ** attempt);
+  return Math.round(base * (0.8 + Math.random() * 0.4));
+};
 
 /**
  * État d'une partie, toujours relu depuis la base (seule source de vérité).
@@ -29,7 +35,10 @@ export function useSession(sessionId: string, userId: string | null) {
   const contextRef = useRef(contextKey);
   contextRef.current = contextKey;
 
-  const load = useCallback(async () => {
+  // Une seule relecture à la fois : les demandes arrivées pendant une lecture sont regroupées en une seule suivante.
+  const inFlight = useRef<Promise<void> | null>(null);
+  const again = useRef(false);
+  const loadOnce = useCallback(async () => {
     const requestedContext = `${sessionId}:${userId ?? ""}`;
     const requestedGeneration = recoveryGeneration.current;
     const res = await rpc<SessionState>("get_session_state", { p_session: sessionId });
@@ -55,6 +64,14 @@ export function useSession(sessionId: string, userId: string | null) {
       setError(null);
     }
   }, [sessionId, userId]);
+  const load = useCallback(async () => {
+    if (inFlight.current) { again.current = true; return inFlight.current; }
+    const run = (async () => {
+      do { again.current = false; await loadOnce(); } while (again.current);
+    })();
+    inFlight.current = run;
+    try { await run; } finally { if (inFlight.current === run) inFlight.current = null; }
+  }, [loadOnce]);
 
   useEffect(() => {
     versionRef.current = 0;
@@ -91,10 +108,17 @@ export function useSession(sessionId: string, userId: string | null) {
   }, [sessionId, userId, load]);
 
   useEffect(() => {
-    const id = setInterval(() => {
-      if (document.visibilityState === "visible") void load();
-    }, channel === "live" ? POLL_LIVE_MS : POLL_DOWN_MS);
-    return () => clearInterval(id);
+    let timer: ReturnType<typeof setTimeout>;
+    let attempt = 0;
+    const tick = () => {
+      timer = setTimeout(() => {
+        if (document.visibilityState === "visible") void load();
+        attempt += 1;
+        tick();
+      }, channel === "live" ? POLL_LIVE_MS : downDelay(attempt));
+    };
+    tick();
+    return () => clearTimeout(timer);
   }, [channel, load]);
 
   /** Action serveur : relit l'état ensuite, quel que soit le résultat. */

@@ -1,6 +1,8 @@
 import { useEffect } from "react";
 import { AdminQuestions } from "./admin/AdminQuestions";
 import { Navigate, Outlet, createBrowserRouter, useLocation } from "react-router";
+import { Ambient } from "./components/Ambient";
+import { useKeyboardInset } from "./lib/useKeyboardInset";
 import { useRegisterSW } from "virtual:pwa-register/react";
 import { t } from "./i18n";
 import { supabaseConfigured } from "./lib/supabase";
@@ -15,6 +17,7 @@ import { AppShell } from "./components/AppShell";
 import { Home } from "./screens/Home";
 import { GameSheet, Libraries, ShelfPage } from "./screens/Libraries";
 import { OurSpace } from "./screens/OurSpace";
+import { HistoryPage } from "./screens/History";
 import { ProfileEdit, Settings } from "./screens/Settings";
 import { Tips } from "./screens/Tips";
 import { SessionScreen } from "./game/SessionScreen";
@@ -55,9 +58,11 @@ function UpdatePrompt() {
 }
 
 function Root() {
+  useKeyboardInset();
   return (
     <AuthProvider>
       <ToastProvider>
+        <Ambient />
         <NetworkBanner />
         {!supabaseConfigured && <div className="page page--bare"><Alert>{t("net.notConfigured")}</Alert></div>}
         <Outlet />
@@ -124,6 +129,7 @@ export const router = createBrowserRouter([
           { path: "/reglages/profil", element: <ProfileEdit /> },
           { path: "/admin/questions", element: <AdminQuestions /> },
           { path: "/parametres/profil", element: <Navigate to="/reglages/profil" replace /> },
+          { path: "/espace/historique", element: <HistoryPage /> },
           { path: "/inviter", element: <InvitePage /> },
           { path: "/rejoindre", element: <InvitePage /> },
           { path: "/partie/:sessionId", element: <SessionScreen /> },
