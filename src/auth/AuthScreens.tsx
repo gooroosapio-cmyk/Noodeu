@@ -97,20 +97,6 @@ export function AuthForm({ mode }: { mode: "signup" | "login" }) {
     finally { authLock.current = false; setBusy(false); }
   }
 
-  async function forgot() {
-    if (!email.trim()) {
-      setError(t("auth.emailRequired"));
-      return;
-    }
-    if(authLock.current) return;
-    authLock.current=true;setBusy(true);setError(null);setInfo(null);
-    try {
-      const {error}=await supabase.auth.resetPasswordForEmail(email.trim(), { redirectTo: `${window.location.origin}/reglages/profil` });
-      if(error)setError(authErrorMessage(error.message));else setInfo(t("auth.resetSent"));
-    } catch {setError("Envoi impossible pour le moment. Réessaie dans un instant.");}
-    finally {authLock.current=false;setBusy(false);}
-  }
-
   return (
     <main className={`page page--bare page--narrow auth-page ${signup ? "auth-page--signup" : "auth-page--login"}`}>
       <header className="topbar" style={{ padding: 0 }}>
@@ -156,7 +142,8 @@ export function AuthForm({ mode }: { mode: "signup" | "login" }) {
         <button className="btn auth-submit" type="submit" disabled={busy || (signup && (!adult || !name.trim() || password.length < 8 || confirm !== password))}>
           <span>{busy ? t("common.sending") : signup ? t("auth.signup") : t("auth.login")}</span><span className="auth-submit__arrow"><Icon name="arrow-right" /></span>
         </button>
-        {!signup && <button type="button" className="btn btn--quiet" disabled={busy} onClick={forgot}>{t("auth.forgot")}</button>}
+        {/* Phase de test : pas de service d'envoi d'e-mails, la réinitialisation se fait à la main par l'équipe. */}
+        {!signup && <p className="t-small muted center">{t("auth.forgot")}</p>}
       </form>
       <div className="auth-google"><GooglePlaceholder /></div>
       <Link className="btn btn--quiet" to={`${signup ? "/connexion" : "/inscription"}${suffix}`}>{signup ? t("auth.toLogin") : t("auth.toSignup")}</Link>

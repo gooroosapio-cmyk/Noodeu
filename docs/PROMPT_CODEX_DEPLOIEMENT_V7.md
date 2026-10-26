@@ -6,7 +6,7 @@ Réponds en français. Travaille par étapes et fais un audit complet avant tout
 ## Contexte
 
 - La production sert actuellement le commit `70fb169` (branche `refonte/rouge-20261026`). C'est le point de retour arrière.
-- La branche à livrer est `v7/interface-20261026`, partie de `70fb169`. Elle contient trois commits :
+- La branche à livrer est `v7/interface-20261026`, partie de `70fb169`. Elle contient notamment ces commits (lis `git log` pour la liste à jour) :
   1. l'interface V7 ;
   2. la fidélité aux témoins pour l'accueil, l'espace, le coffre, l'historique et la conversation ;
   3. les optimisations de fluidité et de rapidité.
@@ -14,7 +14,8 @@ Réponds en français. Travaille par étapes et fais un audit complet avant tout
 - Les autres références sont dans `docs/captures/v7-20261026/` : captures, et comparaisons `fidelite-*.jpg` avec les témoins.
 - Supabase : projet `uqyrjdaonqqkkpzyjfcg`. Ne touche jamais au projet « Limpid ».
 - Vercel : projet `prj_pILsfC2SFwCQjQLyhPrROCKoVSrC` (noodeu.vercel.app), équipe `team_vwilsshWZZiqYc5vQLN8f3zj`.
-- **Cette livraison ne comporte aucune migration.** `git diff 70fb169..v7/interface-20261026 -- supabase` doit être vide. Vérifie-le. S'il ne l'est pas, arrête-toi et signale-le.
+- **Migrations : tu n'en appliques aucune.** La branche contient `supabase/migrations/20261030001500_comptes_reels_perf.sql` (index et règles plus rapides) et une migration préparée plus tôt, `20261030000100_duo_space.sql` (couverture et notes du duo). Elles sont appliquées par Claude, avec l'accord écrit du propriétaire. Avant la mise en production, vérifie en lecture seule que `public.get_duo_space(uuid)` existe (`select to_regprocedure('public.get_duo_space(uuid)')`) et que l'index `couple_members_user` existe. Si ce n'est pas le cas, ne bloque pas le déploiement (l'interface affiche « pas disponible » proprement), mais signale-le dans ton rapport. Aucun autre changement sous `supabase/` n'est attendu.
+- **Comptes réels** : l'inscription se fait sans confirmation par e-mail (réglage Supabase déjà actif). Le « mot de passe oublié » est remplacé par un message de contact. Voir `docs/AUDIT_SECURITE_COMPTES_20261026.md`.
 
 ## Règles impératives
 
@@ -93,7 +94,8 @@ Livre chaque finition dans un commit séparé sur la branche `v7/interface-20261
    - `curl -I /sw.js` doit renvoyer `no-cache`, et `noodeu-release.json` doit renvoyer `no-store`.
    - Le HTML doit contenir `<link rel="preconnect" href="https://uqyrjdaonqqkkpzyjfcg.supabase.co" crossorigin>`.
    - Parcours manuel avec le compte de test Kalou (`dkalou151@gmail.com`, joueur automatique toujours prêt) :
-     - connexion ;
+     - création d'un nouveau compte (adresse de test jetable) : arrivée directe sur l'accueil, sans e-mail de confirmation. Supprime ensuite ce compte depuis Réglages → Supprimer mon compte, ce qui vérifie aussi la suppression ;
+     - connexion ; l'écran de connexion affiche le message de contact, sans bouton d'envoi d'e-mail ;
      - accueil, espace, coffre, historique ;
      - conversation (envoi d'un message) ;
      - nouveau salon, puis une partie G01 et une partie G08 (brouillon conservé au rechargement, purgé sur « Passer ») ;

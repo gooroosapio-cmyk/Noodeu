@@ -112,8 +112,7 @@ export const fr = {
   "auth.toLogin": "J'ai déjà un compte",
   "auth.toSignup": "Créer un compte",
   "auth.checkEmail": "Vérifie ta boîte mail : un lien de confirmation vient d'être envoyé à {email}.",
-  "auth.forgot": "Mot de passe oublié ?",
-  "auth.resetSent": "Si un compte existe, un lien pour changer ton mot de passe vient d'être envoyé.",
+  "auth.forgot": "Mot de passe oublié ? Contacte l’équipe Noodeu : nous le réinitialisons pour toi.",
   "auth.adult": "Je confirme avoir 18 ans ou plus.",
   "auth.emailRequired": "Indique d'abord ton adresse e-mail.",
 
@@ -817,7 +816,7 @@ export const fr = {
   "settings.danger": "Zone sensible",
   "settings.delete": "Supprimer mon compte",
   "settings.deleteTitle": "Supprimer ton compte ?",
-  "settings.deleteText": "Ton profil, ta photo, tes favoris et tes notifications sont effacés définitivement. Ton duo actif est terminé. Les personnes avec qui tu as joué gardent l'historique commun en lecture seule, avec la mention « Compte supprimé ». Cette action est irréversible.",
+  "settings.deleteText": "Ton profil, ta photo, tes favoris et tes notifications sont effacés définitivement. Tes duos en cours sont terminés. Les personnes avec qui tu as joué gardent l'historique commun en lecture seule, avec la mention « Compte supprimé ». Cette action est irréversible.",
   "settings.deleteConfirmLabel": "Tape SUPPRIMER pour confirmer",
   "settings.deleteConfirm": "Supprimer définitivement",
   "settings.deleteError": "La suppression n'a pas abouti. Réessaie plus tard.",
