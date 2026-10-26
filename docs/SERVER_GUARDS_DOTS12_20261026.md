@@ -4,7 +4,7 @@ Le lot est validé sur PostgreSQL Docker local : validation atomique des réglag
 preuves G08 renforcées, moteur M04 12 × 12 points préparé et garde-fous serveur.
 La version M04 préparée reste **non publiée et non courante**. Le chemin public
 continue à créer des parties historiques 5 × 5 points. Aucun déploiement distant
-ni activation 12 × 12 ne fait partie de cette validation.
+ni activation persistante 12 × 12 ne fait partie de cette validation.
 
 Base Git de la revue : `104564da4a7d8dc5761f9616d40d8f8a1ba5f658`.
 Les fichiers du lot étaient non commités ; les empreintes de leur contenu relu
@@ -12,6 +12,8 @@ sont dans `SERVER_GUARDS_DOTS12_20261026_EVIDENCE.json`. Elles identifient la so
 au moment de la clôture, et ne prétendent pas constituer une attestation signée
 de chaque exécution antérieure. La reprise a relu les résultats déjà terminés ;
 seul l'upgrade a été rejoué pour valider le nouveau lanceur et son inclusion SQL.
+Après le commit serveur `96057f0`, une activation **facultative** distincte a été
+préparée et testée sous rollback, comme décrit à la fin de ce rapport.
 
 ## Comportement livré
 
@@ -112,6 +114,7 @@ Toutes les cibles dédiées sont marquées `noodeu:disposable-local-sql-test`.
 | Réapplication010 locale | Pas de deuxième draft ; garde non publiée/non courante conservée | `dots-migration010-reapply.log`, `dots-gate.log` |
 | Upgrade008→010 transactionnel | Compatibilité des données et RPC, rollback intégral vérifié | `dots-upgrade-versioned.log` |
 | Nouveau lanceur, phase upgrade | Réexécution ciblée exit0, `ok:true`, SQL inclus empreinté ; pas de migration persistée | `closeout-runner-upgrade-results.json`, `closeout-runner-upgrade.log` |
+| Activation facultative, phase activation | Trois refus exacts ; publication et pointeur uniques ; rejeu sans UPDATE ; nouvelle partie12 publique et ancienne5 conservée ; rollback final | `optional-activation-results.json`, `optional-activation.log` |
 
 Ces comptes portent sur des fichiers et courses, pas sur un nombre inventé
 d'assertions. Les temps C28 sont des mesures PostgreSQL locales ; ils ne prédisent
@@ -191,12 +194,74 @@ La mise en service 12×12 requiert encore :
    navigation, cibles 44 px, petits écrans, clavier/zoom et planches revues.
 2. Vérifier le déploiement client compatible, les sessions anciennes et les RPC
    sur l'environnement de recette réellement visé ; tester reprise et deux appareils.
-3. Préparer une migration d'activation distincte qui contrôle les préconditions,
-   publie explicitement le draft attendu et bascule `games.current_version` dans
-   une transaction. Ne pas relier les séances existantes à la nouvelle version.
+3. Relire puis exécuter explicitement le script facultatif décrit ci-dessous,
+   qui contrôle les préconditions, publie le draft attendu et bascule
+   `games.current_version` dans une transaction. Ne pas relier les séances
+   existantes à la nouvelle version.
 4. Faire valider cette mise en service et son plan de retour. Remettre le pointeur
    historique ne convertirait pas des séances12 déjà créées : conserver la prise
    en charge des deux formats tant qu'elles existent.
 
 Le lot serveur peut être commité localement avec ces preuves ; ce rapport
 n'autorise pas à lui seul une publication ni un déploiement.
+
+## Activation facultative préparée après le commit serveur
+
+Fichier : `supabase/optional/activate_dots12_after_validation.sql`.
+Il est volontairement **hors `supabase/migrations/`**, hors de la suite SQL normale
+et hors de tout lancement au démarrage. Déployer le client et appliquer010 laisse
+le draft inactif ; cette étape manuelle distincte rend les nouvelles parties12
+accessibles par `create_session` après validation du preview et accord du propriétaire.
+
+Le script est un bloc `DO` atomique, sans commit interne. Il vérifie le jeu publié
+et jouable, l'unicité du nom `noodeu-m04-2.0.0` avant filtrage du contrat, le contrat
+exact `dots12-v1`, les paramètres numériques12/12/121/264 et la présence du moteur.
+La première activation exige le pointeur historique **version1**, publiée avec
+`noodeu-c34-1.0.0` et les dimensions5/5/16/40. Une cible déjà publiée mais non
+courante ou un autre pointeur courant est refusé ; ne pas supprimer cette garde
+pour contourner une divergence d'historique.
+
+Il verrouille la ligne catalogue puis brièvement `game_versions` contre une
+publication/insertion concurrente. Le délai de verrou est de cinq secondes.
+Seuls `game_versions.published_at` de la cible et `games.current_version` changent ;
+le trigger existant met à jour `games.updated_at`. Il n'existe pas de compteur
+catalogue global à incrémenter. Rejoué lorsque cette cible est déjà publiée et
+courante, le script retourne avant tout UPDATE. Aucun accès aux tables de séances
+n'est effectué par le script d'activation.
+
+Test dédié : `supabase/tests/upgrade/dots12_optional_activation.sql`. Commande locale
+reproductible sur la base existante marquée, **sans activation persistante** :
+
+```sh
+python3 tests/sql/server_regression.py noodeu_server_20261026_010539_integrated activation
+```
+
+Le test exerce trois refus exacts (pointeur inattendu, mauvais contrat, doublon de
+nom même avec autre contrat), puis activation et rejeu. Des triggers transactionnels
+comptent exactement une publication et un seul UPDATE catalogue : comparer seulement
+`updated_at` serait insuffisant, car `now()` est stable dans une transaction. Il
+compare toutes les séances, cartes, secrets, coups et versions avant/après activation,
+vérifie l'immutabilité réelle de la version publiée, la poursuite d'une partie5 déjà
+jouée, l'idempotence de son ancien coup et une **nouvelle partie12 créée par le RPC
+public sous le rôle authenticated**, sans substitution de version par la fixture.
+Le rollback final remet le draft non publié/non courant et ne laisse aucune fixture.
+Les trois lignes `ERROR` du journal sont les refus délibérés contrôlés par le test ;
+le résultat final est exit0 et `ok:true`.
+
+Étape réservée au propriétaire, après validation du preview, vérification du
+déploiement client compatible et choix explicite de la connexion du projet :
+
+```sh
+# NOODEU_REVIEWED_TARGET est fourni par le propriétaire dans son environnement.
+# Cette commande produit une activation persistante : elle n'a pas été exécutée ici.
+psql --dbname "${NOODEU_REVIEWED_TARGET:?Connexion du projet à définir}" -X --set ON_ERROR_STOP=1 --single-transaction \
+  --file supabase/optional/activate_dots12_after_validation.sql
+```
+
+Le même bloc SQL peut être exécuté entièrement dans l'éditeur SQL du projet vérifié.
+Relire la cible avant exécution ; aucune connexion ni aucun identifiant n'est fourni
+par ce dépôt. Après l'étape, recharger le catalogue du client puis créer une nouvelle
+partie. Une séance historique déjà ouverte doit rester5. La version publiée est
+immuable : une éventuelle remise du pointeur vers1 exige une décision distincte et
+la conservation du support12 pour les séances12 existantes ; ce lot ne fournit pas
+de script automatique de dépublication ou de conversion.

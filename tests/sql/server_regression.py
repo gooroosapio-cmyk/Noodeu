@@ -3,11 +3,12 @@
 
     python3 tests/sql/server_regression.py noodeu_server_<suffixe> suite
     python3 tests/sql/server_regression.py noodeu_server_<suffixe> upgrade
+    python3 tests/sql/server_regression.py noodeu_server_<suffixe> activation
 
-suite : C18 à C32, après migrations009/010 ; upgrade : avant010 (008 ou009).
+suite : C18 à C32, après009/010 ; upgrade : avant010 ; activation : après010 inactive.
 La liste des fichiers se consulte sans Docker avec --list. Le lanceur n'applique
 aucune migration persistante, ne crée/supprime aucune base et ne nettoie rien.
-Le test upgrade inclut010 dans sa transaction annulée. Les courses indépendantes
+Les tests upgrade/activation incluent leur SQL dans une transaction annulée. Les courses indépendantes
 se lancent séparément avec server_concurrency.py ; elles conservent leurs fixtures.
 """
 
@@ -29,11 +30,16 @@ ROOT = Path(__file__).resolve().parents[2]
 MIGRATION = ROOT / "supabase/migrations/20261029001000_dots12_versioned.sql"
 UPGRADE = ROOT / "supabase/tests/upgrade/dots12_from_008.sql"
 INCLUDE = r"\ir ../../migrations/20261029001000_dots12_versioned.sql"
+ACTIVATION = ROOT / "supabase/tests/upgrade/dots12_optional_activation.sql"
+OPTIONAL = ROOT / "supabase/optional/activate_dots12_after_validation.sql"
+ACTIVATION_INCLUDE = r"\ir ../../optional/activate_dots12_after_validation.sql"
 
 
 def files_for(phase: str) -> list[Path]:
     if phase == "upgrade":
         return [UPGRADE]
+    if phase == "activation":
+        return [ACTIVATION]
     return sorted(path for path in (ROOT / "supabase/tests").glob("c*.sql")
                   if path.name.split("_", 1)[0] in {f"c{n}" for n in range(18, 33)})
 
@@ -46,13 +52,17 @@ def source(path: Path) -> str:
         if sql.count(INCLUDE) != 1:
             raise CheckFailure("Inclusion upgrade010 inattendue ; relire le lanceur.")
         sql = sql.replace(INCLUDE, MIGRATION.read_text())
+    if path == ACTIVATION:
+        if sql.count(ACTIVATION_INCLUDE) != 5:
+            raise CheckFailure("Inclusions activation facultative inattendues ; relire le lanceur.")
+        sql = sql.replace(ACTIVATION_INCLUDE, OPTIONAL.read_text())
     return sql
 
 
 def main() -> int:
     parser = argparse.ArgumentParser(description=__doc__, formatter_class=argparse.RawDescriptionHelpFormatter)
     parser.add_argument("database", type=database_arg)
-    parser.add_argument("phase", choices=("suite", "upgrade"))
+    parser.add_argument("phase", choices=("suite", "upgrade", "activation"))
     parser.add_argument("--list", action="store_true", help="Afficher les fichiers sans accès Docker ni écriture.")
     args = parser.parse_args()
     files = files_for(args.phase)
