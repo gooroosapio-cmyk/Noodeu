@@ -76,6 +76,8 @@ export interface Player {
   ready: boolean;
   /** Révision des réglages acceptée par ce joueur (serveur à partir de la migration 20261030001200). */
   ready_rev?: number | null;
+  /** Partenaire automatique de test (private.test_autoplayers) : toujours considéré présent. */
+  test_partner?: boolean;
   keep_memory: boolean;
 }
 

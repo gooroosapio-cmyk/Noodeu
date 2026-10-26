@@ -40,6 +40,8 @@ begin
   perform t42.as_user(a);
   s := (public.create_session('nd-deux-verites-mensonge') ->> 'session_id')::uuid;
   perform t42.ok(t42.bot_agreed(s, bot), 'robot prêt sur la révision courante');
+  perform t42.ok((select bool_and(coalesce((pl ->> 'test_partner')::boolean, false) = ((pl ->> 'user_id')::uuid = bot))
+                  from jsonb_array_elements(public.get_session_state(s) -> 'players') pl), 'instantané : seul le robot est signalé');
   -- L'humain valide : aucun démarrage silencieux.
   r := public.set_ready_rev(s, true, t42.rev(s));
   perform t42.ok((select status from public.game_sessions where id = s) = 'lobby', 'pas de démarrage sans Lancer');

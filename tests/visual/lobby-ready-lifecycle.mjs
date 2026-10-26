@@ -67,6 +67,18 @@ try{
   await expect(page.getByText('doit être dans le salon pour lancer',{exact:false})).toBeVisible();
   await page.waitForTimeout(1500);assert.equal(launches,0,'aucun démarrage automatique');
  });
+ await scenario('partenaire de test : toujours présent, Lancer actif, un seul appel',async page=>{
+  const host=fixture('rouge-salon-pret-hote.json');host.session.id=SESSION;host.players.find(p=>!p.is_me).test_partner=true;
+  await setup(page,{...duo,notifications:[],state:host});
+  let launches=0;
+  await page.route('**/rpc/get_session_state',r=>r.fulfill({json:host}));
+  await page.route('**/rpc/launch_session',async r=>{launches++;await new Promise(f=>setTimeout(f,300));return r.fulfill({json:{ok:true,status:'playing'}});});
+  await page.goto(`${BASE}/partie/${SESSION}`);
+  const launch=page.getByRole('button',{name:'Lancer la partie'});
+  await expect(launch).toBeEnabled();
+  await launch.dblclick();
+  await page.waitForTimeout(800);assert.equal(launches,1,'double clic : un seul appel');
+ });
  await scenario('l\'invité attend le lancement de l\'hôte',async page=>{
   const guest=fixture('rouge-salon-pret-invite.json');guest.session.id=SESSION;
   await setup(page,{...duo,notifications:[],state:guest});

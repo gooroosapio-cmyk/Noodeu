@@ -93,7 +93,8 @@ export function SessionScreen() {
   const me = st.players.find((p) => p.is_me);
   const partner = st.players.find((p) => !p.is_me);
   const partnerName = partner?.display_name || "?";
-  const partnerHere = Boolean(partner?.user_id && s.present.includes(partner.user_id));
+  // Le partenaire automatique de test (signalé par le serveur) n'ouvre pas d'onglet : il compte comme présent.
+  const partnerHere = Boolean(partner?.user_id && (s.present.includes(partner.user_id) || partner.test_partner));
   const rounds = isRounds(st);
   const board = isBoard(st);
   const questionnaire = board && isQuestionnaireMech((st.game.config as unknown as { mechanic?: string }).mechanic);
