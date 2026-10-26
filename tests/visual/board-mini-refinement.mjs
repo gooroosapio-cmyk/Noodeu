@@ -57,7 +57,7 @@ try {
     matrix.push({ name, width, textScale: zoom, ...geometry, errors });
     if ((width === 390 && zoom === 1) || (width === 320 && zoom === 2)) {
       await page.screenshot({ path: `${OUT}/${width}-text${zoom}-${name}.png`, fullPage: true });
-      const board = page.locator('.mini-refined .board-zoom,.mini-refined .astra-ttt,.mini-refined .rps,.mini-refined .pig-tray').first();
+      const board = page.locator('.mini-refined .board-zoom,.mini-refined .naval-overview,.mini-refined .astra-ttt,.mini-refined .rps,.mini-refined .pig-tray').first();
       await board.scrollIntoViewIfNeeded();
       await page.screenshot({ path: `${OUT}/${width}-text${zoom}-${name}-board.png`, fullPage: true });
     }
@@ -117,6 +117,7 @@ try {
   }
   {
     const { page, ctx } = await make('mini-naval-placement');
+    await page.getByRole('button', { name: 'Cibler une case', exact: true }).click();
     await page.getByRole('gridcell', { name: /^J10 :/ }).click();
     assert.ok(await page.locator('.naval__cell--preview-invalid').count());
     assert.equal(await page.getByRole('button', { name: /Placer.*J10/ }).isDisabled(), true);
@@ -132,6 +133,7 @@ try {
   }
   {
     const { page, ctx, state, c } = await make('mini-naval-tirs');
+    await page.getByRole('button', { name: 'Cibler une case', exact: true }).click();
     assert.equal(await page.locator('.mini-naval-ship').count(), 0);
     assert.equal(await page.locator('.mini-fleet-manifest li').count(), 5);
     let calls = 0;

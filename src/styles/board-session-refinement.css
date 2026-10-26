@@ -53,6 +53,17 @@
 .session-console .session-toolbar__commands > :is(button,a) { flex: 1; }
 .session-console .session-toolbar__commands > .session-toolbar__quit { margin-left: 0; }
 .session-console .session-toolbar { padding-bottom: 10px; }
+.session-toolbar__menu { flex: 0 0 44px; width: 44px; height: 44px; border: 1px solid var(--c-border); border-radius: 13px; background: var(--c-surface); color: var(--c-accent-text); }
+.session-console .session-toolbar { flex-wrap: nowrap; gap: 8px; }
+.session-console .session-toolbar__identity { flex: 1 1 0; }
+.session-console .session-player-strip__person { min-height: 44px; }
+.session-console { --console-question-height: clamp(10.5rem, 25dvh, 13rem); }
+.session-command-menu .btn { justify-content: flex-start; }
+@media (max-width: 360px) {
+ .session-console .session-toolbar { padding-inline: 12px; }
+ .session-console .session-toolbar__reduce { padding-inline: 8px; }
+ .session-console .session-toolbar h1 { font-size: 1rem; }
+}
 .invite-refinement { gap: 14px; }
 .invite-refinement .page-header { text-align: center; gap: 5px; }
 .invite-refinement .page-header h1 { font-size: 1.375rem; }

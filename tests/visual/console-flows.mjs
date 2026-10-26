@@ -22,6 +22,7 @@ async function make(state, size = { width: 390, height: 844 }, zoom = 1) {
   await page.goto(`${BASE}/partie/${SESSION}`);
   await page.locator('.session-toolbar').waitFor();
   if (zoom !== 1) await page.addStyleTag({ content: `html { font-size: ${zoom * 100}%; }` });
+  await page.evaluate(async () => { await document.fonts.ready; await new Promise(resolve => requestAnimationFrame(() => requestAnimationFrame(resolve))); });
   return { page, context, errors };
 }
 async function capture(page, name) {
@@ -40,10 +41,15 @@ try {
     assert.equal(await page.locator('.session-console').count(), 1);
     assert.equal(await page.locator('.topbar, .nav').count(), 0);
     await capture(page, 'action-verite-choix-390');
+    assert.equal(await page.locator('.session-toolbar__commands').count(), 0);
+    await page.getByRole('button', { name: 'Commandes de la partie', exact: true }).click();
     await page.getByRole('button', { name: 'Règles', exact: true }).click();
-    assert.ok(await page.getByRole('dialog').locator('ol li').count() > 0);
+    assert.ok(await page.getByRole('dialog').last().locator('ol li').count() > 0);
     assert.equal(await page.locator('.chat-launcher').isVisible(), false);
     await page.keyboard.press('Escape');
+    await page.getByRole('dialog', { name: 'Commandes de la partie', exact: true }).waitFor();
+    await page.keyboard.press('Escape');
+    await page.getByRole('dialog').waitFor({ state: 'detached' });
     assert.equal(await page.locator('.chat-launcher').isVisible(), true);
     const mutations = [];
     for (const fn of ['set_paused', 'abandon_session']) await page.route(`**/rpc/${fn}`, route => { mutations.push(fn); return route.fulfill({ json: { ok: true } }); });
@@ -52,8 +58,9 @@ try {
     assert.deepEqual(mutations, []);
     await page.getByRole('link', { name: 'Reprendre la partie', exact: true }).click();
     await page.waitForURL(`**/partie/${SESSION}`);
+    await page.getByRole('button', { name: 'Commandes de la partie', exact: true }).click();
     await page.getByRole('button', { name: 'Quitter', exact: true }).click();
-    await page.getByRole('dialog').waitFor();
+    await page.getByRole('dialog').last().waitFor();
     assert.deepEqual(mutations, []);
     await page.keyboard.press('Escape');
     const pauseRequest = page.waitForRequest('**/rpc/set_paused');
@@ -75,6 +82,7 @@ try {
     await page.evaluate(() => window.dispatchEvent(new Event('focus')));
     await page.reload();
     await page.locator('#td-text').waitFor();
+    await page.evaluate(async () => { await document.fonts.ready; await new Promise(resolve => requestAnimationFrame(() => requestAnimationFrame(resolve))); });
     const long = await page.locator('.console-answer-zone').boundingBox();
     assert.ok(Math.abs(initial.y - long.y) <= 1, 'La réponse ne descend pas avec la longueur de la question');
     const question = page.getByRole('region', { name: 'Question de la manche' });
@@ -156,8 +164,9 @@ try {
   {
     const { page, context, errors } = await make(fixture('c14-conv-salon'));
     assert.equal(await page.locator('.session-console').count(), 0);
+    assert.equal(await page.locator('.session-toolbar__commands').count(), 1);
     await page.getByRole('button', { name: 'Règles', exact: true }).click();
-    assert.ok(await page.getByRole('dialog').locator('ol li').count() > 0);
+    assert.ok(await page.getByRole('dialog').last().locator('ol li').count() > 0);
     await page.keyboard.press('Escape');
     await capture(page, 'salon-conversation-390');
     assert.deepEqual(errors, []); await context.close();

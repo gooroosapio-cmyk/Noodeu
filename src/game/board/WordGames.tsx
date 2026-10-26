@@ -263,7 +263,7 @@ function PetitBacWrite({ c, round, send }: { c: Common; round: CRound; send: Sen
                 else e.currentTarget.blur();
               }}
               onBlur={(e) => { if (!saved[k]) { clearTimeout(timers.current[k]); save(k, e.target.value); } }} />
-            <span className="pb-cell__state">{text[k]?.trim() ? "Rempli" : "À remplir"}{failed[k] ? " · à réessayer" : text[k]?.trim() && !saved[k] ? " · envoi…" : ""}</span>
+            {(failed[k] || (text[k]?.trim() && !saved[k])) && <span className="pb-cell__state" aria-live="polite">{failed[k] ? "À réessayer" : "Envoi…"}</span>}
           </div>
         ))}
       </div>

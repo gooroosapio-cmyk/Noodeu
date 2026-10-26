@@ -32,21 +32,33 @@ try {
  {const {ctx,page}=await pageFor({auth:false});let oauth=0;await page.route('**/auth/v1/authorize**',route=>{oauth++;return route.abort();});
   await page.goto(`${BASE}/connexion`);assert.equal(await page.getByRole('button',{name:/Google/}).isDisabled(),true);assert.equal(oauth,0);
   await page.addStyleTag({content:'html{font-size:200%}'});await page.screenshot({path:'test-results/flows/connexion-texte200.png',fullPage:true});await ctx.close();console.log('PASS Google inactif, texte 200 %');}
+ // Build livré : l’audio reste fermé même si le serveur annonce enabled=true.
+ // Les anciens tests de permission/codec exigent un harnais audio distinct ;
+ // ne pas prétendre les exécuter en forçant seulement une réponse RPC.
  {const state=JSON.parse(readFileSync(new URL('./fixtures/c14-pack-vf-jeu.json',import.meta.url),'utf8'));
   state.rounds[0].card.item.response='open';state.rounds[0].card.item.options=null;state.rounds[0].card.status={};
-  const {ctx,page}=await pageFor({...duo,notifications:[],state});
-  await page.route('**/rpc/get_audio_capability',r=>r.fulfill({json:{ok:true,enabled:true}}));
+  const {ctx,page}=await pageFor({...duo,notifications:[],state});let capabilityCalls=0,audioWrites=0;
+  await page.route('**/rpc/get_audio_capability',r=>{capabilityCalls++;return r.fulfill({json:{ok:true,enabled:true}});});
+  await page.route('**/rpc/reserve_answer_audio',r=>{audioWrites++;return r.abort();});
+  await page.route('**/storage/v1/object/answer-audio/**',r=>{audioWrites++;return r.abort();});
   await page.addInitScript(()=>{window.microphoneCalls=0;Object.defineProperty(navigator.mediaDevices,'getUserMedia',{value:async()=>{window.microphoneCalls++;throw new DOMException('Denied','NotAllowedError');}});});
-  await page.goto(`${BASE}/partie/${SESSION}`);await page.getByRole('button',{name:'Enregistrer un audio',exact:true}).waitFor();
-  assert.equal(await page.evaluate(()=>window.microphoneCalls),0);
-  await page.getByRole('button',{name:'Enregistrer un audio',exact:true}).click();
-  await page.getByText('Micro indisponible ou permission refusée. Tu peux répondre par texte.').waitFor();
-  assert.equal(await page.evaluate(()=>window.microphoneCalls),1);
-  await page.locator('#q-text').fill('Le texte reste possible');await page.screenshot({path:'test-results/flows/audio-refus-micro.png',fullPage:true});
-  await ctx.close();console.log('PASS audio : permission au clic seulement, refus micro et repli texte');}
+  await page.goto(`${BASE}/partie/${SESSION}`);
+  await page.getByText('L’audio n’est pas encore disponible. Tu peux écrire ta réponse.').waitFor();
+  assert.equal(await page.getByRole('button',{name:'Enregistrer un audio',exact:true}).count(),0);
+  await page.locator('#q-text').fill('Le texte reste possible');
+  const send=page.locator('form').getByRole('button',{name:'Envoyer et partager',exact:true});
+  assert.equal(await send.isEnabled(),true);
+  const submitted=page.waitForRequest(request=>request.url().includes('/rpc/play_move'));
+  await send.click();const payload=(await submitted).postDataJSON().p_payload;
+  assert.equal(payload.text,'Le texte reste possible');assert.equal(payload.audio_id,undefined);
+  assert.equal(capabilityCalls,0);assert.equal(audioWrites,0);assert.equal(await page.evaluate(()=>window.microphoneCalls),0);
+  await ctx.close();console.log('PASS audio désactivé : aucun RPC capability, micro ou upload ; réponse texte envoyée');}
  {const state=JSON.parse(readFileSync(new URL('./fixtures/c14-mini-naval-tirs.json',import.meta.url),'utf8'));
   const {ctx,page}=await pageFor({...duo,notifications:[],state});await page.goto(`${BASE}/partie/${SESSION}`);
-  await page.getByRole('button',{name:'Plateau entier',exact:true}).first().waitFor();
+  await page.locator('.naval').first().waitFor();
+  const targetMode=page.getByRole('button',{name:'Cibler une case',exact:true});
+  if(await targetMode.count())await targetMode.first().click();
+  await page.locator('.board-zoom .naval__cell').first().waitFor();
   const cells=await page.locator('.board-zoom .naval__cell').evaluateAll(cells=>cells.map(c=>({w:c.getBoundingClientRect().width,h:c.getBoundingClientRect().height})));
   assert.ok(cells.length>0 && cells.every(c=>c.w>=44 && c.h>=44));await ctx.close();console.log('PASS naval : sélection agrandie, cellules 44 px minimum');}
  {const state=JSON.parse(readFileSync(new URL('./fixtures/c14-mot-bac-saisie.json',import.meta.url),'utf8'));
@@ -65,18 +77,9 @@ try {
  {const state=JSON.parse(readFileSync(new URL('./fixtures/c14-conv-dvm2-ecriture.json',import.meta.url),'utf8'));
   const {ctx,page}=await pageFor({...duo,notifications:[],state});await page.goto(`${BASE}/partie/${SESSION}`);
   await page.locator('#tt2-0').fill('Je chante');await page.locator('#tt2-1').fill('Je danse');await page.locator('#tt2-2').fill('Je vole');
-  await page.locator('.theatre-note').nth(2).getByRole('button').click();await page.reload();
+  await page.locator('.theatre-note').nth(2).getByRole('radio').check();await page.reload();
   await page.locator('#tt2-0').waitFor();assert.equal(await page.locator('#tt2-0').inputValue(),'Je chante');assert.equal(await page.locator('#tt2-2').inputValue(),'Je vole');
-  assert.equal(await page.locator('.theatre-note').nth(2).getByRole('button').getAttribute('aria-pressed'),'true');await ctx.close();console.log('PASS G08 : brouillon et mensonge conservés après rechargement, clé par joueur/séance/manche');}
- {const state=JSON.parse(readFileSync(new URL('./fixtures/c14-pack-vf-jeu.json',import.meta.url),'utf8'));
-  state.rounds[0].card.item.response='open';state.rounds[0].card.item.options=null;state.rounds[0].card.status={};
-  const {ctx,page}=await pageFor({...duo,notifications:[],state});
-  await page.route('**/rpc/get_audio_capability',r=>r.fulfill({json:{ok:true,enabled:true}}));
-  await page.addInitScript(()=>{window.stoppedTracks=0;Object.defineProperty(navigator.mediaDevices,'getUserMedia',{value:async()=>({getTracks:()=>[{stop:()=>window.stoppedTracks++}]})});
-   window.MediaRecorder=class {static isTypeSupported(){return true;} constructor(){throw new Error('codec unavailable');}};});
-  await page.goto(`${BASE}/partie/${SESSION}`);await page.getByRole('button',{name:'Enregistrer un audio',exact:true}).click();
-  await page.getByText('Micro indisponible ou permission refusée. Tu peux répondre par texte.').waitFor();assert.ok(await page.evaluate(()=>window.stoppedTracks>=1));
-  await page.locator('#q-text').fill('Texte après échec codec');await ctx.close();console.log('PASS audio : micro libéré si le constructeur du codec échoue');}
+  assert.equal(await page.locator('.theatre-note').nth(2).getByRole('radio').isChecked(),true);await ctx.close();console.log('PASS G08 : brouillon et mensonge conservés après rechargement, clé par joueur/séance/manche');}
  {const {ctx,page}=await pageFor({...duo,notifications:[]});let uploads=0;
   await page.route('**/storage/v1/object/duo-covers/**',r=>{uploads++;return r.abort();});await page.goto(`${BASE}/espace`);
   await page.getByRole('button',{name:'Changer la photo de couverture'}).waitFor();

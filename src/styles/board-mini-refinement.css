@@ -103,7 +103,11 @@
 /* Les bateaux sont uniquement ceux du joueur ; les impacts restent au-dessus. */
 .mini-refined .astra-zoom .board-zoom--naval .naval { position:relative; isolation:isolate; width:calc(24px + 10 * (var(--board-cell) + 2px)); max-width:none; grid-template-columns:24px repeat(10,var(--board-cell)); grid-template-rows:24px repeat(10,var(--board-cell)); gap:2px; margin:0; touch-action:pan-x pan-y; }
 .mini-refined .astra-zoom .board-zoom--naval .naval__cell { width:var(--board-cell); height:var(--board-cell); min-height:var(--board-cell); }
-.mini-refined .astra-overview .naval { width:100%; max-width:none; grid-template-columns:16px repeat(10,minmax(0,1fr)); grid-template-rows:16px repeat(10,minmax(0,1fr)); aspect-ratio:1; gap:1px; }
+.mini-refined .naval-overview { padding:8px; max-height:min(70svh,460px); overflow:auto; overscroll-behavior:contain; }
+.mini-refined .naval-overview .naval { position:relative; isolation:isolate; width:100%; max-width:none; grid-template-columns:20px repeat(10,minmax(0,1fr)); grid-template-rows:20px repeat(10,minmax(0,1fr)); aspect-ratio:1.18; gap:2px; margin:0; }
+.mini-refined .naval-overview .naval__cell { aspect-ratio:auto; width:100%; height:100%; min-width:0; min-height:0; cursor:default; border-radius:4px; }
+.mini-refined .naval-overview .naval__head { font-size:.625rem; line-height:1; }
+.mini-refined .naval-viewport__panel:focus-visible { outline:3px solid #B72132; outline-offset:3px; }
 .mini-refined .naval__head { color:#43131C; font-size:.75rem; }
 .mini-refined .naval__cell { background:linear-gradient(145deg,#fffefe,#F7F1F1); border:1px solid #d9c7cc; border-radius:6px; box-shadow:inset 0 1px 0 #fff; }
 .mini-refined .naval__cell--ship { background:#e9dfe2; border-color:#a88b95; box-shadow:inset 0 1px 0 #fff; }
@@ -118,10 +122,10 @@
 .mini-refined .astra-shot--miss { color:#43131C; background:radial-gradient(circle at 35% 20%,#fff,#eee5e7); }
 .mini-refined .astra-shot--hit,.mini-refined .astra-shot--sunk { color:#fff; background:radial-gradient(circle at 35% 20%,#d44c5b,#B72132); border-color:#8b1928; box-shadow:0 2px 0 #781421; }
 .mini-refined .astra-shot--target { color:#B72132; background:transparent; border:2px solid #B72132; box-shadow:none; }
-.mini-refined .astra-overview .astra-shot { width:80%; height:80%; font-size:clamp(8px,3vw,20px); }
-.mini-refined .mini-naval-ship { position:relative; display:block; z-index:2; pointer-events:none; min-width:0; min-height:0; }
-.mini-refined .mini-naval-ship img { position:absolute; width:100%; height:100%; object-fit:fill; padding:3px; filter:drop-shadow(2px 3px 2px #43131c44); }
-.mini-refined .mini-naval-ship--h img { left:50%; top:50%; width:calc(100% / var(--ship-length)); height:calc(100% * var(--ship-length)); max-width:none; transform:translate(-50%,-50%) rotate(90deg); }
+.mini-refined .naval-overview .astra-shot { width:min(70%,20px); height:auto; aspect-ratio:1; min-width:0; min-height:0; font-size:clamp(8px,2.5vw,14px); line-height:1; box-shadow:0 1px 0 #c6b1b7; }
+.mini-refined .mini-naval-ship { position:relative; display:block; container-type:size; z-index:2; pointer-events:none; min-width:0; min-height:0; border:1px solid #8f737d; border-radius:7px; box-shadow:inset 0 0 0 1px #fff8; }
+.mini-refined .mini-naval-ship svg { position:absolute; width:100%; height:100%; padding:2px; overflow:visible; filter:drop-shadow(1px 2px 1px #43131c44); }
+.mini-refined .mini-naval-ship--h svg { left:50%; top:50%; width:100cqh; height:100cqw; max-width:none; transform:translate(-50%,-50%) rotate(90deg); }
 .mini-refined .astra-naval-report.is-confirmed { animation:mini-shot-confirmed 240ms ease-out; }
 .mini-refined .astra-fleet-piece { background:#F7F1F1; border:1px solid #e2d1d6; }
 .mini-refined .mini-naval-record { border-top:1px solid #e3d3d7; padding-top:14px; }

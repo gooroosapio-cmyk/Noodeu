@@ -44,6 +44,7 @@ export function SessionScreen() {
   const [options, setOptions] = useState(false);
   const [confirmQuit, setConfirmQuit] = useState(false);
   const [rules, setRules] = useState(false);
+  const [commands, setCommands] = useState(false);
   const [actionError, setActionError] = useState<string | null>(null);
   const [busy, setBusy] = useState(false);
   const actionLock = useRef(false);
@@ -115,14 +116,11 @@ export function SessionScreen() {
           onClick={event => { if (!event.metaKey && !event.ctrlKey && !event.shiftKey && !event.altKey && event.button === 0) leavingSession.current = true; }}>
           <Icon name="minus" size={19} /><span>Réduire</span>
         </Link>
-        <nav className="session-toolbar__commands" aria-label="Commandes de la partie">
-          {st.session.status !== "lobby" && <button onClick={() => setRules(true)}><Icon name="book-open" size={17} />Règles</button>}
-          {showOptions && st.session.status !== "lobby" && <button onClick={() => setOptions(true)}><Icon name="settings" size={17} />{t("rounds.options")}</button>}
-          {playing && <button disabled={busy || !online} onClick={() => run("set_paused", { p_paused: true })}><Icon name="pause" size={17} />Pause</button>}
+        {st.session.status !== "lobby" ? <button className="session-toolbar__menu icon-btn" aria-label="Commandes de la partie" aria-haspopup="dialog" aria-expanded={commands} onClick={() => setCommands(true)}><Icon name="settings" size={20} /></button> : <nav className="session-toolbar__commands" aria-label="Commandes du salon">
           {activeSession
             ? <button className="session-toolbar__quit" disabled={busy} onClick={() => setConfirmQuit(true)}><Icon name="logout" size={17} />Quitter</button>
             : <Link className="session-toolbar__quit" to="/accueil"><Icon name="logout" size={17} />Quitter</Link>}
-        </nav>
+        </nav>}
       </header>
       <main className="page page--bare page--read session-with-chat" aria-label={playing ? "Console de jeu" : "Partie"}>
         <div className="session-notices">
@@ -157,6 +155,15 @@ export function SessionScreen() {
 
       </main>
 
+      {commands && <Sheet title="Commandes de la partie" onClose={() => setCommands(false)}>
+        <div className="session-command-menu stack stack--2">
+          <button className="btn btn--secondary" onClick={() => setRules(true)}><Icon name="book-open" />Règles</button>
+          {showOptions && <button className="btn btn--secondary" onClick={() => setOptions(true)}><Icon name="settings" />{t("rounds.options")}</button>}
+          {playing && <button className="btn btn--secondary" disabled={busy || !online} onClick={async () => { const result = await run("set_paused", { p_paused: true }); if (result.ok) setCommands(false); }}><Icon name="pause" />Pause</button>}
+          {activeSession ? <button className="btn btn--secondary" disabled={busy} onClick={() => setConfirmQuit(true)}><Icon name="logout" />Quitter</button>
+            : <Link className="btn btn--secondary" to="/accueil"><Icon name="logout" />Quitter</Link>}
+        </div>
+      </Sheet>}
       {confirmQuit && (
         <ConfirmDialog title={t("game.quitTitle")} text={st.session.status === "lobby" ? "Quitter annule ce salon pour vous deux. Aucune partie ne commencera." : t("game.quitText", { name: partnerName })} confirmLabel={t("game.quit")} danger busy={busy} disabled={!online}
           onCancel={() => setConfirmQuit(false)}
@@ -185,11 +192,12 @@ function SessionPlayers({ st, partnerHere }: { st: SessionState; partnerHere: bo
     : card?.mech === "rps" ? "Choix validé"
     : isConversationMech(card?.mech) ? "Réponse validée" : null;
   return <div className="session-player-strip" aria-label="Les joueurs">
-    {st.players.map(p => <div className="session-player-strip__person" key={p.seat}>
+    {st.players.map(p => { const state = !card?.done && card?.turn === p.seat ? (p.is_me ? "À toi de jouer" : "À son tour") : !card?.done && card?.locked?.[p.seat] && lockLabel ? lockLabel : !p.is_me && partnerHere ? "En ligne" : null;
+      return <div className="session-player-strip__person" key={p.seat} aria-label={`${p.display_name || (p.is_me ? "Toi" : "Partenaire")}${p.is_me ? " · vous" : ""}`}>
       <Avatar name={p.display_name} path={p.avatar_path} size={28} me={p.is_me} />
       <div><span className="session-player-strip__name">{p.display_name || (p.is_me ? "Toi" : "Partenaire")}</span>
-        <span className="session-player-strip__status">{!card?.done && card?.turn === p.seat ? (p.is_me ? "À toi de jouer" : "À son tour") : !card?.done && card?.locked?.[p.seat] && lockLabel ? lockLabel : p.is_me ? "Toi" : partnerHere ? "En ligne" : "Partenaire"}</span></div>
-    </div>)}
+        {state && <span className="session-player-strip__status">{state}</span>}</div>
+    </div>; })}
   </div>;
 }
 

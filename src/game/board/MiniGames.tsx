@@ -335,12 +335,44 @@ function NavalGrid({ label, cell, onCell, onPreview, disabled, fleet = [] }: {
   label: string; cell: (r: number, c: number) => { cls: string; text: string; img?: string }; onCell?: (r: number, c: number) => void; onPreview?: (r: number, c: number) => void; disabled?: (r: number, c: number) => boolean; fleet?: Ship[];
 }) {
   const grid=useRef<HTMLDivElement>(null);
+  const drag=useRef<{ x: number; y: number; left: number; top: number; moved: boolean } | null>(null);
+  const suppressClick=useRef(false);
+  const [zoom,setZoom]=useState(0);
   const [focused,setFocused]=useState(0);
   const isDisabled=(i:number)=>!onCell || Boolean(disabled?.(Math.floor(i/10),i%10));
   const active=isDisabled(focused)?Array.from({length:100},(_,i)=>i).find(i=>!isDisabled(i)):focused;
   return (
-    <Zoomable zoomClass="board-zoom--naval">
-    <div className="naval" role="grid" aria-label={label} ref={grid} onKeyDown={e=>{
+    <div className="stack stack--2 astra-zoom naval-viewport">
+      <div className="mini-zoom-tools" role="group" aria-label="Mode du plateau naval">
+        <button type="button" className="btn btn--quiet btn--sm" aria-pressed={zoom > 0} onClick={() => setZoom(zoom === 0 ? 1 : 0)}>{zoom === 0 ? "Cibler une case" : "Vue entière"}</button>
+        <button type="button" className="btn btn--quiet btn--sm" aria-label="Réduire le plateau" disabled={zoom <= 1} onClick={() => setZoom(1)}><Icon name="minus" size={18} /></button>
+        <output className="t-meta" aria-live="polite">{zoom === 0 ? "Vue entière" : `${Math.round(zoom * 100)} %`}</output>
+        <button type="button" className="btn btn--quiet btn--sm" aria-label="Agrandir le plateau" disabled={zoom === 1.5} onClick={() => setZoom(zoom === 0 ? 1 : 1.5)}><Icon name="plus" size={18} /></button>
+      </div>
+      <p className="t-meta naval-viewport__hint">{zoom ? "Mode ciblage. Glisse le plateau ; au clavier, utilise les flèches." : "Vue entière en lecture seule. Active Cibler pour sélectionner une case."}</p>
+      <div className={`naval-viewport__panel ${zoom ? "board-zoom board-zoom--naval" : "astra-overview naval-overview"}`}
+        style={{ "--board-cell": `${44 * (zoom || 1)}px` } as CSSProperties}
+        tabIndex={0} role="region" aria-label={`${label} · ${zoom ? "mode ciblage, défilement horizontal et vertical" : "vue entière en lecture seule"}`}
+        onPointerDown={event => {
+          suppressClick.current = false;
+          if (!zoom || event.pointerType !== "mouse" || event.button !== 0) return;
+          drag.current = { x: event.clientX, y: event.clientY, left: event.currentTarget.scrollLeft, top: event.currentTarget.scrollTop, moved: false };
+        }}
+        onPointerMove={event => {
+          const start = drag.current;
+          if (!start) return;
+          const dx = event.clientX - start.x, dy = event.clientY - start.y;
+          if (!start.moved && Math.hypot(dx, dy) < 6) return;
+          start.moved = true;
+          event.currentTarget.setPointerCapture(event.pointerId);
+          event.currentTarget.scrollLeft = start.left - dx;
+          event.currentTarget.scrollTop = start.top - dy;
+          suppressClick.current = true;
+        }}
+        onPointerUp={() => { drag.current = null; }} onPointerCancel={() => { drag.current = null; }}
+        onClickCapture={event => { if (suppressClick.current) { event.preventDefault(); event.stopPropagation(); suppressClick.current = false; } }}>
+    <div className="naval" role="grid" aria-label={label} aria-readonly={!zoom || !onCell} aria-rowcount={11} aria-colcount={11} ref={grid} onKeyDown={e=>{
+      if (!zoom) return;
       const key=e.key;if(!['ArrowUp','ArrowDown','ArrowLeft','ArrowRight','Home','End'].includes(key))return;
       const from=Number((e.target as HTMLElement).dataset.cell);if(!Number.isFinite(from))return;
       e.preventDefault();const row=Math.floor(from/10);let i=key==='Home'?row*10:key==='End'?row*10+9:from;
@@ -356,18 +388,23 @@ function NavalGrid({ label, cell, onCell, onPreview, disabled, fleet = [] }: {
       </div>
       {Array.from({length:10},(_,r)=><div role="row" className="naval__row" key={r}>
         <span role="rowheader" className="naval__head" style={{gridRow:r+2,gridColumn:1}}>{ROWS[r]}</span>
-        {Array.from({length:10},(_,c)=>{const x=cell(r,c),i=r*10+c;return <button key={c} type="button" role="gridcell" data-cell={i}
+        {Array.from({length:10},(_,c)=>{const x=cell(r,c),i=r*10+c;
+          const marker=x.img && <span className={`astra-shot astra-shot--${x.img}`} aria-hidden="true">{x.img === "sunk" ? "×" : x.img === "target" ? "+" : x.img === "hit" ? "•" : "○"}</span>;
+          if (!zoom) return <span key={c} role="gridcell" data-cell={i} className={`naval__cell ${x.cls}`} style={{gridRow:r+2,gridColumn:c+2}} aria-label={`${ROWS[r]}${c+1} : ${x.text}`}>{marker}</span>;
+          return <button key={c} type="button" role="gridcell" data-cell={i}
           tabIndex={active===i?0:-1} className={`naval__cell ${x.cls}`} style={{gridRow:r+2,gridColumn:c+2}} aria-label={`${ROWS[r]}${c+1} : ${x.text}`}
           disabled={isDisabled(i)} onFocus={()=>{setFocused(i);onPreview?.(r,c);}} onPointerEnter={event=>{if(event.pointerType === "mouse")onPreview?.(r,c);}} onClick={()=>onCell?.(r,c)}>
-          {x.img && <span className={`astra-shot astra-shot--${x.img}`} aria-hidden="true">{x.img === "sunk" ? "×" : x.img === "target" ? "+" : x.img === "hit" ? "•" : "○"}</span>}
+          {marker}
         </button>;})}
       </div>)}
       {fleet.map(ship => <span key={ship.id} className={`mini-naval-ship mini-naval-ship--${ship.o.toLowerCase()}`} aria-hidden="true"
         style={{ "--ship-length": ship.len, gridColumn: `${ship.c + 2} / span ${ship.o === "H" ? ship.len : 1}`, gridRow: `${ship.r + 2} / span ${ship.o === "V" ? ship.len : 1}` } as CSSProperties}>
-        <BoardPiece piece="naval-ship" fallback="/assets/original/library3d/M07.webp" alt="" />
+        {/* Cadre alpha du bitmap 256² existant : coque native, jamais étirée selon la longueur du navire. */}
+        <svg viewBox="85 12 85 232" preserveAspectRatio="xMidYMid meet" focusable="false"><image href="/assets/original/boards3d/naval-ship.webp" width="256" height="256" /></svg>
       </span>)}
     </div>
-    </Zoomable>
+      </div>
+    </div>
   );
 }
 
