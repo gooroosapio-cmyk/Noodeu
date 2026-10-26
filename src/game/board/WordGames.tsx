@@ -240,7 +240,7 @@ function PetitBacWrite({ c, round, send }: { c: Common; round: CRound; send: Sen
           <span className={`pb-time${left <= 15 ? " pb-time--low" : ""}`} role="timer" aria-live={left <= 10 ? "polite" : "off"}>
             {String(Math.floor(left / 60)).padStart(2, "0")}:{String(left % 60).padStart(2, "0")}
           </span>
-          <span className="t-meta">{t("word.pb.filled", { n: filled, total: cats.length })}</span>
+          <span className="t-meta" aria-label={`${filled} réponses saisies sur ${cats.length}`}>{t("word.pb.filled", { n: filled, total: cats.length })}</span>
           <span className="pb-save-state t-meta" role="status">{pending ? t("word.pb.saving") : t("word.pb.saved")}</span>
         </div>
       </div>

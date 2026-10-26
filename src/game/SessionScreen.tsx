@@ -9,15 +9,14 @@ import { useDuo } from "../duo/DuoProvider";
 import { ChatPanel, ChatLauncher } from "../duo/Chat";
 import { SubPage } from "../components/AppShell";
 import { Avatar } from "../components/Avatar";
-import { Alert, Art, ConfirmDialog, Icon, Illustration, Loading, PageLoading, Sheet } from "../components/ui";
+import { Alert, ConfirmDialog, Icon, Illustration, Loading, PageLoading, Sheet } from "../components/ui";
 import { RulesSheet } from "../components/RulesSheet";
-import { ART_BY_PACK, artOf } from "../screens/Libraries";
 import type { Player, Round, SessionState } from "../lib/types";
 import { answerOf, nextStep, portraitReveal, toggleWord, wordLabel } from "./portrait";
 import { useDraft, useSession } from "./useSession";
 import { OptionsSheet, RoundsPlaying, RoundsResults, hasOptions, isRounds } from "./rounds/RoundsGame";
 import { BoardPlaying, BoardResults, isBoard } from "./board/BoardGame";
-import { Hero, Stage } from "./premium/Stage";
+import { Stage } from "./premium/Stage";
 import { NudgeButton } from "./premium/Nudge";
 import { universeOf } from "./premium/universe";
 import { SessionRecoveryContext } from "./premium/BoardPieces";
@@ -61,6 +60,8 @@ export function SessionScreen() {
     // Une préparation différée ne doit pas déclarer le joueur prêt après Réduire
     // ou un retour navigateur, même si la route suivante est encore en chargement.
     if (leavingSession.current || window.location.pathname !== `/partie/${sessionId}`) return { ok: false as const, error: "stale_session" };
+    if (!online || s.state?.session.read_only) return { ok: false as const, error: "unavailable" };
+    if (fn === "update_session_settings" && s.state?.session.status === "lobby" && s.state.players.some(p => p.is_me && p.ready)) return { ok: false as const, error: "settings_locked" };
     if (actionLock.current) return { ok: false as const, error: "busy" };
     actionLock.current = true; setBusy(true);
     setActionError(null);
@@ -177,7 +178,7 @@ export function SessionScreen() {
       )}
       {duo.active && <ChatLauncher withNav={false} onOpen={() => setChat(true)} />}
       {chat && <ChatPanel inGame onClose={() => setChat(false)} />}
-      {options && <OptionsSheet c={common} onClose={() => setOptions(false)} />}
+      {options && <OptionsSheet c={{ ...common, busy: busy || Boolean(st.session.read_only) || (st.session.status === "lobby" && Boolean(me?.ready)) }} onClose={() => setOptions(false)} />}
       {rules && <RulesSheet title={st.game.title} rules={st.game.rules} onClose={() => setRules(false)} />}
     </div>
     </SessionRecoveryContext.Provider>
@@ -228,12 +229,6 @@ function PausedPanel({ st, userId, partnerName, busy, online, run }: {
   );
 }
 
-function lobbyArt(st: SessionState) {
-  const cfg = st.game.config as unknown as { mechanic?: string; pack?: { code?: string }; test?: { instrument?: string } };
-  if (cfg.mechanic === "pack_conversation" && ART_BY_PACK[cfg.pack?.code ?? ""]) return ART_BY_PACK[cfg.pack!.code!];
-  return artOf({id:st.session.game_id,mechanic:cfg.mechanic ?? "",meta:{}});
-}
-
 function LobbyFacts({st}:{st:SessionState}) {
  const cfg=st.game.config as unknown as {mechanic:string;parameters?:{target?:number;wins_target?:number;choice_timeout_seconds?:number;boxes?:number;rows?:number;columns?:number;fleet?:number[];shots_per_turn?:number};test?:{count:number};pack?:{set_size?:number}};
  const p=cfg.parameters ?? {};const facts:string[]=[];
@@ -253,6 +248,9 @@ function Lobby({ st, me, partner, partnerHere, busy, online, run, onOptions, onR
 }) {
   const [showDescription, setShowDescription] = useState(false);
   const [launching,setLaunching]=useState(false);
+  const launchSnapshot = useRef<{ sessionId: string; gameId: string; version: number; settings: string } | null>(null);
+  const [launchNotice, setLaunchNotice] = useState<string | null>(null);
+  const settingsKey = JSON.stringify(Object.keys(st.session.settings).sort().map(key => [key, st.session.settings[key]]));
   // Moteur 2.1.0 : les réglages passent par la fenêtre d'options (avec les préférences privées).
   const settings = onOptions ? {} : st.game.config.settings ?? {};
   // Questions +18 : aucune permission, elles font partie du jeu. Le salon le signale simplement.
@@ -261,82 +259,103 @@ function Lobby({ st, me, partner, partnerHere, busy, online, run, onOptions, onR
   const readyCount = st.players.filter(p => p.ready).length;
   const cfg = st.game.config as unknown as {mechanic:string;parameters?:{target?:number};turn?:string};
   const kind = cfg.mechanic === "test_form" ? "Se découvrir" : cfg.mechanic === "pack_conversation" ? "Questions à deux" : (cfg.turn === "simultaneous" || cfg.mechanic === "nd_two_truths") ? "À vous deux" : "À tour de rôle";
+  const partnerName = partner?.display_name || "l’autre joueur";
+  const playerState = (p: Player) => p.ready ? (p.is_me ? "Validé" : "Prêt·e") : p.is_me ? (online ? "Connecté·e" : "Hors ligne") : partnerHere ? "Dans le salon" : "En attente";
+  const bothReady = Boolean(me?.ready && partner?.ready);
   return (
-    <section className="lobby lobby-proposal enter">
+    <section className="lobby lobby-proposal salon01 enter">
       <h1 className="sr-only">{t("game.lobbyTitle")}</h1>
-      <div className="salon-crew">
-        <div className="salon-section-head"><h3>Les joueurs</h3><span className="salon-ready-count" aria-live="polite">{readyCount}/2 prêts</span></div>
-        <div className="salon-players">
-        {[me, partner].filter(Boolean).map((p) => (
-          <div className={`salon-player${p!.ready ? " is-ready" : ""}`} key={p!.seat}>
-            <div className="salon-player__avatar"><Avatar name={p!.display_name} path={p!.avatar_path} size={44} me={p!.is_me} /></div>
-            <div className="salon-player__info">
-              <span className="salon-player__name">{p!.display_name || (p!.is_me ? t("game.youCap") : "Partenaire")}</span>
-              <span className="salon-player__status"><Icon name={p!.ready ? "check" : "clock"} size={13} />{p!.ready ? "Disponible" : "À confirmer"}</span>
-              {!p!.is_me && partnerHere && <span className="salon-player__presence">{t("game.here")}</span>}
-            </div>
+      <p className="salon01-badge"><Icon name="lock-keyhole" size={14} />Privé · 2 places<span className="salon-ready-count" aria-live="polite">{readyCount}/2 prêts</span></p>
+
+      <div className="salon01-players salon-players" aria-label="Les joueurs" aria-live="polite">
+        {[me, partner].map((p, i) => p ? (
+          <div className={`salon01-player salon-player${p.is_me ? " is-me" : ""}${p.ready ? " is-ready" : ""}`} key={p.seat}>
+            <Avatar name={p.display_name} path={p.avatar_path} size={44} me={p.is_me} />
+            <span className="salon01-player__text">
+              <strong className="salon-player__name">{p.display_name || "Joueur"}</strong>
+              <span className={`salon01-dot${p.ready || p.is_me || partnerHere ? " is-on" : ""}`}>{playerState(p)}</span>
+            </span>
+            {p.ready && <Icon name="circle-check" size={22} />}
+          </div>
+        ) : (
+          <div className="salon01-player salon01-player--empty" key={`empty-${i}`}>
+            <span className="salon01-player__avatar" aria-hidden="true">?</span>
+            <span className="salon01-player__text"><strong>Deuxième joueur</strong><span className="salon01-dot">En attente</span></span>
           </div>
         ))}
-        {!partner && <div className="salon-player salon-player--empty"><span className="salon-player__name">Deuxième joueur</span><span className="salon-player__status">En attente</span></div>}
-        </div>
       </div>
 
-      <div className="salon-activity">
-        <div className="salon-activity__intro">
-          <div className="salon-activity__identity">
-            <span className="salon-kicker">{kind}</span>
-            <h2>{st.game.title}</h2>
-            <span className="salon-private"><Icon name="lock-keyhole" size={14} />{t("game.roomBadge")}</span>
-          </div>
-          <div className="salon-activity__art" aria-hidden="true">
-            {universeOf(st) ? <Hero u={universeOf(st)!} size={96} /> : <Art name={lobbyArt(st)} size={96} />}
-          </div>
-        </div>
+      <div className="salon01-game salon-activity">
+        <span className="salon01-kicker">{kind}</span>
+        <h2>{st.game.title}</h2>
         {st.game.rules.objective && <p className="lobby-description">{st.game.rules.objective}</p>}
         {sexual && <p className="session-adult-note"><Icon name="shield-check" size={16} />+18 · Tu peux passer à tout moment.</p>}
-        <div className="lobby-guide" aria-label="Découvrir cette activité">
-          <button className="lobby-guide__button" onClick={() => setShowDescription(true)}><Icon name="info" size={18} /><span>Description</span></button>
-          <button className="lobby-guide__button" onClick={onRules}><Icon name="book-open" size={18} /><span>Règles</span></button>
+        <div className="salon01-links lobby-guide">
+          <button type="button" className="lobby-guide__button" onClick={() => setShowDescription(true)}><Icon name="info" size={16} />Description</button>
+          <button type="button" className="lobby-guide__button" onClick={onRules}><Icon name="book-open" size={16} />Règles</button>
         </div>
       </div>
 
+      {(Object.keys(settings).length > 0 || onOptions) ? (
+        <div className="salon01-settings salon-config">
+          {Object.entries(settings).map(([key, def]) => (
+            <fieldset className="salon01-row salon-setting" key={key} disabled={disabled || me?.ready}>
+              <legend className="salon01-row__label"><strong>{def.label}</strong></legend>
+              {def.options.length <= 4 ? (
+                <div className="salon01-seg salon-setting__choices" style={{gridTemplateColumns:`repeat(${def.options.length}, minmax(0, 1fr))`}} role="radiogroup" aria-label={def.label}>
+                  {def.options.map(opt => <label className="salon01-seg__opt salon-setting__choice" key={String(opt)}>
+                    <input className="sr-only" type="radio" name={`salon-${key}`} checked={String(st.session.settings[key] ?? def.default) === String(opt)}
+                      onChange={() => void run("update_session_settings",{p_settings:{[key]:opt}})} />
+                    <span>{String(opt)}</span>
+                  </label>)}
+                </div>
+              ) : (
+                <select className="input salon01-select" aria-label={def.label} value={String(st.session.settings[key] ?? def.default)}
+                  onChange={e => { const value=def.options.find(opt => String(opt) === e.target.value); if(value !== undefined) void run("update_session_settings",{p_settings:{[key]:value}}); }}>
+                  {def.options.map(opt => <option key={String(opt)} value={String(opt)}>{String(opt)}</option>)}
+                </select>
+              )}
+            </fieldset>
+          ))}
+          {onOptions && <button className="btn btn--secondary" disabled={disabled || me?.ready} onClick={onOptions}><Icon name="settings" size={18} />{t("rounds.options")}</button>}
+          {Object.keys(settings).length > 0 && <p className="salon01-hint">Un changement de réglage demande aux deux de valider à nouveau.</p>}
+        </div>
+      ) : <div className="salon01-settings salon-config"><LobbyFacts st={st} /></div>}
 
-      <div className="salon-config">
-        <div className="salon-section-head"><h3>{Object.keys(settings).length || onOptions ? "Réglages" : "Le format"}</h3><Icon name="settings" size={17} /></div>
-        {onOptions && <button className="btn btn--secondary" disabled={disabled} onClick={onOptions}><Icon name="settings" size={18} />{t("rounds.options")}</button>}
-        <div className="lobby-settings">
-        {Object.entries(settings).map(([key, def]) => def.options.length <= 4 ? (
-          <fieldset className="salon-setting" key={key} disabled={disabled}>
-            <legend>{def.label}</legend>
-            <div className="salon-setting__choices" style={{gridTemplateColumns:`repeat(${def.options.length}, minmax(0, 1fr))`}}>
-              {def.options.map(opt => <label className="salon-setting__choice" key={String(opt)}>
-                <input className="sr-only" type="radio" name={`salon-${key}`} checked={String(st.session.settings[key] ?? def.default) === String(opt)}
-                  onChange={() => void run("update_session_settings",{p_settings:{[key]:opt}})} />
-                <span>{String(opt)}</span>
-              </label>)}
-            </div>
-          </fieldset>
+      {partner && !bothReady && (
+        <p className="salon01-partner"><Avatar name={partner.display_name} path={partner.avatar_path} size={30} />
+          {partner.ready ? `${partnerName} a validé les réglages.` : partnerHere ? `${partnerName} est dans le salon.` : `${partnerName} n’est pas encore dans le salon.`}
+        </p>
+      )}
+
+      <div className="salon01-actions salon-launch">
+        {me?.ready ? (
+          <>
+            {bothReady ? <p className="salon01-ready"><Icon name="circle-check" size={18} />Tout est prêt</p>
+              : <p className="salon01-ready salon01-ready--wait salon-launch__status">En attente de {partnerName}</p>}
+            {partner && !partner.ready && <div className="salon01-nudge"><NudgeButton st={st} partner={partner} /></div>}
+            <button className="btn btn--secondary" disabled={disabled} onClick={() => void run("set_ready",{p_ready:false})}>Modifier les réglages</button>
+          </>
         ) : (
-          <label className="field" key={key}><span className="field__label">{def.label}</span>
-            <select className="input" value={String(st.session.settings[key] ?? def.default)} disabled={disabled}
-              onChange={e => { const value=def.options.find(opt => String(opt) === e.target.value); if(value !== undefined) void run("update_session_settings",{p_settings:{[key]:value}}); }}>
-              {def.options.map(opt => <option key={String(opt)} value={String(opt)}>{String(opt)}</option>)}
-            </select>
-          </label>
-        ))}
-        </div>
-        {!Object.keys(settings).length && !onOptions && <LobbyFacts st={st} />}
-        {Object.keys(settings).length>0 && <p className="salon-config__hint">Les deux joueurs reconfirment après un changement.</p>}
+          <button className="btn" disabled={disabled} onClick={() => {
+            launchSnapshot.current = { sessionId: st.session.id, gameId: st.session.game_id, version: st.session.game_version, settings: settingsKey };
+            setLaunchNotice(null); setLaunching(true);
+          }}>
+            <Icon name={partner?.ready ? "play" : "check"} size={19} />
+            {launching ? "Préparation…" : busy ? t("common.sending") : partner?.ready ? "Lancer la partie" : "Valider les réglages"}
+          </button>
+        )}
+        {readyCount < 2 && <p className="salon01-hint">La partie commence quand vous avez validé tous les deux.</p>}
+        {launchNotice && <p className="salon01-hint" role="status">{launchNotice}</p>}
       </div>
-      <div className="salon-launch">
-        <button className={`btn${me?.ready ? " btn--secondary" : ""}`} disabled={disabled} onClick={() => { if(me?.ready) void run("set_ready",{p_ready:false}); else setLaunching(true); }}>
-          <Icon name={me?.ready ? "check" : partner?.ready ? "play" : "check"} size={19} />
-          {launching ? "Préparation…" : busy ? t("common.sending") : me?.ready ? "Annuler ma disponibilité" : partner?.ready ? "Lancer la partie" : t("game.ready")}
-        </button>
-        {me?.ready && partner && !partner.ready && <p className="salon-launch__status">En attente de {partner.display_name || "l’autre joueur"}</p>}
-        {me?.ready && partner && !partner.ready && <NudgeButton st={st} partner={partner} />}
-      </div>
-      {launching && me && <LaunchFilm sessionId={st.session.id} userId={me.user_id ?? `seat-${me.seat}`} title={st.game.title} onComplete={() => { setLaunching(false); if(online && !st.session.read_only) void run("set_ready",{p_ready:true}); }} />}
+      {launching && me && <LaunchFilm sessionId={st.session.id} userId={me.user_id ?? `seat-${me.seat}`} title={st.game.title} onComplete={() => {
+        setLaunching(false);
+        const snapshot = launchSnapshot.current;
+        if (!snapshot || snapshot.sessionId !== st.session.id || snapshot.gameId !== st.session.game_id || snapshot.version !== st.session.game_version || snapshot.settings !== settingsKey) {
+          setLaunchNotice("Les réglages ont changé. Vérifie-les puis valide à nouveau."); return;
+        }
+        if (online && st.session.status === "lobby" && !st.session.read_only && !me.ready) void run("set_ready",{p_ready:true});
+      }} />}
       {showDescription && <Sheet title={<h2 className="t-section">Description · {st.game.title}</h2>} onClose={() => setShowDescription(false)}><p>{st.game.rules.objective || st.game.title}</p><LobbyFacts st={st} /><p className="t-small">{st.game.rules.privacy}</p></Sheet>}
     </section>
   );

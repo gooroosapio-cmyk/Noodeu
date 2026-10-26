@@ -102,7 +102,9 @@ try {
     await page.getByRole('button', { name: 'Changer de carte', exact: true }).click();
     await page.waitForFunction(() => !document.querySelector('#td-text')?.disabled);
     assert.equal(moves[1].p_type, 'replace_card');
+    const skipped = page.waitForResponse(response => response.url().endsWith('/rpc/play_move') && response.request().postDataJSON()?.p_type === 'skip_round');
     await page.getByRole('button', { name: 'Passer mon tour', exact: true }).click();
+    await skipped;
     assert.equal(moves[2].p_type, 'skip_round');
     assert.deepEqual(errors, []);
     await context.close();

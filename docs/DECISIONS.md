@@ -450,3 +450,7 @@ Migration `20261027000300_multi_duos.sql` (fichier à coller : `docs/sql_editeur
   fichiers `public/assets/scenes` supprimés). Règle d'alignement : repères (manche, tour), consignes, états et titres
   centrés ; champs de saisie, listes d'affirmations et réponses longues restent alignés à gauche ; boutons d'action en
   pleine largeur.
+- Mise à jour du 26/10/2026 (2) : salon selon la planche 01 (joueurs et statut, carte du jeu, réglages en lignes à
+  choix segmentés, état de l'autre, « Valider les réglages » / « Modifier les réglages », relance), sans photo de
+  couverture. Plus de rond « Objectif » entre les deux noms. Bataille navale : plateau entier affiché et jouable
+  (tir en deux temps), plus de zoom par défaut.

@@ -24,6 +24,7 @@ try {
   if(f==='pack-attente'&&zoom===1){const region=page.getByRole('region',{name:'Question du pack',exact:true});assert.ok(await region.evaluate(e=>{const q=e.querySelector('.t-question').getBoundingClientRect();const b=e.getBoundingClientRect();return q.top>=b.top-1&&q.bottom<=b.bottom+1;}),'Question standard du pack visible intégralement');}
   if(f==='mot-bac-saisie'){
    assert.equal(await page.locator('.pb-cell').count(),8);assert.equal(await page.getByText('NaN:NaN',{exact:true}).count(),0);assert.equal(await page.locator('.pb-cell__state').filter({hasText:/Rempli/i}).count(),0);
+   assert.doesNotMatch(await page.locator('.astra-board--petitbac').innerText(), /rempli/iu, 'Compteur et consigne sans le libellé superflu');
    const inputs=page.locator('.pb-cell__input');assert.equal(await inputs.count(),8);await inputs.last().focus();await inputs.last().scrollIntoViewIfNeeded();
    assert.ok(await inputs.last().evaluate(e=>parseFloat(getComputedStyle(e).fontSize)>=16));
   }

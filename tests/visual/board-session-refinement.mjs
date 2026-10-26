@@ -8,7 +8,7 @@ const BASE=process.env.BASE??'http://127.0.0.1:4221';
 const OUT=process.env.OUT??'/workspace/noodeu-refinement-session';
 mkdirSync(OUT,{recursive:true});
 const fixture=name=>JSON.parse(readFileSync(new URL(`./fixtures/${name}.json`,import.meta.url),'utf8'));
-const cases=[['salon-questions','c14-conv-salon'],['salon-pig','c14-lobby-nd-de-chanceux'],['salon-aleatoire','c14-random-mixed-lobby'],['salon-g08','c14-conv-salon'],['salon-pret','c14-conv-salon'],['resultat','c14-mini-morpion-fin'],['pause','c14-mini-morpion-jeu'],['invitation',null],['naval-statut','c14-mini-naval-tirs']];
+const cases=[['salon-questions','c14-conv-salon'],['salon-pig','c14-lobby-nd-de-chanceux'],['salon-aleatoire','c14-random-mixed-lobby'],['salon-g08','c14-conv-salon'],['salon-pret','c14-conv-salon'],['salon-texte-long','c14-conv-salon'],['resultat','c14-mini-morpion-fin'],['pause','c14-mini-morpion-jeu'],['invitation',null],['naval-statut','c14-mini-naval-tirs']];
 const sizes=[[320,640,1],[360,740,1],[390,844,1],[430,932,1],[768,1024,1],[1440,900,1],[320,640,2],[390,460,1]];
 const browser=await chromium.launch({executablePath:'/usr/bin/chromium'});
 const results=[];
@@ -21,6 +21,8 @@ try{
    state.players.forEach(p=>p.ready=false);
   }
   if(name==='salon-pret')state.players[1].ready=true;
+  if(name==='salon-texte-long'){state.players[0].display_name='Alexandrine-Charlotte';state.players[1].display_name='Jean-Baptiste Théophile';state.game.title='Les conversations qui nous rapprochent, à notre rythme';state.game.rules.objective='Une description longue qui reste lisible avec le texte agrandi. '.repeat(5);}
+
   if(name==='pause'){state.session.status='paused';state.session.paused_by=state.players[1].user_id;state.session.pause_state={resume:[]};}
   const context=await browser.newContext({viewport:{width,height},serviceWorkers:'block',reducedMotion:'reduce',locale:'fr-FR'});
   const page=await context.newPage(); const errors=[];page.on('pageerror',e=>errors.push(e.message));
@@ -32,6 +34,9 @@ try{
   await page.evaluate(async()=>{await document.fonts.ready;await new Promise(r=>requestAnimationFrame(()=>requestAnimationFrame(r)));});
   assert.equal(await page.evaluate(()=>document.documentElement.scrollWidth>innerWidth+1),false,`${name} ${width} no document overflow`);
   if(name.startsWith('salon')){
+   const players=await page.locator('.salon01-players').boundingBox(),activity=await page.locator('.salon01-game').boundingBox();assert.ok(players.y+players.height<=activity.y+1,'players before game');
+   assert.equal(await page.locator('.salon-player__name').filter({hasText:/^(Toi|Partenaire)$/}).count(),0,'real names shown');
+   if(name==='salon-g08')assert.equal(await page.locator('.salon01-kicker').textContent(),'À vous deux');
    const description=await page.locator('.lobby-description').boundingBox();const settings=await page.locator('.salon-config').boundingBox();
    assert.ok(description.y<settings.y,'description before settings');
    const guide=await page.locator('.lobby-guide__button').evaluateAll(es=>es.map(e=>{const r=e.getBoundingClientRect();return{w:r.width,h:r.height};}));

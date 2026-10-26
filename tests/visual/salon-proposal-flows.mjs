@@ -93,7 +93,7 @@ try {
       if (name.endsWith('n2-083')) { await expect(page.locator('.salon-config')).toContainText('2 victoires pour gagner'); await expect(page.locator('.salon-config')).toContainText('30 s pour choisir'); }
       if (name === 'c14-random-mixed-lobby') { assert.equal(server.state.session.total_rounds, 20); await expect(group(page, 'Nombre de questions').getByRole('radio', { name: '5', exact: true })).toBeChecked(); }
       await expect(page.locator('.salon-ready-count')).toHaveText('0/2 prêts');
-      await expect(cta(page)).toHaveText('Je suis disponible');
+      await expect(cta(page)).toHaveText('Valider les réglages');
       assert.equal(server.calls.length, 0);
       await h.close();
     }
@@ -111,24 +111,29 @@ try {
 
   await check('Réglage confirmé : type numérique, aucun choix optimiste, remise à zéro des disponibilités', async () => {
     const h = await make('c14-lobby-n2-002', { prepare: state => { state.players[0].ready = true; } });
+    await expect(cta(h.page)).toHaveText('Modifier les réglages');
+    for (const radio of await h.page.locator('.salon-config input').all()) await expect(radio).toBeDisabled();
+    await cta(h.page).click();
+    await expect(cta(h.page)).toHaveText('Valider les réglages');
+    assert.deepEqual(h.server.calls[0], { fn: 'set_ready', args: { p_session: SESSION, p_ready: false } });
     const gate = deferred(), started = deferred();
     h.server.handlers.update_session_settings = async args => { started.resolve(); await gate.promise; return h.server.apply('update_session_settings', args); };
     await pick(h.page, 'Nombre de cartes', 20); await started.promise;
     await expect(cta(h.page)).toBeDisabled();
     await expect(group(h.page, 'Nombre de cartes').getByRole('radio', { name: '10', exact: true })).toBeChecked();
     assert.equal(await group(h.page, 'Nombre de cartes').getByRole('radio', { name: '20', exact: true }).isChecked(), false);
-    assert.equal(h.server.calls.length, 1);
-    assert.deepEqual(h.server.calls[0].args.p_settings, { cartes: 20 });
+    assert.equal(h.server.calls.length, 2);
+    assert.deepEqual(h.server.calls[1].args.p_settings, { cartes: 20 });
     gate.resolve();
     await expect(group(h.page, 'Nombre de cartes').getByRole('radio', { name: '20', exact: true })).toBeChecked();
     await expect(h.page.locator('.salon-ready-count')).toHaveText('0/2 prêts');
     assert.equal(await h.page.locator('.salon-player.is-ready').count(), 0);
-    await expect(cta(h.page)).toHaveText('Je suis disponible');
+    await expect(cta(h.page)).toHaveText('Valider les réglages');
     h.server.state.players[1].ready = true; await refresh(h);
     await expect(cta(h.page)).toHaveText('Lancer la partie');
     await pick(h.page, 'Nombre de cartes', 30);
     await expect(h.page.locator('.salon-ready-count')).toHaveText('0/2 prêts');
-    assert.equal(h.server.calls.length, 2);
+    assert.equal(h.server.calls.length, 3);
     await h.close();
   });
 
@@ -156,11 +161,11 @@ try {
     await expect(h.page.locator('.salon-ready-count')).toHaveText('0/2 prêts');
     gate.resolve();
     await expect(h.page.getByRole('alert')).toContainText('Pas assez de cartes disponibles pour ces réglages.');
-    await expect(cta(h.page)).toHaveText('Je suis disponible');
+    await expect(cta(h.page)).toHaveText('Valider les réglages');
     delete h.server.handlers.set_ready;
     await cta(h.page).click();
     await expect(h.page.locator('.salon-ready-count')).toHaveText('1/2 prêts');
-    await expect(cta(h.page)).toHaveText('Annuler ma disponibilité');
+    await expect(cta(h.page)).toHaveText('Modifier les réglages');
     await expect(h.page.locator('.salon-launch__status')).toContainText('Alex');
     await cta(h.page).evaluate(button => { button.click(); button.click(); });
     await expect(h.page.locator('.salon-ready-count')).toHaveText('0/2 prêts');
@@ -223,19 +228,41 @@ try {
       await page.route(film, async route => { headCount++; headStarted.resolve(); await head.promise; await route.fulfill({ status: 404, body: '' }); });
     } });
     assert.equal(await h.page.locator('.salon-config input[type=radio]').count(), 0);
+    await expect(h.page.getByRole('button', { name: 'Options', exact: true })).toBeDisabled();
+    await cta(h.page).click();
+    await expect(cta(h.page)).toHaveText('Valider les réglages');
     await h.page.getByRole('button', { name: 'Options', exact: true }).click();
     await h.page.getByRole('dialog').getByRole('radio', { name: '12', exact: true }).click();
     await expect(h.page.getByRole('dialog').getByRole('radio', { name: '12', exact: true })).toHaveAttribute('aria-checked', 'true');
-    assert.deepEqual(h.server.calls[0].args.p_settings, { cartes: 12 });
+    assert.deepEqual(h.server.calls[1].args.p_settings, { cartes: 12 });
     await h.page.keyboard.press('Escape'); await expect(h.page.locator('.salon-ready-count')).toHaveText('0/2 prêts');
     await cta(h.page).click(); await headStarted.promise;
     await expect(h.page.getByRole('button', { name: 'Options', exact: true })).toBeDisabled();
-    assert.equal(h.server.calls.filter(c => c.fn === 'set_ready').length, 0);
-    head.resolve(); await expect(cta(h.page)).toHaveText('Annuler ma disponibilité');
+    assert.equal(h.server.calls.filter(c => c.fn === 'set_ready' && c.args.p_ready).length, 0);
+    head.resolve(); await expect(cta(h.page)).toHaveText('Modifier les réglages');
     // StrictMode rejoue le montage en développement : deux HEAD possibles, un seul RPC métier.
     assert.ok(headCount >= 1 && headCount <= 2);
-    assert.equal(h.server.calls.filter(c => c.fn === 'set_ready').length, 1);
+    assert.equal(h.server.calls.filter(c => c.fn === 'set_ready' && c.args.p_ready).length, 1);
     await h.close();
+  });
+
+  await check('Options déjà ouvertes : nouveau snapshot prêt ou lecture seule verrouille UI et RPC', async () => {
+    for (const lock of ['ready', 'read_only']) {
+      const h = await make('N2-001-lobby');
+      await h.page.getByRole('button', { name: 'Options', exact: true }).click();
+      const radio = h.page.getByRole('dialog').getByRole('radio', { name: '12', exact: true });
+      await expect(radio).toBeEnabled();
+      if (lock === 'ready') h.server.state.players.find(p => p.is_me).ready = true;
+      else h.server.state.session.read_only = true;
+      await refresh(h);
+      await expect(radio).toBeDisabled();
+      // La garde de l'action tient même si un événement utilise un contrôle réactivé.
+      await radio.evaluate(button => { button.disabled = false; button.click(); });
+      await h.page.waitForTimeout(100);
+      assert.equal(h.server.calls.length, 0, lock);
+      await h.page.keyboard.press('Escape');
+      await h.close();
+    }
   });
 
   await check('Film absent/type HTML, mouvement réduit et non-rejeu : une seule confirmation', async () => {
@@ -245,12 +272,12 @@ try {
         await page.route(film, route => { heads++; return route.fulfill(kind === 'html' ? { status: 200, contentType: 'text/html', body: '<!doctype html>' } : { status: 404, body: '' }); });
       } });
       await cta(h.page).evaluate(button => { button.click(); button.click(); });
-      await expect(cta(h.page)).toHaveText('Annuler ma disponibilité');
+      await expect(cta(h.page)).toHaveText('Modifier les réglages');
       assert.equal(h.server.calls.length, 1);
       assert.ok(kind === 'reduce' ? heads === 0 : heads >= 1 && heads <= 2);
       const initialHeads = heads;
-      await cta(h.page).click(); await expect(cta(h.page)).toHaveText('Je suis disponible');
-      await cta(h.page).click(); await expect(cta(h.page)).toHaveText('Annuler ma disponibilité');
+      await cta(h.page).click(); await expect(cta(h.page)).toHaveText('Valider les réglages');
+      await cta(h.page).click(); await expect(cta(h.page)).toHaveText('Modifier les réglages');
       assert.equal(heads, initialHeads);
       await h.close();
     }
@@ -265,7 +292,7 @@ try {
       await cta(h.page).click(); await started.promise;
       if (action === 'reduce') { await h.page.getByRole('link', { name: /Réduire la partie/ }).click(); await h.page.waitForURL('**/accueil'); }
       if (action === 'offline') { await h.context.setOffline(true); await h.page.getByText('En attente du réseau', { exact: true }).waitFor(); }
-      if (action === 'read_only') { h.server.state.session.read_only = true; await refresh(h); await h.page.waitForFunction(() => document.querySelector('.session-toolbar a')?.tagName === 'A'); }
+      if (action === 'read_only') { h.server.state.session.read_only = true; await refresh(h); await h.page.waitForFunction(() => document.querySelector('.session-toolbar__quit')?.tagName === 'A'); }
       gate.resolve(); await h.page.waitForTimeout(1800);
       assert.equal(h.server.calls.filter(c => c.fn === 'set_ready').length, 0, action);
       if (action !== 'reduce') await expect(cta(h.page)).toBeDisabled();
@@ -277,7 +304,7 @@ try {
     const started = deferred(); let heldRoute;
     const h = await make('c14-lobby-n2-002', { motion: 'no-preference', beforeGoto: async ({ page }) => { await page.route(film, route => { heldRoute = route; started.resolve(); }); } });
     const time = Date.now(); await cta(h.page).click(); await started.promise;
-    await expect(cta(h.page)).toHaveText('Annuler ma disponibilité', { timeout: 5000 });
+    await expect(cta(h.page)).toHaveText('Modifier les réglages', { timeout: 5000 });
     assert.ok(Date.now() - time < 4000);
     assert.equal(h.server.calls.filter(c => c.fn === 'set_ready').length, 1);
     await heldRoute.fulfill({ status: 404, body: '' }).catch(() => {});

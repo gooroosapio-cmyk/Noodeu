@@ -335,12 +335,32 @@ function NavalGrid({ label, cell, onCell, onPreview, disabled, fleet = [] }: {
   label: string; cell: (r: number, c: number) => { cls: string; text: string; img?: string }; onCell?: (r: number, c: number) => void; onPreview?: (r: number, c: number) => void; disabled?: (r: number, c: number) => boolean; fleet?: Ship[];
 }) {
   const grid=useRef<HTMLDivElement>(null);
+  const viewport=useRef<HTMLDivElement>(null);
+  const pendingFocus=useRef<number | null>(null);
   const drag=useRef<{ x: number; y: number; left: number; top: number; moved: boolean } | null>(null);
   const suppressClick=useRef(false);
   const [zoom,setZoom]=useState(0);
   const [focused,setFocused]=useState(0);
   const isDisabled=(i:number)=>!onCell || Boolean(disabled?.(Math.floor(i/10),i%10));
   const active=isDisabled(focused)?Array.from({length:100},(_,i)=>i).find(i=>!isDisabled(i)):focused;
+  useEffect(() => {
+    const index = pendingFocus.current;
+    if (!zoom || index === null) return;
+    pendingFocus.current = null;
+    const panel = viewport.current, target = grid.current?.querySelector<HTMLButtonElement>(`[data-cell="${index}"]`);
+    if (!panel || !target) return;
+    const area = panel.getBoundingClientRect(), box = target.getBoundingClientRect();
+    panel.scrollLeft += box.left - area.left - (panel.clientWidth - box.width) / 2;
+    panel.scrollTop += box.top - area.top - (panel.clientHeight - box.height) / 2;
+    (target.disabled ? panel : target).focus({ preventScroll: true });
+    target.scrollIntoView({ block: "nearest", inline: "nearest" });
+  }, [zoom]);
+  function openTarget(index: number) {
+    pendingFocus.current = index;
+    setFocused(index);
+    setZoom(1);
+  }
+  // La vue entière sert aussi à naviguer. Seules les grandes cibles peuvent choisir une case.
   return (
     <div className="stack stack--2 astra-zoom naval-viewport">
       <div className="mini-zoom-tools" role="group" aria-label="Mode du plateau naval">
@@ -349,13 +369,20 @@ function NavalGrid({ label, cell, onCell, onPreview, disabled, fleet = [] }: {
         <output className="t-meta" aria-live="polite">{zoom === 0 ? "Vue entière" : `${Math.round(zoom * 100)} %`}</output>
         <button type="button" className="btn btn--quiet btn--sm" aria-label="Agrandir le plateau" disabled={zoom === 1.5} onClick={() => setZoom(zoom === 0 ? 1 : 1.5)}><Icon name="plus" size={18} /></button>
       </div>
-      <p className="t-meta naval-viewport__hint">{zoom ? "Glisse le plateau. Au clavier : les flèches." : "Lecture seule · Cibler pour choisir."}</p>
-      <div className={`naval-viewport__panel ${zoom ? "board-zoom board-zoom--naval" : "astra-overview naval-overview"}`}
+      <p className="t-meta naval-viewport__hint">{zoom ? "Glisse le plateau. Au clavier : les flèches." : "Touche le plateau pour agrandir."}</p>
+      <div ref={viewport} className={`naval-viewport__panel ${zoom ? "board-zoom board-zoom--naval" : "astra-overview naval-overview"}`}
         style={{ "--board-cell": `${44 * (zoom || 1)}px` } as CSSProperties}
-        tabIndex={0} role="region" aria-label={`${label} · ${zoom ? "mode ciblage, défilement horizontal et vertical" : "vue entière en lecture seule"}`}
+        tabIndex={0} role="region" aria-label={`${label} · ${zoom ? "mode ciblage, défilement horizontal et vertical" : "vue entière, toucher ou appuyer sur Entrée pour agrandir"}`}
+        aria-keyshortcuts={zoom ? undefined : "Enter Space"}
+        onKeyDown={event => {
+          if (!zoom && event.target === event.currentTarget && (event.key === "Enter" || event.key === " ")) {
+            event.preventDefault();
+            openTarget(active ?? focused);
+          }
+        }}
         onPointerDown={event => {
           suppressClick.current = false;
-          if (!zoom || event.pointerType !== "mouse" || event.button !== 0) return;
+          if (event.button !== 0) return;
           drag.current = { x: event.clientX, y: event.clientY, left: event.currentTarget.scrollLeft, top: event.currentTarget.scrollTop, moved: false };
         }}
         onPointerMove={event => {
@@ -364,13 +391,21 @@ function NavalGrid({ label, cell, onCell, onPreview, disabled, fleet = [] }: {
           const dx = event.clientX - start.x, dy = event.clientY - start.y;
           if (!start.moved && Math.hypot(dx, dy) < 6) return;
           start.moved = true;
-          event.currentTarget.setPointerCapture(event.pointerId);
-          event.currentTarget.scrollLeft = start.left - dx;
-          event.currentTarget.scrollTop = start.top - dy;
           suppressClick.current = true;
+          if (zoom && event.pointerType === "mouse") {
+            event.currentTarget.setPointerCapture(event.pointerId);
+            event.currentTarget.scrollLeft = start.left - dx;
+            event.currentTarget.scrollTop = start.top - dy;
+          }
         }}
-        onPointerUp={() => { drag.current = null; }} onPointerCancel={() => { drag.current = null; }}
-        onClickCapture={event => { if (suppressClick.current) { event.preventDefault(); event.stopPropagation(); suppressClick.current = false; } }}>
+        onPointerUp={() => { drag.current = null; }} onPointerCancel={() => { drag.current = null; suppressClick.current = true; }}
+        onClickCapture={event => {
+          if (suppressClick.current) { event.preventDefault(); event.stopPropagation(); suppressClick.current = false; return; }
+          if (!zoom) {
+            const index = (event.target as Element).closest<HTMLElement>("[data-cell]")?.dataset.cell;
+            if (index !== undefined) { event.preventDefault(); openTarget(Number(index)); }
+          }
+        }}>
     <div className="naval" role="grid" aria-label={label} aria-readonly={!zoom || !onCell} aria-rowcount={11} aria-colcount={11} ref={grid} onKeyDown={e=>{
       if (!zoom) return;
       const key=e.key;if(!['ArrowUp','ArrowDown','ArrowLeft','ArrowRight','Home','End'].includes(key))return;

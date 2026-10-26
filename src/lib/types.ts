@@ -81,6 +81,7 @@ export interface SessionState {
   session: {
     id: string;
     game_id: string;
+    game_version: number;
     status: SessionStatus;
     settings: Record<string, string | number>;
     current_round: number;
