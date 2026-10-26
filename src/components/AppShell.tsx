@@ -1,5 +1,5 @@
 import { createContext, useContext, useLayoutEffect, useRef, useState, type ReactNode } from "react";
-import { Link, NavLink, Outlet } from "react-router";
+import { Link, NavLink, Outlet, useLocation } from "react-router";
 import { t } from "../i18n";
 import { useAuth } from "../auth/AuthProvider";
 import { useDuo } from "../duo/DuoProvider";
@@ -40,7 +40,7 @@ function BottomNav() {
   return (
     <nav className="nav" aria-label={t("nav.label")} ref={ref}>
       {tabs.map((tab) => (
-        <NavLink key={tab.to} to={tab.to}>
+        <NavLink key={tab.to} to={tab.to} end={false}>
           <Icon name={tab.icon} size={20} />
           <span>{tab.label}</span>
         </NavLink>
@@ -72,13 +72,29 @@ export function TopBar({ onOpenNotifications, showBell = true }: { onOpenNotific
   );
 }
 
+/** Pages de second niveau gardant la navigation (témoins 05 et 06) : retour explicite au lieu du logo. */
+const BACK_PAGES: Record<string, string> = { "/espace/coffre": "Coffre à souvenirs", "/espace/historique": "Historique" };
+
+function BackHeader({ title }: { title: string }) {
+  const { search } = useLocation();
+  const duo = new URLSearchParams(search).get("duo");
+  return (
+    <header className="topbar v7-backbar">
+      <Link className="icon-btn" to={duo ? `/espace?duo=${duo}` : "/espace"} aria-label={t("common.back")}><Icon name="back" size={22} /></Link>
+      <h1 className="v7-backbar__title">{title}</h1>
+    </header>
+  );
+}
+
 /** Pages principales connectées : en-tête, contenu, navigation basse et discussion flottante. */
 export function AppShell() {
   const [panel, setPanel] = useState<"chat" | "notifications" | null>(null);
+  const { pathname } = useLocation();
+  const backTitle = BACK_PAGES[pathname];
   return (
     <ShellContext.Provider value={{ openChat: () => setPanel("chat") }}>
       <div className="shell">
-        <TopBar onOpenNotifications={() => setPanel("notifications")} />
+        {backTitle ? <BackHeader title={backTitle} /> : <TopBar onOpenNotifications={() => setPanel("notifications")} />}
         <Outlet />
         <BottomNav />
         <ChatLauncher onOpen={() => setPanel("chat")} />

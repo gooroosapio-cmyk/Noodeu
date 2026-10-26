@@ -93,7 +93,15 @@ async function setup(page, scenario) {
       return json(catalogue.rules[id] ? [{ rules: catalogue.rules[id] }] : [{ rules }]);
     }
     if (p.endsWith("/game_favorites")) return json([{ game_id: "ND-Q-P01" }, { game_id: "N2-076" }]);
-    if (p.endsWith("/game_sessions")) return json(scenario.history ?? []);
+    if (p.endsWith("/game_sessions")) {
+      // Filtre de statut, pagination (offset/limit) et total exact, comme PostgREST.
+      const q = new URL(route.request().url()).searchParams;
+      const wanted = /^in\.\((.*)\)$/.exec(q.get("status") ?? "")?.[1]?.split(",");
+      const all = (scenario.history ?? []).filter((h) => !wanted || wanted.includes(h.status));
+      const offset = Number(q.get("offset") ?? 0), limit = Number(q.get("limit") ?? all.length);
+      const page = all.slice(offset, offset + limit);
+      return route.fulfill({ status: 200, contentType: "application/json", headers: { "content-range": `${offset}-${offset + Math.max(page.length - 1, 0)}/${all.length}`, "access-control-expose-headers": "content-range" }, body: JSON.stringify(page) });
+    }
     // Parcours : réglages personnels, plafond du duo, question du jour, progression, questions gardées.
     if (p.endsWith("/rpc/get_my_prefs")) return json({ ok: true, max_intensity: scenario.maxIntensity ?? "moyen", adult_confirmed_at: scenario.intimate ? "2026-10-01T10:00:00Z" : null,
       daily_adult: false, timezone: "Europe/Paris", country: scenario.country ?? "FR", reminders: { enabled: Boolean(scenario.reminders), per_week: 2, quiet_start: 21, quiet_end: 9 } });
@@ -116,7 +124,18 @@ async function setup(page, scenario) {
 }
 
 const solo = { duos: [] };
-const duo = { duos: [activeDuo, archivedDuo], unread: 2, notifications, history: [{ id: SESSION, status: "closed", created_at: "2026-10-20T20:00:00Z", ended_at: "2026-10-20T20:10:00Z", games: { title: game.title }, session_players: [{ keep_memory: true }, { keep_memory: true }] }] };
+// Historique fictif (données de démonstration) : titres et identifiants du catalogue, dates relatives.
+const ago = (days, minutes = 0) => new Date(Date.now() - days * 86_400_000 - minutes * 60_000).toISOString();
+const histo = (id, game_id, title, status, days, minutes, keep = false, extra = {}) => ({ id, game_id, status, created_at: ago(days, minutes + 5), started_at: ago(days, minutes + 5), ended_at: status === "abandoned" || ["lobby", "playing", "paused"].includes(status) ? null : ago(days, 5),
+  current_round: 10, total_rounds: 10, games: { title }, session_players: [{ keep_memory: keep }, { keep_memory: keep }], ...extra });
+const duo = { duos: [activeDuo, archivedDuo], unread: 2, notifications, history: [
+  histo("00000000-0000-4000-a000-0000000000h1", "nd-action-verite", "Action ou Vérité", "ended", 0, 0, true),
+  histo("00000000-0000-4000-a000-0000000000h2", "N2-003", "Je n’ai jamais", "ended", 1, 5),
+  histo("00000000-0000-4000-a000-0000000000h3", "N2-002", "Tu préfères", "closed", 4, -2, true),
+  histo(SESSION, game.id, game.title, "closed", 6, 5, true),
+  histo("00000000-0000-4000-a000-0000000000h5", "nd-de-chanceux", "Le Dé chanceux", "ended", 7, 8),
+  histo("00000000-0000-4000-a000-0000000000h6", "N2-018", "Petit bac", "ended", 8, 10),
+] };
 const allScreens = [
   { name: "01-bienvenue", path: "/", scenario: { auth: false } },
   { name: "02a-connexion", path: "/connexion", scenario: { auth: false } },
@@ -156,6 +175,9 @@ const allScreens = [
   { name: "20-pause-reprise", path: `/partie/${SESSION}`, scenario: { ...duo, state: (() => { const st = sessionState("playing");
     return { ...st, session: { ...st.session, status: "paused", paused_by: ME, pause_state: { paused_at: "2026-10-24T10:00:00Z", by: ME, resume: [st.my_seat ?? 1] } } }; })() } },
   { name: "21a-espace-duo", path: "/espace", scenario: duo },
+  { name: "21e-coffre", path: "/espace/coffre", scenario: duo },
+  { name: "21f-coffre-notes", path: "/espace/coffre?tab=notes", scenario: duo },
+  { name: "21g-historique", path: "/espace/historique", scenario: duo },
   { name: "21b-espace-archive", path: `/espace?duo=${OLD_DUO}`, scenario: { ...duo, duos: [archivedDuo] } },
   { name: "21c-espace-sans-duo", path: "/espace", scenario: solo },
   { name: "22-parametres", path: "/reglages", scenario: duo },

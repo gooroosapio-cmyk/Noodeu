@@ -1,7 +1,7 @@
-import { useEffect, useState } from "react";
+import { useState } from "react";
 import { Link, useNavigate, useSearchParams } from "react-router";
 import { t } from "../i18n";
-import { rpc, supabase } from "../lib/supabase";
+import { rpc } from "../lib/supabase";
 import { errorMessage } from "../lib/errors";
 import { useAuth } from "../auth/AuthProvider";
 import { useDuo, type DuoSummary } from "../duo/DuoProvider";
@@ -10,19 +10,11 @@ import { MessageList } from "../duo/Chat";
 import { Avatar } from "../components/Avatar";
 import { Alert, ConfirmDialog, Icon, Loading, PageLoading, Sheet, formatDate, useToast } from "../components/ui";
 import type { ChatMessage } from "../lib/types";
-import { DuoDashboard } from "../duo/DuoDashboard";
+import { DuoSpaceCard, useDuoSpace } from "../duo/DuoDashboard";
 import { useCatalog } from "./catalog";
 import { MyItems, ProgressSection } from "../parcours/Progress";
-import { HistoryList } from "./History";
+import { DONE, DuoAvatars, SessionLine, dayLabel, minutesOf, useSessions } from "./v7parts";
 
-interface HistoryItem {
-  id: string;
-  status: string;
-  created_at: string;
-  ended_at: string | null;
-  games: { title: string } | null;
-  session_players: { keep_memory: boolean }[];
-}
 
 function DuoSelector({ duos, selected, onSelect }: { duos: DuoSummary[]; selected: string; onSelect: (id: string) => void }) {
   return (
@@ -42,37 +34,6 @@ function DuoSelector({ duos, selected, onSelect }: { duos: DuoSummary[]; selecte
   );
 }
 
-function History({ coupleId }: { coupleId: string }) {
-  const [onlyKept, setOnlyKept] = useState(true);
-  const [items, setItems] = useState<HistoryItem[] | null>(null);
-  const [error, setError] = useState(false);
-  useEffect(() => {
-    let cancelled = false;
-    setItems(null); setError(false);
-    void supabase.from("game_sessions")
-      .select("id, status, created_at, ended_at, games(title), session_players(keep_memory)")
-      .eq("couple_id", coupleId).in("status", ["ended", "closed", "abandoned"])
-      .order("created_at", { ascending: false }).limit(30)
-      .then(({ data, error: e }) => { if (!cancelled) { setError(Boolean(e)); setItems((data as unknown as HistoryItem[]) ?? []); } });
-    return () => { cancelled = true; };
-  }, [coupleId]);
-  if (error) return <Alert>{t("net.loadError")}</Alert>;
-  if (!items) return <Loading />;
-  return (
-    <div className="stack stack--3">
-      <div className="action-pair" aria-label="Afficher les parties">
-        <button className="chip" aria-pressed={!onlyKept} onClick={() => setOnlyKept(false)}>Parties récentes</button>
-        <button className="chip" aria-pressed={onlyKept} onClick={() => setOnlyKept(true)}><Icon name="heart" size={18} />Coffre à souvenirs</button>
-      </div>
-      <p className="t-meta">{onlyKept ? 'Uniquement les parties que vous avez tous les deux choisi de garder.' : 'Les trois dernières parties de ce duo.'}</p>
-      {onlyKept && !items.some(h => h.session_players.length === 2 && h.session_players.every(p => p.keep_memory)) && <p className="t-small muted">Aucun souvenir partagé.</p>}
-      {/* V7 : aperçu limité aux trois plus récentes ; « Tout voir » mène à l'historique paginé par cinq. */}
-      <HistoryList rows={items.filter(h => !onlyKept || (h.session_players.length === 2 && h.session_players.every(p => p.keep_memory))).slice(0, 3)} />
-      <Link className="btn btn--quiet btn--sm btn--auto" to={`/espace/historique?duo=${coupleId}`}>Tout voir<Icon name="chevron-right" size={18} /></Link>
-    </div>
-  );
-}
-
 function ArchivedMessages({ coupleId, partnerName }: { coupleId: string; partnerName: string }) {
   const { loadArchive } = useDuo();
   const { userId, profile } = useAuth();
@@ -89,14 +50,48 @@ function ArchivedMessages({ coupleId, partnerName }: { coupleId: string; partner
   );
 }
 
+/** Corps du témoin 04 : carte de couverture, confidentialité, accès Coffre / Notes, trois parties récentes. */
+function SpaceBody({ selected, partnerName }: { selected: DuoSummary; partnerName: string }) {
+  const { profile, userId } = useAuth();
+  const { games } = useCatalog(userId);
+  const space = useDuoSpace(selected.id, selected.active);
+  const recent = useSessions(selected.id, DONE, 0, 2);
+  const notes = space.unavailable || !space.space ? null : space.space.notes.length;
+  return (
+    <>
+      <DuoSpaceCard space={space} active={selected.active} title={`${profile?.display_name || "Toi"} & ${partnerName}`} subtitle="Votre espace à deux"
+        avatars={<DuoAvatars me={{ name: profile?.display_name ?? "", path: profile?.avatar_path }} partner={selected.partner} />} />
+      <p className="v7-private"><Icon name="lock" size={16} />Seulement toi et {partnerName}</p>
+      <div className="v7-access">
+        <Link className="v7-access__card" to={`/espace/coffre?duo=${selected.id}`}>
+          <img src="/assets/noodeu/v7/souvenirs-chest.webp" alt="" width={56} height={56} />
+          <span><strong>Coffre à souvenirs</strong><small>souvenirs</small></span>
+        </Link>
+        <Link className="v7-access__card" to={`/espace/coffre?duo=${selected.id}&tab=notes`}>
+          <img src="/assets/noodeu/v7/notes-notebook.webp" alt="" width={56} height={56} />
+          <span><strong>Nos notes</strong><small>{notes === null ? "Notes partagées" : `${notes} note${notes > 1 ? "s" : ""}`}</small></span>
+        </Link>
+      </div>
+      <section aria-labelledby="space-recent">
+        <div className="v7-section-head"><h2 id="space-recent">Parties récentes</h2><Link to={`/espace/historique?duo=${selected.id}`}>Tout voir</Link></div>
+        {recent.error ? <Alert>{t("net.loadError")}</Alert> : !recent.rows ? <Loading /> : recent.rows.length === 0 ? <p className="t-small muted">Aucune partie terminée pour le moment.</p> : (
+          <div className="v7-list">
+            {recent.rows.map((r) => <SessionLine key={r.id} row={r} game={games.find((g) => g.id === r.game_id)}
+              meta={<>{dayLabel(r.ended_at ?? r.created_at)}{minutesOf(r) ? ` · ${minutesOf(r)} min` : ""}</>} />)}
+          </div>
+        )}
+      </section>
+    </>
+  );
+}
+
 export function OurSpace() {
   const duo = useDuo();
-  const { userId } = useAuth();
-  const { games } = useCatalog(userId);
   const toast = useToast();
   const navigate = useNavigate();
   const [params, setParams] = useSearchParams();
   const [manage, setManage] = useState(false);
+  const [menu, setMenu] = useState(false);
   const [confirmEnd, setConfirmEnd] = useState(false);
   const [busy, setBusy] = useState(false);
   const [error, setError] = useState<string | null>(null);
@@ -104,7 +99,6 @@ export function OurSpace() {
   if (duo.loading) return <PageLoading />;
   const selectedId = params.get("duo") && duo.duos.some((d) => d.id === params.get("duo")) ? params.get("duo")! : (duo.active?.id ?? duo.duos[0]?.id);
   const selected = duo.duos.find((d) => d.id === selectedId) ?? null;
-  const currentGame = selected?.id === duo.active?.id && duo.openSession ? games.find(g => g.id === duo.openSession?.game_id) : undefined;
   const partnerName = selected?.partner?.deleted ? t("duo.deleted") : selected?.partner?.name || "?";
 
   async function endDuo() {
@@ -122,18 +116,14 @@ export function OurSpace() {
   }
 
   return (
-    <main className="page">
-      <div className="page-header">
-        <h1 className="t-page">{t("space.title")}</h1>
+    <main className="page v7-space">
+      <div className="v7-space-head">
+        <h1>{selected ? `Espace avec ${partnerName}` : t("space.title")}</h1>
+        <button type="button" className="icon-btn" aria-haspopup="dialog" aria-expanded={menu} aria-label="Choisir le duo et gérer l’espace" onClick={() => setMenu(true)}>
+          <Icon name="chevron-down" size={22} />
+        </button>
       </div>
       {error && <Alert>{error}</Alert>}
-
-      {duo.duos.length > 1 && selectedId && (
-        <details className="disclosure space-selector">
-          <summary><span>Espace avec {partnerName}</span><Icon name="chevron-down" /></summary>
-          <DuoSelector duos={duo.duos} selected={selectedId} onSelect={(id) => setParams({ duo: id }, { replace: true })} />
-        </details>
-      )}
 
       {!selected ? (
         <section className="card stack stack--4">
@@ -145,50 +135,24 @@ export function OurSpace() {
           <Link className="btn" to="/inviter">{t("duo.invite")}</Link>
         </section>
       ) : (
-        <DuoDashboard key={selected.id} coupleId={selected.id} active={selected.active} partner={partnerName} activity={currentGame ? <><h2 className="t-card">{currentGame.title}</h2><p className="t-small muted">{currentGame.promise}</p></> : <p className="t-small muted">{selected.active ? "Aucune partie en cours." : "Duo archivé."}</p>} identity={<DuoIdentity duo={selected} online={selected.id === duo.active?.id && duo.partnerOnline} size={40} />}>
-        <section className="space-vault stack stack--3" aria-label="Coffre à souvenirs"><h2 className="t-section row"><Icon name="heart" />Coffre à souvenirs</h2><History key={selected.id} coupleId={selected.id} /></section>
-        <section className="space-duo-summary stack stack--3">
-          <ul className="t-meta plain-list">
-            {selected.episodes.map((e, i) => (
-              <li key={e.started_at}>
-                {i === 0 ? t("duo.since", { date: formatDate(e.started_at) }) : t("duo.resumedOn", { date: formatDate(e.started_at) })}
-                {e.ended_at && ` · ${t("duo.endedOn", { date: formatDate(e.ended_at) })}`}
-              </li>
-            ))}
-          </ul>
-          {selected.active && selected.id !== duo.active?.id ? (
-            <div className="stack">
-              <p className="t-small muted">{t("duo.switchHint")}</p>
-              <button className="btn" onClick={async () => { if (await duo.switchDuo(selected.id)) toast(t("duo.switched", { name: partnerName })); }}>
-                <Icon name="users" />{t("duo.showThis")}
-              </button>
-              <button className="btn btn--quiet btn--sm" aria-haspopup="dialog" onClick={() => setManage(true)}>
-                <Icon name="settings" size={20} />{t("duo.manage")}
-              </button>
-            </div>
-          ) : selected.active ? (
-            <div className="stack">
-              <button className="btn btn--quiet btn--sm" aria-haspopup="dialog" onClick={() => setManage(true)}>
-                <Icon name="settings" size={20} />{t("duo.manage")}
-              </button>
-            </div>
-          ) : (
-            <div className="stack">
-              <Alert kind="info">{t("space.archiveBanner")}</Alert>
-              {!selected.partner?.deleted && (
-                duo.activeDuos.some((d) => d.partner?.id && d.partner.id === selected.partner?.id) ? (
-                  <p className="t-small muted">{t("invite.alreadyDuo")}</p>
-                ) : (
-                  <>
-                    <button className="btn btn--secondary" onClick={() => navigate("/inviter")}>{t("space.replayWith", { name: partnerName })}</button>
-                    <p className="t-meta">{t("space.replayHint", { name: partnerName })}</p>
-                  </>
-                )
-              )}
-            </div>
-          )}
-        </section>
-        </DuoDashboard>
+        <SpaceBody key={selected.id} selected={selected} partnerName={partnerName} />
+      )}
+
+      {selected && selected.active && selected.id !== duo.active?.id && (
+        <div className="stack">
+          <p className="t-small muted">{t("duo.switchHint")}</p>
+          <button className="btn" onClick={async () => { if (await duo.switchDuo(selected.id)) toast(t("duo.switched", { name: partnerName })); }}>
+            <Icon name="users" />{t("duo.showThis")}
+          </button>
+        </div>
+      )}
+      {selected && !selected.active && (
+        <div className="stack">
+          <Alert kind="info">{t("space.archiveBanner")}</Alert>
+          {!selected.partner?.deleted && (duo.activeDuos.some((d) => d.partner?.id && d.partner.id === selected.partner?.id)
+            ? <p className="t-small muted">{t("invite.alreadyDuo")}</p>
+            : <><button className="btn btn--secondary" onClick={() => navigate("/inviter")}>{t("space.replayWith", { name: partnerName })}</button><p className="t-meta">{t("space.replayHint", { name: partnerName })}</p></>)}
+        </div>
       )}
 
       {selected?.active && selected.id === duo.active?.id && (
@@ -197,7 +161,6 @@ export function OurSpace() {
           <ProgressSection />
         </section>
       )}
-
       <section className="section" aria-labelledby="space-items">
         <div className="section__head">
           <h2 className="t-section" id="space-items">{t("items.title")}</h2>
@@ -205,18 +168,26 @@ export function OurSpace() {
         </div>
         <MyItems />
       </section>
-
       {selected && !selected.active && <ArchivedMessages coupleId={selected.id} partnerName={partnerName} />}
 
-      {duo.duos.length > 0 && (
-        <Link className="btn btn--secondary" to="/inviter"><Icon name="plus" />{duo.active ? t("duo.addOther") : t("duo.invite")}</Link>
+      {menu && (
+        <Sheet title={<h2 className="t-section">{t("space.title")}</h2>} onClose={() => setMenu(false)}>
+          {duo.duos.length > 0 && selectedId && <DuoSelector duos={duo.duos} selected={selectedId} onSelect={(id) => { setParams({ duo: id }, { replace: true }); setMenu(false); }} />}
+          {selected && (
+            <ul className="t-meta plain-list">
+              {selected.episodes.map((e, i) => (
+                <li key={e.started_at}>
+                  {i === 0 ? t("duo.since", { date: formatDate(e.started_at) }) : t("duo.resumedOn", { date: formatDate(e.started_at) })}
+                  {e.ended_at && ` · ${t("duo.endedOn", { date: formatDate(e.ended_at) })}`}
+                </li>
+              ))}
+            </ul>
+          )}
+          {selected?.active && <button className="btn btn--secondary" onClick={() => { setMenu(false); setManage(true); }}><Icon name="settings" size={20} />{t("duo.manage")}</button>}
+          <Link className="btn btn--quiet" to="/inviter" onClick={() => setMenu(false)}><Icon name="plus" />{duo.active ? t("duo.addOther") : t("duo.invite")}</Link>
+          <p className="t-small muted">{t("space.privateText")}</p>
+        </Sheet>
       )}
-
-      <section className="card card--soft stack stack--2">
-        <h2 className="t-card row"><Icon name="lock" size={20} />{t("space.private")}</h2>
-        <p className="t-small">{t("space.privateText")}</p>
-      </section>
-
       {manage && selected?.active && (
         <Sheet title={<h2 className="t-section">{t("duo.manage")}</h2>} onClose={() => setManage(false)}>
           <h3 className="t-card">{t("space.members")}</h3>

@@ -18,6 +18,7 @@ import { Home } from "./screens/Home";
 import { GameSheet, Libraries, ShelfPage } from "./screens/Libraries";
 import { OurSpace } from "./screens/OurSpace";
 import { HistoryPage } from "./screens/History";
+import { VaultPage } from "./screens/Vault";
 import { ProfileEdit, Settings } from "./screens/Settings";
 import { Tips } from "./screens/Tips";
 import { SessionScreen } from "./game/SessionScreen";
@@ -117,6 +118,8 @@ export const router = createBrowserRouter([
               { path: "/conseils", element: <Tips /> },
               { path: "/astuces", element: <Navigate to="/conseils" replace /> },
               { path: "/espace", element: <OurSpace /> },
+              { path: "/espace/coffre", element: <VaultPage /> },
+              { path: "/espace/historique", element: <HistoryPage /> },
               { path: "/notre-espace", element: <LegacySpace /> },
               { path: "/parametres", element: <Navigate to="/reglages" replace /> },
               { path: "/reglages", element: <Settings /> },
@@ -129,7 +132,6 @@ export const router = createBrowserRouter([
           { path: "/reglages/profil", element: <ProfileEdit /> },
           { path: "/admin/questions", element: <AdminQuestions /> },
           { path: "/parametres/profil", element: <Navigate to="/reglages/profil" replace /> },
-          { path: "/espace/historique", element: <HistoryPage /> },
           { path: "/inviter", element: <InvitePage /> },
           { path: "/rejoindre", element: <InvitePage /> },
           { path: "/partie/:sessionId", element: <SessionScreen /> },

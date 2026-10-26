@@ -10,7 +10,7 @@ import { useDuo } from "./DuoProvider";
  * Bascule entre plusieurs duos actifs : le duo choisi devient le duo affiché partout (parties, discussion, question
  * du jour). Les autres duos restent intacts, avec leur historique ; le choix est gardé d'une connexion à l'autre.
  */
-export function DuoSwitcher({ compact = false }: { compact?: boolean }) {
+export function DuoSwitcher({ compact = false, icon = false }: { compact?: boolean; icon?: boolean }) {
   const { active, activeDuos, switchDuo } = useDuo();
   const online = useOnline();
   const toast = useToast();
@@ -22,11 +22,19 @@ export function DuoSwitcher({ compact = false }: { compact?: boolean }) {
 
   return (
     <>
+      {icon ? (
+        <button type="button" className="v7-swap" onClick={() => setOpen(true)} aria-haspopup="dialog"
+          aria-label={others.length ? t("duo.switch", { n: activeDuos.length }) : t("duo.addOther")}>
+          <Icon name="swap" size={20} />
+          {unreadElsewhere > 0 && <span className="badge-count" aria-hidden="true">{unreadElsewhere}</span>}
+        </button>
+      ) : (
       <button type="button" className={`btn btn--secondary btn--sm${compact ? " btn--auto" : ""}`} onClick={() => setOpen(true)} aria-haspopup="dialog">
         <Icon name="users" size={18} />
         {others.length ? t("duo.switch", { n: activeDuos.length }) : t("duo.addOther")}
         {unreadElsewhere > 0 && <span className="badge-count badge-count--inline" aria-label={t("duo.unreadElsewhere", { n: unreadElsewhere })}>{unreadElsewhere}</span>}
       </button>
+      )}
       {open && (
         <Sheet title={<h2 className="t-section">{t("duo.switchTitle")}</h2>} onClose={() => setOpen(false)}>
           <p className="t-meta">{t("duo.switchHint")}</p>

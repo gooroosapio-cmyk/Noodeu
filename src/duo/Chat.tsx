@@ -1,4 +1,4 @@
-import { useEffect, useRef, useState, type FormEvent } from "react";
+import { Fragment, useEffect, useRef, useState, type FormEvent } from "react";
 import { Link } from "react-router";
 import { t } from "../i18n";
 import { errorMessage } from "../lib/errors";
@@ -47,26 +47,44 @@ export function MessageList({ messages, myId, myName, partnerName }: { messages:
     if (first.current || stick.current || last?.user_id === myId) endRef.current?.scrollIntoView({ block: "end" });
     first.current = false;
   }, [messages.length, last?.user_id, myId]);
+  const dayOf = (iso: string) => new Date(iso).toDateString();
   return (
     <div role="log" aria-live="polite" className="chat-log">
       {messages.map((m, i) => {
         const mine = m.user_id === myId;
+        const prev = messages[i - 1];
         const next = messages[i + 1];
-        const endOfGroup = !next || next.user_id !== m.user_id || new Date(next.created_at).getTime() - new Date(m.created_at).getTime() > 5 * 60_000;
+        const newDay = !prev || dayOf(prev.created_at) !== dayOf(m.created_at);
+        const endOfGroup = !next || next.user_id !== m.user_id || dayOf(next.created_at) !== dayOf(m.created_at)
+          || new Date(next.created_at).getTime() - new Date(m.created_at).getTime() > 5 * 60_000;
         return (
-          <div key={m.client_id} className={`bubble ${mine ? "bubble--me" : ""}${endOfGroup ? " bubble--group-end" : ""}`}>
-            <div className="bubble__text">{m.body}</div>
-            <div className={`bubble__meta${endOfGroup || m.pending || m.failed ? "" : " sr-only"}`}>
-              <span className="sr-only">{mine ? myName : partnerName}, </span>
-              <time dateTime={m.created_at}>{new Date(m.created_at).toLocaleString("fr-FR", { day: "numeric", month: "short", hour: "2-digit", minute: "2-digit" })}</time>
-              {m.pending && <> · {t("common.sending")}</>}
+          <Fragment key={m.client_id}>
+            {newDay && <p className="chat-day">{chatDay(m.created_at)}</p>}
+            <div className={`chat-msg${mine ? " chat-msg--me" : ""}${endOfGroup ? " chat-msg--end" : ""}`}>
+              <div className={`bubble ${mine ? "bubble--me" : ""}`}>
+                <span className="sr-only">{mine ? myName : partnerName} : </span>
+                <span className="bubble__text">{m.body}</span>
+              </div>
+              {(endOfGroup || m.pending || m.failed) && (
+                <div className="chat-msg__meta">
+                  <time dateTime={m.created_at}>{new Date(m.created_at).toLocaleTimeString("fr-FR", { hour: "2-digit", minute: "2-digit" })}</time>
+                  {m.pending && <> · {t("common.sending")}</>}
+                </div>
+              )}
             </div>
-          </div>
+          </Fragment>
         );
       })}
       <div ref={endRef} />
     </div>
   );
+}
+
+/** Séparateur de jour : « Aujourd'hui », « Hier » ou la date. */
+function chatDay(iso: string) {
+  const d = new Date(iso), now = new Date();
+  const days = Math.round((new Date(now.toDateString()).getTime() - new Date(d.toDateString()).getTime()) / 86_400_000);
+  return days === 0 ? "Aujourd’hui" : days === 1 ? "Hier" : d.toLocaleDateString("fr-FR", { weekday: "long", day: "numeric", month: "long" });
 }
 
 export function ChatPanel({ onClose, inGame = false }: { onClose: () => void; inGame?: boolean }) {
@@ -120,19 +138,18 @@ export function ChatPanel({ onClose, inGame = false }: { onClose: () => void; in
   const failed = messages.filter((m) => m.failed);
   return (
     <Sheet
-      tall={!inGame}
-      side={!inGame}
-      className={inGame ? "sheet--game-chat" : ""}
+      className={inGame ? "sheet--game-chat" : "sheet--chat-page"}
       onClose={onClose}
       closeLabel={inGame ? "Fermer la conversation et revenir au jeu" : t("chat.minimize")}
       closeIcon={inGame ? "close" : "minus"}
       headerExtra={inGame ? <button type="button" className="btn btn--quiet btn--sm btn--auto" onClick={onClose}>Retour au jeu</button> : undefined}
       title={
-        <div className="row">
+        <div className="row chat-head">
+          {!inGame && <button type="button" className="icon-btn chat-head__back" onClick={onClose} aria-label={t("common.back")}><Icon name="back" size={22} /></button>}
           <Avatar name={partnerName} path={active.partner?.avatar_path} size={40} />
           <div className="stack" style={{ gap: 0 }}>
             <h2 className="t-card">{partnerName}</h2>
-            <span className="t-meta">{inGame ? t("chat.gameContinues") : t("chat.with", { name: partnerName })}</span>
+            <span className="t-meta">{inGame ? t("chat.gameContinues") : "Votre conversation"}</span>
           </div>
         </div>
       }
@@ -159,7 +176,7 @@ export function ChatPanel({ onClose, inGame = false }: { onClose: () => void; in
               maxLength={1000}
               placeholder={t("chat.placeholder", { name: partnerName })}
               value={draft}
-              data-autofocus
+              data-autofocus={inGame || undefined}
               onChange={(e) => {
                 setDraft(e.target.value);
                 e.target.style.height = "auto";

@@ -55,4 +55,25 @@ effacement à la déconnexion).
 - Identifiant d'intention stable entre tentatives : il n'y a pas de nouvelle tentative automatique ; le serveur
   déduplique par `action_id` et refuse un second coup hors phase. Un retry automatique devrait réutiliser l'identifiant.
 - Coffre et notes : modules existants conservés tels quels ; pas de nouveau service.
-- Accueil 360 px : la section « Récemment joués » du témoin n'existe pas dans l'accueil actuel ; non ajoutée.
+
+## Passe de fidélité aux témoins (accueil 01, espace 04/05/06, conversation 07/08)
+
+Demande du propriétaire : rester entièrement fidèle aux témoins pour l'accueil, la conversation et l'espace.
+
+| Témoin | Réalisation | Fichiers |
+|---|---|---|
+| 01 Accueil | Carte duo (avatars superposés, « Votre duo », bouton d'échange 44 px), filtres, carrousel, tuiles « Question du moment » et « À reprendre » (progression réelle « Question/Manche x sur y »), « Récemment joués » + « Tout voir » ; section masquée à 360 px comme le témoin | `src/screens/Home.tsx`, `src/screens/v7parts.tsx`, `src/duo/DuoSwitcher.tsx` |
+| 04 Espace | « Espace avec X » + menu (duos, épisodes, gestion, invitation), couverture 128 px avec crayon, « Seulement toi et X », accès Coffre / Nos notes, 3 parties récentes (durée réelle début → fin) + « Tout voir » | `src/screens/OurSpace.tsx`, `src/duo/DuoDashboard.tsx` |
+| 05 Coffre | Page dédiée avec retour : onglets Souvenirs / Nos notes, cartes « Gardé par vous deux · date » des parties gardées par les deux | `src/screens/Vault.tsx`, `src/components/AppShell.tsx` |
+| 06 Historique | « Vos parties », filtres Toutes / Terminées / À reprendre, 5 par page, total exact côté serveur | `src/screens/History.tsx` |
+| 07/08 Conversation | Plein écran sans navigation ni bouton flottant : retour, avatar, nom, « Votre conversation » ; séparateur de jour ; bulles blanches / roses (rayon 18, 78 %) ; heure sous chaque fin de groupe ; saisie fixe 52 px, bordure cerise au focus, envoi rouge 52 px ; pas de clavier ouvert d'office (sauf depuis la saisie en jeu) | `src/duo/Chat.tsx`, `src/styles/v7.css` |
+
+Écarts assumés :
+- Pas de bouton « … » dans les en-têtes (coffre, historique, conversation) : il n'aurait aucune action réelle.
+- Pas de citation dans les cartes du coffre : aucune réponse n'est stockée pour être affichée, et les réponses intimes ne sont pas exposées.
+- Les flèches de pagination gardent une cible de 44 px (règle d'accessibilité du kit).
+- Le contenu (titres, dates, durées, notes) est celui du compte ; les témoins montrent des données fictives.
+
+Vérifications de cette passe : lint, typecheck, tests unitaires, build ; `v7-flows.mjs` (11 scénarios, dont la conversation
+plein écran et l'aperçu de l'espace), salon (5), G01/G08 (10), clavier (6) ; `render-check.mjs` à 360/390/412 et texte
+à 200 % sur accueil, espace, coffre, historique et conversation. Comparaisons côte à côte dans `docs/captures/v7-20261026/fidelite-*.jpg`.

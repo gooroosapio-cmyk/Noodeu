@@ -77,10 +77,26 @@ try {
   }, {...duo, state: fixture('c14-pack-vf-jeu.json')});
   await scenario('espace : aperçu limité à trois parties, Tout voir', 390, async (page) => {
     await page.goto(`${BASE}/espace`);
-    await page.getByRole('button', {name: 'Parties récentes'}).click();
-    const rows = page.locator('.space-vault .list > li');
+    await expect(page.getByRole('heading', {name: 'Parties récentes'})).toBeVisible();
+    const rows = page.locator('.v7-list .v7-row');
     assert.ok(await rows.count() <= 3, 'trois parties au plus');
-    await expect(page.getByRole('link', {name: /Tout voir/})).toBeVisible();
+    const all = page.getByRole('link', {name: /Tout voir/});
+    assert.match(await all.getAttribute('href') ?? '', /^\/espace\/historique/);
+  });
+  await scenario('conversation plein écran : sans navigation ni bouton flottant, retour', 390, async (page) => {
+    await page.goto(`${BASE}/accueil`);
+    await page.getByRole('button', {name: /Ouvrir la discussion/}).last().click();
+    const sheet = page.locator('.sheet--chat-page');
+    await expect(sheet).toBeVisible();
+    const box = await sheet.boundingBox();
+    assert.ok(box && box.width === 390 && box.y === 0, 'occupe tout l’écran');
+    const input = page.locator('#chat-input');
+    assert.equal(await input.evaluate((el) => el === document.activeElement), false, 'pas de clavier à l’ouverture');
+    const ib = await input.boundingBox();
+    assert.ok(ib && ib.height >= 52 && ib.y + ib.height <= 844, 'saisie 52 px en pied');
+    await page.screenshot({path: `${OUT}/390-chat.png`});
+    await page.locator('.chat-head__back').click();
+    await expect(sheet).toHaveCount(0);
   });
 } finally { await browser.close(); }
 if (failures) process.exitCode = 1;

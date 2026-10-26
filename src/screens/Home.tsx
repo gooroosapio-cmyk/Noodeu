@@ -8,9 +8,13 @@ import { DuoSwitcher } from "../duo/DuoSwitcher";
 import { useCarouselAutoplay } from "./useCarouselAutoplay";
 import { useHomeMoment } from "./useHomeMoment";
 import { PendingRequest, useInviteActions } from "../duo/InviteScreens";
-import { Alert, Art, ConfirmDialog, Icon, PageLoading, Sheet, formatDate } from "../components/ui";
+import { Alert, ConfirmDialog, Icon, PageLoading, Sheet, formatDate } from "../components/ui";
 import { artOf, GameThumb } from "./Libraries";
 import { useCatalog } from "./catalog";
+import { DONE, DuoAvatars, OPEN, SessionLine, dayLabel, minutesOf, useSessions } from "./v7parts";
+
+const CONVERSATION = /^(nd_|pack_conversation|test_form)/;
+const roundWord = (mechanic?: string) => (mechanic && CONVERSATION.test(mechanic) ? "Question" : "Manche");
 
 function PendingInvitationCard() {
   const { out, share, copy, revoke } = useInviteActions();
@@ -46,7 +50,7 @@ function PendingInvitationCard() {
 }
 
 export function Home() {
-  const { userId } = useAuth();
+  const { userId, profile } = useAuth();
   const duo = useDuo();
   const cat = useCatalog(userId);
   const moment = useHomeMoment(duo.active?.id);
@@ -60,6 +64,9 @@ export function Home() {
   }
 
   const { active, invitations, openSession } = duo;
+  const openRows = useSessions(active && openSession ? active.id : undefined, OPEN, 0, 0);
+  const openRow = openRows.rows?.find((r) => r.id === openSession?.id);
+  const recent = useSessions(active?.id, DONE, 0, 0);
 
   let sessionLabel = "", sessionAction = "";
   if (openSession) {
@@ -77,21 +84,18 @@ export function Home() {
   const cards = (quick ? featured.filter((g) => (g.duration_min ?? 99) <= 5) : featured).slice(0, 4);
   const rotation = useCarouselAutoplay(carousel, cards.length);
   if (duo.loading) return <PageLoading />;
-  const next = discover.filter((g) => ["custom-M01", "custom-P01"].includes(artOf(g))).slice(0, 2);
-  const recommendations = next.length === 2 ? next : discover.slice(0, 2);
 
   return (
-    <main className="page page--tight arcade-home">
+    <main className="page page--tight arcade-home v7-home">
 
       {duo.error && <Alert>{t("net.loadError")}</Alert>}
 
       {/* Carte principale : la pause à deux (ou l'invitation). */}
       {active ? (
-        <section className="arcade-duo" aria-label="Votre duo">
-          <DuoIdentity duo={active} online={duo.partnerOnline} size={42} />
-          <Link className="arcade-space" to="/espace" aria-label="Notre espace"><Icon name="home" size={20} /></Link>
-          {/* Plusieurs duos actifs : bascule manuelle conservée à l'intégration du nouvel accueil. */}
-          {duo.activeDuos.length > 1 && <div className="arcade-duo__switch"><DuoSwitcher compact /></div>}
+        <section className="v7-duo-card" aria-label="Votre duo">
+          <DuoAvatars me={{ name: profile?.display_name ?? "", path: profile?.avatar_path }} partner={active.partner} />
+          <span className="v7-duo-card__text"><strong>{profile?.display_name || "Toi"} &amp; {active.partner?.name || "?"}</strong><small>Votre duo</small></span>
+          <DuoSwitcher icon />
         </section>
       ) : invitations.outgoing?.status === "claimed" ? (
         <PendingRequest />
@@ -120,7 +124,7 @@ export function Home() {
       >
         <h1 id="arcade-title">À quoi on joue ?</h1>
         <div className="arcade-filters">
-          <button className="btn btn--secondary" onClick={() => { setQuick(false); requestAnimationFrame(() => go(Math.floor(Math.random() * Math.max(1, featured.slice(0, 4).length)))); }}>Surprise</button>
+          <button className="btn btn--secondary v7-filter--primary" onClick={() => { setQuick(false); requestAnimationFrame(() => go(Math.floor(Math.random() * Math.max(1, featured.slice(0, 4).length)))); }}>Surprise</button>
           <button className="btn btn--secondary" aria-pressed={quick} onClick={() => { setQuick(!quick); go(0); }}>5 minutes</button>
           <a className="btn btn--secondary" href="#arcade-resume">À reprendre</a>
         </div>
@@ -143,28 +147,37 @@ export function Home() {
           </div>
         </>}
       </section>
-      <section className="arcade-dashboard" aria-label="Votre rendez-vous à deux">
-        <article className="arcade-question v7-question-moment">
+      <section className="v7-home-pair" aria-label="Votre rendez-vous à deux">
+        <article className="v7-question-moment v7-home-tile">
           <h2>Question du moment</h2>
           <p aria-live="polite">{!active ? "Créez votre duo pour découvrir votre question." : moment.loading ? "Votre question arrive…" : moment.data?.question ?? "Question indisponible pour le moment."}</p>
-          {moment.error && <button className="btn btn--quiet" onClick={moment.refresh}>Réessayer</button>}
-          <div className="arcade-question__foot"><Art name="custom-025" size={95} /><Link to="/bibliotheques/questions" className="icon-btn" aria-label="Découvrir les questions"><Icon name="arrow-right" /></Link></div>
+          {moment.error && <button className="btn btn--quiet btn--sm" onClick={moment.refresh}>Réessayer</button>}
         </article>
-        <article className="arcade-resume" id="arcade-resume" tabIndex={-1}>
-          <h2>Reprendre la partie</h2>
-          <Art name="custom-M12" size={56} />
-          {active && openSession ? <><p>{sessionGame?.title ?? openSession.title}</p><span className="t-meta">{sessionLabel}</span><Link className="btn btn--secondary" to={`/partie/${openSession.id}`}>{sessionAction}</Link></> : <p>Aucune partie en cours.</p>}
-        </article>
-        <article className="arcade-progress">
-          <h2>Votre parcours</h2>
-          <p>{active && moment.played !== null ? <><strong>{moment.played}</strong> jeux terminés</> : active ? "Progression indisponible" : "Votre aventure commence à deux"}</p>
-          <div className="arcade-progress__dots" aria-hidden="true">{Array.from({ length: 5 }, (_, i) => <span key={i} className={moment.played !== null && i < moment.played ? "is-done" : ""} />)}</div>
-        </article>
+        {active && openSession ? (
+          <Link className="v7-home-tile v7-resume" id="arcade-resume" to={`/partie/${openSession.id}`} aria-label={`${sessionAction} : ${sessionGame?.title ?? openSession.title}`}>
+            <h2>À reprendre</h2>
+            <p className="v7-resume__game">{sessionGame?.title ?? openSession.title}</p>
+            {openRow && openRow.status !== "lobby" && openRow.total_rounds > 0 ? <>
+              <small>{roundWord(sessionGame?.mechanic)} {openRow.current_round} sur {openRow.total_rounds}</small>
+              <span className="v7-resume__bar" aria-hidden="true"><span style={{ width: `${Math.min(100, (100 * openRow.current_round) / openRow.total_rounds)}%` }} /></span>
+            </> : <small>{sessionLabel}</small>}
+          </Link>
+        ) : (
+          <article className="v7-home-tile v7-resume" id="arcade-resume" tabIndex={-1}>
+            <h2>À reprendre</h2>
+            <small>Aucune partie en cours.</small>
+          </article>
+        )}
       </section>
-      <section className="section arcade-next" aria-labelledby="arcade-next">
-        <div className="section__head"><h2 id="arcade-next">Vos prochains jeux</h2><Link to="/bibliotheques" className="btn btn--quiet btn--auto">Voir tout</Link></div>
-        <div>{recommendations.map((g) => <Link key={g.id} to={`/bibliotheques/${g.id}`}><GameThumb game={g} /><span><strong>{g.title}</strong><small>{g.duration_min ? `${g.duration_min} min` : "À votre rythme"}</small></span><Icon name="chevron-right" size={16} /></Link>)}</div>
-      </section>
+      {active && recent.rows && recent.rows.length > 0 && (
+        <section className="v7-recent" aria-labelledby="v7-recent-title">
+          <div className="v7-section-head"><h2 id="v7-recent-title">Récemment joués</h2><Link to="/espace/historique">Tout voir</Link></div>
+          <div className="v7-list">
+            <SessionLine row={recent.rows[0]} game={cat.games.find((g) => g.id === recent.rows![0].game_id)}
+              meta={<>{dayLabel(recent.rows[0].ended_at ?? recent.rows[0].created_at)}{minutesOf(recent.rows[0]) ? ` · ${minutesOf(recent.rows[0])} min` : ""}</>} />
+          </div>
+        </section>
+      )}
     </main>
   );
 }
