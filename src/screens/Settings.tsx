@@ -8,6 +8,7 @@ import { Avatar, clearAvatarCache } from "../components/Avatar";
 import { SubPage } from "../components/AppShell";
 import { Alert, ConfirmDialog, Icon, PageLoading, Sheet, useToast } from "../components/ui";
 import type { Profile, WordForm } from "../lib/types";
+import { authErrorMessage } from "../lib/errors";
 
 
 export function Settings() {
@@ -18,6 +19,7 @@ export function Settings() {
   const [typed, setTyped] = useState("");
   const [deleting, setDeleting] = useState(false);
   const [isAdmin, setIsAdmin] = useState(false);
+  const [changePassword, setChangePassword] = useState(false);
   // Entrée affichée aux administrateurs ; chaque action d'administration est revérifiée par le serveur.
   useEffect(() => { void supabase.rpc("is_app_admin").then(({ data }) => setIsAdmin(data === true)); }, []);
 
@@ -135,8 +137,10 @@ export function Settings() {
 
       <section className="section">
         <h2 className="t-section">{t("settings.account")}</h2>
+        <button className="btn btn--secondary" onClick={() => setChangePassword(true)}><Icon name="lock" />{t("settings.password")}</button>
         <button className="btn btn--secondary" onClick={() => void signOut()}><Icon name="logout" />{t("settings.logout")}</button>
       </section>
+      {changePassword && <PasswordSheet onClose={() => setChangePassword(false)} />}
 
       <section className="section" aria-labelledby="danger-title">
         <h2 className="t-section" id="danger-title" style={{ color: "var(--c-danger)" }}>{t("settings.danger")}</h2>
@@ -170,6 +174,56 @@ export function Settings() {
         </ConfirmDialog>
       )}
     </main>
+  );
+}
+
+/** Changement de mot de passe : le mot de passe actuel est revérifié avant toute modification
+ *  (un téléphone resté ouvert ne suffit pas). Aucun e-mail n'est nécessaire. */
+function PasswordSheet({ onClose }: { onClose: () => void }) {
+  const { session } = useAuth();
+  const toast = useToast();
+  const [current, setCurrent] = useState("");
+  const [next, setNext] = useState("");
+  const [confirm, setConfirm] = useState("");
+  const [busy, setBusy] = useState(false);
+  const [error, setError] = useState<string | null>(null);
+  const lock = useRef(false);
+  const mismatch = confirm.length > 0 && confirm !== next;
+
+  async function submit(e: FormEvent) {
+    e.preventDefault();
+    const email = session?.user.email;
+    if (lock.current || !email || next.length < 8 || next !== confirm) return;
+    if (next === current) { setError(t("settings.passwordSame")); return; }
+    lock.current = true; setBusy(true); setError(null);
+    try {
+      const check = await supabase.auth.signInWithPassword({ email, password: current });
+      if (check.error) { setError(t("settings.passwordWrong")); return; }
+      const { error: e2 } = await supabase.auth.updateUser({ password: next });
+      if (e2) { setError(authErrorMessage(e2.message)); return; }
+      toast(t("settings.passwordDone"));
+      onClose();
+    } catch { setError(t("settings.passwordError")); }
+    finally { lock.current = false; setBusy(false); }
+  }
+
+  return (
+    <Sheet title={<h2 className="t-section">{t("settings.password")}</h2>} onClose={() => { if (!lock.current) onClose(); }}>
+      <form className="stack stack--4" onSubmit={submit}>
+        <label className="field">{t("settings.passwordCurrent")}
+          <input className="input" type="password" required autoComplete="current-password" value={current} onChange={(e) => setCurrent(e.target.value)} disabled={busy} data-autofocus /></label>
+        <label className="field">{t("settings.passwordNew")}
+          <input className="input" type="password" required minLength={8} autoComplete="new-password" value={next} onChange={(e) => setNext(e.target.value)} disabled={busy} aria-describedby="pw-new-hint" />
+          <span id="pw-new-hint" className="field__hint">{t("auth.passwordHint")}</span></label>
+        <label className="field">{t("auth.passwordConfirm")}
+          <input className="input" type="password" required minLength={8} autoComplete="new-password" value={confirm} onChange={(e) => setConfirm(e.target.value)} disabled={busy}
+            aria-invalid={mismatch} aria-describedby={mismatch ? "pw-confirm-error" : undefined} />
+          {mismatch && <span id="pw-confirm-error" className="field__error" role="alert">{t("auth.passwordMismatch")}</span>}</label>
+        {error && <Alert>{error}</Alert>}
+        <button className="btn" type="submit" disabled={busy || !current || next.length < 8 || next !== confirm} aria-busy={busy}>
+          {busy ? t("common.sending") : t("settings.passwordSave")}</button>
+      </form>
+    </Sheet>
   );
 }
 

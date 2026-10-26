@@ -93,3 +93,9 @@ Côté sécurité :
 - un objet déposé ne peut ni être écrasé ni être supprimé depuis le navigateur.
 
 Elle est testée par c30 et c43, et s'applique proprement sur l'état de production. Elle n'utilise aucun service payant.
+
+## Suite (décisions du propriétaire)
+
+- **Changer mon mot de passe** (Réglages → Compte) : le mot de passe actuel est revérifié avant la modification, et la confirmation est obligatoire. Aucun e-mail n'est nécessaire. Testé : confirmation différente bloquée ; mauvais mot de passe actuel refusé sans aucune modification ; changement réussi.
+- **Historique après la fin d'un duo** : conservé en lecture seule pour les deux anciens membres (fonctionnement actuel, confirmé).
+- **Migrations 1500 et 0100** : appliquées en ligne le 26/10 après accord écrit (« Applique 1500 et 0100 »), puis vérifiées en lecture seule.
