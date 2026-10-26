@@ -21,7 +21,7 @@ import { Hero, Stage } from "./premium/Stage";
 import { NudgeButton } from "./premium/Nudge";
 import { universeOf } from "./premium/universe";
 import { SessionRecoveryContext } from "./premium/BoardPieces";
-import { GameHeader, GameMenu, GamePlayers, GameScene } from "./premium/GameFrame";
+import { GameHeader, GameMenu, GamePlayers } from "./premium/GameFrame";
 import { QuestionnairePlaying, QuestionnaireResults, isQuestionnaireMech } from "./board/QuestionnaireGames";
 import { ConversationPlaying, ConversationResults, isConversationMech } from "./board/ConversationGames";
 import { WordPlaying, isWordMech } from "./board/WordGames";
@@ -119,7 +119,6 @@ export function SessionScreen() {
         {st.session.status === "lobby" && <Lobby st={st} me={me} partner={partner} partnerHere={partnerHere} busy={busy} online={online} run={run}
           onRules={() => setRules(true)} onOptions={showOptions ? () => setOptions(true) : undefined} />}
         {(playing || st.session.status === "paused") && <GamePlayers st={st} partnerHere={partnerHere} />}
-        {playing && <GameScene st={st} />}
         {playing && adultStart && <p className="session-adult-note"><Icon name="shield-check" size={16} />+18 · Tu peux passer à tout moment.</p>}
         {playing && <div className="session-play-area"><Stage u={universe} compact>{word ? <WordPlaying c={common} /> : conversation ? <ConversationPlaying c={common} /> : questionnaire ? <QuestionnairePlaying c={common} /> : board ? <BoardPlaying {...common} /> : rounds ? <RoundsPlaying {...common} /> : <Playing st={st} partnerName={partnerName} partner={partner} busy={busy} online={online} run={run} />}</Stage></div>}
         {st.session.status === "paused" && <PausedPanel st={st} userId={userId} partnerName={partnerName} busy={busy} online={online} run={run} />}

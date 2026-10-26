@@ -445,3 +445,8 @@ Migration `20261027000300_multi_duos.sql` (fichier à coller : `docs/sql_editeur
   restent dessinés par l'application.
 - Choix illustrés (✓ / ✗) pour Je n'ai jamais et D'accord ou pas, portraits pour Qui de nous deux, clavier AZERTY au
   Pendu, plateau crème et pions corail / vert au Morpion, océan sombre pour la Bataille navale.
+
+- Mise à jour du 26/10/2026 : plus de photo ni d'image de couverture dans les écrans de jeu (bandeaux de scène retirés,
+  fichiers `public/assets/scenes` supprimés). Règle d'alignement : repères (manche, tour), consignes, états et titres
+  centrés ; champs de saisie, listes d'affirmations et réponses longues restent alignés à gauche ; boutons d'action en
+  pleine largeur.

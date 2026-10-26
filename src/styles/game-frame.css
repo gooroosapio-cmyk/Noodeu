@@ -1,5 +1,5 @@
 /* Écrans de jeu d'après les planches cibles du 26/10/2026. Les menus (accueil, bibliothèque, réglages) gardent le
-   thème cerise ; seuls les écrans de partie passent au vert canard des planches. */
+   thème cerise ; seuls les écrans de partie passent au vert canard des planches. Pas de photo de couverture. */
 .session-shell {
   --g-teal: #1E6B5C;
   --g-teal-down: #164F44;
@@ -60,17 +60,6 @@
 }
 .game-players__goal small { font: 600 .625rem/1 var(--f-body); }
 .game-players__goal strong { font: 800 1.125rem/1.1 var(--f-heading); }
-
-/* Scène illustrée. */
-.game-scene { position: relative; border-radius: 22px; overflow: hidden; flex: none; }
-.game-scene--photo { height: clamp(120px, 20dvh, 180px); box-shadow: 0 6px 18px rgb(60 45 30 / 10%); }
-.game-scene--photo img { width: 100%; height: 100%; object-fit: cover; display: block; }
-.game-scene--object {
-  display: grid; place-items: center; height: clamp(104px, 16dvh, 150px);
-  background: radial-gradient(120% 90% at 50% 100%, color-mix(in srgb, var(--u-tint, #EDE3D5) 70%, #fff), color-mix(in srgb, var(--u-tint, #EDE3D5) 35%, #F6F1EA));
-}
-.game-scene--object img { height: 88%; width: auto; filter: drop-shadow(0 10px 14px rgb(60 40 30 / 18%)); }
-.session-console .stage .stage__decor { display: none; }
 
 /* Cartes, choix et boutons dans le style des planches. */
 .session-console .q-card, .session-console .play-card, .session-console .console-question > .q-card {
@@ -188,3 +177,31 @@
 /* Accents des plateaux alignés sur les planches : vert canard, prune pour le Dé, violet pour Pierre-feuille-ciseaux. */
 .session-console .astra-board:not(.astra-board--pig):not(.astra-board--rps) { --board-accent: var(--g-teal); --board-ink: var(--g-teal-down); }
 .session-console .astra-board--pig { --board-accent: #5B1F3A; --board-ink: #3A1024; }
+
+/* Alignement centré des écrans de jeu (planches) : repères, consignes, états et titres au centre ;
+   champs de saisie, listes d'affirmations et réponses longues restent alignés à gauche pour la lecture. */
+.session-console .q-progress, .session-console .console-progress .q-progress {
+  display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 4px; text-align: center;
+}
+.session-console :is(.q-title, .t-section, .t-card, .t-question, .q-card__head, .stage__eyebrow) { text-align: center; }
+.session-console .q-card__head { justify-content: center; flex-wrap: wrap; gap: 6px; }
+.session-console :is(.console-round, .stage__body) > :is(p, .t-meta, .t-small, .muted),
+.session-console :is(.console-round-controls, .console-answer-zone, .action-bar) > :is(p, .t-meta, .t-small),
+.session-console :is(.wait-turn, .pig-hint, .rps-timer, .cite-timer, .hm-board, .pb-stop) :is(p, .t-meta, .t-small) { text-align: center; }
+.session-console :is(.console-round, .console-round-controls, .action-bar) > .row,
+.session-console .console-round-controls p.row, .session-console .wait-turn__line { justify-content: center; }
+.session-console .console-round > .nd-chip, .session-console .console-answer-zone > .nd-chip { justify-self: center; margin-inline: auto; }
+.session-console .console-round-controls, .session-console .action-bar { justify-items: center; text-align: center; }
+.session-console .console-round-controls > .btn, .session-console .action-bar > .btn { width: 100%; }
+.session-console :is(.field, .field__label, .field__hint, .theatre-note, .theatre-card, .q-answer, .reveal__ribbon, .reveal__envelope) { text-align: left; }
+/* Règle générale : toute ligne d'information, d'état ou de consigne d'un écran de jeu est centrée. */
+.session-console p:is(.t-meta, .t-small, .muted) { text-align: center; }
+.session-console p.row, .session-console p.t-meta.row, .session-console p.t-small.row { justify-content: center; }
+.session-console .stage__body > section > .row.row--between:first-child,
+.session-console .stage__body > .stack > .row.row--between:first-child {
+  flex-direction: column; align-items: center; justify-content: center; gap: 4px; text-align: center;
+}
+.session-console .stack > .nd-chip, .session-console .stack > span.nd-chip { justify-self: center; align-self: center; margin-inline: auto; width: fit-content; }
+.session-console .stack:has(> .nd-chip) { justify-items: center; }
+.session-console :is(.field, .theatre-note, .theatre-card, .q-answer, .reveal__ribbon, .reveal__envelope, .q-item) p { text-align: left; }
+.session-console .action-bar .btn, .session-console .console-round-controls .btn:not(.btn--quiet) { width: 100%; justify-self: stretch; }

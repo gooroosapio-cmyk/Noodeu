@@ -1,6 +1,6 @@
 /* eslint-disable @typescript-eslint/no-explicit-any */
 // Cadre des écrans de jeu (planches cibles du 26/10/2026) : en-tête « réduire · titre · aide », bandeau des deux
-// joueurs avec score ou état, scène illustrée par jeu. Les menus de l'application gardent leur propre thème.
+// joueurs avec score ou état. Les menus de l'application gardent leur propre thème.
 import type { ReactNode } from "react";
 import { Link } from "react-router";
 import { Icon, Sheet } from "../../components/ui";
@@ -8,17 +8,7 @@ import type { Player, SessionState } from "../../lib/types";
 
 type J = any;
 
-/** Décor recadré des planches (sans texte ni interface) ; à défaut, l'illustration 3D de la bibliothèque. */
-const SCENE_BY_MECH: Record<string, string> = {
-  nd_opinion: "opinion", nd_two_truths: "twotruths", nd_sentence: "sentence",
-  nd_never: "never", nd_duo_target: "target", pack_conversation: "questionnaire", test_form: "questionnaire",
-};
-
-/** Jeux dont le plateau est déjà la scène : pas de bandeau en plus. */
-const BOARD_IS_SCENE = new Set(["nd_pig", "nd_hangman", "battleship", "tic_tac_toe", "dots_boxes", "rps", "nd_categories_stop", "nd_name_three_call"]);
-
 const mechOf = (st: SessionState) => (st.game.config as unknown as { mechanic?: string }).mechanic ?? "";
-const codeOf = (st: SessionState) => (st.game.config as unknown as { code?: string }).code;
 
 export function GameHeader({ title, reduceTo, onReduce, onHelp }: { title: string; reduceTo: string; onReduce?: () => void; onHelp: () => void }) {
   return (
@@ -83,20 +73,6 @@ export function GamePlayers({ st, partnerHere }: { st: SessionState; partnerHere
       {board?.target ? <span className="game-players__goal"><small>Objectif</small><strong>{board.target}</strong></span> : <span className="game-players__sep" aria-hidden="true" />}
       <Person p={partner} here={partnerHere} value={board && partner ? board.scores[partner.seat] : undefined} label={label} />
     </section>
-  );
-}
-
-/** Scène du jeu : décor de planche quand il existe, sinon l'objet 3D du jeu sur la teinte de son univers. */
-export function GameScene({ st }: { st: SessionState }) {
-  if (BOARD_IS_SCENE.has(mechOf(st))) return null;
-  const scene = SCENE_BY_MECH[mechOf(st)];
-  const code = codeOf(st);
-  if (scene) return <div className="game-scene game-scene--photo" aria-hidden="true"><img src={`/assets/scenes/${scene}.webp`} alt="" decoding="async" /></div>;
-  if (!code) return null;
-  return (
-    <div className="game-scene game-scene--object" aria-hidden="true">
-      <img src={`/assets/original/library3d/${code}.webp`} alt="" decoding="async" onError={(e) => { (e.currentTarget.parentElement as HTMLElement).hidden = true; }} />
-    </div>
   );
 }
 
