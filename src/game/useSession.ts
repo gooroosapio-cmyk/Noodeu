@@ -13,6 +13,30 @@ const downDelay = (attempt: number) => {
   return Math.round(base * (0.8 + Math.random() * 0.4));
 };
 
+interface ReadBatch {
+  promise: Promise<void>;
+  resolve: () => void;
+  reject: (reason: unknown) => void;
+}
+
+function createReadBatch(): ReadBatch {
+  let resolve!: () => void;
+  let reject!: (reason: unknown) => void;
+  const promise = new Promise<void>((done, fail) => { resolve = done; reject = fail; });
+  return { promise, resolve, reject };
+}
+
+interface SessionContext {
+  key: string;
+  sessionId: string;
+  version: number;
+  recoveryPending: boolean;
+  recoveryGeneration: number;
+  channel: ChannelStatus;
+  inFlight: ReadBatch | null;
+  queued: ReadBatch | null;
+}
+
 /**
  * État d'une partie, toujours relu depuis la base (seule source de vérité).
  * Le temps réel ne fait que signaler qu'une relecture est utile.
@@ -27,116 +51,159 @@ export function useSession(sessionId: string, userId: string | null) {
   // L'époque est publiée avec ce snapshot, pas au début de la panne : après ce rattrapage,
   // les relectures régulières restent des mises à jour normales, même sans WebSocket.
   const [recoveryEpoch, setRecoveryEpoch] = useState(0);
-  const recoveryPending = useRef(false);
-  const recoveryGeneration = useRef(0);
-  const channelRef = useRef<ChannelStatus>("connecting");
-  const versionRef = useRef(0);
   const contextKey = `${sessionId}:${userId ?? ""}`;
-  const contextRef = useRef(contextKey);
-  contextRef.current = contextKey;
+  const latestKey = useRef(contextKey);
+  latestKey.current = contextKey;
+  const activeContext = useRef<SessionContext | null>(null);
+  const isCurrent = useCallback((context: SessionContext) => (
+    activeContext.current === context && latestKey.current === context.key
+  ), []);
 
-  // Une seule relecture à la fois : les demandes arrivées pendant une lecture sont regroupées en une seule suivante.
-  const inFlight = useRef<Promise<void> | null>(null);
-  const again = useRef(false);
-  const loadOnce = useCallback(async () => {
-    const requestedContext = `${sessionId}:${userId ?? ""}`;
-    const requestedGeneration = recoveryGeneration.current;
-    const res = await rpc<SessionState>("get_session_state", { p_session: sessionId });
-    if (contextRef.current !== requestedContext) return;
+  const loadOnce = useCallback(async (context: SessionContext) => {
+    const requestedGeneration = context.recoveryGeneration;
+    const res = await rpc<SessionState>("get_session_state", { p_session: context.sessionId });
+    if (!isCurrent(context)) return;
     setLoading(false);
     if (!res.ok) {
-      recoveryPending.current = true;
-      recoveryGeneration.current += 1;
+      context.recoveryPending = true;
+      context.recoveryGeneration += 1;
       setError(res.error);
       return;
     }
     // Une réponse lancée avant la rupture ne prouve pas que le transport a repris.
-    if (recoveryPending.current && requestedGeneration !== recoveryGeneration.current) return;
+    if (context.recoveryPending && requestedGeneration !== context.recoveryGeneration) return;
     const next = res as unknown as SessionState;
     // On n'applique jamais un état plus ancien que celui déjà affiché.
-    if (next.session.state_version >= versionRef.current) {
-      versionRef.current = next.session.state_version;
-      if (recoveryPending.current) {
-        recoveryPending.current = false;
+    if (next.session.state_version >= context.version) {
+      context.version = next.session.state_version;
+      if (context.recoveryPending) {
+        context.recoveryPending = false;
         setRecoveryEpoch((epoch) => epoch + 1);
       }
       setState(next);
       setError(null);
     }
-  }, [sessionId, userId]);
-  const load = useCallback(async () => {
-    if (inFlight.current) { again.current = true; return inFlight.current; }
-    const run = (async () => {
-      do { again.current = false; await loadOnce(); } while (again.current);
-    })();
-    inFlight.current = run;
-    try { await run; } finally { if (inFlight.current === run) inFlight.current = null; }
-  }, [loadOnce]);
+  }, [isCurrent]);
+  const load = useCallback((): Promise<void> => {
+    const context = activeContext.current;
+    if (!context || context.key !== contextKey || !isCurrent(context)) return Promise.resolve();
+    // Chaque contexte possède sa file. Une ancienne partie ne peut pas absorber les demandes de la suivante.
+    if (context.inFlight) {
+      // Les appels pendant une lecture attendent une seule lecture suivante, pas toutes les futures.
+      context.queued ??= createReadBatch();
+      return context.queued.promise;
+    }
+    const start = (batch: ReadBatch) => {
+      context.inFlight = batch;
+      const complete = () => {
+        const next = context.queued;
+        context.queued = null;
+        context.inFlight = null;
+        // Transférer la file avant de réveiller les appelants : leurs nouveaux appels ne peuvent
+        // ni doubler cette lecture, ni prolonger la promesse du lot qui vient de terminer.
+        if (next) {
+          if (isCurrent(context)) start(next);
+          else next.resolve();
+        }
+      };
+      void loadOnce(context).then(() => {
+        complete();
+        batch.resolve();
+      }, (reason: unknown) => {
+        complete();
+        batch.reject(reason);
+      });
+    };
+    const batch = createReadBatch();
+    start(batch);
+    return batch.promise;
+  }, [contextKey, isCurrent, loadOnce]);
 
   useEffect(() => {
-    versionRef.current = 0;
-    recoveryPending.current = false;
-    recoveryGeneration.current = 0;
-    channelRef.current = "connecting";
+    const context: SessionContext = {
+      key: contextKey, sessionId, version: 0, recoveryPending: false,
+      recoveryGeneration: 0, channel: "connecting", inFlight: null, queued: null,
+    };
+    activeContext.current = context;
     setRecoveryEpoch(0);
     setLoading(true);
+    setChannel("connecting");
     setState(null); setError(null); setPresent([]);
     void load();
-    return onResume(() => void load());
-  }, [load]);
+    const stopResume = onResume(() => { if (isCurrent(context)) void load(); });
+    return () => {
+      if (activeContext.current === context) activeContext.current = null;
+      // Les appelants quittant ce contexte n'attendent pas une ancienne requête réseau bloquée.
+      context.queued?.resolve();
+      context.inFlight?.resolve();
+      context.queued = null;
+      context.inFlight = null;
+      stopResume();
+    };
+  }, [contextKey, sessionId, isCurrent, load]);
 
   useEffect(() => {
-    if (!userId) return;
+    const context = activeContext.current;
+    if (!userId || !context) return;
     return subscribePrivate(`session:${sessionId}`, {
       presenceKey: userId,
-      onPresence: setPresent,
+      onPresence: (keys) => { if (isCurrent(context)) setPresent(keys); },
       onStatus: (s) => {
-        if ((channelRef.current === "live" && s === "down") || (channelRef.current === "down" && s === "live")) {
-          recoveryPending.current = true;
-          recoveryGeneration.current += 1;
+        if (!isCurrent(context)) return;
+        if ((context.channel === "live" && s === "down") || (context.channel === "down" && s === "live")) {
+          context.recoveryPending = true;
+          context.recoveryGeneration += 1;
         }
-        channelRef.current = s;
+        context.channel = s;
         setChannel(s);
         if (s === "live") void load(); // rattrape ce qui a pu se passer pendant la coupure
       },
       broadcast: {
         state: (p) => {
-          if (typeof p.v !== "number" || p.v > versionRef.current) void load();
+          if (isCurrent(context) && (typeof p.v !== "number" || p.v > context.version)) void load();
         },
       },
     });
-  }, [sessionId, userId, load]);
+  }, [sessionId, userId, isCurrent, load]);
 
   useEffect(() => {
+    const context = activeContext.current;
+    if (!context) return;
     let timer: ReturnType<typeof setTimeout>;
+    let stopped = false;
     let attempt = 0;
     const tick = () => {
       timer = setTimeout(() => {
+        if (stopped || !isCurrent(context)) return;
         if (document.visibilityState === "visible") void load();
         attempt += 1;
         tick();
       }, channel === "live" ? POLL_LIVE_MS : downDelay(attempt));
     };
     tick();
-    return () => clearTimeout(timer);
-  }, [channel, load]);
+    return () => { stopped = true; clearTimeout(timer); };
+  }, [channel, isCurrent, load]);
 
   /** Action serveur : relit l'état ensuite, quel que soit le résultat. */
   const act = useCallback(
     async (fn: string, args: Record<string, unknown>) => {
+      const context = activeContext.current;
+      if (!context || context.key !== contextKey || !isCurrent(context)) return { ok: false as const, error: "stale_session" };
       const res = await rpc(fn, { p_session: sessionId, ...args });
+      if (!isCurrent(context)) return res;
       if (!res.ok && res.error === "network") {
-        recoveryPending.current = true;
-        recoveryGeneration.current += 1;
+        context.recoveryPending = true;
+        context.recoveryGeneration += 1;
       }
       await load();
       return res;
     },
-    [sessionId, load],
+    [sessionId, contextKey, isCurrent, load],
   );
 
-  const currentState = state?.session.id === sessionId ? state : null;
-  return { state: currentState, error, loading: loading || (state !== null && currentState === null), channel, present, recoveryEpoch, load, act };
+  const current = activeContext.current?.key === contextKey;
+  const currentState = current && state?.session.id === sessionId ? state : null;
+  return { state: currentState, error: current ? error : null, loading: !current || loading, channel: current ? channel : "connecting", present: current ? present : [], recoveryEpoch: current ? recoveryEpoch : 0, load, act };
 }
 
 /** Brouillon local d'une étape (survit au rafraîchissement, effacé à la fermeture de l'onglet). */

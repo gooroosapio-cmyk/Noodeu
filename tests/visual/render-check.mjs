@@ -94,10 +94,19 @@ async function setup(page, scenario) {
     }
     if (p.endsWith("/game_favorites")) return json([{ game_id: "ND-Q-P01" }, { game_id: "N2-076" }]);
     if (p.endsWith("/game_sessions")) {
-      // Filtre de statut, pagination (offset/limit) et total exact, comme PostgREST.
+      // Périmètre du duo, filtres, ordre et pagination (offset/limit), comme PostgREST.
       const q = new URL(route.request().url()).searchParams;
       const wanted = /^in\.\((.*)\)$/.exec(q.get("status") ?? "")?.[1]?.split(",");
-      const all = (scenario.history ?? []).filter((h) => !wanted || wanted.includes(h.status));
+      const coupleId = q.get("couple_id")?.replace(/^eq\./, "");
+      const order = (q.get("order") ?? "").split(",").filter(Boolean).map((part) => part.split("."));
+      const all = (scenario.history ?? []).filter((h) => (!coupleId || (h.couple_id ?? DUO) === coupleId) && (!wanted || wanted.includes(h.status)))
+        .sort((a, b) => {
+          for (const [column, direction] of order) {
+            const cmp = String(a[column] ?? "").localeCompare(String(b[column] ?? ""));
+            if (cmp) return direction === "desc" ? -cmp : cmp;
+          }
+          return 0;
+        });
       const offset = Number(q.get("offset") ?? 0), limit = Number(q.get("limit") ?? all.length);
       const page = all.slice(offset, offset + limit);
       return route.fulfill({ status: 200, contentType: "application/json", headers: { "content-range": `${offset}-${offset + Math.max(page.length - 1, 0)}/${all.length}`, "access-control-expose-headers": "content-range" }, body: JSON.stringify(page) });

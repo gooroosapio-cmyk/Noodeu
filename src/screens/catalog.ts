@@ -1,97 +1,130 @@
-import { useCallback, useEffect, useRef, useState } from "react";
+import { useEffect, useState, useSyncExternalStore } from "react";
 import { rpc, supabase } from "../lib/supabase";
 import type { Category, Format, Game, Intensity } from "../lib/types";
 
-interface CatalogSnapshot { categories: Category[]; games: Game[]; favorites: Set<string>; recent: string[]; error: boolean }
+interface CatalogSnapshot { categories: Category[]; games: Game[]; favorites: Set<string>; recent: string[]; loading: boolean; error: boolean }
 
-// Catalogue partagé entre les écrans, en mémoire seulement (jamais sur disque) et propre à un compte :
-// les requêtes simultanées n'en font qu'une, et un retour sur un écran s'affiche sans attendre.
+// En mémoire seulement, avec un abonnement par compte : les écrans ouverts après une
+// écriture optimiste reçoivent aussi sa confirmation ou son annulation.
 const FRESH_MS = 30_000;
-let cache: { userId: string | null; at: number; snap: CatalogSnapshot } | null = null;
-let inflight: { userId: string | null; promise: Promise<CatalogSnapshot> } | null = null;
+const catalogs = new Map<string | null, ReturnType<typeof createCatalog>>();
 
-function fetchCatalog(userId: string | null) {
-  if (inflight?.userId === userId) return inflight.promise;
-  const promise = (async (): Promise<CatalogSnapshot> => {
-    const [c, g, f, r] = await Promise.all([
-      supabase.from("game_categories").select("id, title, promise, sort, is_demo, family_no").eq("status", "published").order("sort"),
-      supabase.from("games").select("id, category_id, mechanic, title, promise, hook, style, duration_min, duration_max, content_level, current_version, sort, is_demo, implementation, adult_available, mute_ok, difficulties, thumbnail, meta, intensity, formats, duration_kind").eq("status", "published").order("sort"),
-      userId ? supabase.from("game_favorites").select("game_id").eq("user_id", userId) : Promise.resolve({ data: [], error: null }),
-      // Parties du duo (lisibles par ses seuls membres) : activités récemment jouées.
-      supabase.from("game_sessions").select("game_id, created_at").order("created_at", { ascending: false }).limit(40),
-    ]);
-    const snap = {
-      categories: (c.data as Category[]) ?? [],
-      games: (g.data as Game[]) ?? [],
-      favorites: new Set(((f.data as { game_id: string }[]) ?? []).map((x) => x.game_id)),
-      recent: [...new Set(((r.data as { game_id: string }[]) ?? []).map((x) => x.game_id))],
-      error: Boolean(c.error || g.error),
-    };
-    if (!snap.error) cache = { userId, at: Date.now(), snap };
-    return snap;
-  })().finally(() => { if (inflight?.promise === promise) inflight = null; });
-  inflight = { userId, promise };
-  return promise;
+function createCatalog(userId: string | null) {
+  let snapshot: CatalogSnapshot = { categories: [], games: [], favorites: new Set(), recent: [], loading: true, error: false };
+  let confirmedFavorites = new Set<string>();
+  const pendingFavorites = new Map<string, boolean>();
+  const writes = new Map<string, Promise<boolean>>();
+  const listeners = new Set<() => void>();
+  let favoriteRevision = 0;
+  let needsReconciliation = false;
+  let at = 0;
+  let inflight: Promise<void> | null = null;
+
+  function publish(patch: Partial<CatalogSnapshot> = {}) {
+    const favorites = new Set(confirmedFavorites);
+    for (const [gameId, favorite] of pendingFavorites) {
+      if (favorite) favorites.add(gameId);
+      else favorites.delete(gameId);
+    }
+    snapshot = { ...snapshot, ...patch, favorites };
+    for (const listener of listeners) listener();
+  }
+
+  function load(): Promise<void> {
+    if (inflight) return inflight;
+    const readRevision = favoriteRevision;
+    const hadPendingFavorites = pendingFavorites.size > 0;
+    publish({ error: false });
+    const promise = Promise.resolve().then(async () => {
+      if (!listeners.size) { at = 0; return; }
+      const [c, g, f, r] = await Promise.all([
+        supabase.from("game_categories").select("id, title, promise, sort, is_demo, family_no").eq("status", "published").order("sort"),
+        supabase.from("games").select("id, category_id, mechanic, title, promise, hook, style, duration_min, duration_max, content_level, current_version, sort, is_demo, implementation, adult_available, mute_ok, difficulties, thumbnail, meta, intensity, formats, duration_kind").eq("status", "published").order("sort"),
+        userId ? supabase.from("game_favorites").select("game_id").eq("user_id", userId) : Promise.resolve({ data: [], error: null }),
+        // Parties du duo, lisibles par ses seuls membres.
+        supabase.from("game_sessions").select("game_id, created_at").order("created_at", { ascending: false }).limit(40),
+      ]);
+      // Une lecture commencée avant une écriture (même déjà confirmée) ne doit
+      // jamais la défaire. Les écritures encore en vol restent superposées.
+      if (!f.error && !hadPendingFavorites && readRevision === favoriteRevision) {
+        confirmedFavorites = new Set(((f.data as { game_id: string }[]) ?? []).map((x) => x.game_id));
+        needsReconciliation = false;
+      }
+      const error = Boolean(c.error || g.error || f.error || r.error);
+      if (!error && !needsReconciliation) at = Date.now();
+      publish({
+        categories: c.error ? snapshot.categories : (c.data as Category[]) ?? [],
+        games: g.error ? snapshot.games : (g.data as Game[]) ?? [],
+        recent: r.error ? snapshot.recent : [...new Set(((r.data as { game_id: string }[]) ?? []).map((x) => x.game_id))],
+        loading: false,
+        error,
+      });
+    }).catch(() => publish({ loading: false, error: true }))
+      .finally(() => { if (inflight === promise) inflight = null; });
+    inflight = promise;
+    return promise;
+  }
+
+  async function reconcileFavorites() {
+    // Ne pas rejoindre une lecture qui a précédé l'échec de l'écriture.
+    if (inflight) await inflight;
+    at = 0;
+    // Après un changement de compte, ne pas lancer une requête de l'ancien
+    // compte avec la nouvelle authentification. Son retour déclenchera la lecture.
+    if (listeners.size && !pendingFavorites.size && needsReconciliation) await load();
+  }
+
+  function toggleFavorite(gameId: string): Promise<boolean> {
+    if (!userId || !listeners.size) return Promise.resolve(false);
+    const pending = writes.get(gameId);
+    if (pending) return pending;
+    const favorite = !snapshot.favorites.has(gameId);
+    pendingFavorites.set(gameId, favorite);
+    favoriteRevision += 1;
+    const promise = Promise.resolve().then(async () => {
+      const { error } = favorite
+        ? await supabase.from("game_favorites").upsert({ user_id: userId, game_id: gameId }, { onConflict: "user_id,game_id", ignoreDuplicates: true })
+        : await supabase.from("game_favorites").delete().eq("user_id", userId).eq("game_id", gameId);
+      return !error;
+    }).catch(() => false).then((ok) => {
+      if (ok) {
+        if (favorite) confirmedFavorites.add(gameId);
+        else confirmedFavorites.delete(gameId);
+      } else {
+        needsReconciliation = true;
+        at = 0;
+      }
+      pendingFavorites.delete(gameId);
+      writes.delete(gameId);
+      favoriteRevision += 1;
+      publish();
+      // Si un autre favori est encore en écriture, sa fin déclenchera la relecture.
+      if (needsReconciliation && !pendingFavorites.size) void reconcileFavorites();
+      return ok;
+    });
+    writes.set(gameId, promise);
+    publish();
+    return promise;
+  }
+
+  return {
+    getSnapshot: () => snapshot,
+    subscribe(listener: () => void) { listeners.add(listener); return () => { listeners.delete(listener); }; },
+    ensureFresh() { if (!at || Date.now() - at > FRESH_MS) void load(); },
+    reload: load,
+    toggleFavorite,
+  };
 }
 
 export function useCatalog(userId: string | null) {
-  const cached = cache?.userId === userId ? cache : null;
-  const [categories, setCategories] = useState<Category[]>(cached?.snap.categories ?? []);
-  const [games, setGames] = useState<Game[]>(cached?.snap.games ?? []);
-  const [favorites, setFavorites] = useState<Set<string>>(cached?.snap.favorites ?? new Set());
-  const [recent, setRecent] = useState<string[]>(cached?.snap.recent ?? []);
-  const [loading, setLoading] = useState(!cached);
-  const [error, setError] = useState(false);
-  const alive = useRef(true);
-  useEffect(() => { alive.current = true; return () => { alive.current = false; }; }, []);
-
-  const apply = useCallback((snap: CatalogSnapshot) => {
-    if (!alive.current) return;
-    setError(snap.error);
-    setCategories(snap.categories);
-    setGames(snap.games);
-    setFavorites(snap.favorites);
-    setRecent(snap.recent);
-    setLoading(false);
-  }, []);
-  const load = useCallback(async () => {
-    setError(false);
-    apply(await fetchCatalog(userId));
-  }, [userId, apply]);
-
-  useEffect(() => {
-    const hit = cache?.userId === userId ? cache : null;
-    if (hit) apply(hit.snap);
-    if (!hit || Date.now() - hit.at > FRESH_MS) void fetchCatalog(userId).then(apply);
-  }, [userId, apply]);
-
-  // Les favoris changés ici restent justes pour les autres écrans.
-  useEffect(() => { if (cache?.userId === userId) cache.snap = { ...cache.snap, favorites }; }, [favorites, userId]);
-
-  /** Favoris personnels : jamais visibles par l'autre membre du duo. Renvoie false en cas d'échec. */
-  const toggleFavorite = useCallback(
-    async (gameId: string) => {
-      if (!userId) return false;
-      const isFav = favorites.has(gameId);
-      setFavorites((prev) => {
-        const next = new Set(prev);
-        if (isFav) next.delete(gameId);
-        else next.add(gameId);
-        return next;
-      });
-      const { error: e } = isFav
-        ? await supabase.from("game_favorites").delete().eq("user_id", userId).eq("game_id", gameId)
-        : await supabase.from("game_favorites").upsert({ user_id: userId, game_id: gameId }, { onConflict: "user_id,game_id", ignoreDuplicates: true });
-      if (e) {
-        void load(); // retour à l'état réel
-        return false;
-      }
-      return true;
-    },
-    [favorites, userId, load],
-  );
-
-  return { categories, games, favorites, recent, loading, error, reload: load, toggleFavorite };
+  let catalog = catalogs.get(userId);
+  if (!catalog) {
+    catalog = createCatalog(userId);
+    catalogs.set(userId, catalog);
+  }
+  const snapshot = useSyncExternalStore(catalog.subscribe, catalog.getSnapshot, catalog.getSnapshot);
+  useEffect(() => { catalog.ensureFresh(); }, [catalog]);
+  return { ...snapshot, reload: catalog.reload, toggleFavorite: catalog.toggleFavorite };
 }
 
 // ---------- Rayons de la bibliothèque ----------

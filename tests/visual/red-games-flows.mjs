@@ -27,7 +27,8 @@ async function scenario(name,state,fn,width=390){
 try{
  for(const width of [320,412]){
   await scenario('G01 vérité : aucune zone de saisie, C’est répondu sans texte',fixture('rouge-g01-verite.json'),async(page,moves)=>{
-   assert.equal(await page.locator('textarea, input[type="text"], input:not([type])').count(),0,'aucun champ dans Action ou vérité');
+   await expect(page.locator('.red-td')).toBeVisible();
+   assert.equal(await page.locator('.red-td').locator('textarea, input[type="text"], input:not([type])').count(),0,'aucun champ de réponse dans Action ou vérité');
    await expect(page.getByRole('button',{name:'Changer de carte'})).toBeVisible();
    await expect(page.getByRole('button',{name:'Passer',exact:true})).toBeVisible();
    const done=page.getByRole('button',{name:'C’est répondu !'});
@@ -42,8 +43,8 @@ try{
   await expect.poll(()=>moves.length).toBe(1);assert.equal(moves[0].p_type,'mark_done');
  });
  await scenario('G01 observateur : aucune commande de réponse',fixture('rouge-g01-action-observe.json'),async page=>{
-  assert.equal(await page.getByRole('button',{name:/C’est (fait|répondu)/}).count(),0);
   await expect(page.getByText('réalise son action',{exact:false})).toBeVisible();
+  assert.equal(await page.getByRole('button',{name:/C’est (fait|répondu)/}).count(),0);
  });
  await scenario('G08 auteur : trois propositions, un mensonge, verrouillage',fixture('rouge-g08-ecriture.json'),async(page,moves)=>{
   const lock=page.getByRole('button',{name:'Verrouiller mes propositions'});
@@ -82,7 +83,8 @@ try{
   });
  }
  await scenario('G08 devineur pendant l’écriture : rien à lire, pas de champ',fixture('rouge-g08-attente.json'),async page=>{
-  assert.equal(await page.locator('input, textarea').count(),0);
+  await expect(page.locator('.red-tt')).toBeVisible();
+  assert.equal(await page.locator('.red-tt').locator('input, textarea').count(),0);
   await expect(page.getByText('écrit ses trois affirmations',{exact:false})).toBeVisible();
  });
  await scenario('G08 devineur : choisit puis valide',fixture('rouge-g08-devine.json'),async(page,moves)=>{

@@ -105,8 +105,21 @@ export function NetworkBanner() {
 // afin que le bouton « retour » du téléphone ferme d'abord la fenêtre du dessus.
 const sheetStack: (() => void)[] = [];
 let historyPushed = false;
+let historyBackPending = false;
+function ensureSheetHistory() {
+  if (historyPushed || historyBackPending || !sheetStack.length) return;
+  history.pushState({ noodeuSheet: true }, "");
+  historyPushed = true;
+}
 if (typeof window !== "undefined") {
   window.addEventListener("popstate", () => {
+    // Le retour demandé à la fermeture peut arriver après l'ouverture d'une autre feuille.
+    // Il retire l'ancienne entrée ; il ne doit pas fermer la nouvelle fenêtre.
+    if (historyBackPending) {
+      historyBackPending = false;
+      ensureSheetHistory();
+      return;
+    }
     if (!historyPushed || !sheetStack.length) return;
     historyPushed = false;
     sheetStack[sheetStack.length - 1]();
@@ -114,18 +127,17 @@ if (typeof window !== "undefined") {
 }
 function registerSheet(close: () => void) {
   sheetStack.push(close);
-  if (!historyPushed) {
-    history.pushState({ noodeuSheet: true }, "");
-    historyPushed = true;
-  }
+  ensureSheetHistory();
   return () => {
     const i = sheetStack.indexOf(close);
     if (i >= 0) sheetStack.splice(i, 1);
     // Différé : si une autre fenêtre s'ouvre aussitôt (remplacement), elle réutilise l'entrée.
     setTimeout(() => {
-      if (sheetStack.length || !historyPushed) return;
+      if (historyBackPending) return;
+      if (sheetStack.length) { ensureSheetHistory(); return; }
+      if (!historyPushed) return;
       historyPushed = false;
-      if (history.state?.noodeuSheet) history.back();
+      if (history.state?.noodeuSheet) { historyBackPending = true; history.back(); }
     }, 0);
   };
 }

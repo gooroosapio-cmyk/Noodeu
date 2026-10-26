@@ -219,8 +219,9 @@ export function DuoProvider({ children }: { children: ReactNode }) {
   }, [loadNotifications]);
 
   const loadArchive = useCallback(async (coupleId: string) => {
-    const { data } = await supabase.from("duo_messages").select("id, user_id, client_id, body, created_at")
+    const { data, error } = await supabase.from("duo_messages").select("id, user_id, client_id, body, created_at")
       .eq("couple_id", coupleId).order("created_at", { ascending: true }).limit(300);
+    if (error) throw new Error("archive_load_failed");
     return (data as ChatMessage[]) ?? [];
   }, []);
 
