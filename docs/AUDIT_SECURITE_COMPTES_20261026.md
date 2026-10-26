@@ -99,3 +99,34 @@ Elle est testée par c30 et c43, et s'applique proprement sur l'état de product
 - **Changer mon mot de passe** (Réglages → Compte) : le mot de passe actuel est revérifié avant la modification, et la confirmation est obligatoire. Aucun e-mail n'est nécessaire. Testé : confirmation différente bloquée ; mauvais mot de passe actuel refusé sans aucune modification ; changement réussi.
 - **Historique après la fin d'un duo** : conservé en lecture seule pour les deux anciens membres (fonctionnement actuel, confirmé).
 - **Migrations 1500 et 0100** : appliquées en ligne le 26/10 après accord écrit (« Applique 1500 et 0100 »), puis vérifiées en lecture seule.
+
+## Correctif après l'audit de Codex (changement de mot de passe)
+
+Codex a relevé trois défauts dans la première version (`0922497`, non mise en ligne) :
+
+1. **Vérification par reconnexion dans le navigateur.** Si le compte changeait pendant l'opération, la mise à jour pouvait viser la nouvelle session ; une réponse tardive pouvait aussi reconnecter un compte après sa déconnexion.
+2. **Erreurs réseau** présentées comme un mauvais mot de passe.
+3. **Message de récupération** sans contact utilisable.
+
+Correctifs :
+
+- **Fonction serveur `change_password`** (migration `20261030001600_change_password.sql`, à appliquer avec accord). Elle vérifie le mot de passe actuel (bcrypt) et enregistre le nouveau, en une seule opération liée au jeton de l'appelant. Aucune session n'est ouverte ni remplacée côté navigateur. Règles :
+  - de 8 caractères à 72 octets ;
+  - le nouveau mot de passe doit différer de l'actuel ;
+  - 5 échecs en 15 minutes bloquent le compte concerné seulement ;
+  - les essais sont illisibles depuis le navigateur.
+- **Écran.** La feuille se ferme si le compte change, et une réponse tardive est ignorée. Une panne réseau ou serveur affiche « Ton mot de passe n'a pas changé ; réessaie ».
+- **Contact de récupération.** L'adresse vient de la variable publique `VITE_SUPPORT_EMAIL` (lien e-mail). Elle n'est jamais codée en dur. Sans elle, le message générique reste affiché.
+
+Preuves :
+
+- `supabase/tests/c44_change_password.sql`. Couvre :
+  - refus sans connexion ;
+  - mot de passe trop court, trop long, identique ou faux ;
+  - le hachage `$2a$10$` attendu par Supabase Auth ;
+  - le compte B jamais touché ;
+  - le blocage après 5 échecs, sans effet sur B ;
+  - les essais illisibles depuis le navigateur.
+
+  Résultat : **OK**. Migration appliquée sans erreur sur une copie de l'état de production (transaction annulée).
+- `tests/visual/password-flows.mjs` : 6 scénarios **PASS**. Le dernier simule une déconnexion depuis un autre onglet pendant la requête : la réponse est ignorée et aucune session n'est recréée. Dans tous les cas, aucun appel de reconnexion ni de mise à jour directe du compte depuis le navigateur.

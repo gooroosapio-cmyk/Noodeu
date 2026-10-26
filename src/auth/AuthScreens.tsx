@@ -15,6 +15,14 @@ function useNextPath() {
 }
 
 /** Emplacement réservé : aucun appel OAuth tant que le propriétaire n'a pas branché Google. */
+/** Contact de réinitialisation : adresse publique configurée au déploiement (VITE_SUPPORT_EMAIL), jamais codée en dur. */
+function ForgotPassword() {
+  const contact = import.meta.env.VITE_SUPPORT_EMAIL?.trim();
+  if (!contact) return <p className="t-small muted center">{t("auth.forgot")}</p>;
+  const subject = encodeURIComponent("Noodeu : réinitialiser mon mot de passe");
+  return <p className="t-small muted center">{t("auth.forgotContact")} <a href={`mailto:${contact}?subject=${subject}`}>{contact}</a></p>;
+}
+
 function GooglePlaceholder() {
   return <div className="stack stack--2">
     <button className="btn btn--secondary" type="button" disabled aria-describedby="google-pending">
@@ -143,7 +151,7 @@ export function AuthForm({ mode }: { mode: "signup" | "login" }) {
           <span>{busy ? t("common.sending") : signup ? t("auth.signup") : t("auth.login")}</span><span className="auth-submit__arrow"><Icon name="arrow-right" /></span>
         </button>
         {/* Phase de test : pas de service d'envoi d'e-mails, la réinitialisation se fait à la main par l'équipe. */}
-        {!signup && <p className="t-small muted center">{t("auth.forgot")}</p>}
+        {!signup && <ForgotPassword />}
       </form>
       <div className="auth-google"><GooglePlaceholder /></div>
       <Link className="btn btn--quiet" to={`${signup ? "/connexion" : "/inscription"}${suffix}`}>{signup ? t("auth.toLogin") : t("auth.toSignup")}</Link>

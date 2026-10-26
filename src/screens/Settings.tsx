@@ -8,7 +8,6 @@ import { Avatar, clearAvatarCache } from "../components/Avatar";
 import { SubPage } from "../components/AppShell";
 import { Alert, ConfirmDialog, Icon, PageLoading, Sheet, useToast } from "../components/ui";
 import type { Profile, WordForm } from "../lib/types";
-import { authErrorMessage } from "../lib/errors";
 
 
 export function Settings() {
@@ -177,34 +176,49 @@ export function Settings() {
   );
 }
 
-/** Changement de mot de passe : le mot de passe actuel est revérifié avant toute modification
- *  (un téléphone resté ouvert ne suffit pas). Aucun e-mail n'est nécessaire. */
+/** Changement de mot de passe : une seule fonction serveur, liée au jeton du compte connecté, vérifie le mot de passe
+ *  actuel et enregistre le nouveau. Aucune session n'est ouverte ni remplacée ; si le compte change pendant
+ *  l'opération, la feuille se ferme et la réponse est ignorée. Une panne réseau n'est jamais présentée comme une erreur de saisie. */
 function PasswordSheet({ onClose }: { onClose: () => void }) {
   const { session } = useAuth();
   const toast = useToast();
+  const owner = useRef(session?.user.id ?? null);
+  const userId = session?.user.id ?? null;
   const [current, setCurrent] = useState("");
   const [next, setNext] = useState("");
   const [confirm, setConfirm] = useState("");
   const [busy, setBusy] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const lock = useRef(false);
+  const live = useRef(userId);
+  live.current = userId;
+  const alive = useRef(true);
+  useEffect(() => { alive.current = true; return () => { alive.current = false; }; }, []);
   const mismatch = confirm.length > 0 && confirm !== next;
+  // Déconnexion ou autre compte pendant que la feuille est ouverte : on la ferme sans rien afficher.
+  useEffect(() => { if (userId !== owner.current) onClose(); }, [userId, onClose]);
 
   async function submit(e: FormEvent) {
     e.preventDefault();
-    const email = session?.user.email;
-    if (lock.current || !email || next.length < 8 || next !== confirm) return;
-    if (next === current) { setError(t("settings.passwordSame")); return; }
+    if (lock.current || !owner.current || owner.current !== userId || next.length < 8 || next !== confirm) return;
     lock.current = true; setBusy(true); setError(null);
+    const sentFor = owner.current;
+    let message: string | null = null;
     try {
-      const check = await supabase.auth.signInWithPassword({ email, password: current });
-      if (check.error) { setError(t("settings.passwordWrong")); return; }
-      const { error: e2 } = await supabase.auth.updateUser({ password: next });
-      if (e2) { setError(authErrorMessage(e2.message)); return; }
-      toast(t("settings.passwordDone"));
-      onClose();
-    } catch { setError(t("settings.passwordError")); }
-    finally { lock.current = false; setBusy(false); }
+      const { data, error: e2 } = await supabase.rpc("change_password", { p_current: current, p_new: next });
+      const res = data as { ok?: boolean; error?: string } | null;
+      if (e2 || !res) message = t("settings.passwordError");
+      else if (res.ok) message = null;
+      else message = t(res.error === "wrong_password" ? "settings.passwordWrong" : res.error === "same_password" ? "settings.passwordSame"
+        : res.error === "weak_password" ? "settings.passwordWeak" : res.error === "too_many_attempts" ? "settings.passwordLocked" : "settings.passwordError");
+    } catch { message = t("settings.passwordError"); }
+    finally { lock.current = false; }
+    // Réponse arrivée après un changement de compte : ignorée.
+    if (!alive.current || live.current !== sentFor) return;
+    setBusy(false);
+    if (message) { setError(message); return; }
+    toast(t("settings.passwordDone"));
+    onClose();
   }
 
   return (

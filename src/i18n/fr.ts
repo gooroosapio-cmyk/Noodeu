@@ -113,6 +113,7 @@ export const fr = {
   "auth.toSignup": "Créer un compte",
   "auth.checkEmail": "Vérifie ta boîte mail : un lien de confirmation vient d'être envoyé à {email}.",
   "auth.forgot": "Mot de passe oublié ? Contacte l’équipe Noodeu : nous le réinitialisons pour toi.",
+  "auth.forgotContact": "Mot de passe oublié ? Écris-nous depuis l’adresse de ton compte, nous le réinitialisons pour toi :",
   "auth.adult": "Je confirme avoir 18 ans ou plus.",
   "auth.emailRequired": "Indique d'abord ton adresse e-mail.",
 
@@ -821,7 +822,9 @@ export const fr = {
   "settings.passwordDone": "Mot de passe modifié.",
   "settings.passwordWrong": "Le mot de passe actuel ne correspond pas.",
   "settings.passwordSame": "Choisis un mot de passe différent de l’actuel.",
-  "settings.passwordError": "Modification impossible pour le moment. Réessaie dans un instant.",
+  "settings.passwordError": "Modification impossible pour le moment (connexion ou serveur). Ton mot de passe n’a pas changé ; réessaie dans un instant.",
+  "settings.passwordWeak": "Le nouveau mot de passe doit faire entre 8 caractères et 72 octets.",
+  "settings.passwordLocked": "Trop d’essais. Patiente 15 minutes avant de réessayer.",
   "settings.delete": "Supprimer mon compte",
   "settings.deleteTitle": "Supprimer ton compte ?",
   "settings.deleteText": "Ton profil, ta photo, tes favoris et tes notifications sont effacés définitivement. Tes duos en cours sont terminés. Les personnes avec qui tu as joué gardent l'historique commun en lecture seule, avec la mention « Compte supprimé ». Cette action est irréversible.",
