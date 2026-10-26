@@ -181,8 +181,9 @@
 .session-shell .card-board .reveal__stamp { background: #f3dce1; color: #6d2636; }
 .session-shell .card-board :is(.reveal__envelope, .reveal__ribbon) { border: 1px solid var(--card-border); border-radius: 12px; background: #fff8f8; box-shadow: 0 3px 0 #e5d6d9; }
 .session-shell .card-board .reveal__envelope::before { border-color: #e1ced4; }
-.session-shell .pack-board .q-card__head { min-height: 48px; position: relative; padding-right: 60px; }
-.session-shell .pack-board .pack-question__object { position: absolute; top: -14px; right: -4px; width: 68px; height: 68px; object-fit: contain; }
+.session-shell.session-console .pack-board { --console-question-height: 13rem; }
+.session-shell .pack-board .q-card__head { min-height: 32px; position: relative; padding-right: 48px; }
+.session-shell .pack-board .pack-question__object { position: absolute; top: -6px; right: 0; width: 44px; height: 44px; object-fit: contain; }
 .session-shell .pack-board .pack-answer-paper__heading { display: flex; align-items: center; justify-content: space-between; gap: 12px; color: var(--card-ink); }
 .session-shell .pack-board .pack-answer-form { gap: 18px; }
 .session-shell .pack-board .pack-answer-form__content { gap: 12px; }

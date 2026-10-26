@@ -117,6 +117,17 @@
 .mini-refined .naval__cell--preview-valid { background:#ead7dc; outline:3px solid #43131C; outline-offset:-4px; }
 .mini-refined .naval__cell--preview-invalid { background:repeating-linear-gradient(45deg,#f6d8de 0 5px,#fff 5px 8px); outline:3px dashed #B72132; outline-offset:-4px; }
 .mini-refined .mini-placement-status { min-height:2.8em; }
+.mini-refined.naval-placement { gap:10px; }
+.mini-refined.naval-placement .naval-placement-progress { display:flex; flex-wrap:wrap; align-items:center; gap:8px; }
+.mini-refined.naval-placement .naval-placement-progress > img { width:32px; height:32px; object-fit:contain; flex:none; }
+.mini-refined.naval-placement .naval-placement-help { margin-left:auto; }
+.mini-refined.naval-placement .naval-placement-help summary { display:flex; align-items:center; justify-content:center; min-width:44px; min-height:44px; cursor:pointer; color:#43131C; font-size:.8125rem; text-decoration:underline; }
+.mini-refined.naval-placement .naval-placement-help[open] { flex-basis:100%; }
+.mini-refined.naval-placement .naval-placement-help[open] summary { justify-content:flex-start; }
+.mini-refined.naval-placement .naval-placement-tools { display:flex; flex-wrap:wrap; align-items:center; gap:8px; }
+.mini-refined.naval-placement .naval-placement-tools .field { flex:1 1 11rem; min-width:0; gap:0; }
+.mini-refined.naval-placement .naval-placement-tools .btn { flex:1 1 7rem; max-width:100%; }
+.mini-refined.naval-placement .mini-placement-status { min-height:1.4em; }
 .mini-refined .astra-shot { z-index:3; display:grid; place-items:center; width:30px; height:30px; font-size:25px; font-weight:800; border:1px solid #c6b1b7; box-shadow:0 2px 0 #c6b1b7; }
 .mini-refined .astra-shot::before { display:none; }
 .mini-refined .astra-shot--miss { color:#43131C; background:radial-gradient(circle at 35% 20%,#fff,#eee5e7); }

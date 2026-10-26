@@ -35,8 +35,14 @@ begin
   select r.card->'queue',(r.card->>'index')::int+1,(r.card->>'cycle')::int into queue,ci,cy
    from public.session_rounds r where r.session_id=s.id and r.round_no=s.current_round-1;
  end if;
- bank_name:=queue->ci->>0;
- select value into it from public.content_banks where bank=bank_name and idx=(queue->ci->>1)::int;
+ -- Question supprimée par l'administration après le tirage : sautée (intégration Admin).
+ loop
+  exit when ci>=jsonb_array_length(queue);
+  bank_name:=queue->ci->>0;
+  select value into it from public.content_banks where bank=bank_name and idx=(queue->ci->>1)::int;
+  exit when it is not null;
+  ci:=ci+1;
+ end loop;
  if it is null then raise exception 'not_enough_cards'; end if;
  insert into private.pack_draws(couple_id,game_id,cycle,item_id) values(s.couple_id,s.game_id,cy,bank_name||':'||(it->>'id')) on conflict do nothing;
  return jsonb_build_object('mech','pack_conversation','index',ci,'count',jsonb_array_length(queue),'queue',queue,'cycle',cy,'random',true,

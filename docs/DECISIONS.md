@@ -379,3 +379,74 @@ Migration `20261027000300_multi_duos.sql` (fichier à coller : `docs/sql_editeur
 - Après connexion, l'accueil sans duo propose « Inviter » (code et lien à partager) ou « J'ai un code ». L'association
   demande toujours la confirmation des deux personnes.
 - « Mot de passe oublié » utilise encore le service d'e-mails intégré de Supabase, limité à quelques envois par heure.
+
+## Administration des questions (25/10/2026)
+
+- Réglages → « Administration des questions », visible et utilisable seulement par les comptes de `app_admins`
+  (vérifié par le serveur à chaque action). Pas de sixième onglet dans la navigation (cinq destinations imposées).
+- Filtres catégorie et sous-catégorie, recherche, filtre +18, tri (ordre du jeu, alphabétique, +18 d'abord, ajouts
+  récents). Par question : modifier, supprimer (avec confirmation), bouton +18 / Tout public.
+- Ajout dans la sous-catégorie choisie ; le formulaire s'adapte au jeu (deux propositions pour Tu préfères, Vérité ou
+  Action, amorce terminée par « … » pour Complète la phrase ; Je n'ai jamais et D'accord gardent leurs réponses fixes).
+- Questionnaires notés : texte et +18 modifiables, ni ajout ni suppression (le score dépend du nombre d'items).
+- Une suppression place la question dans une corbeille serveur (`private.question_trash`) ; toute action est consignée
+  (`private.question_log`). Les parties en cours gardent les cartes déjà tirées ; une question supprimée encore à venir
+  dans un questionnaire aléatoire est sautée ; un pack joue aussi ses questions ajoutées.
+- Migration `20261029000100_admin_questions.sql`, test `c23_admin_questions.sql`.
+
+## Retrait des ressources santé publique et dépistage (25/10/2026)
+
+- Supprimés à la demande du propriétaire : l'encadré « Santé sexuelle et dépistage » (Réglages et page À huis clos)
+  et le choix du pays, qui ne servait qu'à ces ressources. La colonne `profiles.country` reste en base, sans usage.
+- Les questions des packs (dont « Protection et décisions partagées ») ne sont pas concernées.
+
+## Tu préfères : situations sexuelles drôles ou gênantes (26/10/2026)
+
+- 30 cartes du PDF « Noodeu – Tu préfères : situations sexuelles drôles / gênantes » ajoutées au jeu Tu préfères
+  (banque `conv_dilemma`, identifiants TPS-001 à TPS-030), +18, intensité « hot », marquées « à relire ».
+- Texte repris tel quel ; les deux propositions sont découpées autour du « ou ». Modifiables dans l'administration.
+- Migration `20261029000200_tu_preferes_situations.sql`, test `c24_tu_preferes_situations.sql`.
+
+## Complète la phrase et D'accord ou pas d'accord dans « Se découvrir » (26/10/2026)
+
+- Les deux jeux quittent « À huis clos » pour « Se découvrir », section « Jeux pour en parler ». Le salon affiche
+  toujours « Ce contenu contient des questions relatives au sexe ».
+- PDF « D'accord ou pas d'accord ? + Complète la phrase » : 26 affirmations et 29 amorces étaient déjà présentes ;
+  4 affirmations prennent la formulation du PDF (PK-G10-003, 004, 006, 016) ; l'amorce « Le fantasme que je garde
+  encore pour moi c'est… » est ajoutée (ACS-S-030). Aucune question existante supprimée.
+- Migration `20261029000300_accord_phrase_se_decouvrir.sql`, test `c25_accord_phrase.sql`.
+
+## Intégration du bundle « salon » 104564d (26/10/2026)
+
+- Bundle vérifié (empreinte du manifeste, HEAD 104564d, arbre 4e90997, base 49d3c1e présente) et importé dans
+  `import/noodeu-astra-104564d`, puis fusionné (merge sans avance rapide) dans `integration/noodeu-astra-admin-104564d`
+  à partir de `ccr-7a7de876-azitw6`. Conflits résolus à la main : CSS (les deux blocs gardés), ressources santé
+  (retrait conservé). Admin, Tu préfères, Se découvrir et retrait santé conservés.
+- Migrations du bundle renumérotées `20261030000100` à `800` (les numéros `20261029000x00` étaient déjà pris par les
+  migrations appliquées en ligne) ; tests renumérotés `c30` à `c37`. Les deux nouveaux tirages (`random_packs`,
+  `random_mixed`) sautent aussi une question supprimée par l'administration.
+- Accueil Arcade : le sélecteur de duo (plusieurs duos actifs) est remis dans la carte duo, il avait disparu.
+- Google : bouton inactif (aucun OAuth configuré). Audio : désactivé (`deploymentFeatures.answerAudio=false`).
+- Supabase : migrations `20261030000x00` non appliquées en ligne à cette date (voir DEPLOIEMENT.md). L'interface
+  utilise ses replis (notes/couverture indisponibles, tirage classique, compteur d'accueil existant).
+- Mise à jour du 26/10/2026 (accord du propriétaire) : migrations `20261030000300` à `20261030000800` appliquées en
+  ligne une par une et vérifiées (pack_draws, enveloppes du tirage avec saut des questions supprimées, 14 packs en ordre
+  aléatoire, RND1 mixte, question horaire, normalisation Petit bac, validation navale). `20261030000100` (espace duo :
+  bucket et règles de stockage) et `20261030000200` (audio) restent non appliquées.
+
+## Écrans de jeu d'après les planches (26/10/2026)
+
+- Tous les écrans de partie suivent les planches : en-tête « ⌄ réduire · titre · ? », bandeau des deux joueurs (score,
+  objectif ou présence), scène illustrée, cartes crème, boutons vert canard. Les menus (accueil, bibliothèque, réglages)
+  gardent le thème cerise.
+- « ? » ouvre le menu de la partie : règles, options, pause, quitter. « Réduire » garde la partie ouverte.
+- Décors repris des planches fournies par le propriétaire, uniquement des zones sans texte ni interface
+  (`public/assets/scenes`, voir PROVENANCE.json) ; les plateaux dont l'état varie (dé, lettres, pions, navires)
+  restent dessinés par l'application.
+- Choix illustrés (✓ / ✗) pour Je n'ai jamais et D'accord ou pas, portraits pour Qui de nous deux, clavier AZERTY au
+  Pendu, plateau crème et pions corail / vert au Morpion, océan sombre pour la Bataille navale.
+
+- Mise à jour du 26/10/2026 : plus de photo ni d'image de couverture dans les écrans de jeu (bandeaux de scène retirés,
+  fichiers `public/assets/scenes` supprimés). Règle d'alignement : repères (manche, tour), consignes, états et titres
+  centrés ; champs de saisie, listes d'affirmations et réponses longues restent alignés à gauche ; boutons d'action en
+  pleine largeur.

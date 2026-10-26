@@ -1,5 +1,5 @@
 -- Mesure locale, sans seuil dépendant de la machine. Aucune donnée modifiée.
--- Exécuter après 20261029000700 sur le Docker jetable uniquement.
+-- Exécuter après 20261030000700 sur le Docker jetable uniquement.
 begin;
 do $$ begin
   if current_database() not in ('noodeu_lot6_clean_2154', 'noodeu') and not (

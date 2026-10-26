@@ -24,7 +24,7 @@ try {
    const hit=await p.evaluate(()=>{
     const b=document.querySelector('.chat-launcher').getBoundingClientRect();
     const main=document.querySelector('main'), m=main.getBoundingClientRect();
-    const collisions=[...document.querySelectorAll('main a, main button, main input, main textarea, main select, main label, .session-toolbar a, .session-toolbar button')].filter(e=>{
+    const collisions=[...document.querySelectorAll('main a, main button, main input, main textarea, main select, main label, .session-toolbar a, .session-toolbar button, .session-toolbar a, .session-toolbar button')].filter(e=>{
      const r=e.getBoundingClientRect(), inMain=main.contains(e), top=inMain?Math.max(r.top,m.top):r.top, bottom=inMain?Math.min(r.bottom,m.bottom):r.bottom;
      return r.width&&r.height&&bottom>top&&Math.min(b.right,r.right)>Math.max(b.left,r.left)&&Math.min(b.bottom,bottom)>Math.max(b.top,top);
     }).map(e=>e.getAttribute('aria-label')||e.textContent||e.tagName);

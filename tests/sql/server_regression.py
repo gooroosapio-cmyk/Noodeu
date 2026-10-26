@@ -5,7 +5,8 @@
     python3 tests/sql/server_regression.py noodeu_server_<suffixe> upgrade
     python3 tests/sql/server_regression.py noodeu_server_<suffixe> activation
 
-suite : C18 à C32, après009/010 ; upgrade : avant010 ; activation : après010 inactive.
+suite : 19 fichiers C18–C25 et C30–C40, après300011 ; upgrade : avant300010 ;
+activation : après300010 inactive. Aucun accès distant ni activation persistante.
 La liste des fichiers se consulte sans Docker avec --list. Le lanceur n'applique
 aucune migration persistante, ne crée/supprime aucune base et ne nettoie rien.
 Les tests upgrade/activation incluent leur SQL dans une transaction annulée. Les courses indépendantes
@@ -27,12 +28,20 @@ from server_concurrency import CheckFailure, LocalPostgres, database_arg
 
 
 ROOT = Path(__file__).resolve().parents[2]
-MIGRATION = ROOT / "supabase/migrations/20261029001000_dots12_versioned.sql"
+MIGRATION = ROOT / "supabase/migrations/20261030001000_dots12_versioned.sql"
 UPGRADE = ROOT / "supabase/tests/upgrade/dots12_from_008.sql"
-INCLUDE = r"\ir ../../migrations/20261029001000_dots12_versioned.sql"
+INCLUDE = r"\ir ../../migrations/20261030001000_dots12_versioned.sql"
 ACTIVATION = ROOT / "supabase/tests/upgrade/dots12_optional_activation.sql"
 OPTIONAL = ROOT / "supabase/optional/activate_dots12_after_validation.sql"
 ACTIVATION_INCLUDE = r"\ir ../../optional/activate_dots12_after_validation.sql"
+SUITE_FILES = (
+    "c18_sans_permission_adulte.sql", "c19_g08_simultane.sql", "c20_purete.sql",
+    "c21_de30_petitbac8.sql", "c22_jamais_libelles.sql", "c23_admin_questions.sql",
+    "c24_tu_preferes_situations.sql", "c25_accord_phrase.sql", "c30_duo_space.sql",
+    "c31_audio.sql", "c32_random.sql", "c33_random_mixed.sql", "c34_home_moment.sql",
+    "c35_petit_bac_arbitrage.sql", "c36_petit_bac_latency.sql", "c37_naval_payload_validation.sql",
+    "c38_session_settings.sql", "c39_dots12.sql", "c40_server_guards.sql",
+)
 
 
 def files_for(phase: str) -> list[Path]:
@@ -40,8 +49,11 @@ def files_for(phase: str) -> list[Path]:
         return [UPGRADE]
     if phase == "activation":
         return [ACTIVATION]
-    return sorted(path for path in (ROOT / "supabase/tests").glob("c*.sql")
-                  if path.name.split("_", 1)[0] in {f"c{n}" for n in range(18, 33)})
+    files = [ROOT / "supabase/tests" / name for name in SUITE_FILES]
+    missing = [str(path.relative_to(ROOT)) for path in files if not path.is_file()]
+    if missing:
+        raise CheckFailure("Suite SQL incomplète : " + ", ".join(missing))
+    return files
 
 
 def source(path: Path) -> str:

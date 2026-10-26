@@ -1,0 +1,176 @@
+{
+ "ok": true,
+ "questions": [
+  {
+   "bank": "q_aron",
+   "idx": 0,
+   "id": "C1-01-001",
+   "text": "Si tu pouvais inviter n’importe qui au monde à dîner, tu choisirais qui ?",
+   "adult": false,
+   "category": "Se découvrir",
+   "activity": "36 questions pour se rapprocher",
+   "type": "pack",
+   "mechanic": "pack_conversation",
+   "theme": "36 questions pour se rapprocher"
+  },
+  {
+   "bank": "q_aron",
+   "idx": 1,
+   "id": "C1-01-002",
+   "text": "Tu aimerais être célèbre ? Pour quoi ?",
+   "adult": true,
+   "category": "Se découvrir",
+   "activity": "36 questions pour se rapprocher",
+   "type": "pack",
+   "mechanic": "pack_conversation",
+   "theme": "36 questions pour se rapprocher"
+  },
+  {
+   "bank": "q_aron",
+   "idx": 2,
+   "id": "C1-01-003",
+   "text": "Avant d’appeler quelqu’un, ça t’arrive de répéter ce que tu vas dire ? Pourquoi ?",
+   "adult": false,
+   "category": "Se découvrir",
+   "activity": "36 questions pour se rapprocher",
+   "type": "pack",
+   "mechanic": "pack_conversation",
+   "theme": "36 questions pour se rapprocher"
+  },
+  {
+   "bank": "q_gottman_rituals",
+   "idx": 0,
+   "id": "C1-02-001",
+   "text": "On est d’accord sur les rituels des repas du soir.",
+   "adult": false,
+   "category": "Se découvrir",
+   "activity": "Nos petits rituels",
+   "type": "pack",
+   "mechanic": "pack_conversation",
+   "theme": "Nos petits rituels"
+  },
+  {
+   "bank": "q_gottman_rituals",
+   "idx": 1,
+   "id": "C1-02-002",
+   "text": "Les repas de fête sont pour nous des moments spéciaux… ou on les déteste tous les deux.",
+   "adult": false,
+   "category": "Se découvrir",
+   "activity": "Nos petits rituels",
+   "type": "pack",
+   "mechanic": "pack_conversation",
+   "theme": "Nos petits rituels"
+  },
+  {
+   "bank": "q_ecrrs",
+   "idx": 0,
+   "id": "C2-02-001",
+   "text": "Me tourner vers cette personne m’aide quand j’en ai besoin.",
+   "adult": false,
+   "category": "Se découvrir",
+   "activity": "L’attachement envers son ou sa partenaire",
+   "type": "test",
+   "mechanic": "test_form"
+  },
+  {
+   "bank": "q_ecrrs",
+   "idx": 1,
+   "id": "C2-02-002",
+   "text": "Je lui parle habituellement de mes problèmes et de mes préoccupations.",
+   "adult": false,
+   "category": "Se découvrir",
+   "activity": "L’attachement envers son ou sa partenaire",
+   "type": "test",
+   "mechanic": "test_form"
+  },
+  {
+   "bank": "conv_dilemma",
+   "idx": 1,
+   "id": "C3-04-002",
+   "text": "Tu préfères qu’on te surprenne ou qu’on te prévienne ?",
+   "adult": false,
+   "category": "Conversation et découverte",
+   "activity": "Tu préfères",
+   "type": "game",
+   "mechanic": "nd_dilemma",
+   "options": [
+    {
+     "id": "C3-04-002-A",
+     "text": "Qu’on te surprenne"
+    },
+    {
+     "id": "C3-04-002-B",
+     "text": "Qu’on te prévienne"
+    }
+   ]
+  },
+  {
+   "bank": "conv_dilemma",
+   "idx": 2,
+   "id": "C3-04-003",
+   "text": "Tu préfères un dimanche sous la couette ou une sortie improvisée ?",
+   "adult": false,
+   "category": "Conversation et découverte",
+   "activity": "Tu préfères",
+   "type": "game",
+   "mechanic": "nd_dilemma",
+   "options": [
+    {
+     "id": "C3-04-003-A",
+     "text": "Un dimanche sous la couette"
+    },
+    {
+     "id": "C3-04-003-B",
+     "text": "Une sortie improvisée"
+    }
+   ]
+  },
+  {
+   "bank": "conv_truth_dare",
+   "idx": 0,
+   "id": "C3-01-001",
+   "text": "T’as déjà fait semblant de connaître une chanson alors que tu l’avais jamais entendue ? Comment t’en es sorti·e ?",
+   "adult": false,
+   "category": "Conversation et découverte",
+   "activity": "Action ou Vérité",
+   "type": "game",
+   "mechanic": "nd_truth_dare",
+   "kind": "truth"
+  },
+  {
+   "bank": "conv_truth_dare",
+   "idx": 1,
+   "id": "C3-01-002",
+   "text": "Si t’as déjà répondu à un salut qui t’était pas destiné, t’as fait quoi juste après ?",
+   "adult": false,
+   "category": "Conversation et découverte",
+   "activity": "Action ou Vérité",
+   "type": "game",
+   "mechanic": "nd_truth_dare",
+   "kind": "truth"
+  },
+  {
+   "bank": "conv_target",
+   "idx": 0,
+   "id": "C3-05-001",
+   "text": "Qui de nous deux est le plus susceptible d’oublier un anniversaire ?",
+   "adult": false,
+   "category": "Conversation et découverte",
+   "activity": "Qui de nous deux ?",
+   "type": "game",
+   "mechanic": "nd_duo_target"
+  },
+  {
+   "bank": "conv_target",
+   "idx": 1,
+   "id": "C3-05-002",
+   "text": "Qui de nous deux est le plus susceptible de faire le premier pas ?",
+   "adult": false,
+   "category": "Conversation et découverte",
+   "activity": "Qui de nous deux ?",
+   "type": "game",
+   "mechanic": "nd_duo_target",
+   "admin": true
+  }
+ ]
+}

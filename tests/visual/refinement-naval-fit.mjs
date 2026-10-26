@@ -52,9 +52,15 @@ async function routeMove(page, state, handle) {
 try {
   for (const width of [320, 360, 390, 430]) for (const height of [{ 320: 640, 360: 740, 390: 844, 430: 932 }[width], 460]) for (const text of [1, 2]) for (const phase of ['placement', 'tirs']) {
     const { page, ctx, errors } = await make(phase, { width, height, text });
+    if (phase === 'placement' && height !== 460 && text === 1) {
+      await page.waitForTimeout(300);
+      const initialBoard = await page.locator('.naval').boundingBox();
+      assert.ok(initialBoard.y + initialBoard.height <= height, `Plateau initial coupé : ${JSON.stringify({ width, height, initialBoard })}`);
+      await page.screenshot({ path: `${OUT}/${width}x${height}-placement-initial.png`, fullPage: true });
+    }
     for (const mode of ['overview', 'target']) {
       if (mode === 'target') await page.getByRole('button', { name: 'Cibler une case', exact: true }).click();
-      const panel = page.locator('.naval-viewport__panel'); await panel.scrollIntoViewIfNeeded();
+      const panel = page.locator('.naval-viewport__panel'); await panel.scrollIntoViewIfNeeded(); await page.waitForTimeout(300);
       const row = { width, height, text, phase, mode, ...await metrics(page), errors: [...errors] };
       matrix.push(row);
       await page.screenshot({ path: `${OUT}/${width}x${height}-text${text}-${phase}-${mode}.png`, fullPage: true });

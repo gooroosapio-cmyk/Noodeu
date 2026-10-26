@@ -1,6 +1,6 @@
 # Audit serveur des mini-jeux — 25 octobre 2026
 
-Deux défauts de validation de Bataille navale ont été reproduits puis corrigés par la migration additive `20261029000800_naval_payload_validation.sql`. L'API, les règles, les scores et les flottes déjà enregistrées ne changent pas.
+Deux défauts de validation de Bataille navale ont été reproduits puis corrigés par la migration additive `20261030000800_naval_payload_validation.sql`. L'API, les règles, les scores et les flottes déjà enregistrées ne changent pas.
 
 ## Défauts reproduits
 
@@ -27,7 +27,7 @@ Uniquement dans le conteneur Docker `noodeu-refonte-test-20261025` (PostgreSQL 1
 
 | Vérification | Résultat |
 | --- | --- |
-| Nouveau `c29_naval_payload_validation.sql`, avant migration | Échec attendu : le placement sans orientation était accepté. |
+| Nouveau `c37_naval_payload_validation.sql`, avant migration | Échec attendu : le placement sans orientation était accepté. |
 | Nouveau C29, après migration, sur les deux bases | Réussi ; transactions annulées. |
 | `c14_minijeux.sql`, après migrations 007 et 008, sur les deux bases | Réussi ; transactions annulées. |
 | `c21_de30_petitbac8.sql`, après migrations 007 et 008, sur les deux bases | Réussi ; transactions annulées. |
@@ -42,7 +42,7 @@ Les tests existants confirment également : six erreurs calculées par le serveu
 Exemple d'exécution du nouveau test sur la base jetable :
 
 ```sh
-docker exec -i noodeu-refonte-test-20261025 psql -X -v ON_ERROR_STOP=1 -U postgres -d noodeu_lot6_clean_2154 < supabase/tests/c29_naval_payload_validation.sql
+docker exec -i noodeu-refonte-test-20261025 psql -X -v ON_ERROR_STOP=1 -U postgres -d noodeu_lot6_clean_2154 < supabase/tests/c37_naval_payload_validation.sql
 ```
 
 Les seules écritures persistantes de cet audit sont les définitions des deux fonctions dans les bases Docker de test. Aucun commit, push, déploiement, accès production ni modification d'identifiants n'a été effectué.

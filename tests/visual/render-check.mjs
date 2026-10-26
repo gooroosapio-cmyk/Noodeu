@@ -108,6 +108,8 @@ async function setup(page, scenario) {
     if (p.endsWith("/rpc/get_my_items")) return json({ ok: true, later: [], favorites: [{ kind: "question", bank: "q_usu_roadtrip", item_id: "R-03",
       view: { text: "Quel voyage aimerais-tu que l'on fasse ensemble ?", intensity: "soft", duration_kind: "discussion", minutes_min: 5, minutes_max: 10 } }] });
     if (p.endsWith("/rpc/get_session_meta")) return json({ ok: true, items: {} });
+    if (p.endsWith("/rpc/is_app_admin")) return json(Boolean(scenario.admin));
+    if (p.endsWith("/rpc/admin_list_questions")) return json(scenario.admin ? fixture("admin-questions.json") : { ok: false, error: "forbidden" });
     if (/\/(item_favorites|later_items|item_feedback)$/.test(p)) return json(route.request().method() === "GET" ? null : []);
     return json({});
   });
@@ -119,6 +121,12 @@ const allScreens = [
   { name: "01-bienvenue", path: "/", scenario: { auth: false } },
   { name: "02a-connexion", path: "/connexion", scenario: { auth: false } },
   { name: "02-inscription", path: "/inscription", scenario: { auth: false } },
+  { name: "70-admin-questions", path: "/admin/questions", scenario: { ...solo, admin: true } },
+  { name: "70b-admin-sous-categorie", path: "/admin/questions", scenario: { ...solo, admin: true },
+    action: async (page) => { await page.getByLabel("Sous-catégorie").selectOption("Tu préfères"); await page.getByRole("button", { name: "Ajouter une question" }).click(); } },
+  { name: "70c-admin-modifier", path: "/admin/questions", scenario: { ...solo, admin: true },
+    action: async (page) => { await page.getByRole("button", { name: "Modifier" }).first().click(); } },
+  { name: "70d-reglages-admin", path: "/reglages", scenario: { ...solo, admin: true } },
   { name: "06a-accueil-sans-duo", path: "/accueil", scenario: solo },
   { name: "06b-accueil-invitation", path: "/accueil", scenario: { ...solo, invitations: { outgoing: { id: "i", code: "K7PM-Q2RX", status: "open", expires_at: "2026-10-22T10:00:00Z", expired: false, claimer_name: null }, incoming: null } } },
   { name: "06c-accueil-demande", path: "/accueil", scenario: { ...solo, invitations: { outgoing: { id: "i", code: "K7PM-Q2RX", status: "claimed", expires_at: "2026-10-22T10:00:00Z", expired: false, claimer_name: "Alex" }, incoming: null } } },

@@ -24,7 +24,7 @@ Trois défauts ont été reproduits avant correction dans PostgreSQL 16 :
 | tabulations autour de « chat », animal, C | `invalid` | `valid` |
 | espaces insécables autour de « chat », animal, C | `invalid` | `valid` |
 
-La migration `20261029000700_petit_bac_normalization.sql` ajoute
+La migration `20261030000700_petit_bac_normalization.sql` ajoute
 `private.pb_norm_v2`, une copie figée de la banque sous le nom
 `petit_bac_huit_unicode`, et une nouvelle version de `N2-018` (3 dans les bases
 testées). Les versions 1 et 2 et leurs banques restent identiques ; la fonction
@@ -101,7 +101,7 @@ Conteneur autorisé : `noodeu-refonte-test-20261025`, image `postgres:16`.
 Bases autorisées : `noodeu_lot6_clean_2154` et `noodeu`, avec shim local Supabase.
 Les tests de jeu se terminent par `ROLLBACK` ; aucune fixture n'est conservée.
 
-- `c28_petit_bac_arbitrage.sql` passe sur les deux bases : les 941 alias sont
+- `c35_petit_bac_arbitrage.sql` passe sur les deux bases : les 941 alias sont
   reconnus dans leur rubrique ; Unicode, casse, ligatures, espaces, initiales,
   catégories et variantes inconnues sont vérifiés. Le parcours `play_move`
   couvre secrets, gel, acceptation, contestation, confirmations et scores 5/10/15.
@@ -114,7 +114,7 @@ Les tests de jeu se terminent par `ROLLBACK` ; aucune fixture n'est conservée.
 - Application de 007 avec comparaison avant/après : anciennes versions et
   banques identiques. Réapplication : zéro entrée, zéro version, zéro mise à jour.
 - `c14_minijeux.sql`, `c21_de30_petitbac8.sql` et
-  `c29_naval_payload_validation.sql` passent sur les deux bases après 007 + 008.
+  `c37_naval_payload_validation.sql` passent sur les deux bases après 007 + 008.
 - Le bloc Pendu de `c14_lot4.sql` passe sur la base `noodeu`. Le test complet de lot 4
   est écrit pour le catalogue initial à quatre rubriques ; il n'est pas présenté
   comme passé sur le catalogue huit rubriques.
@@ -122,8 +122,8 @@ Les tests de jeu se terminent par `ROLLBACK` ; aucune fixture n'est conservée.
 Reproduction du test Petit bac :
 
 ```sh
-docker exec -i noodeu-refonte-test-20261025 psql -U postgres -d noodeu_lot6_clean_2154 -X -v ON_ERROR_STOP=1 < supabase/tests/c28_petit_bac_arbitrage.sql
-docker exec -i noodeu-refonte-test-20261025 psql -U postgres -d noodeu_lot6_clean_2154 -X -v ON_ERROR_STOP=1 < supabase/tests/c28_petit_bac_latency.sql
+docker exec -i noodeu-refonte-test-20261025 psql -U postgres -d noodeu_lot6_clean_2154 -X -v ON_ERROR_STOP=1 < supabase/tests/c35_petit_bac_arbitrage.sql
+docker exec -i noodeu-refonte-test-20261025 psql -U postgres -d noodeu_lot6_clean_2154 -X -v ON_ERROR_STOP=1 < supabase/tests/c36_petit_bac_latency.sql
 ```
 
 Mesure locale de fonctions serveur avec `clock_timestamp`, même base, séries
@@ -153,7 +153,7 @@ et tir sans coordonnées consommant un tour. Le rapport
 `AUDIT_NAVAL_20261025.md` détaille les validations et la préservation du calcul
 touché/coulé et des secrets.
 
-007 dépend de l'état migré jusqu'à `20261029000600` (notamment les banques de
+007 dépend de l'état migré jusqu'à `20261030000600` (notamment les banques de
 `20261028000500` et le moteur de `20261025000300`). 008 dépend du moteur mini-jeux
 de `20261025000100`, et est indépendante des fonctions de 007. L'ordre livré
 reste 007 puis 008. Les migrations sont préparées et testées localement ; elles

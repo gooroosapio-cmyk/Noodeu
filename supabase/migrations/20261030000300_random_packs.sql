@@ -31,7 +31,13 @@ begin
   select r.card->'queue',(r.card->>'index')::integer+1,(r.card->>'cycle')::integer into queue,ci,cy
   from public.session_rounds r where r.session_id=s.id and r.round_no=s.current_round-1;
  end if;
- select value into it from public.content_banks where bank=cfg->>'bank' and idx=(queue->>ci)::integer;
+ -- Question supprimée par l'administration après le tirage : sautée (intégration Admin).
+ loop
+  exit when ci>=jsonb_array_length(queue);
+  select value into it from public.content_banks where bank=cfg->>'bank' and idx=(queue->>ci)::integer;
+  exit when it is not null;
+  ci:=ci+1;
+ end loop;
  if it is null then raise exception 'not_enough_cards'; end if;
  insert into private.pack_draws(couple_id,game_id,cycle,item_id) values(s.couple_id,s.game_id,cy,it->>'id') on conflict do nothing;
  -- random=true évite d'écrire un index mélangé dans l'ancienne progression séquentielle.

@@ -1,6 +1,6 @@
 # Déploiement
 
-> Livraison refonte du 25 octobre 2026 : les migrations `20261029000100` à `20261029000400` sont préparées et testées localement, **pas appliquées à Supabase par ce déploiement**. Les mentions historiques ci-dessous ne prouvent pas leur état actuel. Notes/couverture affichent un état indisponible si leur RPC manque. Le tirage mixte indique une mise à jour serveur en attente si sa configuration manque. L’audio reste désactivé dans `deploymentFeatures.ts`, Google reste un emplacement inactif, et la vidéo n’est pas intégrée. Aucun build ne lance de migration.
+> Livraison refonte du 25 octobre 2026 : les migrations `20261030000300` à `20261030000800` sont appliquées à Supabase depuis le 26/10/2026 ; `20261030000100` (espace duo) et `20261030000200` (audio) **ne le sont pas**. Les mentions historiques ci-dessous ne prouvent pas leur état actuel. Notes/couverture affichent un état indisponible si leur RPC manque. Le tirage mixte indique une mise à jour serveur en attente si sa configuration manque. L’audio reste désactivé dans `deploymentFeatures.ts`, Google reste un emplacement inactif, et la vidéo n’est pas intégrée. Aucun build ne lance de migration.
 
 
 ## 1. Supabase (déjà fait pour le projet « Noodeu »)

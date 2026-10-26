@@ -1,4 +1,4 @@
--- Test local dédié APRES010 inactive. Jamais inclus dans la suite C18–C32.
+-- Test local dédié APRES010 inactive. Jamais inclus dans la suite intégrée C18–C25 et C30–C40.
 -- Trois refus attendus, puis activation et rejeu dans UNE transaction annulée.
 \set ON_ERROR_STOP on
 begin;

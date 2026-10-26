@@ -63,7 +63,7 @@ create temp table compat_before_moves as select action_id,to_jsonb(m) val from p
 create temp table compat_before_published as select game_id,version,to_jsonb(v) val from public.game_versions v where published_at is not null;
 create temp table compat_before_games as select id,to_jsonb(g) val from public.games g;
 select 'AVANT010 : une partie5 jouee et un salon5 existent';
-\ir ../../migrations/20261029001000_dots12_versioned.sql
+\ir ../../migrations/20261030001000_dots12_versioned.sql
 
 do $$ declare sid uuid; who int; reply jsonb; before jsonb; action uuid; begin
  perform t31compat.ok(not exists(select 1 from compat_before_sessions b full join public.game_sessions s using(id) where b.val is distinct from to_jsonb(s)),'sessions exactes avant/apres010');

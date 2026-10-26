@@ -265,7 +265,7 @@ try {
       await cta(h.page).click(); await started.promise;
       if (action === 'reduce') { await h.page.getByRole('link', { name: /Réduire la partie/ }).click(); await h.page.waitForURL('**/accueil'); }
       if (action === 'offline') { await h.context.setOffline(true); await h.page.getByText('En attente du réseau', { exact: true }).waitFor(); }
-      if (action === 'read_only') { h.server.state.session.read_only = true; await refresh(h); await h.page.waitForFunction(() => document.querySelector('.session-toolbar__quit')?.tagName === 'A'); }
+      if (action === 'read_only') { h.server.state.session.read_only = true; await refresh(h); await h.page.waitForFunction(() => document.querySelector('.session-toolbar a')?.tagName === 'A'); }
       gate.resolve(); await h.page.waitForTimeout(1800);
       assert.equal(h.server.calls.filter(c => c.fn === 'set_ready').length, 0, action);
       if (action !== 'reduce') await expect(cta(h.page)).toBeDisabled();

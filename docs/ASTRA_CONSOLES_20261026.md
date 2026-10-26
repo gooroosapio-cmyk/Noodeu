@@ -165,8 +165,8 @@ absente. Il n'est pas chargé par l'application. Aucun crédit Runway consommé.
 
 ## Dépendances et limites de livraison
 
-- Les migrations `20261029000700_petit_bac_normalization.sql` et
-  `20261029000800_naval_payload_validation.sql` sont préparées et testées
+- Les migrations `20261030000700_petit_bac_normalization.sql` et
+  `20261030000800_naval_payload_validation.sql` sont préparées et testées
   localement seulement. 007 dépend de l'état migré jusqu'à 006 ; 008 du moteur
   mini-jeux existant. Ne pas rejouer aveuglément l'historique SQL en production.
 - Le frontend garde le repli sur les anciens verdicts Petit bac sans `reason`

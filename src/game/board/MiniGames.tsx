@@ -349,7 +349,7 @@ function NavalGrid({ label, cell, onCell, onPreview, disabled, fleet = [] }: {
         <output className="t-meta" aria-live="polite">{zoom === 0 ? "Vue entière" : `${Math.round(zoom * 100)} %`}</output>
         <button type="button" className="btn btn--quiet btn--sm" aria-label="Agrandir le plateau" disabled={zoom === 1.5} onClick={() => setZoom(zoom === 0 ? 1 : 1.5)}><Icon name="plus" size={18} /></button>
       </div>
-      <p className="t-meta naval-viewport__hint">{zoom ? "Mode ciblage. Glisse le plateau ; au clavier, utilise les flèches." : "Vue entière en lecture seule. Active Cibler pour sélectionner une case."}</p>
+      <p className="t-meta naval-viewport__hint">{zoom ? "Glisse le plateau. Au clavier : les flèches." : "Lecture seule · Cibler pour choisir."}</p>
       <div className={`naval-viewport__panel ${zoom ? "board-zoom board-zoom--naval" : "astra-overview naval-overview"}`}
         style={{ "--board-cell": `${44 * (zoom || 1)}px` } as CSSProperties}
         tabIndex={0} role="region" aria-label={`${label} · ${zoom ? "mode ciblage, défilement horizontal et vertical" : "vue entière en lecture seule"}`}
@@ -456,21 +456,24 @@ function Placement({ c, priv, me, partner, play, busy }: V) {
     );
   }
   return (
-    <div className="stack stack--4 astra-board mini-refined astra-board--naval">
-      <div className="naval-placement-progress"><p className="t-small">{t("mini.naval.placeHint")}</p><span className="nd-chip">{draft.length}/{ships.length} navires placés</span></div>
-      <div className="astra-fleet-piece"><BoardPiece piece="naval-ship" fallback="/assets/original/library3d/M07.webp" alt="" width={64} height={64} /><p className="t-small"><strong>{nameShip(sel)}</strong><br />{ships.find(ship => ship.id === sel)?.len} cases · {o === "H" ? "horizontal" : "vertical"}</p></div>
+    <div className="stack stack--4 astra-board mini-refined astra-board--naval naval-placement">
+      <div className="naval-placement-progress">
+        <BoardPiece piece="naval-ship" fallback="/assets/original/library3d/M07.webp" alt="" width={32} height={32} />
+        <span className="t-small strong">{draft.length}/{ships.length} navires placés</span>
+        <details className="naval-placement-help"><summary>Aide</summary><p className="t-meta">{t("mini.naval.placeHint")} Tourne le navire si nécessaire. Choisis sa case de départ, puis confirme le placement.</p></details>
+      </div>
       <div className="naval-placement-tools">
-        <label className="field"><span className="field__label">Navire à placer</span>
+        <label className="field"><span className="sr-only">Navire à placer</span>
           <select className="input" value={sel} disabled={busy} onChange={e=>{setSel(e.target.value);setPlacementError(null);}}>
             {ships.map(ship=><option key={ship.id} value={ship.id}>{draft.some(d=>d.id===ship.id)?"✓ ":""}{nameShip(ship.id)} · {ship.len}</option>)}
           </select>
         </label>
-        <button type="button" className="btn btn--secondary" disabled={busy} onClick={()=>{setO(o==="H"?"V":"H");setPlacementError(null);}}>
-          <Icon name="refresh" size={18}/>{t("mini.naval.rotate",{o:o==="H"?t("mini.naval.horizontal"):t("mini.naval.vertical")})}
+        <button type="button" className="btn btn--secondary" disabled={busy} aria-label={t("mini.naval.rotate",{o:o==="H"?t("mini.naval.horizontal"):t("mini.naval.vertical")})} onClick={()=>{setO(o==="H"?"V":"H");setPlacementError(null);}}>
+          <Icon name="refresh" size={18}/><span>Tourner</span>
         </button>
       </div>
       {placementError && <Alert kind="info">{placementError}</Alert>}
-      <p className="t-meta mini-placement-status" aria-live="polite">{preview ? `${ROWS[preview.r]}${preview.c + 1} · ${previewValid ? "Placement possible" : "Placement impossible : débordement ou chevauchement"}` : "Choisis une case de départ, puis confirme le placement."}</p>
+      <p className="t-meta mini-placement-status" aria-live="polite">{o === "H" ? "Horizontal" : "Vertical"} · {preview ? `${ROWS[preview.r]}${preview.c + 1} · ${previewValid ? "Placement possible" : "Placement impossible : débordement ou chevauchement"}` : "choisis une case, puis confirme."}</p>
       <NavalGrid label={t("mini.naval.myFleet")} fleet={draft} onPreview={busy ? undefined : (r, col) => setHover({ r, c: col })} onCell={busy ? undefined : (r, col) => setAnchor({ r, c: col })}
         cell={(r, col) => {
           const occupied = taken.get(`${r}:${col}`), highlighted = previewCells.has(`${r}:${col}`);

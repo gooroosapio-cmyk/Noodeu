@@ -4,6 +4,7 @@ import { t } from "../i18n";
 import { useAuth } from "../auth/AuthProvider";
 import { useDuo } from "../duo/DuoProvider";
 import { DuoIdentity } from "../duo/DuoIdentity";
+import { DuoSwitcher } from "../duo/DuoSwitcher";
 import { useCarouselAutoplay } from "./useCarouselAutoplay";
 import { useHomeMoment } from "./useHomeMoment";
 import { PendingRequest, useInviteActions } from "../duo/InviteScreens";
@@ -89,6 +90,8 @@ export function Home() {
         <section className="arcade-duo" aria-label="Votre duo">
           <DuoIdentity duo={active} online={duo.partnerOnline} size={42} />
           <Link className="arcade-space" to="/espace" aria-label="Notre espace"><Icon name="home" size={20} /></Link>
+          {/* Plusieurs duos actifs : bascule manuelle conservée à l'intégration du nouvel accueil. */}
+          {duo.activeDuos.length > 1 && <div className="arcade-duo__switch"><DuoSwitcher compact /></div>}
         </section>
       ) : invitations.outgoing?.status === "claimed" ? (
         <PendingRequest />

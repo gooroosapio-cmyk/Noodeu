@@ -30,9 +30,9 @@ try {
   await page.goto(`${BASE}/partie/${SESSION}`);const guide=page.locator('.lobby-guide__button');await guide.first().waitFor();const sizes=await guide.evaluateAll(xs=>xs.map(x=>{const r=x.getBoundingClientRect();return [r.width,r.height];}));assert.deepEqual(sizes[0],sizes[1]);
   await page.getByRole('button',{name:'Description',exact:true}).click();await page.getByRole('dialog').waitFor();assert.equal(await page.getByRole('dialog').locator('ol').count(),0);await page.keyboard.press('Escape');
   await page.getByRole('button',{name:'Règles',exact:true}).click();assert.ok(await page.getByRole('dialog').locator('ol li').count()>0);await page.keyboard.press('Escape');
-  const settings=page.locator('.lobby-settings select');assert.equal(await settings.count(),1);assert.equal(await settings.locator('option').count(),3);
-  const button=page.locator('.lobby .action-bar button');await button.evaluate(x=>{x.click();x.click();});await page.waitForTimeout(200);assert.equal(ready,0);assert.equal(await button.isDisabled(),true);
-  await page.waitForFunction(()=>!document.querySelector('.lobby .action-bar button')?.disabled);assert.equal(ready,1);assert.equal(head,1);
+  const settings=page.getByRole('group',{name:'Nombre de cartes',exact:true});assert.equal(await settings.count(),1);assert.equal(await settings.getByRole('radio').count(),3);
+  const button=page.locator('.salon-launch > button');await button.evaluate(x=>{x.click();x.click();});await page.waitForTimeout(200);assert.equal(ready,0);assert.equal(await button.isDisabled(),true);
+  await page.waitForFunction(()=>!document.querySelector('.salon-launch > button')?.disabled);assert.equal(ready,1);assert.equal(head,1);
   await button.click();await page.waitForTimeout(150);assert.equal(head,1);assert.equal(ready,2);
   await ctx.setOffline(true);await page.getByText('En attente du réseau',{exact:true}).waitFor();assert.equal(await button.isDisabled(),true);
   await ctx.setOffline(false);await page.getByText('En attente du réseau',{exact:true}).waitFor({state:'detached'});
@@ -40,6 +40,6 @@ try {
  }
  {const {ctx,page}=await context({...duo,notifications:[],state:lobby},'reduce');let requests=0,ready=0;
   await page.route('**/assets/original/launch/**',r=>{requests++;return r.abort();});await page.route('**/rpc/set_ready',r=>{ready++;return r.fulfill({json:{ok:true}});});
-  await page.goto(`${BASE}/partie/${SESSION}`);await page.locator('.lobby .action-bar button').click();await page.waitForTimeout(100);assert.equal(requests,0);assert.equal(ready,1);await ctx.close();console.log('PASS reduced-motion : vidéo ignorée sans requête, prêt confirmé');
+  await page.goto(`${BASE}/partie/${SESSION}`);await page.locator('.salon-launch > button').click();await page.waitForTimeout(100);assert.equal(requests,0);assert.equal(ready,1);await ctx.close();console.log('PASS reduced-motion : vidéo ignorée sans requête, prêt confirmé');
  }
 }finally{await browser.close();}

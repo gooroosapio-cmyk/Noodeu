@@ -10,6 +10,7 @@ const rebase=o=>Array.isArray(o)?o.map(rebase):o&&typeof o==='object'?'__rel'in 
 const browser=await chromium.launch({executablePath:'/usr/bin/chromium'}),results=[];
 try {
  for(const f of ['conv-preferes-jeu','conv-av-verite','mot-bac-saisie','pack-attente']) for(const [width,height,zoom] of [[320,780,1],[360,780,1],[390,844,1],[430,844,1],[320,640,2],[390,460,1]]) {
+  if(process.env.ONLY && !f.includes(process.env.ONLY))continue;
   const state=rebase(JSON.parse(readFileSync(new URL(`./fixtures/c14-${f}.json`,import.meta.url),'utf8')));
   const context=await browser.newContext({viewport:{width,height},reducedMotion:'reduce',serviceWorkers:'block'}),page=await context.newPage(),errors=[];
   page.on('pageerror',e=>errors.push(e.message));await page.route('**/*',r=>new URL(r.request().url()).origin===new URL(BASE).origin?r.continue():r.abort());
@@ -20,6 +21,7 @@ try {
   assert.equal(await page.locator('.session-player-strip__status').filter({hasText:/^(Toi|Partenaire)$/}).count(),0);
   assert.equal(await page.evaluate(()=>document.documentElement.scrollWidth>innerWidth),false);
   for(const s of ['.session-toolbar__reduce','.session-toolbar__menu']){const b=await page.locator(s).boundingBox();assert.ok(b.width>=44&&b.height>=44);assert.ok(b.x>=0&&b.x+b.width<=width);}
+  if(f==='pack-attente'&&zoom===1){const region=page.getByRole('region',{name:'Question du pack',exact:true});assert.ok(await region.evaluate(e=>{const q=e.querySelector('.t-question').getBoundingClientRect();const b=e.getBoundingClientRect();return q.top>=b.top-1&&q.bottom<=b.bottom+1;}),'Question standard du pack visible intégralement');}
   if(f==='mot-bac-saisie'){
    assert.equal(await page.locator('.pb-cell').count(),8);assert.equal(await page.getByText('NaN:NaN',{exact:true}).count(),0);assert.equal(await page.locator('.pb-cell__state').filter({hasText:/Rempli/i}).count(),0);
    const inputs=page.locator('.pb-cell__input');assert.equal(await inputs.count(),8);await inputs.last().focus();await inputs.last().scrollIntoViewIfNeeded();
