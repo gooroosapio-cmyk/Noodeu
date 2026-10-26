@@ -1,0 +1,125 @@
+/* Planches mots 08–10 : commandes cerise, surfaces sobres et pièces existantes. */
+.word-board.astra-board {
+  --board-accent:#B72132;
+  --board-soft:#F7F1F1;
+  --board-ink:#43131C;
+  color:var(--board-ink);
+  gap:16px;
+  min-width:0;
+}
+.word-board :is(.t-meta,.t-small,.pb-cell__state) { font-size:.875rem; line-height:1.45; }
+.word-board :is(.t-section,.t-card) { font-size:1.125rem; line-height:1.35; }
+.word-board .t-question { font-size:1.25rem; line-height:1.45; overflow-wrap:anywhere; }
+.word-board .q-progress { gap:10px; flex-wrap:wrap; padding-bottom:10px; border-bottom:1px solid #E5D5D7; }
+.word-board .word-eyebrow { display:block; font-size:.875rem; line-height:1.4; font-weight:700; color:#794D55; }
+.word-board :is(.btn,.chip,.q-choice) { min-width:44px; min-height:44px; white-space:normal; }
+.word-board .btn { border-radius:15px; }
+.word-board .btn:not(.btn--secondary):not(.btn--quiet) { box-shadow:inset 0 1px 0 #FFFFFF30,0 3px 0 #801825,0 5px 10px #43131C12; }
+.word-board .btn--secondary { background:#FFFCFC; border:1px solid #D5ADB4; color:#43131C; box-shadow:0 2px 0 #E5D5D7; }
+.word-board .btn--quiet { color:#742335; }
+.word-board .chip { border-color:#D9BCC1; color:#43131C; }
+.word-board .chip[aria-pressed="true"] { background:#B72132; border-color:#B72132; color:white; }
+.word-board :is(.btn,.chip,.hm-key,.q-choice):focus-visible { outline:3px solid #B72132; outline-offset:3px; }
+.word-board .nd-chip { max-width:100%; white-space:normal; background:#F0E2E5; color:#632332; font-size:.875rem; }
+.word-board .nd-chip--mint { background:#E7EFDF; color:#345036; }
+.word-board .nd-chip--peach { background:#FAEBDF; color:#7A472C; }
+.word-board .q-card { background:#FFFCFA; border:1px solid #E4D3D5; box-shadow:0 3px 0 #EEE1E3,0 7px 16px #43131C06; }
+.word-board .mini-scores__item { background:#F7F1F1; }
+
+/* Le végétal garde ses couleurs naturelles ; seul son support suit l'interface. */
+.word-board.astra-board--hangman .hm-board { padding:14px 10px; gap:6px; border:1px solid #E9DBDD; border-radius:22px; background:linear-gradient(150deg,#FFFCFA,#F7F1F1); box-shadow:inset 0 1px 0 white,0 3px 0 #EEE3E4; }
+.word-board .hm-attempts { display:grid; justify-items:center; gap:8px; text-align:center; }
+.word-board .hm-attempts__dots { display:flex; gap:6px; }
+.word-board .hm-attempts__dots > span { width:10px; height:10px; border:1px solid #AF7C85; border-radius:50%; background:#B72132; box-shadow:inset 0 1px 1px #FFFFFF80; }
+.word-board .hm-attempts__dots > .is-used { background:#E7D9DC; border-color:#D6BEC3; box-shadow:none; }
+.word-board.astra-board--hangman .hm-slots { gap:6px; }
+.word-board.astra-board--hangman .hm-slot { width:clamp(27px,8vw,40px); height:48px; min-width:27px; border:1px solid #E1CDD1; border-bottom:3px solid #CCAFB5; background:#FFFCFA; border-radius:9px; color:#43131C; box-shadow:inset 0 1px 0 #FFF,0 3px 6px #43131C08; }
+.word-board.astra-board--hangman .hm-slot--on { color:#842239; border-color:#C9949E; background:#F4E7EA; }
+.word-board .hm-keyboard { display:grid; gap:10px; }
+.word-board .hm-keyboard__head,.word-board .hm-keyboard__legend { display:flex; flex-wrap:wrap; justify-content:space-between; align-items:center; gap:8px; }
+.word-board.astra-board--hangman .hm-keys { display:grid; grid-template-columns:minmax(0,1fr); gap:8px; }
+.word-board .hm-key-row { display:flex; flex-wrap:wrap; justify-content:center; gap:6px; }
+.word-board.astra-board--hangman .hm-key { flex:1 0 44px; max-width:calc((100% - 24px)/5); min-width:44px; min-height:46px; padding:8px 2px; border:1px solid #D9C3C7; border-radius:10px; color:#43131C; background:linear-gradient(#FFFFFF,#F9F4F4); box-shadow:0 3px 0 #DEC9CD; font-size:1rem; }
+.word-board.astra-board--hangman .hm-key--hit { background:#B72132; border-color:#951A29; color:#FFF; box-shadow:0 3px 0 #7D1825; }
+.word-board.astra-board--hangman .hm-key--miss { background:#EDE5E7; border-color:#D5C7CB; color:#715D63; box-shadow:0 3px 0 #D9CACF; text-decoration:line-through; text-decoration-thickness:2px; }
+.word-board .hm-keyboard__legend { justify-content:center; font-size:.875rem; line-height:1.4; color:#6A4C53; }
+.word-board .hm-keyboard__legend > span { display:flex; align-items:center; gap:4px; }
+.word-board .hm-keyboard__legend i { width:10px; height:10px; border:1px solid #B2949B; border-radius:3px; background:#FFF; }
+.word-board .hm-keyboard__legend .is-hit { background:#B72132; border-color:#B72132; }
+.word-board .hm-keyboard__legend .is-miss { background:#D9CACF; }
+
+/* Huit rubriques réelles, deux colonnes ; les champs restent à 16 px minimum. */
+.word-board.astra-board--petitbac .pb-head { justify-content:flex-start; flex-wrap:nowrap; background:#F7F1F1; border:1px solid #E5D5D7; border-radius:18px; padding:12px; gap:14px; }
+.word-board.astra-board--petitbac .pb-token { width:64px; height:68px; border-radius:13px; border:1px solid #E4D2BA; background:linear-gradient(145deg,#FFF9E8,#F1DFBB); box-shadow:inset 0 2px 0 #FFFDF6,0 4px 0 #D4B890,0 6px 8px #43131C12; transform:rotate(-4deg); }
+.word-board .pb-token span { color:#43131C; font-size:2.25rem; }
+.word-board .pb-head__info { gap:3px; }
+.word-board .pb .pb-time { color:#43131C; font-size:1.75rem; line-height:1.2; }
+.word-board .pb .pb-time--low { color:#B72132; }
+.word-board .pb-save-state { color:#7B5B62; }
+.word-board.astra-board--petitbac .pb-grid { grid-template-columns:repeat(2,minmax(0,1fr)); gap:10px; }
+.word-board.astra-board--petitbac .pb-cell { padding:10px 8px 8px; min-height:124px; border:1px solid #E2D2D5; border-radius:14px; background:#FFFCFC; box-shadow:inset 0 1px 0 white,0 3px 0 #EEE3E5; gap:8px; }
+.word-board.astra-board--petitbac .pb-cell.is-filled { border-color:#D8AFB7; background:#FBF3F4; }
+.word-board.astra-board--petitbac .pb-cell__label { flex-wrap:wrap; font-size:.875rem; line-height:1.4; color:#43131C; }
+.word-board.astra-board--petitbac .pb-cell__label img { width:20px; height:20px; }
+.word-board .pb-cell__input { font-size:1rem; min-height:48px; border-color:#D9C2C7; background:#FFF; scroll-margin-block:110px; }
+.word-board .pb-cell__state { color:#7A5B63; }
+.word-board .pb-cell.is-filled .pb-cell__state { color:#8F233A; }
+.word-board .pb-stop { gap:10px; padding-block:6px; }
+.word-board .pb-stop .btn { min-height:52px; text-transform:uppercase; letter-spacing:.06em; }
+.word-board .pb-stop__symbol { display:inline-block; width:14px; height:14px; border:2px solid currentColor; border-radius:3px; flex:none; }
+.word-board .pb-review__head { display:flex; flex-wrap:wrap; justify-content:space-between; align-items:center; gap:8px; }
+.word-board .astra-pb-help { background:#F7F1F1; border-color:#E2CDD2; }
+.word-board .astra-pb-help summary { color:#662232; min-height:48px; }
+.word-board .pb-comparison { border:1px solid #E3CFD4; border-radius:17px; background:#FFFCFC; padding:14px; box-shadow:0 3px 0 #EFE3E6; }
+.word-board .pb-comparison h3 { padding-bottom:10px; border-bottom:1px solid #EADDE0; }
+.word-board .pb-comparison__answers { display:grid; gap:12px; min-width:0; }
+.word-board .pb-answer { min-width:0; padding:12px; border:1px solid #EADDE0; border-radius:12px; background:#F9F5F5; }
+.word-board .pb-answer__heading { display:flex; flex-wrap:wrap; align-items:center; justify-content:space-between; gap:6px; }
+.word-board .pb-answer__text { font-size:1rem; line-height:1.45; overflow-wrap:anywhere; font-weight:700; }
+.word-board .pb-answer__status { justify-self:start; align-self:flex-start; }
+.word-board .pb-answer[data-status="unknown"] .pb-answer__status { background:#FFF0CE; color:#755114; }
+.word-board .astra-pb-reason { color:#74525B; }
+.word-board .pb-answer .chips { gap:6px; }
+.word-board .pb-answer .chip { flex:1 1 auto; min-height:44px; padding:8px; font-size:.875rem; }
+
+/* Chrono physique existant ; le chiffre est toujours calculé depuis l'échéance serveur. */
+.word-board .cite-call-badge { align-self:flex-start; display:inline-flex; align-items:center; gap:7px; }
+.word-board .cite-call-badge > span { width:7px; height:7px; border-radius:50%; background:#B72132; }
+.word-board .cite-player { display:flex; align-items:center; gap:10px; }
+.word-board .cite-player__avatar { display:grid; place-items:center; width:44px; height:44px; flex:none; border-radius:50%; background:#EDD7DC; color:#7E263A; font:800 1.125rem/1 var(--f-heading); border:2px solid #FFFCFC; box-shadow:0 2px 5px #43131C12; }
+.word-board .cite-prompt { display:grid; align-content:center; gap:9px; min-height:148px; padding:18px; text-align:left; }
+.word-board .cite-timer { gap:2px; padding:4px 0; }
+.word-board .cite-clock { position:relative; width:190px; height:190px; }
+.word-board .cite-clock > img { display:block; width:100%; height:100%; object-fit:contain; }
+.word-board .cite-clock__value { position:absolute; left:43.5%; top:59%; transform:translate(-50%,-50%); width:80px; height:80px; display:flex; flex-direction:column; align-items:center; justify-content:center; gap:2px; border-radius:50%; background:#F7E8D0; color:#43131C; font:800 2.375rem/1 var(--f-heading); font-variant-numeric:tabular-nums; box-shadow:0 0 8px 3px #F7E8D0; }
+.word-board .cite-clock__value small { font:700 .75rem/1.2 var(--f-body); }
+.word-board .cite-timer.is-finished .cite-clock__value { color:#B72132; }
+.word-board .cite-judge { padding:14px; background:#F7F1F1; border:1px solid #E3CDD3; border-radius:18px; }
+.word-board .cite-verdicts { grid-template-columns:repeat(2,minmax(0,1fr)); gap:8px; }
+.word-board .cite-verdicts .btn { min-height:52px; padding:10px 8px; }
+.word-board .cite-verdicts .btn:first-child { background:#B72132; color:#FFF; border-color:#A51B2B; box-shadow:0 3px 0 #8A1B2B; }
+.word-board .cite-verdicts .btn span { display:flex; flex-wrap:wrap; justify-content:center; gap:6px; }
+.word-board .cite-ready__object { width:130px; height:130px; margin-inline:auto; }
+.word-board .cite-ready__object img { width:100%; height:100%; object-fit:contain; }
+.word-board .cite-ready .switch-row { background:#F7F1F1; border:1px solid #E3CDD3; border-radius:16px; padding:12px; }
+@media (min-width:540px) {
+  .word-board.astra-board--hangman .hm-key { max-width:calc((100% - 54px)/10); }
+  .word-board .pb-comparison__answers { grid-template-columns:repeat(2,minmax(0,1fr)); }
+}
+@media (max-height:560px) {
+  .word-board .cite-clock { width:150px; height:150px; }
+  .word-board .cite-clock__value { width:62px; height:62px; font-size:1.875rem; }
+  .word-board .cite-clock__value small { font-size:.625rem; }
+  .word-board .cite-prompt { min-height:120px; }
+}
+/* Les rangées AZERTY restent lisibles sans réduire les cibles tactiles. */
+.word-board .hm-key-row { display:grid; grid-template-columns:repeat(5,minmax(44px,1fr)); }
+.word-board.astra-board--hangman .hm-key { width:100%; max-width:none; }
+.word-board .hm-key-row:last-child { grid-template-columns:repeat(3,minmax(44px,1fr)); }
+.word-board .astra-flower { width:160px; height:160px; }
+.word-board .astra-flower__petal { left:-34px; bottom:-3.5px; width:68px; height:64px; }
+.session-shell.session-console .word-board .cite-prompt.question-reading { height:clamp(12rem,27dvh,14rem); }
+.word-board .cite-call-badge { width:fit-content; }
+@media (min-width:360px) { .word-board .hm-key-row:last-child { grid-template-columns:repeat(6,minmax(44px,1fr)); } }
+@media (min-width:540px) { .word-board .hm-key-row { grid-template-columns:repeat(10,minmax(44px,1fr)); } }
+.word-board .btn:disabled { opacity:.55; box-shadow:none; cursor:not-allowed; }

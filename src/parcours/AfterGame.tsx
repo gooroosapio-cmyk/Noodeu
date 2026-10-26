@@ -27,7 +27,7 @@ export function AfterGame({ onOpenChat }: { onOpenChat: () => void }) {
   }
 
   return (
-    <section className="card card--soft stack stack--4" aria-labelledby="after-title">
+    <section className="card card--soft stack stack--4 after-game" aria-labelledby="after-title">
       <div className="stack stack--2">
         <h2 className="t-card" id="after-title">{t("calm.title")}</h2>
         <p className="t-small">{t("calm.text")}</p>

@@ -7,6 +7,8 @@ import { Alert, Icon, Loading } from "../../components/ui";
 import type { Player } from "../../lib/types";
 import { CardBox, nameOf, forWho, useMoves, type Common, type CRound } from "./ConversationGames";
 import { ExpiryRetry, HangmanFlower, useServerExpiry } from "../premium/BoardPieces";
+import { ReadingRegion } from "../ReadingRegion";
+import "../../styles/board-word-refinement.css";
 
 type J = any;
 type Send = (type: string, payload?: Record<string, unknown>, quiet?: boolean) => Promise<{ ok: boolean; error?: string; info?: any }>;
@@ -16,7 +18,7 @@ export const WORD_MECHS = ["nd_hangman", "nd_categories_stop", "nd_name_three_ca
 export const isWordMech = (m?: string) => Boolean(m && WORD_MECHS.includes(m));
 const PREMIUM = "/assets/premium";
 const KNOWN = ["repeated", "too_early", "fields_missing", "time_up", "stale_draft", "call_required", "waiting_ack", "correction_pending", "seen", "invalid_move"];
-const LETTERS = "ABCDEFGHIJKLMNOPQRSTUVWXYZ".split("");
+const KEY_ROWS = ["AZERTYUIOP", "QSDFGHJKLM", "WXCVBN"];
 
 // ---------------------------------------------------------------------------
 // Heure du serveur : décalage mesuré à chaque réponse (info.now), utilisé pour toutes les échéances.
@@ -100,7 +102,7 @@ function Hangman({ c, round }: { c: Common; round: CRound }) {
   const misses: string[] = card.misses ?? [];
 
   return (
-    <section className="stack stack--5 astra-board astra-board--hangman">
+    <section className="stack stack--5 astra-board astra-board--hangman word-board">
       <div className="q-progress">
         <span className="t-meta">{t("word.round", { n: round.round_no, total: c.st.session.total_rounds })}</span>
         <span className="t-meta">{forWho(giver, "word.hm.youGive", "word.hm.gives")}</span>
@@ -123,22 +125,34 @@ function Hangman({ c, round }: { c: Common; round: CRound }) {
       ) : (
         <div className="stack stack--4">
           <div className="hm-board">
+            <span className="word-eyebrow">{iGive ? "Fais deviner ton mot" : "Retrouve le mot"}</span>
             <HangmanFlower errors={errors} revision={Number(card.rev ?? 0)} online={c.online} label={t("word.hm.petals", { n: 6 - Math.min(errors, 6) })} />
-            <p className="t-meta" aria-live="polite">{t("word.hm.errors", { n: errors, max: 6 })}</p>
+            <div className="hm-attempts" aria-live="polite">
+              <span className="hm-attempts__dots" aria-hidden="true">{Array.from({ length: 6 }, (_, i) => <span key={i} className={i < errors ? "is-used" : ""} />)}</span>
+              <span className="t-meta">{Math.max(0, 6 - errors)} essais restants · {t("word.hm.errors", { n: errors, max: 6 })}</span>
+            </div>
           </div>
-          <p className="hm-slots" aria-label={t("word.hm.maskLabel", { n: mask.length })}>
+          <p className="hm-slots" aria-label={`${t("word.hm.maskLabel", { n: mask.length })} : ${mask.map(x => x ?? "lettre cachée").join(", ")}`}>
             {mask.map((x, i) => <span key={i} className={`hm-slot${x ? " hm-slot--on" : ""}`}>{x ?? ""}</span>)}
           </p>
           {iGive && round.private?.word?.text && !card.done && <p className="t-small center">{t("word.hm.yourWord")} <strong>{round.private.word.text}</strong></p>}
           {!card.done && (
-            <div className="hm-keys" role="group" aria-label={t("word.hm.keyboard")}>
-              {LETTERS.map((l) => {
-                const used = guessed.includes(l);
-                return (
-                  <button key={l} className={`hm-key${used ? (misses.includes(l) ? " hm-key--miss" : " hm-key--hit") : ""}`}
-                    disabled={busy || used || iGive} aria-label={used ? t("word.hm.keyUsed", { l }) : l} onClick={() => void play("guess_letter", { letter: l })}>{l}</button>
-                );
-              })}
+            <div className="hm-keyboard">
+              <div className="hm-keyboard__head"><span className="word-eyebrow">Clavier AZERTY</span><span className="t-meta">Une lettre à la fois</span></div>
+              <div className="hm-keys" role="group" aria-label={t("word.hm.keyboard")}>
+                {KEY_ROWS.map((row) => <div className="hm-key-row" key={row}>
+                  {row.split("").map((l) => {
+                    const used = guessed.includes(l);
+                    const miss = misses.includes(l);
+                    return (
+                      <button key={l} className={`hm-key${used ? (miss ? " hm-key--miss" : " hm-key--hit") : ""}`}
+                        disabled={busy || used || iGive} aria-label={used ? `${l}, ${miss ? "absente du mot" : "trouvée"}` : l}
+                        onClick={() => void play("guess_letter", { letter: l })}>{l}</button>
+                    );
+                  })}
+                </div>)}
+              </div>
+              <div className="hm-keyboard__legend" aria-hidden="true"><span><i className="is-hit" />Trouvée</span><span><i className="is-miss" />Absente</span><span><i />Disponible</span></div>
             </div>
           )}
           {!card.done && (iGive ? <p className="t-meta center">{t("word.hm.watch", { name: nameOf(partner) })}</p> : <p className="t-meta center">{t("word.hm.yourTurn")}</p>)}
@@ -220,14 +234,14 @@ function PetitBacWrite({ c, round, send }: { c: Common; round: CRound; send: Sen
     <div className="stack stack--4 pb">
       <div className="pb-head">
         <span className="pb-token" aria-label={t("word.pb.letterIs", { l: card.letter })}>
-          <img src="/assets/premium/M16/letter-token.svg" alt="" aria-hidden="true" />
           <span aria-hidden="true">{card.letter}</span>
         </span>
         <div className="pb-head__info">
           <span className={`pb-time${left <= 15 ? " pb-time--low" : ""}`} role="timer" aria-live={left <= 10 ? "polite" : "off"}>
             {String(Math.floor(left / 60)).padStart(2, "0")}:{String(left % 60).padStart(2, "0")}
           </span>
-          <span className="t-meta">{t("word.pb.filled", { n: filled, total: cats.length })} · {pending ? t("word.pb.saving") : t("word.pb.saved")}</span>
+          <span className="t-meta">{t("word.pb.filled", { n: filled, total: cats.length })}</span>
+          <span className="pb-save-state t-meta" role="status">{pending ? t("word.pb.saving") : t("word.pb.saved")}</span>
         </div>
       </div>
       <p className="t-meta astra-pb-hint">Une réponse par rubrique, commençant par <strong>{card.letter}</strong>. Les accents et majuscules ne changent pas la réponse.</p>
@@ -249,14 +263,15 @@ function PetitBacWrite({ c, round, send }: { c: Common; round: CRound; send: Sen
                 else e.currentTarget.blur();
               }}
               onBlur={(e) => { if (!saved[k]) { clearTimeout(timers.current[k]); save(k, e.target.value); } }} />
+            <span className="pb-cell__state">{text[k]?.trim() ? "Rempli" : "À remplir"}{failed[k] ? " · à réessayer" : text[k]?.trim() && !saved[k] ? " · envoi…" : ""}</span>
           </div>
         ))}
       </div>
       {Object.values(failed).some(Boolean) && <Alert kind="info"><div className="stack stack--2"><p>Certaines réponses n’ont pas pu être enregistrées. Elles restent dans cet écran.</p><button type="button" className="btn btn--secondary" disabled={offline || left===0} onClick={()=>{for(const k of cats)if(failed[k])save(k,text[k]??"");}}>Réessayer l’enregistrement</button></div></Alert>}
       <ExpiryRetry expiry={expiry} />
       <div className="pb-stop">
-        <button className="btn" disabled={offline || !canStop || left === 0} onClick={stop}>
-          <img src="/assets/premium/M16/stop.svg" alt="" aria-hidden="true" width={22} height={22} />{t("word.pb.stop")}
+        <button className="btn" disabled={c.busy || offline || !canStop || left === 0} onClick={stop}>
+          <span className="pb-stop__symbol" aria-hidden="true" />{t("word.pb.stop")}
         </button>
         <p className="t-meta center">{!canStop && left > 0 ? t("word.pb.stopHint8", { total: cats.length }) : t("word.pb.partnerWriting", { name: nameOf(partner) })}</p>
       </div>
@@ -285,7 +300,8 @@ function PetitBacValidation({ c, round, send }: { c: Common; round: CRound; send
   };
 
   return (
-    <div className="stack stack--4">
+    <div className="stack stack--4 pb-review">
+      <div className="pb-review__head"><h2 className="t-section">Comparez vos réponses</h2><span className="nd-chip">Lettre {card.letter}</span></div>
       {!final && <p className="t-small">{t("word.pb.judgeIntro", { n: left })}</p>}
       <ExpiryRetry expiry={expiry} />
       <details className="astra-pb-help">
@@ -299,18 +315,17 @@ function PetitBacValidation({ c, round, send }: { c: Common; round: CRound; send
         const ok = (e: J) => ["valid", "unknown"].includes(e.status);
         const needSame = !final && a.every((x) => ok(x.e)) && a[0].e.norm !== a[1]?.e.norm && !(a[0].e.acc && a[1]?.e.acc);
         return (
-          <section key={k} className="card stack stack--3">
+          <section key={k} className="card stack stack--3 pb-comparison" data-category={k}>
             <h3 className="t-card row"><img src={`/assets/premium/M16/${k}.svg`} alt="" aria-hidden="true" width={24} height={24} />{labels[k] ?? k}</h3>
-            {a.map(({ p, e }) => {
+            <div className="pb-comparison__answers">{a.map(({ p, e }) => {
               const st = final ? e.final : e.status;
               return (
-                <div key={p.seat} className="stack stack--2">
-                  <p className="row row--wrap" style={{ gap: 8 }}>
-                    <span className="t-meta strong">{nameOf(p)}</span>
-                    <span className="grow">{e.text || <span className="muted">{t("word.pb.empty")}</span>}</span>
-                    {st && st !== "empty" && <span className={`nd-chip ${STATUS_CHIP[st] ?? ""}`}>{t(`word.pb.st.${st}` as never)}</span>}
+                <div key={p.seat} className="stack stack--2 pb-answer" data-status={st ?? "empty"}>
+                  <div className="pb-answer__heading"><span className="t-meta strong">{nameOf(p)}{p.is_me ? " · toi" : ""}</span>
                     {final && <span className="nd-chip">{t("word.pts", { n: e.points ?? 0 })}</span>}
-                  </p>
+                  </div>
+                  <p className="pb-answer__text">{e.text || <span className="muted">{t("word.pb.empty")}</span>}</p>
+                  {st && st !== "empty" && <span className={`nd-chip pb-answer__status ${STATUS_CHIP[st] ?? ""}`}>{st === "unknown" ? "À vérifier" : t(`word.pb.st.${st}` as never)}</span>}
                   {(reasons[e.reason] || (!e.reason && e.status === "unknown")) && <p className="t-meta astra-pb-reason">{reasons[e.reason] ?? reasons.not_in_index}</p>}
                   {!final && ok(e) && (
                     <div className="chips" role="group" aria-label={t("word.pb.voteFor", { name: nameOf(p), cat: labels[k] ?? k })}>
@@ -318,14 +333,14 @@ function PetitBacValidation({ c, round, send }: { c: Common; round: CRound; send
                         const current = votes[`${p.seat}:${k}`] ?? (e.status === "valid" ? "accept" : undefined);
                         return (
                           <button key={v} className="chip" aria-pressed={current === v} disabled={busy}
-                            onClick={() => void send("judge_entry", { seat: p.seat, category_id: k, verdict: v })}>{t(`word.pb.vote.${v}` as never)}</button>
+                            onClick={() => void send("judge_entry", { seat: p.seat, category_id: k, verdict: v })}>{v === "reject" && e.status === "valid" ? "Contester" : t(`word.pb.vote.${v}` as never)}</button>
                         );
                       })}
                     </div>
                   )}
                 </div>
               );
-            })}
+            })}</div>
             {needSame && (
               <div className="stack stack--2">
                 <p className="t-small">{t("word.pb.sameAsk")}</p>
@@ -359,7 +374,7 @@ function PetitBac({ c, round }: { c: Common; round: CRound }) {
   const { err, play, after, send } = useTimedMoves(c, round);
   const busy = c.busy || !c.online;
   return (
-    <section className="stack stack--5 astra-board astra-board--petitbac">
+    <section className="stack stack--5 astra-board astra-board--petitbac word-board">
       <div className="q-progress">
         <span className="t-meta">{t("word.round", { n: round.round_no, total: c.st.session.total_rounds })}</span>
         {card.letter && <span className="t-meta">{t("word.pb.letterIs", { l: card.letter })}</span>}
@@ -400,22 +415,37 @@ function CiteLive({ c, round, send }: { c: Common; round: CRound; send: Send }) 
   const deadline = new Date(card.deadline_at).getTime();
   const acked = Boolean(card.acks?.[me.seat]);
   const both = Boolean(card.acks?.["1"] && card.acks?.["2"]);
-  const sent = useRef({ ack: false, tick: false, interrupt: false });
+  const sent = useRef({ ack: false, tick: false, interrupt: false, ackInFlight: false, tickInFlight: false, ackRetries: 0, tickRetries: 0, ackRetryAt: 0, tickRetryAt: 0 });
+  const [receiptFailed, setReceiptFailed] = useState(false);
   const isJudge = card.judge === me.seat;
   const busy = c.busy || !c.online;
 
   // Accusé de réception envoyé dès l'heure de départ (le serveur refuse tout envoi anticipé, on relance alors).
   useEffect(() => {
-    if (acked || sent.current.ack || now < starts) return;
+    if (acked || !c.online || sent.current.ack || now < starts || now < sent.current.ackRetryAt) return;
     sent.current.ack = true;
-    void send("prompt_received", {}, true).then((res) => { if (!res.ok && res.error === "too_early") sent.current.ack = false; });
-  }, [now, starts, acked, send]);
+    sent.current.ackInFlight = true;
+    void send("prompt_received", {}, true).then((res) => {
+      sent.current.ackInFlight = false;
+      if (!res.ok && ["too_early", "network", "unexpected", "busy"].includes(res.error ?? "")) {
+        if (sent.current.ackRetries++ < 3) { sent.current.ack = false; sent.current.ackRetryAt = serverNow() + 200; }
+        else setReceiptFailed(true);
+      }
+    });
+  }, [now, starts, acked, c.online, send]);
   // Accusé manquant 750 ms après le départ : le serveur annule la manche.
   useEffect(() => {
-    if (both || sent.current.tick || now < starts + 1000) return;
+    if (both || !c.online || sent.current.tick || now < starts + 1000 || now < sent.current.tickRetryAt) return;
     sent.current.tick = true;
-    void send("tick", {}, true);
-  }, [now, starts, both, send]);
+    sent.current.tickInFlight = true;
+    void send("tick", {}, true).then((res) => {
+      sent.current.tickInFlight = false;
+      if (!res.ok && ["too_early", "network", "unexpected", "busy"].includes(res.error ?? "")) {
+        if (sent.current.tickRetries++ < 3) { sent.current.tick = false; sent.current.tickRetryAt = serverNow() + 1000; }
+        else setReceiptFailed(true);
+      }
+    });
+  }, [now, starts, both, c.online, send]);
   // Quitter l'écran pendant les 10 secondes annule la manche, sans point.
   useEffect(() => {
     const onHide = () => {
@@ -428,11 +458,23 @@ function CiteLive({ c, round, send }: { c: Common; round: CRound; send: Send }) 
     return () => document.removeEventListener("visibilitychange", onHide);
   }, [deadline, send]);
 
+  const receiptRetry = receiptFailed && !both ? <div className="stack stack--2" role="status">
+    <p className="t-small">La réception n’a pas été confirmée. La manche reste soumise au délai initial.</p>
+    <button className="btn btn--secondary" disabled={busy || sent.current.ackInFlight || sent.current.tickInFlight} onClick={() => {
+      if (sent.current.ackInFlight || sent.current.tickInFlight) return;
+      sent.current.ack = false; sent.current.tick = false;
+      sent.current.ackRetries = 0; sent.current.tickRetries = 0;
+      sent.current.ackRetryAt = 0; sent.current.tickRetryAt = 0;
+      setReceiptFailed(false);
+    }}>Réessayer la confirmation</button>
+  </div> : null;
+
   if (now < starts || !card.text) {
     return (
       <div className="cite-count" role="timer" aria-live="polite">
         <p className="t-section">{now < starts ? t("word.ct.startsIn", { n: secondsLeft(card.starts_at, now) }) : t("word.ct.receiving")}</p>
         <Loading />
+        {receiptRetry}
       </div>
     );
   }
@@ -441,27 +483,24 @@ function CiteLive({ c, round, send }: { c: Common; round: CRound; send: Send }) 
   const waitSec = Math.floor((now - deadline) / 1000);
   const respondent = players.find((p) => p.seat === card.respondent);
   return (
-    <div className="stack stack--4">
-      <p className="nd-chip">{forWho(respondent, "word.ct.youAnswer", "word.ct.answers")}</p>
-      <article className="q-card"><h2 className="t-question">{card.text}</h2></article>
-      <div className="cite-timer">
-        <svg className="cite-dial" viewBox="0 0 120 120" width={120} height={120} aria-hidden="true">
-          <circle cx="60" cy="60" r="52" className="cite-dial__track" />
-          <circle cx="60" cy="60" r="52" className="cite-dial__arc" pathLength={100}
-            strokeDasharray={`${Math.max(0, Math.min(100, (100 * Math.max(0, deadline - now)) / Math.max(1, deadline - starts)))} 100`} />
-          <text x="60" y="70" textAnchor="middle" className="cite-dial__n">{left}</text>
-        </svg>
+    <div className="stack stack--4 cite-live">
+      {receiptRetry}
+      <div className="cite-player"><span className="cite-player__avatar" aria-hidden="true">{nameOf(respondent).slice(0, 1)}</span><div><span className="word-eyebrow">À voix haute</span><p className="strong">{forWho(respondent, "word.ct.youAnswer", "word.ct.answers")}</p></div></div>
+      <ReadingRegion label="Consigne de la manche" className="cite-prompt" resetKey={card.card_id ?? card.text}><span className="word-eyebrow">La consigne · 3 réponses</span><h2 className="t-question">{card.text}</h2></ReadingRegion>
+      <div className={`cite-timer${late ? " is-finished" : ""}`}>
+        <div className="cite-clock" aria-hidden="true"><img src="/assets/original/library3d/G07.webp" alt="" /><span className="cite-clock__value">{left}<small>secondes</small></span></div>
         <p className="t-meta" role="timer" aria-live="off">{late ? t("word.ct.timeUp") : t("word.seconds", { n: left })}</p>
       </div>
       {isJudge ? (
-        <div className="stack stack--2">
+        <div className="stack stack--2 cite-judge">
+          <span className="word-eyebrow">Ton verdict</span>
           <p className="t-small strong">{late ? t("word.ct.judgeLate") : t("word.ct.judgeNow")}</p>
-          <div className="q-choices">
+          <div className="q-choices cite-verdicts">
             <button className="btn btn--secondary" disabled={busy || !both} onClick={() => void send("verdict", { success: true })}>
-              <img src={`${PREMIUM}/G07/success.svg`} alt="" width={22} height={22} />{t("word.ct.success")}
+              <Icon name="check" size={20} /><span>{t("word.ct.success")} <strong>+3</strong></span>
             </button>
             <button className="btn btn--secondary" disabled={busy || !both} onClick={() => void send("verdict", { success: false })}>
-              <img src={`${PREMIUM}/G07/failure.svg`} alt="" width={22} height={22} />{t("word.ct.failure")}
+              <span aria-hidden="true">×</span><span>{t("word.ct.failure")} <strong>0</strong></span>
             </button>
           </div>
           {!both && <p className="t-meta">{t("word.ct.waitAck")}</p>}
@@ -495,15 +534,19 @@ function CiteTrois({ c, round }: { c: Common; round: CRound }) {
   const correction = card.correction;
 
   return (
-    <section className="stack stack--5">
+    <section className="stack stack--5 astra-board astra-board--citethree word-board">
       <div className="q-progress">
         <span className="t-meta">{t("word.ct.round", { n: round.round_no })}</span>
         <span className="t-meta">{t("word.ct.target", { n: target })}</span>
       </div>
+      {(!card.need_call || card.phase !== "loading") && <span className="nd-chip cite-call-badge"><span aria-hidden="true" />En appel</span>}
       {card.adult && !card.done && <span className="nd-chip nd-chip--peach">{t("conv.adultChip")}</span>}
 
       {card.phase === "loading" ? (
-        <div className="stack stack--3">
+        <div className="stack stack--3 cite-ready">
+          <div className="cite-ready__object"><img src="/assets/original/library3d/G07.webp" alt="" /></div>
+          <h2 className="t-section">3 réponses en 10 secondes</h2>
+          <p className="t-small">Répondez à voix haute, puis l’autre donne son verdict. Une réussite rapporte 3 points.</p>
           {card.need_call && (
             <label className="switch-row">
               <span className="switch-row__text"><span>{t("word.ct.inCall")}</span><span className="t-meta">{t("word.ct.inCallHint")}</span></span>

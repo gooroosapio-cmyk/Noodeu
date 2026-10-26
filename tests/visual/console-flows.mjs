@@ -56,7 +56,9 @@ try {
     await page.getByRole('dialog').waitFor();
     assert.deepEqual(mutations, []);
     await page.keyboard.press('Escape');
+    const pauseRequest = page.waitForRequest('**/rpc/set_paused');
     await page.getByRole('button', { name: 'Pause', exact: true }).click();
+    await pauseRequest;
     assert.deepEqual(mutations, ['set_paused']);
     assert.deepEqual(errors, []);
     await context.close();

@@ -9,7 +9,7 @@ const browser = await chromium.launch({ executablePath: process.env.PW_CHROMIUM 
 const scenarios = [
   { fixture: 'c14-mini-de-jeu', selector: '.pig', animation: 'astra-die-land',
     change(card, n) { Object.assign(card, { rev: n, last: { type: 'roll', seat: 1 }, die: n === 7 ? 5 : 4 }); } },
-  { fixture: 'c14-mini-naval-tirs', selector: '.astra-board--naval', animation: 'astra-confirmed',
+  { fixture: 'c14-mini-naval-tirs', selector: '.astra-board--naval', animation: 'mini-shot-confirmed',
     change(card, n) { Object.assign(card, { rev: n, last: { type: 'fire', seat: 1 } }); if (n > 7) card.shots[1].push({ r: 0, c: n - 8, res: 'miss' }); } },
   { fixture: 'c14-mot-pendu-devineur', selector: '.astra-flower', animation: 'astra-petal-fall',
     change(card, n) { Object.assign(card, { rev: n, last: { type: 'guess_letter', seat: 1 }, errors: n - 6 }); } },

@@ -1,0 +1,138 @@
+/* Matières communes aux cinq mini-jeux. Les objets sont les ressources 3D existantes. */
+.astra-board.mini-refined {
+  --board-accent:#B72132;
+  --board-soft:#F7F1F1;
+  --board-ink:#43131C;
+  --mini-line:#decdd0;
+  color:var(--board-ink);
+  gap:14px;
+}
+.mini-refined :is(button,input,select,summary) { min-width:44px; min-height:44px; }
+.mini-refined :is(input,select) { font-size:max(16px,1rem); }
+.mini-refined .btn { border-radius:14px; }
+.mini-refined .btn--quiet { color:#43131C; background:#F7F1F1; border:1px solid var(--mini-line); }
+.mini-refined .series-score,.mini-refined .mini-scores__item { background:#F7F1F1; border:1px solid var(--mini-line); box-shadow:inset 0 1px 0 #fff; }
+.mini-refined .mini-scores__item--me { border-color:#B72132; }
+.mini-refined .series-score { grid-template-columns:1fr 1fr; }
+.mini-refined .series-score > p { grid-column:1/-1; margin:0; }
+.mini-refined .series-score strong { color:#43131C; }
+.mini-refined .series-score > div { display:flex; justify-content:space-between; align-items:center; gap:8px; background:#f4e1e5; }
+.mini-refined .series-score > div:nth-child(2) { background:#e9dfe2; }
+.mini-refined .nd-chip { background:#F7F1F1; color:#43131C; border:1px solid #e2d1d6; }
+.mini-refined .mini-board-caption { font-size:.875rem; font-weight:800; text-align:center; color:#43131C; }
+.mini-refined .mini-board-caption span { font-weight:500; }
+
+/* Plateau de pierre claire et empreintes céramique ; les symboles restent des objets séparés. */
+.stage--M01 .mini-refined .astra-ttt,.mini-refined .astra-ttt {
+  padding:12px; gap:8px; border:1px solid #e5d8d8; border-radius:24px;
+  background:linear-gradient(145deg,#fffdfb,#e9dddd);
+  box-shadow:inset 0 2px 1px #fff,0 5px 0 #cdb9bd,0 10px 18px #43131c12;
+}
+.stage--M01 .mini-refined .astra-ttt .ttt__cell,.mini-refined .astra-ttt .ttt__cell {
+  background:linear-gradient(145deg,#fffefa,#f2eaea); border:1px solid #e6dada;
+  box-shadow:inset 0 -4px 0 #dfd1d3,inset 0 1px 0 #fff; border-radius:16px;
+}
+.mini-refined .astra-ttt .ttt__cell img { animation:none; filter:drop-shadow(0 4px 3px #43131c24); }
+.stage--M01 .mini-refined .astra-ttt .ttt__cell--win,.mini-refined .astra-ttt .ttt__cell--win { background:#f8e6e8; box-shadow:inset 0 -4px 0 #d6a7ae; border-color:#B72132; }
+.mini-refined .astra-ttt__line line { stroke:#B72132; stroke-width:6; }
+.mini-refined .astra-ttt__line.is-revealing line { animation-duration:260ms; }
+
+/* Le zoom change la géométrie réelle. Aucune cible interactive ne descend sous 44 px. */
+.mini-refined .mini-zoom-tools { display:grid; grid-template-columns:minmax(0,1fr) 44px minmax(48px,max-content) 44px; align-items:center; gap:6px; }
+.mini-refined .mini-zoom-tools .btn { min-width:44px; padding:8px; font-size:.8125rem; }
+.mini-refined .mini-zoom-tools output { text-align:center; }
+.mini-refined .astra-zoom .board-zoom {
+  max-width:100%; max-height:min(65svh,460px); overflow:auto; padding:12px;
+  border:1px solid #d7c3c7; border-radius:18px; background:#F7F1F1;
+  box-shadow:inset 0 2px 4px #43131c0d,0 3px 0 #ddcdd0;
+  touch-action:pan-x pan-y; scrollbar-width:thin; scrollbar-color:#bca2a8 #F7F1F1;
+  overscroll-behavior:contain; scroll-padding:12px;
+}
+.mini-refined .astra-overview { width:100%; overflow:hidden; padding:8px; border:1px solid #d7c3c7; background:#F7F1F1; }
+.mini-refined .board-zoom--dots .dots {
+  display:grid; width:calc(var(--dot-tracks-x) * var(--board-cell)); max-width:none; height:calc(var(--dot-tracks-y) * var(--board-cell));
+  grid-template-columns:repeat(var(--dot-tracks-x),var(--board-cell)); grid-template-rows:repeat(var(--dot-tracks-y),var(--board-cell));
+  margin:0; gap:0; aspect-ratio:auto; touch-action:pan-x pan-y;
+}
+.mini-refined .astra-overview .dots { width:100%; height:auto; aspect-ratio:var(--dot-tracks-x)/var(--dot-tracks-y); grid-template-columns:repeat(var(--dot-tracks-x),minmax(0,1fr)); grid-template-rows:repeat(var(--dot-tracks-y),minmax(0,1fr)); }
+.mini-refined .astra-overview :is(.dots__edge,.naval__cell) { min-width:0; min-height:0; }
+.mini-refined .dots__dot { width:15px; height:15px; background:radial-gradient(circle at 35% 25%,#fff,#bba8ac 60%,#84646e); box-shadow:0 2px 2px #43131c22; filter:none; }
+.mini-refined .astra-overview .dots__dot { width:65%; height:65%; max-width:12px; max-height:12px; }
+.mini-refined .dots__edge::after { background:#dfced2; border-radius:5px; }
+.mini-refined .dots__edge--h::after { left:calc(var(--board-cell) / -2 + 7px); right:calc(var(--board-cell) / -2 + 7px); height:7px; }
+.mini-refined .dots__edge--v::after { top:calc(var(--board-cell) / -2 + 7px); bottom:calc(var(--board-cell) / -2 + 7px); width:7px; }
+.mini-refined.astra-board--dots .dots__edge--me::after,.mini-refined .astra-board--dots .dots__edge--me::after { background:#B72132; box-shadow:0 2px 1px #751624; }
+.mini-refined .dots__edge--them::after { background:repeating-linear-gradient(45deg,#43131C 0 5px,#85616b 5px 8px); box-shadow:0 2px 1px #43131c45; }
+.mini-refined.astra-board--dots .dots__box--me,.mini-refined .astra-board--dots .dots__box--me { background:#f2d6db; color:#8f1928; }
+.mini-refined .dots__box--them { background:#e5dadd; color:#43131C; border:1px dashed #85616b; }
+.mini-refined .dots__box { margin:2px; font-size:1rem; }
+.mini-refined .astra-overview .dots__box { font-size:clamp(6px,1.8vw,12px); margin:0; border-radius:2px; }
+.mini-refined .astra-overview .dots__edge--h::after { left:-35%; right:-35%; height:3px; }
+.mini-refined .astra-overview .dots__edge--v::after { top:-35%; bottom:-35%; width:3px; }
+.mini-refined .dots-legend,.mini-refined .mini-shot-legend { display:flex; justify-content:center; flex-wrap:wrap; gap:8px 16px; }
+.mini-refined .dots-legend span { display:flex; align-items:center; gap:6px; }
+.mini-refined .dots-legend i { display:inline-block; width:20px; height:6px; border-radius:4px; }
+.mini-refined .dots-legend__me { background:#B72132; }
+.mini-refined .dots-legend__them { background:repeating-linear-gradient(45deg,#43131C 0 4px,#98737e 4px 7px); }
+
+/* Trois cartes de même poids, et un dos opaque indépendant du choix adverse. */
+.stage--M11 .mini-refined .rps__choice,.mini-refined.astra-board--rps .rps__choice { border:1px solid #dbc7cc; border-radius:18px; padding:14px 5px; background:linear-gradient(155deg,#fffefd,#F7F1F1); box-shadow:0 4px 0 #ddcdd1,0 7px 12px #43131c09; color:#43131C; }
+.stage--M11 .mini-refined .rps__choice[aria-checked=true],.mini-refined.astra-board--rps .rps__choice[aria-checked=true] { background:#f8e7ea; border:1px solid #B72132; padding:14px 5px; box-shadow:0 4px 0 #b87884,inset 0 0 0 1px #B72132; }
+.mini-refined .rps__choice img { filter:drop-shadow(0 5px 3px #43131c15); }
+.mini-refined.astra-board--rps .rps-timer { color:#43131C; }
+.mini-refined.astra-board--rps .rps-timer--urgent { color:#B72132; }
+.mini-refined .rps-opponent { display:flex; align-items:center; gap:12px; min-width:0; padding:10px 12px; border:1px solid #e2d2d6; border-radius:16px; background:#F7F1F1; }
+.mini-refined .rps-opponent > div { min-width:0; }
+.mini-refined .rps-card-back { display:grid; place-items:center; flex:none; width:48px; height:62px; border:3px solid #fff; border-radius:12px; background:repeating-linear-gradient(45deg,#43131C 0 4px,#54212d 4px 8px); color:#fff; box-shadow:0 3px 0 #c6adb4; }
+.mini-refined .astra-rps-reveal.is-revealing .rps__choice { animation-duration:280ms; }
+
+/* Coupelle céramique, feutre bordeaux et acquis séparés du total risqué. */
+.mini-refined.astra-board--pig .pig-counter { background:#F7F1F1; border:1px solid #e2d1d6; }
+.mini-refined.astra-board--pig .pig-counter.is-active { border-color:#B72132; box-shadow:inset 0 0 0 1px #B72132; }
+.mini-refined.astra-board--pig .pig-counter__bar span { background:#B72132; }
+.mini-refined.astra-board--pig .pig-tray { background:radial-gradient(ellipse at 45% 35%,#652b3a,#43131C); border:10px solid #eee2e2; border-radius:36px; box-shadow:inset 0 3px 8px #1f060c66,0 4px 0 #c7b4ba,0 10px 16px #43131c12; }
+.mini-refined.astra-board--pig .pig-idle { color:#fff4f5; }
+.mini-refined.astra-board--pig .pig-pot { background:#fffdfb; border:1px dashed #b8808b; color:#43131C; }
+.mini-refined.astra-board--pig .pig-pot.is-bust { background:#F7F1F1; border-style:solid; }
+.mini-refined.astra-board--pig .pig-actions { grid-template-columns:repeat(2,minmax(0,1fr)); align-items:stretch; }
+.mini-refined.astra-board--pig .pig-actions .btn { height:100%; }
+.mini-refined.astra-board--pig .pig-tray__die.astra-die--land { animation-duration:280ms; }
+.mini-refined .mini-pig-result { display:grid; justify-items:center; gap:8px; }
+.mini-refined .mini-pig-result .mini-scores { width:100%; }
+
+/* Les bateaux sont uniquement ceux du joueur ; les impacts restent au-dessus. */
+.mini-refined .astra-zoom .board-zoom--naval .naval { position:relative; isolation:isolate; width:calc(24px + 10 * (var(--board-cell) + 2px)); max-width:none; grid-template-columns:24px repeat(10,var(--board-cell)); grid-template-rows:24px repeat(10,var(--board-cell)); gap:2px; margin:0; touch-action:pan-x pan-y; }
+.mini-refined .astra-zoom .board-zoom--naval .naval__cell { width:var(--board-cell); height:var(--board-cell); min-height:var(--board-cell); }
+.mini-refined .astra-overview .naval { width:100%; max-width:none; grid-template-columns:16px repeat(10,minmax(0,1fr)); grid-template-rows:16px repeat(10,minmax(0,1fr)); aspect-ratio:1; gap:1px; }
+.mini-refined .naval__head { color:#43131C; font-size:.75rem; }
+.mini-refined .naval__cell { background:linear-gradient(145deg,#fffefe,#F7F1F1); border:1px solid #d9c7cc; border-radius:6px; box-shadow:inset 0 1px 0 #fff; }
+.mini-refined .naval__cell--ship { background:#e9dfe2; border-color:#a88b95; box-shadow:inset 0 1px 0 #fff; }
+.mini-refined .naval__cell--sel { outline:2px solid #43131C; outline-offset:-3px; }
+.mini-refined .naval__cell--hit,.mini-refined .naval__cell--sunk { background:#f5d9de; border-color:#B72132; }
+.mini-refined .naval__cell--aim { background:#fbe8ec; border:2px solid #B72132; }
+.mini-refined .naval__cell--preview-valid { background:#ead7dc; outline:3px solid #43131C; outline-offset:-4px; }
+.mini-refined .naval__cell--preview-invalid { background:repeating-linear-gradient(45deg,#f6d8de 0 5px,#fff 5px 8px); outline:3px dashed #B72132; outline-offset:-4px; }
+.mini-refined .mini-placement-status { min-height:2.8em; }
+.mini-refined .astra-shot { z-index:3; display:grid; place-items:center; width:30px; height:30px; font-size:25px; font-weight:800; border:1px solid #c6b1b7; box-shadow:0 2px 0 #c6b1b7; }
+.mini-refined .astra-shot::before { display:none; }
+.mini-refined .astra-shot--miss { color:#43131C; background:radial-gradient(circle at 35% 20%,#fff,#eee5e7); }
+.mini-refined .astra-shot--hit,.mini-refined .astra-shot--sunk { color:#fff; background:radial-gradient(circle at 35% 20%,#d44c5b,#B72132); border-color:#8b1928; box-shadow:0 2px 0 #781421; }
+.mini-refined .astra-shot--target { color:#B72132; background:transparent; border:2px solid #B72132; box-shadow:none; }
+.mini-refined .astra-overview .astra-shot { width:80%; height:80%; font-size:clamp(8px,3vw,20px); }
+.mini-refined .mini-naval-ship { position:relative; display:block; z-index:2; pointer-events:none; min-width:0; min-height:0; }
+.mini-refined .mini-naval-ship img { position:absolute; width:100%; height:100%; object-fit:fill; padding:3px; filter:drop-shadow(2px 3px 2px #43131c44); }
+.mini-refined .mini-naval-ship--h img { left:50%; top:50%; width:calc(100% / var(--ship-length)); height:calc(100% * var(--ship-length)); max-width:none; transform:translate(-50%,-50%) rotate(90deg); }
+.mini-refined .astra-naval-report.is-confirmed { animation:mini-shot-confirmed 240ms ease-out; }
+.mini-refined .astra-fleet-piece { background:#F7F1F1; border:1px solid #e2d1d6; }
+.mini-refined .mini-naval-record { border-top:1px solid #e3d3d7; padding-top:14px; }
+.mini-refined .mini-fleet-manifest { display:grid; gap:6px; padding:0; list-style:none; }
+.mini-refined .mini-fleet-manifest li { display:grid; grid-template-columns:20px minmax(0,1fr) auto; gap:6px; align-items:center; padding:7px 10px; border-radius:10px; background:#F7F1F1; font-size:.8125rem; overflow-wrap:anywhere; }
+.mini-refined .mini-fleet-manifest li.is-sunk { background:#f2dce1; color:#8f1928; }
+.mini-refined .mini-shot-log summary { display:list-item; padding:12px 2px; font-size:.875rem; font-weight:700; cursor:pointer; }
+.mini-refined .mini-shot-log ol { padding-left:22px; font-size:.875rem; }
+.mini-refined .mini-shot-log li { padding-block:5px; }
+.mini-refined .mini-naval-result { display:flex; align-items:center; gap:12px; }
+.mini-refined .mini-naval-result img { flex:none; object-fit:contain; }
+@keyframes mini-shot-confirmed { from { box-shadow:0 0 0 3px #B7213240; } to { box-shadow:0 0 0 0 #B7213200; } }
+@media (max-width:360px) { .mini-refined .naval-placement-tools { grid-template-columns:minmax(0,1fr); } }
+@media (prefers-reduced-motion:reduce) { .mini-refined *, .mini-refined *::before,.mini-refined *::after { animation:none!important; transition:none!important; } }

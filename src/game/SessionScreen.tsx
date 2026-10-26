@@ -30,6 +30,7 @@ import { AfterGame } from "../parcours/AfterGame";
 import { ReadingRegion } from "./ReadingRegion";
 import "../styles/astra-console.css";
 import "../styles/salon-proposal.css";
+import "../styles/board-session-refinement.css";
 
 type Run = (fn: string, args?: Record<string, unknown>) => Promise<{ ok: boolean }>;
 
@@ -131,6 +132,7 @@ export function SessionScreen() {
 
         {st.session.status === "lobby" && <Lobby st={st} me={me} partner={partner} partnerHere={partnerHere} busy={busy} online={online} run={run}
           onRules={() => setRules(true)} onOptions={showOptions ? () => setOptions(true) : undefined} />}
+        {playing && <SessionPlayers st={st} partnerHere={partnerHere} />}
         {playing && adultStart && <p className="session-adult-note"><Icon name="shield-check" size={16} />+18 · Tu peux passer à tout moment.</p>}
         {playing && <div className="session-play-area"><Stage u={universe} compact>{word ? <WordPlaying c={common} /> : conversation ? <ConversationPlaying c={common} /> : questionnaire ? <QuestionnairePlaying c={common} /> : board ? <BoardPlaying {...common} /> : rounds ? <RoundsPlaying {...common} /> : <Playing st={st} partnerName={partnerName} partner={partner} busy={busy} online={online} run={run} />}</Stage></div>}
         {st.session.status === "paused" && <PausedPanel st={st} userId={userId} partnerName={partnerName} busy={busy} online={online} run={run} />}
@@ -173,6 +175,22 @@ export function SessionScreen() {
     </div>
     </SessionRecoveryContext.Provider>
   );
+}
+
+/** Les identités et verrous proviennent du snapshot ; aucune réponse privée n'est déduite. */
+function SessionPlayers({ st, partnerHere }: { st: SessionState; partnerHere: boolean }) {
+  const round = st.rounds.find(r => r.round_no === st.session.current_round);
+  const card = round?.card as unknown as { mech?: string; phase?: string; turn?: number; done?: boolean; locked?: Record<number, boolean> } | undefined;
+  const lockLabel = card?.mech === "battleship" ? card.phase === "placement" ? "Flotte prête" : null
+    : card?.mech === "rps" ? "Choix validé"
+    : isConversationMech(card?.mech) ? "Réponse validée" : null;
+  return <div className="session-player-strip" aria-label="Les joueurs">
+    {st.players.map(p => <div className="session-player-strip__person" key={p.seat}>
+      <Avatar name={p.display_name} path={p.avatar_path} size={28} me={p.is_me} />
+      <div><span className="session-player-strip__name">{p.display_name || (p.is_me ? "Toi" : "Partenaire")}</span>
+        <span className="session-player-strip__status">{!card?.done && card?.turn === p.seat ? (p.is_me ? "À toi de jouer" : "À son tour") : !card?.done && card?.locked?.[p.seat] && lockLabel ? lockLabel : p.is_me ? "Toi" : partnerHere ? "En ligne" : "Partenaire"}</span></div>
+    </div>)}
+  </div>;
 }
 
 /** Pause partagée : chronos suspendus ; la partie ne reprend qu'avec l'accord de vous deux. */
@@ -234,10 +252,27 @@ function Lobby({ st, me, partner, partnerHere, busy, online, run, onOptions, onR
   const disabled = busy || !online || launching || st.session.read_only || !me;
   const readyCount = st.players.filter(p => p.ready).length;
   const cfg = st.game.config as unknown as {mechanic:string;parameters?:{target?:number};turn?:string};
-  const kind = cfg.mechanic === "test_form" ? "Se découvrir" : cfg.mechanic === "pack_conversation" ? "Questions à deux" : cfg.turn === "simultaneous" ? "À vous deux" : "À tour de rôle";
+  const kind = cfg.mechanic === "test_form" ? "Se découvrir" : cfg.mechanic === "pack_conversation" ? "Questions à deux" : (cfg.turn === "simultaneous" || cfg.mechanic === "nd_two_truths") ? "À vous deux" : "À tour de rôle";
   return (
     <section className="lobby lobby-proposal enter">
       <h1 className="sr-only">{t("game.lobbyTitle")}</h1>
+      <div className="salon-crew">
+        <div className="salon-section-head"><h3>Les joueurs</h3><span className="salon-ready-count" aria-live="polite">{readyCount}/2 prêts</span></div>
+        <div className="salon-players">
+        {[me, partner].filter(Boolean).map((p) => (
+          <div className={`salon-player${p!.ready ? " is-ready" : ""}`} key={p!.seat}>
+            <div className="salon-player__avatar"><Avatar name={p!.display_name} path={p!.avatar_path} size={44} me={p!.is_me} /></div>
+            <div className="salon-player__info">
+              <span className="salon-player__name">{p!.display_name || (p!.is_me ? t("game.youCap") : "Partenaire")}</span>
+              <span className="salon-player__status"><Icon name={p!.ready ? "check" : "clock"} size={13} />{p!.ready ? "Disponible" : "À confirmer"}</span>
+              {!p!.is_me && partnerHere && <span className="salon-player__presence">{t("game.here")}</span>}
+            </div>
+          </div>
+        ))}
+        {!partner && <div className="salon-player salon-player--empty"><span className="salon-player__name">Deuxième joueur</span><span className="salon-player__status">En attente</span></div>}
+        </div>
+      </div>
+
       <div className="salon-activity">
         <div className="salon-activity__intro">
           <div className="salon-activity__identity">
@@ -257,22 +292,6 @@ function Lobby({ st, me, partner, partnerHere, busy, online, run, onOptions, onR
         </div>
       </div>
 
-      <div className="salon-crew">
-        <div className="salon-section-head"><h3>Les joueurs</h3><span className="salon-ready-count" aria-live="polite">{readyCount}/2 prêts</span></div>
-        <div className="salon-players">
-        {[me, partner].filter(Boolean).map((p) => (
-          <div className={`salon-player${p!.ready ? " is-ready" : ""}`} key={p!.seat}>
-            <div className="salon-player__avatar"><Avatar name={p!.display_name} path={p!.avatar_path} size={48} me={p!.is_me} /></div>
-            <div className="salon-player__info">
-              <span className="salon-player__name">{p!.is_me ? t("game.youCap") : p!.display_name || "Partenaire"}</span>
-              <span className="salon-player__status">{p!.ready ? "Disponible" : "À confirmer"}</span>
-              {!p!.is_me && partnerHere && <span className="salon-player__presence">{t("game.here")}</span>}
-            </div>
-          </div>
-        ))}
-        {!partner && <div className="salon-player salon-player--empty"><span className="salon-player__name">Deuxième joueur</span><span className="salon-player__status">En attente</span></div>}
-        </div>
-      </div>
 
       <div className="salon-config">
         <div className="salon-section-head"><h3>{Object.keys(settings).length || onOptions ? "Réglages" : "Le format"}</h3><Icon name="settings" size={17} /></div>

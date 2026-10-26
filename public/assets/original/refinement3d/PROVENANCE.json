@@ -1,0 +1,42 @@
+{
+  "created_at": "2026-10-26",
+  "source": "OpenAI image generation, original asset atlas generated for this Noodeu revision",
+  "source_file": "exec-1977aaae-e861-4744-8e5d-f7bc7f868d0c.png",
+  "source_sha256": "4b0f2cd997e845d4246502ed9e85e9dc91eb9cfad2aa4fa02672920e0310480f",
+  "processing": "Individual object extraction and WebP optimization; original PNG retained outside production repository. No third-party reference images used.",
+  "license": "Generated original assets; no third-party stock licence claimed.",
+  "assets": [
+    {
+      "file": "opinions-balance.webp",
+      "width": 512,
+      "height": 512,
+      "alpha": true,
+      "bytes": 52144,
+      "sha256": "adb68d245163ac65435eb3bb531532af7876cff67daafd25b4396bbf2c900e85"
+    },
+    {
+      "file": "truths-mask.webp",
+      "width": 512,
+      "height": 512,
+      "alpha": true,
+      "bytes": 42350,
+      "sha256": "9473c3443b86c671fe0ccbc0eed97c6504644e2676a90f21a2e4d930f5a30358"
+    },
+    {
+      "file": "salon-chairs.webp",
+      "width": 512,
+      "height": 512,
+      "alpha": true,
+      "bytes": 35162,
+      "sha256": "3b433e82731e8498676ce359c6ccf568360f6cd5619d0dc16454d19b300dbc83"
+    },
+    {
+      "file": "result-cup.webp",
+      "width": 512,
+      "height": 512,
+      "alpha": true,
+      "bytes": 45146,
+      "sha256": "c8bc3a63cf2ee68e71684d08791ea212a9d8b2c822ab0a9d61f20016dc51b138"
+    }
+  ]
+}

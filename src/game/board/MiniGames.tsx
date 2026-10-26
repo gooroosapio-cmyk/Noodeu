@@ -1,11 +1,12 @@
 /* eslint-disable @typescript-eslint/no-explicit-any */
 // Mini-jeux du lot 2 : Morpion, Points et carrés, Pierre-feuille-ciseaux, Dé chanceux, Bataille navale.
 // Les pièces viennent du kit interface v2 ; tirages, tours, scores et secrets viennent du serveur.
-import { useEffect, useMemo, useRef, useState, type ComponentType, type ReactNode } from "react";
+import { useEffect, useMemo, useRef, useState, type ComponentType, type CSSProperties, type ReactNode } from "react";
 import { t } from "../../i18n";
 import { Alert, Icon } from "../../components/ui";
 import type { Player } from "../../lib/types";
 import { BoardPiece, ExpiryRetry, useBoardReveal, useConfirmedEvent, useLiveBoardFrame, useServerExpiry } from "../premium/BoardPieces";
+import "../../styles/board-mini-refinement.css";
 
 type J = any;
 type Play = (type: string, payload?: Record<string, unknown>) => Promise<{ ok: boolean; error?: string; info?: J }>;
@@ -14,6 +15,7 @@ interface V { c: J; priv: J; me: Player; partner?: Player; play: Play; busy: boo
 const PREMIUM = "/assets/premium";
 const nameOf = (p?: Player) => (p ? (p.is_me ? t("game.you") : p.display_name || "?") : "?");
 const seatName = (me: Player, partner: Player | undefined, seat: number) => nameOf(seat === me.seat ? me : partner);
+const seatInitial = (me: Player, partner: Player | undefined, seat: number) => ((seat === me.seat ? me : partner)?.display_name || seatName(me, partner, seat)).trim().slice(0, 1).toUpperCase();
 const revealKey = (c: J, me: Player, partner?: Player) => `${me.user_id}:${partner?.user_id}:${c.mech}:${c.deadline_at ?? `${c.first}:${c.x_seat}:${JSON.stringify(c.series)}`}`;
 
 export const MINI_MECHS = ["tic_tac_toe", "dots_boxes", "rps", "nd_pig", "battleship"];
@@ -67,7 +69,7 @@ function TicTacToe(v: V) {
   const { c, me } = v;
   useLiveBoardFrame(revealKey(c, me, v.partner), Number(c.rev ?? 0));
   return (
-    <div className="stack stack--4 astra-board astra-board--morpion">
+    <div className="stack stack--4 astra-board mini-refined astra-board--morpion">
       <Series c={c} me={me} partner={v.partner} />
       <p className="t-small">{t("mini.ttt.youAre", { s: symbolOf(c, me.seat).toUpperCase() })}</p>
       <TicTacToeBoard {...v} />
@@ -76,13 +78,20 @@ function TicTacToe(v: V) {
 }
 
 // ---------------------------------------------------------------------------
-// Points et carrés : grille 9 × 9 (points, arêtes, cases) ; arêtes h:r:c et v:r:c.
+// Dimensions publiées par la carte. L'absence de dimensions conserve les parties 5 × 5.
 // ---------------------------------------------------------------------------
+function dotsDimensions(c: J) {
+  const dimension = (value: unknown, fallback: number) => Number.isInteger(value) && Number(value) >= 2 && Number(value) <= 12 ? Number(value) : fallback;
+  const rows = dimension(c.dot_rows, 5), columns = dimension(c.dot_columns, 5);
+  return { rows, columns, boxRows: rows - 1, boxColumns: columns - 1 };
+}
+
 function DotsBoard({ c, me, partner, play, busy, mine }: V) {
+  const { rows, columns, boxRows, boxColumns } = dotsDimensions(c);
   const cells = [];
   const colorOf = (seat?: number) => (seat ? (seat === me.seat ? "me" : "them") : "");
-  for (let gr = 0; gr < 9; gr++) {
-    for (let gc = 0; gc < 9; gc++) {
+  for (let gr = 0; gr < rows * 2 - 1; gr++) {
+    for (let gc = 0; gc < columns * 2 - 1; gc++) {
       const key = `${gr}-${gc}`;
       if (gr % 2 === 0 && gc % 2 === 0) {
         cells.push(<span key={key} className="dots__dot" aria-hidden="true" />);
@@ -93,24 +102,39 @@ function DotsBoard({ c, me, partner, play, busy, mine }: V) {
           ? t("mini.dots.hEdge", { r: gr / 2 + 1, c: (gc - 1) / 2 + 1 })
           : t("mini.dots.vEdge", { r: (gr - 1) / 2 + 1, c: gc / 2 + 1 });
         cells.push(
-          <button key={key} type="button" className={`dots__edge dots__edge--${gr % 2 === 0 ? "h" : "v"} ${owner ? `dots__edge--on dots__edge--${colorOf(owner)}` : ""}`}
+          <button key={key} type="button" data-edge={id} data-r={gr} data-c={gc} className={`dots__edge dots__edge--${gr % 2 === 0 ? "h" : "v"} ${owner ? `dots__edge--on dots__edge--${colorOf(owner)}` : ""}`}
             disabled={busy || !mine || Boolean(owner) || c.done} aria-pressed={Boolean(owner)}
             aria-label={owner ? `${label}, ${seatName(me, partner, owner)}` : label}
             onClick={() => void play("draw_edge", { edge_id: id })} />,
         );
       } else {
-        const box = ((gr - 1) / 2) * 4 + (gc - 1) / 2;
+        const box = ((gr - 1) / 2) * boxColumns + (gc - 1) / 2;
         const owner = c.owner?.[box];
         cells.push(
           <span key={key} className={`dots__box ${owner ? `dots__box--${colorOf(owner)}` : ""}`}
             aria-label={owner ? t("mini.dots.boxOf", { name: seatName(me, partner, owner) }) : undefined}>
-            {owner ? (owner === me.seat ? nameOf(me) : nameOf(partner)).slice(0, 1).toUpperCase() : ""}
+            {owner ? seatInitial(me, partner, owner) : ""}
           </span>,
         );
       }
     }
   }
-  return <Zoomable zoomClass="board-zoom--dots"><div className="dots" role="group" aria-label={t("mini.dots.board")}>{cells}</div></Zoomable>;
+  return <Zoomable zoomClass="board-zoom--dots"><div className="dots" role="group"
+    aria-label={`${t("mini.dots.board")} · ${rows} × ${columns} points · ${boxRows * boxColumns} cases`}
+    style={{ "--dot-tracks-x": columns * 2 - 1, "--dot-tracks-y": rows * 2 - 1 } as CSSProperties}
+    onKeyDown={event => {
+      if (!["ArrowLeft", "ArrowRight", "ArrowUp", "ArrowDown"].includes(event.key)) return;
+      const source = event.target as HTMLButtonElement;
+      if (!source.dataset.edge) return;
+      event.preventDefault();
+      const vertical = event.key === "ArrowUp" || event.key === "ArrowDown";
+      const direction = event.key === "ArrowUp" || event.key === "ArrowLeft" ? -1 : 1;
+      const r = Number(source.dataset.r), col = Number(source.dataset.c);
+      const next = [...event.currentTarget.querySelectorAll<HTMLButtonElement>("button:not(:disabled)")]
+        .filter(button => vertical ? Number(button.dataset.c) === col && (Number(button.dataset.r) - r) * direction > 0 : Number(button.dataset.r) === r && (Number(button.dataset.c) - col) * direction > 0)
+        .sort((a, b) => vertical ? Math.abs(Number(a.dataset.r) - r) - Math.abs(Number(b.dataset.r) - r) : Math.abs(Number(a.dataset.c) - col) - Math.abs(Number(b.dataset.c) - col))[0];
+      next?.focus();
+    }}>{cells}</div></Zoomable>;
 }
 
 function Scoreline({ me, partner, values, label }: { me: Player; partner?: Player; values: J; label: string }) {
@@ -123,9 +147,12 @@ function Scoreline({ me, partner, values, label }: { me: Player; partner?: Playe
 }
 
 function DotsBoxes(v: V) {
+  const { rows, columns, boxRows, boxColumns } = dotsDimensions(v.c);
   return (
-    <div className="stack stack--4 astra-board astra-board--dots">
+    <div className="stack stack--4 astra-board mini-refined astra-board--dots">
       <Scoreline me={v.me} partner={v.partner} values={v.c.tally} label={t("mini.dots.scores")} />
+      <p className="mini-board-caption">{rows} × {columns} points <span>· {boxRows * boxColumns} cases</span></p>
+      <div className="dots-legend t-meta"><span><i className="dots-legend__me" aria-hidden="true" />{seatInitial(v.me, v.partner, v.me.seat)} · {nameOf(v.me)}</span><span><i className="dots-legend__them" aria-hidden="true" />{seatInitial(v.me, v.partner, v.partner?.seat ?? 2)} · {nameOf(v.partner)}</span></div>
       <p className="t-meta">{t("mini.dots.hint")}</p>
       <DotsBoard {...v} />
     </div>
@@ -159,10 +186,14 @@ function Rps({ c, priv, me, partner, play, busy }: V) {
   const expiry = useServerExpiry(c.deadline_at, left === 0 && !c.done, () => play("expire"));
   const mineGesture = priv?.gesture as string | undefined;
   return (
-    <div className="stack stack--4 astra-board astra-board--rps">
+    <div className="stack stack--4 astra-board mini-refined astra-board--rps">
       <Series c={c} me={me} partner={partner} />
       <div className={`rps-timer${left <= 10 ? " rps-timer--urgent" : ""}`} role="timer" aria-live="off">
         <Icon name="timer" size={20} /><span className="t-score">{left}</span><span className="t-meta">{t("mini.rps.seconds")}</span>
+      </div>
+      <div className="rps-opponent" aria-label={`${nameOf(partner)} : choix caché${theirs ? ", verrouillé" : ""}`}>
+        <span className="rps-card-back" aria-hidden="true"><Icon name="lock-keyhole" size={24} /></span>
+        <div><strong>{nameOf(partner)}</strong><p className="t-meta">{theirs ? "Choix verrouillé" : "Choix en cours"} · caché jusqu’aux deux verrous</p></div>
       </div>
       <div className="rps" role="radiogroup" aria-label={t("mini.rps.choose")}>
         {GESTURES.map((g, index) => {
@@ -217,11 +248,12 @@ function Pig({ c, me, partner, play, busy, mine }: V) {
   const roll = useConfirmedEvent(Number(c.rev ?? 0), c.last?.type === "roll" && Number(c.die) >= 1 && Number(c.die) <= 6);
   const bust = Boolean(c.bust && last?.die === 1);
   return (
-    <div className="stack stack--4 pig astra-board astra-board--pig">
+    <div className="stack stack--4 pig astra-board mini-refined astra-board--pig">
       <div className="pig-counters">
         <PigCounter who={nameOf(me)} value={Number(c.banked?.[me.seat] ?? 0)} target={target} active={c.turn === me.seat} />
         {partner && <PigCounter who={nameOf(partner)} value={Number(c.banked?.[partner.seat] ?? 0)} target={target} active={c.turn === partner.seat} />}
       </div>
+      <p className="mini-board-caption">Points acquis <span>· objectif {target}</span></p>
       <div className="pig-tray" aria-live="polite">
         <div className={`pig-tray__die${roll !== null ? " astra-die--land" : ""}`} key={roll ?? "rest"}>
           {c.die ? <BoardPiece className="pig-die-img" piece={`die-${c.die}`} fallback={`/assets/premium/M12/die-${c.die}.svg`} alt={t("mini.pig.dieValue", { n: c.die })} width={96} height={96} />
@@ -229,18 +261,19 @@ function Pig({ c, me, partner, play, busy, mine }: V) {
         </div>
       </div>
       <div className={`pig-pot${bust ? " is-bust" : ""}`}>
-        <img src={`/assets/premium/M12/${bust ? "bust" : "turn-pot"}.svg`} alt="" aria-hidden="true" width={44} height={44} />
+        <Icon name={bust ? "close" : "clock"} size={30} />
         <div className="grow">
-          <span className="t-meta">{t("mini.pig.turnTotal")}</span>
+          <span className="t-meta">{t("mini.pig.turnTotal")} · provisoire</span>
           <p className="pig-pot__val">{c.turn_total}</p>
         </div>
         {rolls.length > 0 && <span className="t-meta">{rolls.join(" + ")}</span>}
         {bust && <span className="t-small strong">{t("mini.pig.bust", { name: seatName(me, partner, last.seat) })}</span>}
+        {bust && <span className="t-meta">Les points acquis sont conservés.</span>}
       </div>
         <div className="pig-actions astra-actions">
           <button className="btn" disabled={busy || !mine || c.done} aria-busy={busy} onClick={() => void play("roll")}><Icon name="dices" size={18} />{t("mini.pig.roll")}</button>
           <button className="btn btn--secondary" disabled={busy || !mine || c.done || c.turn_total <= 0} onClick={() => void play("hold")}>
-            <img src="/assets/premium/M12/bank.svg" alt="" aria-hidden="true" width={22} height={22} />{t("mini.pig.holdPlus", { n: c.turn_total })}
+            <Icon name="check" size={22} />{t("mini.pig.holdPlus", { n: c.turn_total })}
           </button>
         </div>
       <p className="t-small muted center astra-status" aria-live="polite">{mine ? "À toi de lancer ou de conserver." : t("mini.pig.waiting", { name: nameOf(partner) })}</p>
@@ -259,20 +292,47 @@ const inBounds = (s: Ship) => (s.o === "H" ? s.c + s.len <= 10 : s.r + s.len <= 
 
 /** Cibles tactiles de 44 px dès l’ouverture ; vue d’ensemble explicitement non interactive. */
 function Zoomable({ children, zoomClass }: { children: ReactNode; zoomClass: string }) {
-  const [zoom, setZoom] = useState(true);
+  const [zoom, setZoom] = useState(1);
+  const viewport = useRef<HTMLDivElement>(null);
+  const drag = useRef<{ x: number; y: number; left: number; top: number; moved: boolean } | null>(null);
+  const suppressClick = useRef(false);
   return (
     <div className="stack stack--2 astra-zoom">
-      <button type="button" className="btn btn--quiet btn--sm btn--auto" aria-pressed={zoom} onClick={() => setZoom(!zoom)}>
-        <Icon name={zoom ? "minus" : "plus"} size={18} />{zoom ? t("mini.zoomOut") : t("mini.zoomIn")}
-      </button>
-      <p className="t-meta">{zoom ? "Fais défiler le plateau pour atteindre toutes les cases." : "Vue d’ensemble en lecture seule. Agrandis le plateau pour jouer."}</p>
-      <div className={zoom ? `board-zoom ${zoomClass}` : "astra-overview"} inert={!zoom ? true : undefined} tabIndex={zoom ? 0 : undefined} role={zoom ? "region" : undefined} aria-label={zoom ? "Plateau agrandi, défilement horizontal" : undefined}>{children}</div>
+      <div className="mini-zoom-tools" role="group" aria-label="Taille du plateau">
+        <button type="button" className="btn btn--quiet btn--sm" aria-pressed={zoom === 0} onClick={() => setZoom(zoom === 0 ? 1 : 0)}>{zoom === 0 ? "Jouer" : "Vue entière"}</button>
+        <button type="button" className="btn btn--quiet btn--sm" aria-label="Réduire le plateau" disabled={zoom <= 1} onClick={() => setZoom(1)}><Icon name="minus" size={18} /></button>
+        <output className="t-meta" aria-live="polite">{zoom === 0 ? "Vue entière" : `${Math.round(zoom * 100)} %`}</output>
+        <button type="button" className="btn btn--quiet btn--sm" aria-label="Agrandir le plateau" disabled={zoom === 1.5} onClick={() => setZoom(zoom === 0 ? 1 : 1.5)}><Icon name="plus" size={18} /></button>
+      </div>
+      <p className="t-meta">{zoom ? "Glisse le plateau pour explorer. Au clavier, utilise les flèches entre les cases." : "Vue d’ensemble en lecture seule. Choisis Jouer pour retrouver les grandes cibles."}</p>
+      <div ref={viewport} className={zoom ? `board-zoom ${zoomClass}` : `astra-overview ${zoomClass}`} style={{ "--board-cell": `${44 * (zoom || 1)}px` } as CSSProperties}
+        inert={!zoom ? true : undefined} tabIndex={zoom ? 0 : undefined} role="region" aria-label="Plateau, défilement horizontal et vertical"
+        onPointerDown={event => {
+          suppressClick.current = false;
+          if (event.pointerType !== "mouse" || event.button !== 0 || !zoom) return;
+          drag.current = { x: event.clientX, y: event.clientY, left: event.currentTarget.scrollLeft, top: event.currentTarget.scrollTop, moved: false };
+        }}
+        onPointerMove={event => {
+          const start = drag.current;
+          if (!start) return;
+          const dx = event.clientX - start.x, dy = event.clientY - start.y;
+          if (!start.moved && Math.hypot(dx, dy) < 6) return;
+          start.moved = true;
+          event.currentTarget.setPointerCapture(event.pointerId);
+          event.currentTarget.scrollLeft = start.left - dx;
+          event.currentTarget.scrollTop = start.top - dy;
+          suppressClick.current = true;
+        }}
+        onPointerUp={() => { drag.current = null; }} onPointerCancel={() => { drag.current = null; }}
+        onClickCapture={event => { if (suppressClick.current) { event.preventDefault(); event.stopPropagation(); suppressClick.current = false; } }}>
+        {children}
+      </div>
     </div>
   );
 }
 
-function NavalGrid({ label, cell, onCell, disabled }: {
-  label: string; cell: (r: number, c: number) => { cls: string; text: string; img?: string }; onCell?: (r: number, c: number) => void; disabled?: (r: number, c: number) => boolean;
+function NavalGrid({ label, cell, onCell, onPreview, disabled, fleet = [] }: {
+  label: string; cell: (r: number, c: number) => { cls: string; text: string; img?: string }; onCell?: (r: number, c: number) => void; onPreview?: (r: number, c: number) => void; disabled?: (r: number, c: number) => boolean; fleet?: Ship[];
 }) {
   const grid=useRef<HTMLDivElement>(null);
   const [focused,setFocused]=useState(0);
@@ -291,17 +351,21 @@ function NavalGrid({ label, cell, onCell, disabled }: {
         if(!isDisabled(i)){setFocused(i);grid.current?.querySelector<HTMLButtonElement>(`[data-cell="${i}"]`)?.focus();return;}i+=delta;
       }
     }}>
-      <div role="row" className="naval__row"><span role="columnheader" aria-label="Ligne" />
-        {Array.from({length:10},(_,c)=><span role="columnheader" key={c} className="naval__head">{c+1}</span>)}
+      <div role="row" className="naval__row"><span role="columnheader" aria-label="Ligne" style={{gridRow:1,gridColumn:1}} />
+        {Array.from({length:10},(_,c)=><span role="columnheader" key={c} className="naval__head" style={{gridRow:1,gridColumn:c+2}}>{c+1}</span>)}
       </div>
       {Array.from({length:10},(_,r)=><div role="row" className="naval__row" key={r}>
-        <span role="rowheader" className="naval__head">{ROWS[r]}</span>
+        <span role="rowheader" className="naval__head" style={{gridRow:r+2,gridColumn:1}}>{ROWS[r]}</span>
         {Array.from({length:10},(_,c)=>{const x=cell(r,c),i=r*10+c;return <button key={c} type="button" role="gridcell" data-cell={i}
-          tabIndex={active===i?0:-1} className={`naval__cell ${x.cls}`} aria-label={`${ROWS[r]}${c+1} : ${x.text}`}
-          disabled={isDisabled(i)} onFocus={()=>setFocused(i)} onClick={()=>onCell?.(r,c)}>
-          {x.img && <span className={`astra-shot astra-shot--${x.img}`} aria-hidden="true">{x.img === "sunk" ? "×" : x.img === "target" ? "+" : ""}</span>}
+          tabIndex={active===i?0:-1} className={`naval__cell ${x.cls}`} style={{gridRow:r+2,gridColumn:c+2}} aria-label={`${ROWS[r]}${c+1} : ${x.text}`}
+          disabled={isDisabled(i)} onFocus={()=>{setFocused(i);onPreview?.(r,c);}} onPointerEnter={event=>{if(event.pointerType === "mouse")onPreview?.(r,c);}} onClick={()=>onCell?.(r,c)}>
+          {x.img && <span className={`astra-shot astra-shot--${x.img}`} aria-hidden="true">{x.img === "sunk" ? "×" : x.img === "target" ? "+" : x.img === "hit" ? "•" : "○"}</span>}
         </button>;})}
       </div>)}
+      {fleet.map(ship => <span key={ship.id} className={`mini-naval-ship mini-naval-ship--${ship.o.toLowerCase()}`} aria-hidden="true"
+        style={{ "--ship-length": ship.len, gridColumn: `${ship.c + 2} / span ${ship.o === "H" ? ship.len : 1}`, gridRow: `${ship.r + 2} / span ${ship.o === "V" ? ship.len : 1}` } as CSSProperties}>
+        <BoardPiece piece="naval-ship" fallback="/assets/original/library3d/M07.webp" alt="" />
+      </span>)}
     </div>
     </Zoomable>
   );
@@ -314,6 +378,8 @@ function Placement({ c, priv, me, partner, play, busy }: V) {
   const [sel, setSel] = useState<string>(ships[0].id);
   const [o, setO] = useState<"H" | "V">("H");
   const [placementError,setPlacementError] = useState<string|null>(null);
+  const [anchor, setAnchor] = useState<{ r: number; c: number } | null>(null);
+  const [hover, setHover] = useState<{ r: number; c: number } | null>(null);
   const locked = Boolean(c.locked?.[me.seat]);
   useEffect(() => { if (server) setDraft(server); }, [JSON.stringify(server)]); // eslint-disable-line react-hooks/exhaustive-deps
   const taken = useMemo(() => {
@@ -324,6 +390,10 @@ function Placement({ c, priv, me, partner, play, busy }: V) {
   const complete = draft.length === ships.length;
   const synced = server && JSON.stringify(server) === JSON.stringify(draft);
   const nameShip = (id: string) => t(`mini.naval.ship.${id}` as never);
+  const previewOrigin = anchor ?? hover;
+  const preview: Ship | null = previewOrigin ? { id: sel, len: ships.find(ship => ship.id === sel)!.len, ...previewOrigin, o } : null;
+  const previewCells = new Set(preview ? cellsOf(preview) : []);
+  const previewValid = Boolean(preview && inBounds(preview) && cellsOf(preview).every(key => !taken.has(key) || taken.get(key) === sel));
 
   function place(r: number, col: number) {
     const len = ships.find((s) => s.id === sel)!.len;
@@ -332,6 +402,8 @@ function Placement({ c, priv, me, partner, play, busy }: V) {
     const others = draft.filter((s) => s.id !== sel);
     if (cellsOf(next).some((k) => others.some((s) => cellsOf(s).includes(k)))) { setPlacementError("Deux navires ne peuvent pas occuper la même case."); return; }
     setPlacementError(null);
+    setAnchor(null);
+    setHover(null);
     setDraft([...others, next]);
     const free = ships.find((s) => s.id !== sel && !others.some((x) => x.id === s.id));
     if (free) setSel(free.id);
@@ -339,15 +411,15 @@ function Placement({ c, priv, me, partner, play, busy }: V) {
 
   if (locked) {
     return (
-      <div className="stack stack--4 astra-board astra-board--naval">
+      <div className="stack stack--4 astra-board mini-refined astra-board--naval">
         <p className="nd-chip"><Icon name="lock-keyhole" size={16} />{t("mini.naval.fleetLocked")}</p>
         <p className="t-small muted">{c.locked?.[partner?.seat ?? 0] ? t("mini.naval.starting") : t("mini.naval.waitingFleet", { name: nameOf(partner) })}</p>
-        <NavalGrid label={t("mini.naval.myFleet")} cell={(r, col) => taken.has(`${r}:${col}`) ? { cls: "naval__cell--ship", text: nameShip(taken.get(`${r}:${col}`)!) } : { cls: "", text: t("mini.naval.water") }} />
+        <NavalGrid label={t("mini.naval.myFleet")} fleet={draft} cell={(r, col) => taken.has(`${r}:${col}`) ? { cls: "naval__cell--ship", text: nameShip(taken.get(`${r}:${col}`)!) } : { cls: "", text: t("mini.naval.water") }} />
       </div>
     );
   }
   return (
-    <div className="stack stack--4 astra-board astra-board--naval">
+    <div className="stack stack--4 astra-board mini-refined astra-board--naval">
       <div className="naval-placement-progress"><p className="t-small">{t("mini.naval.placeHint")}</p><span className="nd-chip">{draft.length}/{ships.length} navires placés</span></div>
       <div className="astra-fleet-piece"><BoardPiece piece="naval-ship" fallback="/assets/original/library3d/M07.webp" alt="" width={64} height={64} /><p className="t-small"><strong>{nameShip(sel)}</strong><br />{ships.find(ship => ship.id === sel)?.len} cases · {o === "H" ? "horizontal" : "vertical"}</p></div>
       <div className="naval-placement-tools">
@@ -361,8 +433,13 @@ function Placement({ c, priv, me, partner, play, busy }: V) {
         </button>
       </div>
       {placementError && <Alert kind="info">{placementError}</Alert>}
-      <NavalGrid label={t("mini.naval.myFleet")} onCell={busy ? undefined : place}
-        cell={(r, col) => taken.has(`${r}:${col}`) ? { cls: `naval__cell--ship${taken.get(`${r}:${col}`) === sel ? " naval__cell--sel" : ""}`, text: nameShip(taken.get(`${r}:${col}`)!) } : { cls: "", text: t("mini.naval.water") }} />
+      <p className="t-meta mini-placement-status" aria-live="polite">{preview ? `${ROWS[preview.r]}${preview.c + 1} · ${previewValid ? "Placement possible" : "Placement impossible : débordement ou chevauchement"}` : "Choisis une case de départ, puis confirme le placement."}</p>
+      <NavalGrid label={t("mini.naval.myFleet")} fleet={draft} onPreview={busy ? undefined : (r, col) => setHover({ r, c: col })} onCell={busy ? undefined : (r, col) => setAnchor({ r, c: col })}
+        cell={(r, col) => {
+          const occupied = taken.get(`${r}:${col}`), highlighted = previewCells.has(`${r}:${col}`);
+          return { cls: `${occupied ? "naval__cell--ship" : ""}${occupied === sel ? " naval__cell--sel" : ""}${highlighted ? ` naval__cell--preview-${previewValid ? "valid" : "invalid"}` : ""}`, text: `${occupied ? nameShip(occupied) : t("mini.naval.water")}${highlighted ? previewValid ? ", placement possible" : ", placement impossible" : ""}` };
+        }} />
+      <button type="button" className="btn btn--secondary" disabled={busy || !anchor || !preview || !previewValid} onClick={() => anchor && previewValid && place(anchor.r, anchor.c)}>{anchor ? `Placer ${nameShip(sel)} en ${ROWS[anchor.r]}${anchor.c + 1}` : "Choisis la position du navire"}</button>
       <div className="stack stack--2">
         <button className="btn btn--secondary" disabled={busy} onClick={() => void play("random_fleet")}><Icon name="dices" size={18} />{t("mini.naval.random")}</button>
         {!synced ? (
@@ -386,6 +463,22 @@ function shotCell(x: J | undefined, unknownText: string) {
   return { cls: "", text: unknownText };
 }
 
+function NavalRecord({ c, me, partner }: { c: J; me: Player; partner?: Player }) {
+  const shots: J[] = c.shots?.[me.seat] ?? [];
+  return <div className="mini-naval-record stack stack--2">
+    <p className="t-small strong">Navires adverses coulés · {c.sunk?.[me.seat]?.length ?? 0}/{c.ships?.length ?? 5}</p>
+    <ul className="mini-fleet-manifest" aria-label="État connu de la flotte adverse">
+      {(c.ships ?? []).map((ship: { id: string; len: number }) => {
+        const sunk = Boolean(c.sunk?.[me.seat]?.includes(ship.id));
+        return <li key={ship.id} className={sunk ? "is-sunk" : ""}><span aria-hidden="true">{sunk ? "×" : "—"}</span><span>{t(`mini.naval.ship.${ship.id}` as never)}</span><span className="t-meta">{sunk ? "Coulé" : `${ship.len} cases`}</span></li>;
+      })}
+    </ul>
+    <details className="mini-shot-log"><summary>Journal de tes tirs · {shots.length}</summary>
+      {shots.length ? <ol>{shots.slice(-8).reverse().map((shot, index) => <li key={`${shot.r}:${shot.c}`}><strong>{ROWS[shot.r]}{shot.c + 1}</strong> · {shotCell(shot, "").text}<span className="t-meta"> · tir {shots.length - index}</span></li>)}</ol> : <p className="t-meta">Aucun tir envoyé à {nameOf(partner)}.</p>}
+    </details>
+  </div>;
+}
+
 function Battleship(v: V) {
   const { c, priv, me, partner, play, busy, mine } = v;
   const [view, setView] = useState<"them" | "me">("them");
@@ -400,7 +493,7 @@ function Battleship(v: V) {
   const last = myShots[myShots.length - 1];
   const target = aim && !shotAt(myShots, aim.r, aim.c) ? aim : null;
   return (
-    <div className="stack stack--4 astra-board astra-board--naval">
+    <div className="stack stack--4 astra-board mini-refined astra-board--naval">
       <Scoreline me={me} partner={partner} values={{ [me.seat]: c.sunk?.[me.seat]?.length ?? 0, [partner?.seat ?? 0]: c.sunk?.[partner?.seat ?? 0]?.length ?? 0 }} label={t("mini.naval.sunkCount")} />
       <div className="seg" role="tablist" aria-label={t("mini.naval.grids")}>
         <button type="button" role="tab" aria-selected={view === "them"} onClick={() => setView("them")}>{t("mini.naval.theirGrid")}</button>
@@ -415,7 +508,7 @@ function Battleship(v: V) {
             const x = shotCell(shotAt(myShots, r, col), t("mini.naval.unknown"));
             return target && target.r === r && target.c === col ? { ...x, cls: `${x.cls} naval__cell--aim`, img: "target", text: t("mini.naval.aimed") } : x;
           }}
-            onCell={mine && !busy ? (r, col) => setAim({ r, c: col }) : undefined}
+            onCell={mine && !busy && !c.done ? (r, col) => setAim({ r, c: col }) : undefined}
             disabled={(r, col) => Boolean(shotAt(myShots, r, col))} />
             <button className="btn naval-fire astra-actions" disabled={busy || !mine || c.done || !target}
               onClick={async () => { if (target && (await play("fire", { row: target.r, col: target.c })).ok) setAim(null); }}>
@@ -425,7 +518,7 @@ function Battleship(v: V) {
           <p className="t-small muted center astra-status">{!mine ? t("mini.naval.waitingShot", { name: nameOf(partner) }) : "Un tir par tour, même après un touché."}</p>
         </>
       ) : (
-        <NavalGrid label={t("mini.naval.myGrid")} cell={(r, col) => {
+        <NavalGrid label={t("mini.naval.myGrid")} fleet={fleet} cell={(r, col) => {
           const s = shipAt(r, col);
           const x = shotAt(theirShots, r, col);
           if (x) return shotCell(x, "");
@@ -435,6 +528,8 @@ function Battleship(v: V) {
       {c.sunk?.[me.seat]?.length > 0 && (
         <p className="t-meta">{t("mini.naval.youSank", { list: (c.sunk[me.seat] as string[]).map((id) => t(`mini.naval.ship.${id}` as never)).join(", ") })}</p>
       )}
+      <div className="mini-shot-legend t-meta"><span>○ À l’eau</span><span>• Touché</span><span>× Coulé</span></div>
+      <NavalRecord c={c} me={me} partner={partner} />
     </div>
   );
 }
@@ -456,11 +551,11 @@ export function MiniSolution({ c, players }: { c: J; players: Player[] }) {
     : c.winner === me.seat ? t("mini.youWin")
     : c.winner ? t("mini.winner", { name: seatName(me, partner, c.winner) }) : "";
   return (
-    <div className={`stack stack--3 astra-board astra-board--result${c.mech === "rps" ? " astra-board--rps" : c.mech === "tic_tac_toe" ? " astra-board--morpion" : ""}`}>
+    <div className={`stack stack--3 astra-board mini-refined astra-board--result${c.mech === "rps" ? " astra-board--rps" : c.mech === "tic_tac_toe" ? " astra-board--morpion" : ""}`}>
       {winnerText && <p className="strong">{winnerText}</p>}
       {c.shortened && <p className="t-meta">{t("mini.shortened")}</p>}
       {c.mech === "tic_tac_toe" && <TicTacToeBoard c={c} priv={null} me={me} partner={partner} play={noop} busy mine={false} animate={reveal} />}
-      {c.mech === "dots_boxes" && <Scoreline me={me} partner={partner} values={c.tally} label={t("mini.dots.scores")} />}
+      {c.mech === "dots_boxes" && <div className="astra-board--dots stack stack--3"><Scoreline me={me} partner={partner} values={c.tally} label={t("mini.dots.scores")} /><DotsBoard c={c} priv={null} me={me} partner={partner} play={noop} busy mine={false} /></div>}
       {c.mech === "rps" && showGestures && (
         <div className={`rps rps--reveal astra-rps-reveal${reveal ? " is-revealing" : ""}`} aria-label="Les deux choix verrouillés sont révélés ensemble">
           {[me, partner].filter(Boolean).map((p) => {
@@ -475,8 +570,8 @@ export function MiniSolution({ c, players }: { c: J; players: Player[] }) {
         </div>
       )}
       {c.mech === "rps" && !showGestures && <p className="t-small">Aucun geste révélé pour cette manche.</p>}
-      {c.mech === "nd_pig" && <Scoreline me={me} partner={partner} values={c.banked} label={t("mini.pig.banked")} />}
-      {c.mech === "battleship" && <p className="t-meta">{t("mini.naval.secretKept")}</p>}
+      {c.mech === "nd_pig" && <div className="mini-pig-result"><BoardPiece piece="token" fallback="/assets/premium/M12/bank.svg" alt="" width={56} height={56} /><p className="t-small">Points acquis · objectif {c.target ?? 30}</p><Scoreline me={me} partner={partner} values={c.banked} label={t("mini.pig.banked")} /></div>}
+      {c.mech === "battleship" && <><div className="mini-naval-result"><BoardPiece piece="naval-ship" fallback="/assets/original/library3d/M07.webp" alt="" width={72} height={72} /><p className="t-meta">{t("mini.naval.secretKept")}</p></div><NavalRecord c={c} me={me} partner={partner} /></>}
     </div>
   );
 }

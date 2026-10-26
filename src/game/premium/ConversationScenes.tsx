@@ -45,6 +45,15 @@ export function WaitTurn({ st, partner, text }: { st: SessionState; partner?: Pl
 export const pickClass = (mech: string) =>
   mech === "nd_never" ? "pick pick--stamps" : mech === "nd_dilemma" ? "pick pick--doors" : mech === "nd_opinion" ? "pick pick--bubbles" : "pick";
 
+/** Objets décoratifs uniquement : le libellé et la sélection viennent toujours du serveur. */
+export function ChoiceIllustration({ mech, index }: { mech: string; index: number }) {
+  if (mech === "nd_dilemma") return <span className={`card-choice-illustration card-choice-illustration--door card-choice-illustration--${index % 2}`} aria-hidden="true">
+    <img src="/assets/original/library3d/G03.webp" alt="" width={184} height={184} />
+  </span>;
+  if (mech === "nd_never" || mech === "nd_opinion") return <span className={`card-choice-token card-choice-token--${index % 2}`} aria-hidden="true"><span /></span>;
+  return null;
+}
+
 /** Révélation groupée : chaque option avec les personnes qui l'ont choisie, sans verdict ni « bonne » réponse. */
 export function ChoiceReveal({ card, players }: { card: J; players: Player[] }) {
   const me = players.find((p) => p.is_me)!;
@@ -62,11 +71,11 @@ export function ChoiceReveal({ card, players }: { card: J; players: Player[] }) 
   return (
     <div className={`stack stack--3 enter reveal reveal--${card.mech}`} aria-live="polite">
       <div className="reveal__grid">
-        {options.map((o) => {
+        {options.map((o, index) => {
           const who = people.filter((p) => chose(p, o.id));
           return (
             <section key={o.id} className={`reveal__tile${who.length ? " is-chosen" : ""}`} aria-label={`${o.text} : ${who.map(nameOf).join(", ") || t("conv.reveal.nobody")}`}>
-              {o.player && <Avatar name={o.player.display_name} path={o.player.avatar_path} size={48} me={o.player.is_me} />}
+              {o.player ? <span className="target-pick__medallion"><Avatar name={o.player.display_name} path={o.player.avatar_path} size={64} me={o.player.is_me} /></span> : <ChoiceIllustration mech={card.mech} index={index} />}
               <p className="reveal__text">{o.text}</p>
               <ul className="reveal__who">
                 {who.map((p) => (

@@ -9,7 +9,6 @@ import { Link } from "react-router";
 import { t } from "../../i18n";
 import { Alert, Art, Icon, Loading } from "../../components/ui";
 import type { Player, SessionState } from "../../lib/types";
-import { ART_BY_PACK, artOf } from "../../screens/Libraries";
 import { NudgeButton } from "../premium/Nudge";
 import { ReadingRegion } from "../ReadingRegion";
 
@@ -87,25 +86,30 @@ function PackForm({ card, busy, onSend, sessionId, round }: { card: J; busy: boo
   const has = Boolean(text.trim()) || value !== null;
   const payload = (choice: string) => ({ choice, ...(text.trim() ? { text: text.trim() } : {}), ...(value !== null ? { value } : {}) });
   return (
-    <form className="stack stack--4" onSubmit={(e) => { e.preventDefault(); if (has && !blocked) void onSend(payload("share")); }}>
+    <form className="pack-answer-form stack stack--4" onSubmit={(e) => { e.preventDefault(); if (has && !blocked) void onSend(payload("share")); }}>
+      <div className="pack-answer-form__content stack stack--4">
       {tf && (
         <div className="q-choices" role="radiogroup" aria-label={t("q.pack.yourAnswer")}>
           {(card.item.options ?? []).map((o: J) => (
             <button key={o.value} type="button" role="radio" aria-checked={value === o.value} className="q-choice" disabled={blocked}
               onClick={() => setValue(value === o.value ? null : o.value)}>
-              <span className="q-choice__dot" aria-hidden="true" />{o.label_fr}
+              <span className="q-choice__dot" aria-hidden="true" /><span className="q-choice__label">{o.label_fr}</span>
             </button>
           ))}
         </div>
       )}
-      <div className="field">
-        <label className="field__label" htmlFor="q-text">{tf ? t("q.pack.comment") : t("q.pack.yourAnswer")}</label>
+      <div className="field pack-answer-paper">
+        <div className="pack-answer-paper__heading">
+          <label className="field__label" htmlFor="q-text">{tf ? t("q.pack.comment") : t("q.pack.yourAnswer")}</label>
+          <Icon name="pencil" size={18} />
+        </div>
         <textarea id="q-text" className="input q-textarea" maxLength={MAX_TEXT} value={text} disabled={blocked}
-          onChange={(e) => setText(e.target.value)} placeholder={tf ? "" : t("q.pack.placeholder")} />
-        <span className="field__hint">{t("q.pack.hint", { n: MAX_TEXT - text.length })}</span>
+          rows={4} aria-describedby="q-text-hint" onChange={(e) => setText(e.target.value)} placeholder={tf ? "" : t("q.pack.placeholder")} />
+        <span id="q-text-hint" className="field__hint">{t("q.pack.hint", { n: MAX_TEXT - text.length })}</span>
       </div>
       {!tf && <AudioAnswer key={`${sessionId}:${round}`} sessionId={sessionId} round={round} disabled={busy} onSend={onSend} onBusy={setAudioBusy} />}
-      <div className="stack stack--2">
+      </div>
+      <div className="pack-answer-form__actions stack stack--2">
         <button className="btn" type="submit" disabled={blocked || !has}><Icon name="send" size={18} />{t("q.pack.sendShare")}</button>
         <button className="btn btn--secondary" type="button" disabled={blocked || !has} onClick={() => void onSend(payload("private"))}>
           <Icon name="lock-keyhole" size={18} />{t("q.pack.sendPrivate")}
@@ -137,7 +141,7 @@ function PackPlaying({ c, round }: { c: Common; round: QRound }) {
   }
 
   return (
-    <section className="pack-playing reading-games stack stack--5" key={round.round_no}>
+    <section className="pack-playing pack-board reading-games stack stack--5" key={round.round_no}>
       <div className="q-progress">
         <span className="t-meta">
           {card.set_no ? t("q.pack.set", { s: card.set_no, n: (card.index % card.set_size) + 1, size: card.set_size }) : t("q.pack.card", { n: card.index + 1, count: card.count })}
@@ -150,9 +154,11 @@ function PackPlaying({ c, round }: { c: Common; round: QRound }) {
       <IntensityTransition prev={prevItem ? meta[prevItem] : undefined} cur={meta[card.item.id]} />
       <ReadingRegion className="console-question pack-question" label="Question du pack" resetKey={card.item.id}>
         <div className="q-card__head">
-          {card.item.adult && <span className="nd-chip nd-chip--peach">+18</span>}
-          <span className="nd-chip">{card.set_no ? t("q.pack.setChip", { s: card.set_no }) : t("q.pack.cardChip", { n: card.index + 1 })}</span>
-          <Art name={ART_BY_PACK[(c.st.game.config as any).pack?.code ?? ""] ?? artOf({id:c.st.session.game_id,meta:{},mechanic:"pack_conversation"})} size={64} />
+          <span className="pack-question__meta row row--wrap">
+            {card.item.adult && <span className="nd-chip nd-chip--peach">+18</span>}
+            <span className="nd-chip">{card.set_no ? t("q.pack.setChip", { s: card.set_no }) : t("q.pack.cardChip", { n: card.index + 1 })}</span>
+          </span>
+          <img className="pack-question__object" src="/assets/original/library3d/G05.webp" width={72} height={72} alt="" aria-hidden="true" />
         </div>
         <h2 className={`t-question${card.item.text.length > 140 ? " t-question--long" : ""}`}>{card.item.text}</h2>
         <p className="t-meta">{first?.is_me ? t("q.pack.youFirst") : t("q.pack.firstSpeaker", { name: nameOf(first) })}</p>
@@ -219,14 +225,14 @@ function ScaleItem({ item, scale, value, onChange, disabled }: {
 }) {
   const id = `it-${item.id}`;
   return (
-    <fieldset className="q-item" aria-describedby={item.note ? `${id}-note` : undefined}>
+    <fieldset className="q-item q-item--scale" aria-describedby={item.note ? `${id}-note` : undefined}>
       <legend className="q-item__text"><span className="q-item__no">{item.position}.</span> {item.text}</legend>
       {item.note && <p id={`${id}-note`} className="t-meta row"><Icon name="info" size={16} />{item.note}</p>}
-      <div className={`q-scale${scale.length > 5 ? " q-scale--long" : ""}`} role="radiogroup" aria-label={item.text}>
+      <div className={`q-scale${scale.length > 5 ? " q-scale--long" : ""}`} role="radiogroup" aria-label={item.text} data-scale-count={scale.length}>
         {scale.map((o) => (
           <button key={o.value} type="button" role="radio" aria-checked={value === o.value} className="q-choice" disabled={disabled}
             onClick={() => onChange(o.value)}>
-            <span className="q-choice__dot" aria-hidden="true" />{o.label_fr}
+            <span className="q-choice__dot" aria-hidden="true" /><span className="q-choice__label">{o.label_fr}</span>
           </button>
         ))}
         <button type="button" role="radio" aria-checked={value === null} className="q-choice q-choice--pass" disabled={disabled}
@@ -239,7 +245,7 @@ function ScaleItem({ item, scale, value, onChange, disabled }: {
 function CheckItem({ item, value, onChange, disabled }: { item: J; value: boolean | null | undefined; onChange: (v: boolean | null) => void; disabled: boolean }) {
   const id = `it-${item.id}`;
   return (
-    <div className="q-check">
+    <div className="q-check q-item--checkbox">
       <label className="q-check__row" htmlFor={id}>
         <input id={id} type="checkbox" checked={value === true} disabled={disabled} onChange={(e) => onChange(e.target.checked)} />
         <span><span className="q-item__no">{item.position}.</span> {item.text}</span>
@@ -393,7 +399,7 @@ function TestPlaying({ c, round }: { c: Common; round: QRound }) {
   const busy = c.busy || !c.online;
 
   return (
-    <section className="questionnaire-playing reading-games stack stack--5">
+    <section className="questionnaire-playing questionnaire-sheet reading-games stack stack--5">
       <div className="q-progress">
         <span className="t-meta">{t("q.test.page", { n: page + 1, total: pages })}</span>
         <span className="t-meta">{t("q.test.answered", { n: answeredCount, total: items.length })}</span>
@@ -401,8 +407,8 @@ function TestPlaying({ c, round }: { c: Common; round: QRound }) {
       <div className="nd-progress" role="progressbar" aria-label={t("q.test.progress")} aria-valuemin={0} aria-valuemax={pages} aria-valuenow={page + 1}>
         <div className="nd-progress__fill" style={{ width: `${(100 * (page + 1)) / pages}%` }} />
       </div>
-      {page === 0 && c.st.game.rules.details?.[0] && <p className="card card--soft">{c.st.game.rules.details[0]}</p>}
-      <div className="stack stack--4">
+      {page === 0 && c.st.game.rules.details?.[0] && <p className="questionnaire-intro card card--soft">{c.st.game.rules.details[0]}</p>}
+      <div className="questionnaire-items stack stack--4">
         {slice.map((it) => checkbox
           ? <CheckItem key={it.id} item={it} value={answers[it.id] as boolean | null | undefined} onChange={(v) => set(it.id, v)} disabled={busy} />
           : <ScaleItem key={it.id} item={it} scale={card.scales?.[it.scale] ?? []} value={answers[it.id] as number | null | undefined} onChange={(v) => set(it.id, v)} disabled={busy} />)}
@@ -417,7 +423,7 @@ function TestPlaying({ c, round }: { c: Common; round: QRound }) {
           <input className="switch" type="checkbox" role="switch" checked={share} onChange={(e) => setShare(e.target.checked)} />
         </label>
       )}
-      <div className="action-bar stack stack--2">
+      <div className="questionnaire-actions action-bar stack stack--2">
         {last ? (
           <button className="btn" disabled={busy} onClick={() => void play("complete", { answers: pageAnswers(), page, share })}>
             {Object.keys(card.axes ?? {}).length === 0 ? t("q.test.finish") : share ? t("q.test.finishShare") : t("q.test.finishPrivate")}

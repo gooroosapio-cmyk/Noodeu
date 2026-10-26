@@ -9,10 +9,12 @@ import { Avatar } from "../components/Avatar";
 import { SubPage } from "../components/AppShell";
 import { Alert, ConfirmDialog, Icon, Illustration, formatDate, useToast } from "../components/ui";
 import { useDuo } from "./DuoProvider";
+import "../styles/board-session-refinement.css";
 
 export function InvitePage() {
   const [params] = useSearchParams();
   const { activeDuos, invitations } = useDuo();
+  const { profile } = useAuth();
   const navigate = useNavigate();
   const [startCount] = useState(activeDuos.length);
   const [tab, setTab] = useState<"invite" | "join">(params.get("code") || invitations.incoming ? "join" : "invite");
@@ -24,10 +26,15 @@ export function InvitePage() {
 
   return (
     <SubPage backTo="/accueil">
-      <main className="page page--bare page--narrow">
+      <main className="page page--bare page--narrow invite-refinement">
         <div className="page-header">
           <h1 className="t-page">{t("invite.title")}</h1>
           <p>{t("invite.subtitle")}</p>
+        </div>
+        <div className="invite-refinement__scene" aria-hidden="true"><img src="/assets/original/refinement3d/salon-chairs.webp" width={170} height={170} alt="" /></div>
+        <div className="invite-refinement__seats" aria-label="Les participants">
+          <div><Avatar name={profile?.display_name || "Toi"} path={profile?.avatar_path} size={40} me /><span>{profile?.display_name || "Toi"}</span></div>
+          <div><span className="invite-refinement__empty" aria-hidden="true"><Icon name="users" size={22} /></span><span>{invitations.incoming?.inviter_name || invitations.outgoing?.claimer_name || "Place à partager"}</span></div>
         </div>
         {activeDuos.length > 0 && <Alert kind="info">{t("invite.otherDuo", { n: activeDuos.length })}</Alert>}
         {(

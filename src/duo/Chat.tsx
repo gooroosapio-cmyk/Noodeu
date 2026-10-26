@@ -60,9 +60,10 @@ export function ChatLauncher({ onOpen, withNav = true }: { onOpen: () => void; w
           }
           return new DOMRect(left, top, Math.max(0, right - left), Math.max(0, bottom - top));
         };
+        // Une grille reste une zone protégée même en lecture seule (cases rendues en spans).
         // Une grille dense peut ne laisser aucune place parmi quatre positions fixes.
         // On cherche le bord libre sur toute la hauteur, sans dock ni espace fixe ajouté.
-        const controls = Array.from(document.querySelectorAll('main a, main button, main input, main select, main textarea, main label, main img, .session-toolbar a, .session-toolbar button')).filter((el) => el !== button).map((el) => clip(el.getBoundingClientRect(), el.parentElement)).filter((r) => r.width && r.height);
+        const controls = Array.from(document.querySelectorAll('main a, main button, main input, main select, main textarea, main label, main img, main .board-zoom, main .astra-overview, main .astra-ttt, main .pig-tray, main .hm-board, main .hm-slots, main .q-answer, main .reveal, main .question-reading, main .pb-head, .session-toolbar a, .session-toolbar button')).filter((el) => el !== button).map((el) => clip(el.getBoundingClientRect(), el.parentElement)).filter((r) => r.width && r.height);
         const textRects: DOMRect[] = [];
         for (const region of [main, header]) {
           if (!region) continue;
@@ -103,11 +104,15 @@ export function ChatLauncher({ onOpen, withNav = true }: { onOpen: () => void; w
     visualViewport?.addEventListener('scroll', place);
     window.addEventListener('focusin', place);
     const observer = new MutationObserver(place);
-    observer.observe(document.body, { childList: true, subtree: true });
+    observer.observe(document.body, { childList: true, characterData: true, attributes: true, attributeFilter: ["class", "style", "open", "hidden"], subtree: true });
+    // Les métriques de texte changent après le chargement des polices sans redimensionner main.
+    document.fonts.addEventListener("loadingdone", place);
+    let active = true;
+    void document.fonts.ready.then(() => { if (active) place(); });
     const resize = new ResizeObserver(place);
     const main = document.querySelector('main');
     if (main) resize.observe(main);
-    return () => { cancelAnimationFrame(frame); observer.disconnect(); resize.disconnect(); window.removeEventListener('scroll', place, true); window.removeEventListener('resize', place); window.removeEventListener('focusin', place); visualViewport?.removeEventListener('resize', place); visualViewport?.removeEventListener('scroll', place); };
+    return () => { active = false; document.fonts.removeEventListener("loadingdone", place); cancelAnimationFrame(frame); observer.disconnect(); resize.disconnect(); window.removeEventListener('scroll', place, true); window.removeEventListener('resize', place); window.removeEventListener('focusin', place); visualViewport?.removeEventListener('resize', place); visualViewport?.removeEventListener('scroll', place); };
   }, [withNav]);
   return (
     <button ref={launcher} data-header-slot={position?.headerSlot || undefined} style={position ? { left: position.left, top: position.top, right: "auto", bottom: "auto" } : undefined} className={`chat-launcher ${withNav ? "" : "chat-launcher--nonav"}`} onClick={onOpen}

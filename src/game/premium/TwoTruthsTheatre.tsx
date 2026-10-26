@@ -20,11 +20,11 @@ export function theatreScore(st: SessionState, seat: number) {
   return (st.rounds as unknown as { card: J }[]).reduce((n, r) => n + (r.card?.done && !r.card.skipped ? Number(r.card.scores?.[seat] ?? 0) : 0), 0);
 }
 
-function Backstage({ busy, play, sessionId, partner, draft, updateDraft }: { busy: boolean; play: Play; sessionId: string; partner?: Player; draft: string[]; updateDraft: (value: string[]) => void }) {
+function Backstage({ busy, play, sessionId, me, partner, readySeats, draft, updateDraft }: { busy: boolean; play: Play; sessionId: string; me: Player; partner?: Player; readySeats: J; draft: string[]; updateDraft: (value: string[]) => void }) {
   const texts = IDS.map((_, i) => draft[i] ?? "");
   const lie = draft[3] || null;
   const setTexts = (next: string[]) => updateDraft([...next, lie ?? ""]);
-  const setLie = (next: string | null) => updateDraft([...texts, next ?? ""]);
+  const setLie = (next: string) => updateDraft([...texts, next]);
   const submitting = useRef(false);
   const [idea, setIdea] = useState<string | null>(null);
   const filled = texts.every((x) => x.trim());
@@ -32,7 +32,7 @@ function Backstage({ busy, play, sessionId, partner, draft, updateDraft }: { bus
   const ready = filled && distinct && lie !== null;
   const why = !filled ? t("tt2.needThree") : !distinct ? t("tt2.needDistinct") : !lie ? t("tt2.needLie") : null;
   return (
-    <form className="stack stack--4" onSubmit={(e) => {
+    <form className="theatre-backstage stack stack--4" onSubmit={(e) => {
       e.preventDefault();
       if (ready && !busy && !submitting.current) {
         submitting.current = true;
@@ -44,6 +44,7 @@ function Backstage({ busy, play, sessionId, partner, draft, updateDraft }: { bus
         <h2 className="q-title">{t("tt2.writeTitle")}</h2>
         <p className="t-small muted">{t("tt2.writeHint")}</p>
       </div>
+      <Pair me={me} partner={partner} done={(seat) => Boolean(readySeats?.[seat])} labelDone={t("tt2.isReady")} labelWait={t("tt2.isWriting")} />
       <ol className="theatre-notes">
         {texts.map((x, i) => {
           const isLie = lie === IDS[i];
@@ -51,13 +52,17 @@ function Backstage({ busy, play, sessionId, partner, draft, updateDraft }: { bus
             <li key={i} className={`theatre-note${isLie ? " theatre-note--lie" : ""}`}>
               <div className="theatre-note__head">
                 <label className="theatre-note__label" htmlFor={`tt2-${i}`}>{t("tt2.statement", { n: i + 1 })}</label>
-                <button type="button" className={`theatre-tag${isLie ? " theatre-tag--lie" : ""}`} aria-pressed={isLie} disabled={busy}
-                  onClick={() => setLie(isLie ? null : IDS[i])}>
-                  <Icon name={isLie ? "eye-off" : "check"} size={14} />{isLie ? t("tt2.myLie") : t("tt2.truth")}
-                </button>
+                <span className="theatre-note__number" aria-hidden="true">{i + 1}</span>
               </div>
-              <textarea id={`tt2-${i}`} className="input theatre-note__input" maxLength={240} rows={2} value={x} disabled={busy}
+              <textarea id={`tt2-${i}`} className="input theatre-note__input" maxLength={240} rows={2} value={x} disabled={busy} aria-describedby={`tt2-count-${i}`}
                 onChange={(e) => setTexts(texts.map((y, k) => (k === i ? e.target.value : y)))} />
+              <div className="theatre-note__foot">
+                <label className="theatre-lie-choice">
+                  <input type="radio" name="tt2-lie" value={IDS[i]} checked={isLie} disabled={busy} onChange={() => setLie(IDS[i])} />
+                  <Icon name="eye-off" size={15} />{t("tt2.myLie")}
+                </label>
+                <span id={`tt2-count-${i}`} className="field__hint">{x.length}/240</span>
+              </div>
             </li>
           );
         })}
@@ -69,7 +74,7 @@ function Backstage({ busy, play, sessionId, partner, draft, updateDraft }: { bus
         }}><Icon name="sparkles" size={16} />{t("conv.tt.idea")}</button>
         {idea && <p className="t-small card card--soft" aria-live="polite">{idea}</p>}
       </div>
-      <p className="theatre-info"><Icon name="lock-keyhole" size={16} />{t("tt2.privacy", { name: nameOf(partner) })}</p>
+      <p className="theatre-info"><Icon name="lock-keyhole" size={16} />Vos affirmations restent privées jusqu’à ce que vous soyez prêts tous les deux. Ton mensonge reste secret.</p>
       <button className="btn" type="submit" disabled={busy || !ready} aria-describedby={why ? "tt2-why" : undefined}>
         {t("tt2.ready")}<Icon name="check" size={18} />
       </button>
@@ -101,7 +106,7 @@ export function TwoTruthsTheatre({ st, card, priv, me, partner, busy, play }: {
   const meGuessed = Boolean(card.guessed?.[me.seat]);
   const theirs: { id: string; text: string }[] = partner ? card.statements?.[partner.seat] ?? [] : [];
 
-  if (card.phase === "write" && !meReady) return <Backstage busy={busy} play={play} sessionId={st.session.id} partner={partner} draft={draft} updateDraft={updateDraft} />;
+  if (card.phase === "write" && !meReady) return <Backstage busy={busy} play={play} sessionId={st.session.id} me={me} partner={partner} readySeats={card.ready} draft={draft} updateDraft={updateDraft} />;
 
   if (card.phase === "write") {
     return (

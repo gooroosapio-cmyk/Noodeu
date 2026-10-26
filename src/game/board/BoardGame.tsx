@@ -4,7 +4,7 @@
 import { useEffect, useState, type ComponentType, type ReactNode } from "react";
 import { Link } from "react-router";
 import { t, type MessageKey } from "../../i18n";
-import { Alert, Art, Icon, Illustration, Loading } from "../../components/ui";
+import { Alert, Icon, Illustration, Loading } from "../../components/ui";
 import type { Player, SessionState } from "../../lib/types";
 import { CREATION_VIEWS, CreationSolution, isCreationMech } from "./CreationGames";
 import { MEMORY_VIEWS, MemorySolution, isMemoryMech } from "./MemoryGames";
@@ -681,11 +681,18 @@ export function BoardResults({ c, navigate }: { c: Common; navigate: (to: string
   const me = c.st.players.find((p) => p.is_me);
   const partner = c.st.players.find((p) => !p.is_me);
   const bothKeep = c.st.players.every((p) => p.keep_memory);
+  const finalPoints = result?.points;
+  const scoredPlayers = finalPoints ? c.st.players.filter(p => typeof finalPoints[String(p.seat)] === "number") : [];
+  const topScore = scoredPlayers.length ? Math.max(...scoredPlayers.map(p => finalPoints![String(p.seat)])) : null;
+  const winners = scoredPlayers.filter(p => finalPoints![String(p.seat)] === topScore);
+  const verdict = isMiniMech(c.st.game.mechanic) && scoredPlayers.length === 2
+    ? winners.length === 2 ? "Égalité" : winners[0].is_me ? "Tu remportes la partie" : `${nameOf(winners[0])} remporte la partie`
+    : t("game.endTitle");
   return (
-    <section className="stack stack--6">
-      {isMiniMech(c.st.game.mechanic) ? <div className="result-emblem"><Art name={`custom-${(c.st.game.config as unknown as {code:string}).code}`} size={72} /></div> : <Illustration name="11-fin-de-partie" className="public__art" />}
+    <section className="stack stack--6 session-result-refinement">
+      {isMiniMech(c.st.game.mechanic) ? <div className="session-result-refinement__object" aria-hidden="true"><img className="session-result-refinement__cup" src="/assets/original/refinement3d/result-cup.webp" alt="" width={112} height={112} /><img className="session-result-refinement__game" src={`/assets/original/library3d/${(c.st.game.config as unknown as {code:string}).code}.webp`} alt="" width={64} height={64} /></div> : <Illustration name="11-fin-de-partie" className="public__art" />}
       <div className="page-header center">
-        <h1 className="t-page">{t("game.endTitle")}</h1>
+        <h1 className="t-page">{verdict}</h1>
         <p>{t("game.endText", { title: c.st.game.title })}</p>
       </div>
       {result?.points && (

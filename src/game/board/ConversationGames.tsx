@@ -12,8 +12,9 @@ import { Avatar } from "../../components/Avatar";
 import type { Player, SessionState } from "../../lib/types";
 import { NudgeButton } from "../premium/Nudge";
 import { TwoTruthsReveal, TwoTruthsTheatre, theatreScore } from "../premium/TwoTruthsTheatre";
-import { CHOICE_SCENES, ChoiceReveal, TextReveal, TruthDareDone, WaitTurn, pickClass } from "../premium/ConversationScenes";
+import { CHOICE_SCENES, ChoiceIllustration, ChoiceReveal, TextReveal, TruthDareDone, WaitTurn, pickClass } from "../premium/ConversationScenes";
 import { ReadingRegion } from "../ReadingRegion";
+import "../../styles/board-cards-refinement.css";
 
 type J = any;
 type Run = (fn: string, args?: Record<string, unknown>) => Promise<{ ok: boolean; error?: string; info?: any }>;
@@ -70,6 +71,7 @@ export function CardBox({ card, label, reading = false }: { card: J; label?: str
           {card.adult && <span className="nd-chip nd-chip--peach">{t("conv.adultChip")}</span>}
         </span>
         {card.theme && <span className="t-meta">{card.theme}</span>}
+        {card.mech === "nd_opinion" && <img className="card-question-object" src="/assets/original/refinement3d/opinions-balance.webp" width={72} height={72} alt="" aria-hidden="true" />}
       </div>
       {(card.text || card.prompt) && <h2 className="t-question">{card.text || card.prompt}</h2>}
     </>}
@@ -146,33 +148,34 @@ function SealedForm({ card, me, partner, players, busy, play }: { card: J; me: P
   const ready = textual ? Boolean(text.trim()) : m === "nd_duo_target" ? seat !== null : choice !== null;
   const payload = textual ? { text: text.trim() } : m === "nd_duo_target" ? { seat } : { choice };
   return (
-    <form className="console-answer-form reading-answer-form" onSubmit={(e) => { e.preventDefault(); if (ready) void play("lock", payload); }}>
+    <form className={`console-answer-form reading-answer-form card-response card-response--${m}`} onSubmit={(e) => { e.preventDefault(); if (ready) void play("lock", payload); }}>
       <div className="reading-answer-form__content" role="region" aria-label="Réponses proposées" tabIndex={0}>
-      {role && (
-        <p className="nd-chip">{role === "subject" ? t("conv.predict.youSubject") : t("conv.predict.youPredict", { name: nameOf(partner) })}</p>
-      )}
       {m === "nd_duo_target" ? (
         <div className="target-pick" role="radiogroup" aria-label={t("conv.target.label")}>
           {players.map((p) => (
             <button key={p.seat} type="button" role="radio" aria-checked={seat === p.seat} className="target-pick__btn" disabled={busy} onClick={() => setSeat(p.seat)}>
-              <Avatar name={p.display_name} path={p.avatar_path} size={56} me={p.is_me} />
-              <span>{p.is_me ? `${p.display_name} (${t("game.you")})` : p.display_name}</span>
+              <span className="target-pick__medallion"><Avatar name={p.display_name} path={p.avatar_path} size={64} me={p.is_me} /></span>
+              <span className="target-pick__plinth">{p.is_me ? `${p.display_name} (${t("game.you")})` : p.display_name}</span>
             </button>
           ))}
         </div>
       ) : textual ? (
-        <div className="field">
-          <label className="field__label" htmlFor="conv-text">
+        <div className={`field card-writing-paper${role ? " card-writing-paper--envelope" : ""}`}>
+          <img className="card-writing-paper__object" src={`/assets/original/library3d/${role ? "G05" : "G09"}.webp`} width={80} height={80} alt="" aria-hidden="true" />
+          <label className={`field__label${role ? " card-role" : ""}`} htmlFor="conv-text">
+            {role && <Icon name={role === "subject" ? "pencil" : "eye"} size={16} />}
             {m === "nd_sentence" ? t("conv.sentence.label") : role === "subject" ? t("conv.predict.subjectLabel") : t("conv.predict.guessLabel", { name: nameOf(partner) })}
           </label>
-          <textarea id="conv-text" className="input q-textarea" maxLength={MAX} value={text} disabled={busy} onChange={(e) => setText(e.target.value)} />
-          <span className="field__hint">{t("conv.textHint", { n: MAX - text.length })}</span>
+          <textarea id="conv-text" className="input q-textarea" rows={4} maxLength={MAX} value={text} disabled={busy} aria-describedby="conv-text-count" onChange={(e) => setText(e.target.value)} />
+          <span id="conv-text-count" className="field__hint">{t("conv.textHint", { n: MAX - text.length })}</span>
         </div>
       ) : (
         <div className={pickClass(m)} role="radiogroup" aria-label={t("conv.choose")}>
-          {(card.options ?? []).map((o: J) => (
+          {(card.options ?? []).map((o: J, index: number) => (
             <button key={o.id} type="button" role="radio" aria-checked={choice === o.id} className="q-choice" disabled={busy} onClick={() => setChoice(o.id)}>
-              <span className="q-choice__dot" aria-hidden="true" />{o.text}
+              <ChoiceIllustration mech={m} index={index} />
+              <span className="q-choice__label">{o.text}</span>
+              <span className="q-choice__dot" aria-hidden="true" />
             </button>
           ))}
         </div>
@@ -193,9 +196,9 @@ function TruthDare({ st, card, me, partner, busy, play }: { st: SessionState; ca
     return <div className="td-console-wait"><Avatar name={partner?.display_name ?? ""} path={partner?.avatar_path} size={64} /><WaitTurn st={st} partner={partner} text={card.phase === "respond" && card.kind === "dare" ? `${nameOf(partner)} réalise son action…` : t(card.phase === "choice" ? "conv.td.waitChoice" : "conv.td.waitAnswer", { name: nameOf(partner) })} /></div>;
   }
   if (card.phase === "choice") {
-    return <div className="td-console-choices" aria-label="Choisir Action ou Vérité">
+    return <div className="td-console-choices card-deck-choices" aria-label="Choisir Action ou Vérité">
       {(["dare", "truth"] as const).map((kind) => <button key={kind} className={`td-console-choice td-console-choice--${kind}`} disabled={busy} onClick={() => void play("choose_kind", { kind })}>
-        <img src={`/assets/original/boards3d/${kind === "dare" ? "action" : "truth"}.webp`} width={104} height={104} alt="" />
+        <span className={`td-card-object td-card-object--${kind}`} aria-hidden="true"><Icon name={kind === "dare" ? "lightning" : "heart"} size={56} /></span>
         <span className="td-console-choice__title">{kind === "dare" ? "Action" : "Vérité"}</span>
         <span className="td-console-choice__hint">{kind === "dare" ? "Un défi à vivre" : "Une réponse à partager"}</span>
       </button>)}
@@ -207,10 +210,10 @@ function TruthDare({ st, card, me, partner, busy, play }: { st: SessionState; ca
       if (busy || (card.kind === "truth" && !text.trim())) return;
       void play(card.kind === "truth" ? "submit_text" : "submit_action", card.kind === "truth" ? { text: text.trim() } : { status: "done", ...(text.trim() ? { text: text.trim() } : {}) });
     }}>
-      <div className="field">
+      <div className="field card-writing-paper">
         <label className="field__label" htmlFor="td-text">{card.kind === "truth" ? t("conv.td.answer") : t("conv.td.shareOptional")}</label>
-        <textarea id="td-text" className="input q-textarea" maxLength={MAX} value={text} disabled={busy} onChange={(e) => setText(e.target.value)} />
-        <span className="field__hint">{card.kind === "truth" ? t("conv.textHint", { n: MAX - text.length }) : "Aucune preuve demandée. Partage seulement si tu le souhaites."}</span>
+        <textarea id="td-text" className="input q-textarea" rows={4} maxLength={MAX} value={text} disabled={busy} aria-describedby="td-text-count" onChange={(e) => setText(e.target.value)} />
+        <span id="td-text-count" className="field__hint">{card.kind === "truth" ? t("conv.textHint", { n: MAX - text.length }) : "Aucune preuve demandée. Partage seulement si tu le souhaites."}</span>
       </div>
       <div className="td-console-submit">
       {card.kind === "truth" ? (
@@ -308,7 +311,7 @@ function RoundView({ c, round }: { c: Common; round: CRound }) {
     : m === "nd_predict" ? forWho(players.find((p) => p.seat === card.subject), "conv.predict.subjectIsMe", "conv.predict.subjectIs") : undefined;
 
   return (
-    <section className={`console-round conversation-console reading-games${m === "nd_truth_dare" ? " truth-dare-console" : ""}`} key={round.round_no} data-phase={card.done ? "reveal" : card.phase ?? (card.locked?.[me.seat] ? "waiting" : "answer")}>
+    <section className={`console-round conversation-console reading-games card-board card-board--${m}${m === "nd_truth_dare" ? " truth-dare-console" : ""}`} key={round.round_no} data-phase={card.done ? "reveal" : card.phase ?? (card.locked?.[me.seat] ? "waiting" : "answer")}>
       <div className="console-progress">
       <div className="q-progress">
         <span className="t-meta">{t("conv.round", { n: round.round_no, total })}</span>

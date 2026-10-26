@@ -17,6 +17,6 @@ export function Stage({ u, children, compact = false }: { u: Universe | null; ch
 
 /** Pièce tactile déjà présente dans le kit ; geste PFC original du lot courant. */
 export function Hero({ u, size = 96 }: { u: Universe; size?: number }) {
-  return <img className="stage__hero" src={u.code === "G06" ? "/assets/original/library/G06.svg" : `/assets/original/library3d/${u.code}.webp`}
+  return <img className="stage__hero" src={u.code === "G08" ? "/assets/original/refinement3d/truths-mask.webp" : u.code === "G10" ? "/assets/original/refinement3d/opinions-balance.webp" : u.code === "G06" ? "/assets/original/library3d/questions.webp" : `/assets/original/library3d/${u.code}.webp`}
     alt="" aria-hidden="true" width={size} height={size} decoding="async" />;
 }

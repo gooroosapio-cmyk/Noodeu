@@ -1,0 +1,196 @@
+/* Objets de jeu discrets, papier et commandes stables. Aucun état de règle n'est déduit du décor. */
+.session-shell .reading-games:is(.card-board, .pack-board, .questionnaire-sheet) {
+  --card-ink: #43131c;
+  --card-active: #b72132;
+  --card-border: #decbd0;
+  --card-paper: #fffdf9;
+  color: var(--card-ink);
+}
+.session-shell .reading-games:is(.card-board, .pack-board, .questionnaire-sheet) :is(.t-small, .field__hint, .t-meta, .td-console-consent) {
+  font-size: .875rem; line-height: 1.5;
+}
+.session-shell .card-board .console-question { position: relative; isolation: isolate; }
+.session-shell.session-console .conversation-console.card-board { --console-question-height: clamp(8.25rem, 18dvh, 9rem); }
+.session-shell .card-board .console-round-controls { grid-template-columns: minmax(0, 1fr) minmax(0, 1fr); align-items: center; gap: 8px; }
+.session-shell .card-board .console-round-controls > :is(.action-bar, .alert, .td-console-consent) { grid-column: 1 / -1; }
+.session-shell .card-board .console-round-controls > .btn:only-of-type { grid-column: 1 / -1; }
+.session-shell .card-board .console-round-controls > :is(.btn, .btn--quiet) { min-height: 44px; font-size: .875rem; }
+.session-shell .card-board .question-reading,
+.session-shell .pack-board .pack-question {
+  border: 1px solid var(--card-border); border-radius: 20px;
+  background: var(--card-paper); box-shadow: 0 3px 0 #e8dbe0, 0 8px 22px #43131c07;
+}
+.session-shell .card-board .question-reading::before {
+  content: ""; position: absolute; z-index: -1; inset: 3px 8px -4px;
+  border: 1px solid #dfd0d2; border-radius: 20px; background: #f6e9e8; transform: rotate(-1.1deg);
+}
+.session-shell .card-board .q-card__head { gap: 8px; }
+.session-shell .card-board .q-card__head > .t-meta { max-width: 65%; text-align: right; }
+.session-shell.session-console .conversation-console.card-board--nd_opinion { --console-question-height: 10.25rem; }
+.session-shell .card-board--nd_opinion .q-card__head { position: relative; min-height: 28px; padding-right: 66px; }
+.card-question-object { position: absolute; right: -5px; top: -22px; width: 64px; height: 64px; object-fit: contain; pointer-events: none; }
+.session-shell .card-board .nd-chip { background: #f4e7e9; color: #722634; }
+.session-shell .card-board .console-answer-zone { padding: 6px 3px; }
+.session-shell .card-board .reading-answer-form { width: 100%; grid-template-columns: minmax(0, 1fr); justify-content: stretch; }
+.session-shell .card-board .reading-answer-form__content { width: 100%; gap: 12px; padding: 6px 3px 8px; }
+.session-shell .card-board .reading-answer-form > .btn { min-height: 48px; }
+.session-shell .card-board .pick { width: 100%; gap: 12px; padding: 5px 2px 8px; }
+.session-shell .card-board .pick .q-choice {
+  position: relative; display: flex; align-items: center; justify-content: center; gap: 12px;
+  min-width: 0; padding: 16px 12px; border: 1px solid var(--card-border); border-radius: 20px;
+  background: var(--card-paper); color: var(--card-ink); box-shadow: 0 4px 0 #e6d9dc, 0 8px 16px #43131c06;
+  font-size: .875rem; line-height: 1.5; text-align: center; transition: border-color 140ms, box-shadow 140ms;
+}
+.session-shell .card-board .pick .q-choice[aria-checked="true"] {
+  border: 1px solid var(--card-active); background: #fff7f7; padding: 16px 12px;
+  box-shadow: 0 0 0 2px var(--card-active), 0 5px 0 #e7c5cb;
+}
+.session-shell .card-board .pick .q-choice__dot { margin: 0; flex: none; }
+.session-shell .card-board .pick .q-choice__label { width: 100%; overflow-wrap: anywhere; }
+.session-shell .card-board .pick--stamps .q-choice,
+.session-shell .card-board .pick--bubbles .q-choice { min-height: 138px; }
+.session-shell .card-board .pick--doors .q-choice { min-height: 188px; justify-content: flex-start; padding: 12px 10px; gap: 8px; }
+.session-shell .card-board .pick--doors .q-choice[aria-checked="true"] { padding: 12px 10px; }
+.session-shell .card-board .pick--doors .q-choice__dot { position: absolute; top: 10px; right: 10px; width: 16px; height: 16px; }
+.card-choice-illustration--door { display: block; position: relative; overflow: hidden; flex: none; width: 44px; height: 70px; }
+.card-choice-illustration--door img { position: absolute; width: 80px; height: 80px; max-width: none; object-fit: contain; top: -3px; }
+.card-choice-illustration--0 img { left: 0; }
+.card-choice-illustration--1 img { left: -40px; }
+.card-choice-token {
+  display: grid; place-items: center; flex: none; width: 52px; height: 52px; border-radius: 50%;
+  border: 1px solid #dbc9b6; background: linear-gradient(135deg, #fff8ec, #e9d9c5);
+  box-shadow: 0 4px 0 #cbb6a1, 0 7px 10px #43131c12, inset 0 2px 2px #fff;
+}
+.card-choice-token > span { width: 36px; height: 36px; border: 2px solid #c8b29a; border-radius: 50%; box-shadow: inset 0 1px 1px #fff, 0 1px 1px #fff; }
+.session-shell .card-board .q-choice[aria-checked="true"] .card-choice-token { box-shadow: 0 4px 0 #cbb6a1, 0 0 0 3px #b7213224; }
+.session-shell .card-board .target-pick { width: 100%; gap: 14px; padding: 4px 3px; }
+.session-shell .card-board .target-pick__btn {
+  min-width: 0; gap: 0; padding: 6px 8px 0; border: 1px solid transparent; border-radius: 22px;
+  background: transparent; color: var(--card-ink); box-shadow: none; font-size: .875rem;
+}
+.target-pick__medallion {
+  display: grid; place-items: center; width: 88px; height: 102px; margin-inline: auto;
+  border: 6px solid #f4e5d5; border-radius: 48% 48% 45% 45%;
+  background: #fffaf3; box-shadow: 0 4px 0 #d9c6b5, 0 8px 18px #43131c12, inset 0 0 0 1px #ddcaba;
+}
+.target-pick__medallion .avatar { border-radius: 46%; color: #722634; background: #f0dadd; }
+.target-pick__medallion .avatar img { border-radius: inherit; }
+.target-pick__plinth {
+  position: relative; display: grid; place-items: center; min-height: 44px; width: 100%; margin-top: 8px; padding: 8px 7px;
+  border: 1px solid #ddc8bb; border-radius: 12px 12px 16px 16px; background: #f3e8dc; box-shadow: 0 4px 0 #d8c5b6;
+}
+.session-shell .card-board .target-pick__btn[aria-checked="true"] { padding: 6px 8px 0; border-color: var(--card-active); background: #fff5f5; }
+.session-shell .card-board .target-pick__btn[aria-checked="true"] .target-pick__plinth { color: #fff; border-color: var(--card-active); background: var(--card-active); box-shadow: 0 4px 0 #7b1825; }
+.session-shell .card-board .card-role { justify-self: start; max-width: 100%; gap: 6px; white-space: normal; font-size: .875rem; }
+.session-shell .card-board .card-writing-paper,
+.session-shell .pack-board .pack-answer-paper {
+  position: relative; min-width: 0; gap: 10px; padding: 18px 16px 12px;
+  border: 1px solid var(--card-border); border-radius: 8px 8px 18px 18px;
+  background: var(--card-paper); box-shadow: 0 3px 0 #e9dfe0, 0 8px 16px #43131c06;
+}
+.session-shell .card-board .card-writing-paper > .field__label { min-height: 48px; padding-right: 62px; display: flex; align-items: center; font-size: .875rem; }
+.card-writing-paper__object { position: absolute; top: -3px; right: 4px; width: 72px; height: 72px; object-fit: contain; pointer-events: none; }
+.session-shell .card-board .card-writing-paper .q-textarea,
+.session-shell .pack-board .pack-answer-paper .q-textarea {
+  min-height: 104px; height: 112px; padding: 10px 6px; border: 0; border-bottom: 1px solid #d4bfc5;
+  border-radius: 0; color: var(--card-ink); background: repeating-linear-gradient(transparent 0 27px, #eadde0 27px 28px);
+  box-shadow: none; line-height: 28px; font-size: max(16px, 1rem);
+}
+.session-shell .card-board .card-writing-paper .q-textarea:focus,
+.session-shell .pack-board .pack-answer-paper .q-textarea:focus { outline: 2px solid var(--card-active); outline-offset: 3px; }
+.session-shell .card-board .card-writing-paper .field__hint,
+.session-shell .pack-board .pack-answer-paper .field__hint { text-align: right; }
+.session-shell .card-board .card-writing-paper { gap: 6px; padding: 12px; }
+.session-shell .card-board .card-writing-paper > .field__label { min-height: 30px; padding-right: 48px; }
+.session-shell .card-board .card-writing-paper__object { width: 56px; height: 56px; }
+.session-shell .card-board .card-writing-paper .q-textarea { min-height: 72px; height: 80px; padding-block: 6px; }
+.session-shell .card-board .card-writing-paper .field__hint { font-size: .875rem; }
+.session-shell .card-board .td-console-choices { gap: 18px; padding: 12px 8px 14px; min-height: 214px; }
+.session-shell .card-board .td-console-choice {
+  position: relative; isolation: isolate; min-height: 204px; padding: 20px 12px; border: 1px solid #d9bec4; border-radius: 22px;
+  background: var(--card-paper); color: var(--card-ink); box-shadow: 0 4px 0 #ddccd0, 0 12px 20px #43131c09;
+}
+.session-shell .card-board .td-console-choice::before {
+  content: ""; position: absolute; z-index: -1; inset: -3px 4px 2px; border: 1px solid #d9bec4; border-radius: 22px;
+  background: #f0dadd; transform: rotate(-5deg);
+}
+.session-shell .card-board .td-console-choice--truth::before { transform: rotate(5deg); }
+.session-shell .card-board .td-console-choice::after { content: ""; position: absolute; inset: 0; z-index: -1; border-radius: inherit; background: var(--card-paper); }
+.session-shell .card-board .td-console-choice__title { font-size: 1.25rem; }
+.session-shell .card-board .td-console-choice__hint { font-size: .875rem; max-width: 16ch; }
+.td-card-object { display: grid; place-items: center; width: 82px; height: 82px; margin-bottom: 8px; border-radius: 50%; color: #b72132; background: radial-gradient(circle at 35% 25%, #fff6ed, #e9d8c8); box-shadow: inset 0 2px 2px #fff, 0 4px 0 #d4bdad, 0 7px 14px #43131c10; }
+.td-card-object .icon { filter: drop-shadow(0 2px 0 #7c1825); }
+.session-shell .card-board .td-console-response { min-height: 0; }
+.session-shell .card-board .td-console-response .card-writing-paper > .field__label { min-height: 22px; padding-right: 0; }
+.session-shell .card-board .td-console-submit { grid-template-columns: minmax(0, 1fr) minmax(0, 1fr); }
+.session-shell .card-board .td-console-submit > .btn { font-size: .875rem; padding-inline: 10px; }
+.session-shell .card-board .theatre-note {
+  padding: 12px; border: 1px solid var(--card-border); border-radius: 14px;
+  background: var(--card-paper); box-shadow: 0 3px 0 #e7d9dc;
+}
+/* Trois affirmations restent trois vrais champs : le théâtre s'étend dans la page. */
+.session-shell.session-console .conversation-console.card-board--nd_two_truths {
+  --console-question-height: 6.5rem;
+  grid-template-rows: auto var(--console-question-height) auto auto;
+  height: auto; min-height: 0;
+}
+.session-shell.session-console .card-board--nd_two_truths > .console-answer-zone {
+  contain: none; overflow: visible; min-height: 0;
+}
+.session-shell .card-board--nd_two_truths .theatre-backstage { gap: 14px; }
+.session-shell .card-board--nd_two_truths .theatre-backstage > .stack:first-child { gap: 4px; }
+.session-shell .card-board--nd_two_truths .theatre-backstage .q-title { font-size: 1.125rem; }
+.session-shell .card-board--nd_two_truths .theatre-note__input { min-height: 56px; }
+.session-shell .card-board .theatre-note--lie { border-color: var(--card-active); box-shadow: 0 0 0 1px var(--card-active), 0 3px 0 #e7d9dc; }
+.theatre-note__number { display: grid; place-items: center; width: 28px; height: 28px; flex: none; color: #8b5360; background: #f4e7e9; border-radius: 50%; font-size: .875rem; font-weight: 700; }
+.session-shell .card-board .theatre-note__input { margin-top: 8px; border-color: #e5d5da; background: #fffcfa; font-size: max(16px, 1rem); }
+.theatre-note__foot { display: flex; flex-wrap: wrap; align-items: center; justify-content: space-between; gap: 4px 12px; }
+.theatre-lie-choice { display: inline-flex; align-items: center; gap: 7px; min-height: 44px; font-size: .875rem; cursor: pointer; }
+.theatre-lie-choice input { width: 20px; height: 20px; flex: none; accent-color: #b72132; }
+.session-shell .card-board .theatre-info { background: #f4e7e9; color: #722634; font-size: .875rem; }
+.session-shell .card-board .ready-pair { gap: 8px; }
+.session-shell .card-board .ready-pair__item { flex: 1; min-width: 0; color: #6b4550; border: 1px solid #e4d3d8; background: #fffaf9; font-size: .875rem; }
+.session-shell .card-board .ready-pair__item.is-done { color: #7b1825; border-color: #d8afb9; background: #f6e7eb; }
+.session-shell .card-board .ready-pair__item .icon { color: inherit; }
+.session-shell .card-board :is(.theatre-tag, .td-done__state) { background: #f4e7e9; color: #722634; }
+.session-shell .card-board .theatre-stamp { border-color: #bf929f; color: #6d3341; }
+.session-shell .card-board :is(.theatre-stamp--lie, .is-success) { color: #b72132; border-color: #b72132; }
+.session-shell .card-board .theatre-scene { padding: 12px 6px; border: 0; border-radius: 18px; background: #f4e7e9; }
+.session-shell .card-board .theatre-card { border-color: var(--card-border); color: var(--card-ink); background: var(--card-paper); font-size: .9375rem; line-height: 1.5; }
+.session-shell .card-board .theatre-card--pick.is-picked { border-color: var(--card-active); box-shadow: 0 0 0 1px var(--card-active); }
+.session-shell .card-board .theatre-card--pick.is-picked .theatre-card__n { background: var(--card-active); }
+.session-shell .reading-games .q-answer,
+.session-shell .reading-games .q-answer--me {
+  border: 1px solid #decbd0; background: #fff8f8; color: #43131c;
+  box-shadow: 0 3px 0 #e9dfe2;
+}
+.session-shell .card-board .theatre-card--reveal { background: #fff8f8; }
+.session-shell .card-board .reveal__grid { gap: 12px; }
+.session-shell .card-board .reveal__tile { display: flex; flex-direction: column; align-items: center; gap: 12px; padding: 16px 12px; border: 1px solid var(--card-border); border-radius: 20px; background: var(--card-paper); color: var(--card-ink); box-shadow: 0 3px 0 #e6d9dc; }
+.session-shell .card-board .reveal__tile.is-chosen { border-color: #bd8b98; background: #fff8f8; }
+.session-shell .card-board .reveal__stamp { background: #f3dce1; color: #6d2636; }
+.session-shell .card-board :is(.reveal__envelope, .reveal__ribbon) { border: 1px solid var(--card-border); border-radius: 12px; background: #fff8f8; box-shadow: 0 3px 0 #e5d6d9; }
+.session-shell .card-board .reveal__envelope::before { border-color: #e1ced4; }
+.session-shell .pack-board .q-card__head { min-height: 48px; position: relative; padding-right: 60px; }
+.session-shell .pack-board .pack-question__object { position: absolute; top: -14px; right: -4px; width: 68px; height: 68px; object-fit: contain; }
+.session-shell .pack-board .pack-answer-paper__heading { display: flex; align-items: center; justify-content: space-between; gap: 12px; color: var(--card-ink); }
+.session-shell .pack-board .pack-answer-form { gap: 18px; }
+.session-shell .pack-board .pack-answer-form__content { gap: 12px; }
+.session-shell .questionnaire-sheet .questionnaire-items { gap: 16px; }
+.session-shell .questionnaire-sheet .q-item { padding: 18px 14px; border: 1px solid var(--card-border); border-radius: 18px; background: var(--card-paper); box-shadow: 0 3px 0 #e7dadd; }
+.session-shell .questionnaire-sheet .q-item__text { color: var(--card-ink); padding-inline: 5px; }
+.session-shell .questionnaire-sheet .q-choice { min-height: 48px; border-color: #ddcbd1; background: #fffdfb; }
+.session-shell .questionnaire-sheet .q-choice[aria-checked="true"] { border-color: var(--card-active); background: #fae9ed; color: var(--card-ink); }
+.session-shell .questionnaire-sheet .q-check__row { padding: 12px 10px; border-radius: 12px; background: #fffaf8; }
+@media (max-width: 360px) {
+  .session-shell .card-board .pick { gap: 10px; }
+  .session-shell .card-board .pick .q-choice { padding-inline: 10px; }
+  .session-shell .card-board .pick .q-choice[aria-checked="true"] { padding-inline: 10px; }
+  .session-shell .card-board .td-console-choices { gap: 14px; padding-inline: 6px; }
+  .session-shell .card-board .td-console-choice { padding-inline: 8px; }
+  .session-shell .card-board .target-pick { gap: 8px; }
+  .target-pick__medallion { width: 88px; height: 102px; }
+}
+@media (prefers-reduced-motion: reduce) {
+  .session-shell .card-board :is(.q-choice, .td-console-choice, .theatre-card) { animation: none; transition: none; }
+}
