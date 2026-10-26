@@ -76,17 +76,19 @@ export function AudioAnswer({ sessionId, round, disabled, onSend, onBusy }: {
     } catch(e) { if(alive.current) setError(e instanceof Error ? e.message : 'Envoi impossible. Réessaie.'); }
     finally { lock.current=false; if(alive.current) {setSending(false);onBusy(false);} }
   }
+  // Une dépendance non activée reste une indication brève, sans promettre un service de conservation opérationnel.
+  if (!enabled) return <p className="audio-answer t-meta"><Icon name="mic" size={16} /> L’audio n’est pas encore disponible. Tu peux écrire ta réponse.</p>;
   return <div className="audio-answer stack stack--2">
     <p className="t-small strong"><Icon name="mic" size={18} /> Ou une réponse audio</p>
     <p className="t-meta">30 secondes maximum. Privée avant la révélation, effacée après 24 h. Jamais ajoutée au coffre ni à la discussion.</p>
-    {!enabled ? <p className="t-meta">L’audio n’est pas encore disponible. Tu peux écrire ta réponse.</p> : <>
+    <>
       <button type="button" className="btn btn--secondary" disabled={sending || (disabled && !recording)} onClick={()=>recording?stop():void start()}>
         <Icon name={recording?'stop':'mic'} />{recording?`Arrêter · ${seconds}/30 s`:url?'Réenregistrer':'Enregistrer un audio'}
       </button>
       {url && !recording && <><audio controls src={url} preload="metadata" aria-label="Écouter mon brouillon audio" />
         <div className="action-pair"><button type="button" className="btn btn--secondary" disabled={sending || disabled} onClick={()=>void send('private')}>Valider pour moi</button>
           <button type="button" className="btn" disabled={sending || disabled} onClick={()=>void send('share')}>Valider et partager</button></div></>}
-    </>}
+    </>
     {error && <Alert>{error}</Alert>}
   </div>;
 }

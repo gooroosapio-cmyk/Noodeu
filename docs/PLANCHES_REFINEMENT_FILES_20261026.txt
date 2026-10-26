@@ -10,6 +10,7 @@ public/assets/original/refinement3d/truths-mask.webp
 src/duo/Chat.tsx
 src/duo/InviteScreens.tsx
 src/game/SessionScreen.tsx
+src/game/audio/AudioAnswer.tsx
 src/game/board/BoardGame.tsx
 src/game/board/ConversationGames.tsx
 src/game/board/MiniGames.tsx
