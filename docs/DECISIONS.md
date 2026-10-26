@@ -433,3 +433,15 @@ Migration `20261027000300_multi_duos.sql` (fichier à coller : `docs/sql_editeur
   ligne une par une et vérifiées (pack_draws, enveloppes du tirage avec saut des questions supprimées, 14 packs en ordre
   aléatoire, RND1 mixte, question horaire, normalisation Petit bac, validation navale). `20261030000100` (espace duo :
   bucket et règles de stockage) et `20261030000200` (audio) restent non appliquées.
+
+## Écrans de jeu d'après les planches (26/10/2026)
+
+- Tous les écrans de partie suivent les planches : en-tête « ⌄ réduire · titre · ? », bandeau des deux joueurs (score,
+  objectif ou présence), scène illustrée, cartes crème, boutons vert canard. Les menus (accueil, bibliothèque, réglages)
+  gardent le thème cerise.
+- « ? » ouvre le menu de la partie : règles, options, pause, quitter. « Réduire » garde la partie ouverte.
+- Décors repris des planches fournies par le propriétaire, uniquement des zones sans texte ni interface
+  (`public/assets/scenes`, voir PROVENANCE.json) ; les plateaux dont l'état varie (dé, lettres, pions, navires)
+  restent dessinés par l'application.
+- Choix illustrés (✓ / ✗) pour Je n'ai jamais et D'accord ou pas, portraits pour Qui de nous deux, clavier AZERTY au
+  Pendu, plateau crème et pions corail / vert au Morpion, océan sombre pour la Bataille navale.

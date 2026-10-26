@@ -172,7 +172,9 @@ function SealedForm({ card, me, partner, players, busy, play }: { card: J; me: P
         <div className={pickClass(m)} role="radiogroup" aria-label={t("conv.choose")}>
           {(card.options ?? []).map((o: J) => (
             <button key={o.id} type="button" role="radio" aria-checked={choice === o.id} className="q-choice" disabled={busy} onClick={() => setChoice(o.id)}>
-              <span className="q-choice__dot" aria-hidden="true" />{o.text}
+              {m === "nd_never" || m === "nd_opinion"
+                ? <span className={`pick-icon pick-icon--${o.id === "experienced" || o.id === "agree" ? "yes" : "no"}`} aria-hidden="true"><Icon name={o.id === "experienced" || o.id === "agree" ? "check" : "close"} size={26} /></span>
+                : <span className="q-choice__dot" aria-hidden="true" />}{o.text}
             </button>
           ))}
         </div>

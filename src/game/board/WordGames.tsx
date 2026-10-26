@@ -16,7 +16,8 @@ export const WORD_MECHS = ["nd_hangman", "nd_categories_stop", "nd_name_three_ca
 export const isWordMech = (m?: string) => Boolean(m && WORD_MECHS.includes(m));
 const PREMIUM = "/assets/premium";
 const KNOWN = ["repeated", "too_early", "fields_missing", "time_up", "stale_draft", "call_required", "waiting_ack", "correction_pending", "seen", "invalid_move"];
-const LETTERS = "ABCDEFGHIJKLMNOPQRSTUVWXYZ".split("");
+// Clavier AZERTY, comme sur les planches de jeu.
+const LETTERS = "AZERTYUIOPQSDFGHJKLMWXCVBN".split("");
 
 // ---------------------------------------------------------------------------
 // Heure du serveur : décalage mesuré à chaque réponse (info.now), utilisé pour toutes les échéances.

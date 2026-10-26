@@ -62,7 +62,7 @@ export function ChatLauncher({ onOpen, withNav = true }: { onOpen: () => void; w
         };
         // Une grille dense peut ne laisser aucune place parmi quatre positions fixes.
         // On cherche le bord libre sur toute la hauteur, sans dock ni espace fixe ajouté.
-        const controls = Array.from(document.querySelectorAll('main a, main button, main input, main select, main textarea, main label, main img, .session-toolbar a, .session-toolbar button')).filter((el) => el !== button).map((el) => clip(el.getBoundingClientRect(), el.parentElement)).filter((r) => r.width && r.height);
+        const controls = Array.from(document.querySelectorAll('main a, main button, main input, main select, main textarea, main label, main img, .session-toolbar a, .session-toolbar button, .game-head a, .game-head button')).filter((el) => el !== button).map((el) => clip(el.getBoundingClientRect(), el.parentElement)).filter((r) => r.width && r.height);
         const textRects: DOMRect[] = [];
         for (const region of [main, header]) {
           if (!region) continue;

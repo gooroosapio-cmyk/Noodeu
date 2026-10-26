@@ -32,7 +32,7 @@ try {
     await page.route('**/*', route => new URL(route.request().url()).origin === new URL(BASE).origin ? route.continue() : route.abort());
     await setup(page, { ...duo, notifications: [], state });
     await page.goto(`${BASE}/partie/${SESSION}`, { waitUntil: 'networkidle' });
-    await page.locator('.session-toolbar').waitFor();
+    await page.locator('.game-head').waitFor();
     await page.evaluate(async () => { await document.fonts.ready; await new Promise(r => requestAnimationFrame(() => requestAnimationFrame(r))); });
     assert.equal(await page.evaluate(() => document.documentElement.scrollWidth > innerWidth), false);
     await page.screenshot({ path: `${OUT}/${name}.png` });

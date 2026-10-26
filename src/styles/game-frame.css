@@ -1,0 +1,190 @@
+/* Écrans de jeu d'après les planches cibles du 26/10/2026. Les menus (accueil, bibliothèque, réglages) gardent le
+   thème cerise ; seuls les écrans de partie passent au vert canard des planches. */
+.session-shell {
+  --g-teal: #1E6B5C;
+  --g-teal-down: #164F44;
+  --g-teal-soft: #E3F1EC;
+  --g-cream: #FBF7F1;
+  --g-ink: #1F2A2A;
+  --g-me: #E8735A;
+  --g-them: #A68BDF;
+  --c-accent: var(--g-teal);
+  --c-accent-down: var(--g-teal-down);
+  --c-accent-text: var(--g-teal-down);
+  --c-accent-soft: var(--g-teal-soft);
+  --c-select: var(--g-teal);
+  --c-focus: var(--g-teal-down);
+  --c-lavender: #EEE8F7;
+  background: #F6F1EA;
+  color: var(--g-ink);
+}
+
+/* En-tête : réduire · titre · aide. */
+.game-head {
+  display: grid; grid-template-columns: 48px 1fr 48px; align-items: center; gap: 8px;
+  width: min(100%, 760px); margin-inline: auto; padding: max(10px, env(safe-area-inset-top)) 16px 6px;
+}
+.game-head__btn {
+  display: grid; place-items: center; width: 44px; height: 44px; border-radius: 14px; border: 1px solid #E7DED3;
+  background: var(--g-cream); color: var(--g-ink); cursor: pointer; text-decoration: none;
+  box-shadow: 0 2px 6px rgb(60 45 30 / 8%);
+}
+.game-head__btn:focus-visible { outline: 3px solid var(--g-teal); outline-offset: 2px; }
+.game-head__title { margin: 0; text-align: center; font: 800 1.25rem/1.25 var(--f-heading); color: var(--g-ink); overflow-wrap: anywhere; }
+.session-shell:has(.chat-launcher[data-header-slot="true"]) .game-head { padding-right: 16px; }
+
+/* Bandeau des joueurs. */
+.game-players {
+  display: grid; grid-template-columns: 1fr auto 1fr; align-items: center; gap: 8px;
+  padding: 10px 14px; border-radius: 20px; background: var(--g-cream); border: 1px solid #ECE3D8;
+  box-shadow: 0 4px 14px rgb(60 45 30 / 7%);
+}
+.game-players__who { display: flex; align-items: center; gap: 10px; min-width: 0; }
+.game-players__who:last-child { justify-content: flex-end; flex-direction: row-reverse; text-align: right; }
+.game-players__avatar {
+  flex: none; display: grid; place-items: center; width: 42px; height: 42px; border-radius: 50%;
+  background: var(--g-them); color: #fff; font: 800 1.125rem/1 var(--f-heading);
+}
+.game-players__who.is-me .game-players__avatar { background: var(--g-me); }
+.game-players__text { display: grid; min-width: 0; }
+.game-players__name { font: 700 .875rem/1.2 var(--f-heading); overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+.game-players__score { font: 800 1.375rem/1.1 var(--f-heading); color: var(--g-ink); }
+.game-players__score small { font: 500 .6875rem/1 var(--f-body); color: #6E6A66; }
+.game-players__state { font: 500 .75rem/1.3 var(--f-body); color: #7A746E; display: inline-flex; align-items: center; gap: 5px; }
+.game-players__state::before { content: ""; width: 8px; height: 8px; border-radius: 50%; background: #B9B2AA; }
+.game-players__state.is-here::before { background: #2E9B6E; }
+.game-players__sep { width: 1px; height: 32px; background: #DDD3C7; justify-self: center; }
+.game-players__goal {
+  display: grid; justify-items: center; width: 54px; height: 54px; align-content: center; border-radius: 50%;
+  background: #F8E7A7; color: var(--g-ink); box-shadow: inset 0 -3px 0 rgb(0 0 0 / 6%);
+}
+.game-players__goal small { font: 600 .625rem/1 var(--f-body); }
+.game-players__goal strong { font: 800 1.125rem/1.1 var(--f-heading); }
+
+/* Scène illustrée. */
+.game-scene { position: relative; border-radius: 22px; overflow: hidden; flex: none; }
+.game-scene--photo { height: clamp(120px, 20dvh, 180px); box-shadow: 0 6px 18px rgb(60 45 30 / 10%); }
+.game-scene--photo img { width: 100%; height: 100%; object-fit: cover; display: block; }
+.game-scene--object {
+  display: grid; place-items: center; height: clamp(104px, 16dvh, 150px);
+  background: radial-gradient(120% 90% at 50% 100%, color-mix(in srgb, var(--u-tint, #EDE3D5) 70%, #fff), color-mix(in srgb, var(--u-tint, #EDE3D5) 35%, #F6F1EA));
+}
+.game-scene--object img { height: 88%; width: auto; filter: drop-shadow(0 10px 14px rgb(60 40 30 / 18%)); }
+.session-console .stage .stage__decor { display: none; }
+
+/* Cartes, choix et boutons dans le style des planches. */
+.session-console .q-card, .session-console .play-card, .session-console .console-question > .q-card {
+  background: var(--g-cream); border: 1px solid #ECE3D8; border-radius: 22px; box-shadow: 0 6px 18px rgb(60 45 30 / 8%);
+}
+.session-console .t-question { font-family: var(--f-heading); font-weight: 800; color: var(--g-ink); text-align: center; }
+.session-shell .btn:not(.btn--quiet):not(.btn--secondary):not(.btn--danger):not(.btn--danger-solid) {
+  border-radius: 16px; min-height: 52px; font-size: 1rem; box-shadow: 0 3px 0 var(--g-teal-down);
+}
+.session-shell .btn--secondary { border-radius: 16px; min-height: 48px; color: var(--g-ink); border-color: #E2D8CC; background: var(--g-cream); }
+.session-shell .q-choice {
+  border-radius: 18px; border-color: #E2D8CC; background: var(--g-cream); min-height: 52px;
+}
+.session-shell .q-choice[aria-checked="true"] { border-color: var(--g-teal); background: var(--g-teal-soft); }
+.session-shell .q-choice[aria-checked="true"] .q-choice__dot { border-color: var(--g-teal); }
+.session-shell .chat-launcher { background: var(--g-teal); color: #fff; }
+.session-shell .nd-chip { background: #F3ECE2; color: var(--g-ink); }
+.session-shell .input, .session-shell .q-textarea { border-radius: 16px; border-color: #D9CEC1; background: #fff; }
+.session-shell .input:focus, .session-shell .q-textarea:focus { border-color: var(--g-teal); outline: 2px solid color-mix(in srgb, var(--g-teal) 30%, transparent); }
+/* Le bandeau affiche déjà les scores : pas de doublon dans le plateau. */
+.session-console .series-score, .session-console .mini-scores { display: none; }
+
+/* Menu « ? ». */
+.game-menu { list-style: none; margin: 0; padding: 0; display: grid; gap: 8px; }
+.game-menu__item {
+  display: grid; grid-template-columns: 24px 1fr 20px; align-items: center; gap: 12px; width: 100%; min-height: 52px;
+  padding: 10px 14px; border-radius: 16px; border: 1px solid #E7DED3; background: var(--g-cream, #FBF7F1);
+  font: 700 .9375rem/1.2 var(--f-heading); color: var(--g-ink, #1F2A2A); text-align: left; cursor: pointer;
+}
+.game-menu__item:disabled { opacity: .5; cursor: default; }
+.game-menu__item--quit { color: #A73545; }
+
+@media (max-width: 360px) {
+  .game-players { padding: 8px 10px; }
+  .game-players__avatar { width: 36px; height: 36px; }
+  .game-players__score { font-size: 1.125rem; }
+}
+
+/* Choix à poids égal, grands et illustrés (Je n'ai jamais, D'accord ou pas, Tu préfères). */
+.session-console .reading-answer-form__content, .session-console .pick { width: 100%; }
+.session-console form .btn { width: 100%; }
+.session-console .pick--stamps .q-choice, .session-console .pick--bubbles .q-choice {
+  display: grid; justify-items: center; align-content: center; gap: 10px; min-height: 132px; padding: 16px 10px;
+  border-radius: 22px; border: 1.5px solid #E2D8CC; border-style: solid; background: var(--g-cream);
+  font: 800 1rem/1.25 var(--f-heading); color: var(--g-ink); box-shadow: 0 4px 12px rgb(60 45 30 / 7%);
+}
+.session-console .pick--stamps .q-choice[aria-checked="true"], .session-console .pick--bubbles .q-choice[aria-checked="true"] {
+  border: 2.5px solid var(--g-teal); background: var(--g-teal-soft);
+}
+.pick-icon { display: grid; place-items: center; width: 58px; height: 58px; border-radius: 50%; box-shadow: inset 0 -4px 0 rgb(0 0 0 / 10%), 0 4px 10px rgb(0 0 0 / 10%); }
+.pick-icon--yes { background: radial-gradient(circle at 35% 30%, #7FD3B0, #2E9B6E); color: #fff; }
+.pick-icon--no { background: radial-gradient(circle at 35% 30%, #FFC3A8, #EE7A5B); color: #fff; }
+.pick-icon .icon { width: 28px; height: 28px; }
+.session-console .pick--doors .q-choice { border-radius: 80px 80px 22px 22px; background: linear-gradient(180deg, #F3E9FB, var(--g-cream) 60%); font-weight: 700; }
+.session-console .pick--doors .q-choice[aria-checked="true"] { border: 2.5px solid #8B6CD8; background: linear-gradient(180deg, #E5D9FA, #F8F3FF 70%); }
+/* Qui de nous deux : portraits dans des cadres dorés. */
+.session-console .target-pick { display: grid; grid-template-columns: 1fr 1fr; gap: 14px; }
+.session-console .target-pick__btn {
+  display: grid; justify-items: center; gap: 8px; padding: 14px 8px; border-radius: 999px 999px 24px 24px;
+  border: 3px solid #E6C77A; background: radial-gradient(circle at 50% 35%, #F7EEFF, #E9DCF8); font: 800 .9375rem/1.2 var(--f-heading);
+}
+.session-console .target-pick__btn[aria-checked="true"] { border-color: var(--g-teal); box-shadow: 0 0 0 4px var(--g-teal-soft); }
+.session-console .target-pick__btn .avatar { width: 84px !important; height: 84px !important; font-size: 2rem; }
+
+/* Dé chanceux : le compteur double le bandeau ; plateau en velours. */
+.session-console .pig-counters, .session-console .pig-counter { display: none; }
+.session-console .pig-tray, .session-console .tray {
+  background: radial-gradient(circle at 50% 45%, #7A2440, #4E1328 75%); border: 10px solid #F3E6D2; border-radius: 34px;
+  box-shadow: 0 10px 24px rgb(60 30 30 / 22%), inset 0 6px 18px rgb(0 0 0 / 35%);
+}
+
+/* Pendu : tuiles de lettres et clavier AZERTY (10 colonnes). */
+.session-console .hm-slots { display: flex; flex-wrap: wrap; justify-content: center; gap: 6px; }
+.session-console .hm-slot {
+  display: grid; place-items: center; min-width: 40px; height: 52px; padding: 0 4px; border-radius: 12px; border: 0;
+  background: #F1EBDF; box-shadow: inset 0 -3px 0 #DCD2C2; font: 800 1.5rem/1 var(--f-heading); color: var(--g-ink);
+}
+.session-console .hm-slot--on { background: #E5F1E9; box-shadow: inset 0 -3px 0 #BFD9C8; color: var(--g-teal-down); }
+.session-console .hm-keys { grid-template-columns: repeat(10, minmax(0, 1fr)); gap: 5px; }
+.session-console .hm-key { min-height: 46px; padding: 0; border-radius: 10px; border: 1px solid #E2D8CC; background: #fff; box-shadow: 0 2px 0 #E2D8CC; font-size: 1.0625rem; }
+.session-console .hm-key--hit { background: var(--g-teal); color: #fff; border-color: transparent; box-shadow: 0 2px 0 var(--g-teal-down); }
+.session-console .hm-key--miss { background: #EDE7DF; color: #A69C90; }
+.session-console .stage--M12 .btn:not(.btn--quiet):not(.btn--secondary):not(:disabled) { background: #5B1F3A; box-shadow: 0 3px 0 #3A1024; }
+.session-console .pig-tray__die img { filter: drop-shadow(0 12px 10px rgb(0 0 0 / 35%)); }
+
+/* Le cadre (bandeau + scène) prend de la hauteur : la console défile avec la page au lieu de rogner les choix. */
+.session-console .console-round { height: auto; min-height: 0; grid-template-rows: auto auto auto auto; }
+.session-console .conversation-console.reading-games > .console-answer-zone { contain: none; }
+.session-console .console-answer-zone { overflow: visible; }
+.session-console .reading-games .reading-answer-form { height: auto; grid-template-rows: auto auto; }
+.session-console .reading-answer-form__content { overflow: visible; display: block; }
+.session-console .reading-answer-form__content > * + * { margin-top: 12px; }
+.session-shell.session-console .question-reading.q-card { height: auto; min-height: 7.5rem; max-height: 42dvh; }
+.session-console .console-question { height: auto; }
+
+/* Morpion : plateau crème, pièces posées. */
+.session-console .ttt { background: #EFE5D6; border-radius: 26px; padding: 14px; gap: 10px; box-shadow: 0 12px 26px rgb(60 45 30 / 16%), inset 0 -6px 0 #DDCFBC; }
+.session-console .ttt__cell { background: #F8F2E8; border: 0; border-radius: 16px; box-shadow: inset 0 3px 6px rgb(60 45 30 / 12%); }
+/* Bataille navale : océan sombre, cases claires au tracé blanc. */
+.session-console .naval { background: #17595E; padding: 6px; border-radius: 16px; gap: 1px; box-shadow: 0 10px 24px rgb(20 60 60 / 25%); }
+.session-console .naval__head { color: #DDF0EC; font-weight: 700; }
+.session-console .naval__cell { background: #2B7B7E; border: 1px solid rgb(255 255 255 / 22%); border-radius: 3px; }
+.session-console .naval__cell--ship { background: #5D8C88; }
+.session-console .naval__cell--aim { background: #FFD66B; border: 2px solid #fff; }
+/* Pierre, feuille, ciseaux : tuiles crème, choix encadré corail. */
+.session-console .rps__choice { border-radius: 22px; background: var(--g-cream); border: 1.5px solid #E2D8CC; }
+.session-console .rps__choice[aria-checked="true"] { border: 2.5px solid var(--g-me); background: #FFF3EE; }
+.session-console .reading-games .reading-answer-form, .session-console .console-answer-form { grid-template-columns: minmax(0, 1fr); width: 100%; }
+.session-console .stage--M01 .ttt { background: #EFE5D6; box-shadow: 0 12px 26px rgb(60 45 30 / 16%), inset 0 -6px 0 #DDCFBC; }
+.session-console .stage--M01 .ttt__cell { background: #F8F2E8; box-shadow: inset 0 3px 6px rgb(60 45 30 / 12%); }
+/* Pions des planches : X corail, O vert. */
+.session-console .ttt__cell img[src*="cross"] { filter: hue-rotate(150deg) saturate(.75) brightness(1.15) drop-shadow(0 4px 4px rgb(0 0 0 / 18%)); }
+.session-console .ttt__cell img[src*="ring"] { filter: hue-rotate(140deg) saturate(.8) brightness(.8) drop-shadow(0 4px 4px rgb(0 0 0 / 18%)); }
+.session-shell.session-console .stage .pb-stop .btn:not(:disabled) { background: var(--g-teal); box-shadow: 0 3px 0 var(--g-teal-down); }
+/* Accents des plateaux alignés sur les planches : vert canard, prune pour le Dé, violet pour Pierre-feuille-ciseaux. */
+.session-console .astra-board:not(.astra-board--pig):not(.astra-board--rps) { --board-accent: var(--g-teal); --board-ink: var(--g-teal-down); }
+.session-console .astra-board--pig { --board-accent: #5B1F3A; --board-ink: #3A1024; }

@@ -20,7 +20,7 @@ async function make(state, size = { width: 390, height: 844 }, zoom = 1) {
   await page.route('**/*', route => new URL(route.request().url()).origin === new URL(BASE).origin ? route.continue() : route.abort());
   await setup(page, { ...duo, notifications: [], state, open: { id: SESSION, game_id: state.session.game_id, status: state.session.status, title: state.game.title } });
   await page.goto(`${BASE}/partie/${SESSION}`);
-  await page.locator('.session-toolbar').waitFor();
+  await page.locator('.game-head').waitFor();
   if (zoom !== 1) await page.addStyleTag({ content: `html { font-size: ${zoom * 100}%; }` });
   return { page, context, errors };
 }
