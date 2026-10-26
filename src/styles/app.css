@@ -1419,3 +1419,12 @@ html.reduced-motion .page-loading__logo { animation:none; }
 /* La réserve défile avec le contenu : aucune bande opaque ou marge fixe sous la page. */
 .shell > main { margin-bottom: 0; padding-bottom: 88px; scroll-padding-bottom: 88px; }
 .subpage > main, .subpage > .session-with-chat { margin-bottom: 0; padding-bottom: calc(88px + env(safe-area-inset-bottom)); scroll-padding-bottom: 88px; }
+
+/* Le bitmap original bouge à peine ; le contenu et les consoles restent immobiles. */
+body { position: relative; isolation: isolate; background-image: none; }
+body::before { content: ''; position: fixed; inset: -12px; z-index: -1; pointer-events: none;
+  background: center top / cover no-repeat url('/assets/original/backgrounds/app-ivory.webp'); opacity: .8; }
+@media (prefers-reduced-motion: no-preference) {
+  body::before { animation: noodeu-ambient-light 24s ease-in-out infinite alternate; }
+  @keyframes noodeu-ambient-light { from { transform: translate3d(-3px, -2px, 0); } to { transform: translate3d(3px, 2px, 0); } }
+}

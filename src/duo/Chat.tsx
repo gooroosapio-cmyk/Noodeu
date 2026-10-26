@@ -17,38 +17,89 @@ function draftKey(coupleId: string) {
 export function ChatLauncher({ onOpen, withNav = true }: { onOpen: () => void; withNav?: boolean }) {
   const { chatUnread } = useDuo();
   const launcher = useRef<HTMLButtonElement>(null);
-  const [position, setPosition] = useState<{ left: number; top: number }>();
+  const [position, setPosition] = useState<{ left: number; top: number; headerSlot?: boolean }>();
   useEffect(() => {
     let frame = 0;
+    let reserveHeader = false;
     function place() {
       cancelAnimationFrame(frame);
       frame = requestAnimationFrame(() => {
         const button = launcher.current;
         if (!button || document.querySelector('[role="dialog"]')) return;
         const box = button.getBoundingClientRect();
+        const header = document.querySelector('.session-toolbar');
+        const headerPosition = () => {
+          const r = header!.getBoundingClientRect();
+          return { left: Math.min(innerWidth - box.width - 16, r.right - box.width - 12), top: r.top + Math.max(12, parseFloat(getComputedStyle(header!).paddingTop) || 0), headerSlot: true };
+        };
+        if (reserveHeader && header) {
+          const next = headerPosition();
+          setPosition(old => old?.left === next.left && old?.top === next.top && old?.headerSlot ? old : next);
+          return;
+        }
         const edge = Math.max(16, (innerWidth - 632) / 2 + 16);
-        const floor = withNav ? document.querySelector('.nav')?.getBoundingClientRect().top ?? innerHeight : (visualViewport?.height ?? innerHeight);
-        const controls = Array.from(document.querySelectorAll('main a, main button, main input, main select, main textarea')).filter((el) => el !== button).map((el) => el.getBoundingClientRect()).filter((r) => r.width && r.height);
-        const candidates = [16, 84, 152, 220].flatMap((gap) => [
-          { left: innerWidth - edge - box.width, top: floor - box.height - gap },
-          { left: edge, top: floor - box.height - gap },
-        ]).filter((p) => p.top >= 72);
+        const viewportTop = visualViewport?.offsetTop ?? 0;
+        const viewportBottom = viewportTop + (visualViewport?.height ?? innerHeight);
+        const floor = Math.min(viewportBottom, withNav ? document.querySelector('.nav')?.getBoundingClientRect().top ?? viewportBottom : viewportBottom);
+        const main = document.querySelector('main');
+        const ceiling = Math.max(viewportTop + 8, main?.getBoundingClientRect().top ?? 72);
+        const mainRect = main?.getBoundingClientRect();
+        const clip = (r: DOMRect, inMain: boolean) => {
+          if (!inMain || !mainRect || !main || getComputedStyle(main).overflowY === 'visible') return r;
+          const left = Math.max(r.left, mainRect.left), top = Math.max(r.top, mainRect.top);
+          return new DOMRect(left, top, Math.max(0, Math.min(r.right, mainRect.right) - left), Math.max(0, Math.min(r.bottom, mainRect.bottom) - top));
+        };
+        // Une grille dense peut ne laisser aucune place parmi quatre positions fixes.
+        // On cherche le bord libre sur toute la hauteur, sans dock ni espace fixe ajouté.
+        const controls = Array.from(document.querySelectorAll('main a, main button, main input, main select, main textarea, main label, main img, .session-toolbar a, .session-toolbar button')).filter((el) => el !== button).map((el) => clip(el.getBoundingClientRect(), Boolean(main?.contains(el)))).filter((r) => r.width && r.height);
+        const textRects: DOMRect[] = [];
+        for (const region of [main, header]) {
+          if (!region) continue;
+          const walker = document.createTreeWalker(region, NodeFilter.SHOW_TEXT);
+          while (walker.nextNode()) {
+            const node = walker.currentNode;
+            if (!node.textContent?.trim() || node.parentElement?.closest('[aria-hidden="true"], .sr-only')) continue;
+            const range = document.createRange();
+            range.selectNodeContents(node);
+            textRects.push(...Array.from(range.getClientRects()).map(r => clip(r, region === main)).filter((r) => r.width && r.height));
+          }
+        }
+        const candidates: { left: number; top: number }[] = [];
+        for (let top = floor - box.height - 16; top >= ceiling; top -= 4) {
+          candidates.push({ left: innerWidth - edge - box.width, top }, { left: edge, top });
+        }
         if (!candidates.length) candidates.push({ left: edge, top: Math.max(0, floor - box.height - 16) });
-        const overlap = (p: { left: number; top: number }) => controls.reduce((area, r) => area + Math.max(0, Math.min(p.left + box.width + 4, r.right) - Math.max(p.left - 4, r.left)) * Math.max(0, Math.min(p.top + box.height + 4, r.bottom) - Math.max(p.top - 4, r.top)), 0);
-        const best = candidates.reduce((a, b) => overlap(b) < overlap(a) ? b : a);
-        setPosition((old) => old?.left === best.left && old?.top === best.top ? old : best);
+        const area = (p: { left: number; top: number }, rects: DOMRect[]) => rects.reduce((sum, r) => sum + Math.max(0, Math.min(p.left + box.width + 4, r.right) - Math.max(p.left - 4, r.left)) * Math.max(0, Math.min(p.top + box.height + 4, r.bottom) - Math.max(p.top - 4, r.top)), 0);
+        const overlap = (p: { left: number; top: number }) => area(p, controls) * 100 + area(p, textRects);
+        let best = candidates[0], score = overlap(best);
+        for (const candidate of candidates.slice(1)) {
+          if (score === 0) break;
+          const next = overlap(candidate);
+          if (next < score) { best = candidate; score = next; }
+        }
+        // Si le texte agrandi remplit toute la hauteur, une place réelle est réservée
+        // dans la barre de commandes. Aucun recouvrement n'est choisi par défaut.
+        if (score > 0 && header) {
+          reserveHeader = true;
+          setPosition(headerPosition());
+        } else setPosition((old) => old?.left === best.left && old?.top === best.top && !old?.headerSlot ? old : best);
       });
     }
     place();
     window.addEventListener('scroll', place, true);
     window.addEventListener('resize', place);
     visualViewport?.addEventListener('resize', place);
+    visualViewport?.addEventListener('scroll', place);
+    window.addEventListener('focusin', place);
     const observer = new MutationObserver(place);
     observer.observe(document.body, { childList: true, subtree: true });
-    return () => { cancelAnimationFrame(frame); observer.disconnect(); window.removeEventListener('scroll', place, true); window.removeEventListener('resize', place); visualViewport?.removeEventListener('resize', place); };
+    const resize = new ResizeObserver(place);
+    const main = document.querySelector('main');
+    if (main) resize.observe(main);
+    return () => { cancelAnimationFrame(frame); observer.disconnect(); resize.disconnect(); window.removeEventListener('scroll', place, true); window.removeEventListener('resize', place); window.removeEventListener('focusin', place); visualViewport?.removeEventListener('resize', place); visualViewport?.removeEventListener('scroll', place); };
   }, [withNav]);
   return (
-    <button ref={launcher} style={position ? { ...position, right: "auto", bottom: "auto" } : undefined} className={`chat-launcher ${withNav ? "" : "chat-launcher--nonav"}`} onClick={onOpen}
+    <button ref={launcher} data-header-slot={position?.headerSlot || undefined} style={position ? { left: position.left, top: position.top, right: "auto", bottom: "auto" } : undefined} className={`chat-launcher ${withNav ? "" : "chat-launcher--nonav"}`} onClick={onOpen}
       aria-label={chatUnread ? t("chat.openUnread", { n: chatUnread }) : t("chat.open")}>
       <Icon name="chat" size={26} />
       {chatUnread > 0 && <span className="badge-count" aria-hidden="true">{chatUnread > 99 ? "99+" : chatUnread}</span>}

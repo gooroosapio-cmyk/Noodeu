@@ -136,7 +136,7 @@ function PackPlaying({ c, round }: { c: Common; round: QRound }) {
   }
 
   return (
-    <section className="stack stack--5" key={round.round_no}>
+    <section className="pack-playing stack stack--5" key={round.round_no}>
       <div className="q-progress">
         <span className="t-meta">
           {card.set_no ? t("q.pack.set", { s: card.set_no, n: (card.index % card.set_size) + 1, size: card.set_size }) : t("q.pack.card", { n: card.index + 1, count: card.count })}
@@ -147,7 +147,7 @@ function PackPlaying({ c, round }: { c: Common; round: QRound }) {
         <div className="nd-progress__fill" style={{ width: `${(100 * (card.index + 1)) / card.count}%` }} />
       </div>
       <IntensityTransition prev={prevItem ? meta[prevItem] : undefined} cur={meta[card.item.id]} />
-      <article className="q-card">
+      <article className="q-card console-question pack-question" role="region" aria-label="Question du pack" tabIndex={0}>
         <div className="q-card__head">
           {card.item.adult && <span className="nd-chip nd-chip--peach">+18</span>}
           <span className="nd-chip">{card.set_no ? t("q.pack.setChip", { s: card.set_no }) : t("q.pack.cardChip", { n: card.index + 1 })}</span>
@@ -392,7 +392,7 @@ function TestPlaying({ c, round }: { c: Common; round: QRound }) {
   const busy = c.busy || !c.online;
 
   return (
-    <section className="stack stack--5">
+    <section className="questionnaire-playing stack stack--5">
       <div className="q-progress">
         <span className="t-meta">{t("q.test.page", { n: page + 1, total: pages })}</span>
         <span className="t-meta">{t("q.test.answered", { n: answeredCount, total: items.length })}</span>

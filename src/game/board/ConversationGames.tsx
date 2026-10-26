@@ -12,7 +12,7 @@ import { Avatar } from "../../components/Avatar";
 import type { Player, SessionState } from "../../lib/types";
 import { NudgeButton } from "../premium/Nudge";
 import { TwoTruthsReveal, TwoTruthsTheatre, theatreScore } from "../premium/TwoTruthsTheatre";
-import { CHOICE_SCENES, ChoiceReveal, TextReveal, TruthDareDone, TruthDareSeals, WaitTurn, pickClass } from "../premium/ConversationScenes";
+import { CHOICE_SCENES, ChoiceReveal, TextReveal, TruthDareDone, WaitTurn, pickClass } from "../premium/ConversationScenes";
 
 type J = any;
 type Run = (fn: string, args?: Record<string, unknown>) => Promise<{ ok: boolean; error?: string; info?: any }>;
@@ -61,9 +61,9 @@ export function useMoves(c: Common, round: CRound, known: string[] = []) {
 // Éléments communs
 // ---------------------------------------------------------------------------
 export function CardBox({ card, label }: { card: J; label?: string }) {
-  if (card.redacted) return <article className="q-card"><p className="muted">{t("conv.redacted")}</p></article>;
+  if (card.redacted) return <article className="q-card" role="region" aria-label="Carte de jeu" tabIndex={0}><p className="muted">{t("conv.redacted")}</p></article>;
   return (
-    <article className="q-card">
+    <article className="q-card" role="region" aria-label="Question de la manche" tabIndex={0}>
       <div className="q-card__head">
         <span className="row row--wrap" style={{ gap: 6 }}>
           {label && <span className="nd-chip">{label}</span>}
@@ -133,7 +133,7 @@ function SealedForm({ card, me, partner, players, busy, play }: { card: J; me: P
   const ready = textual ? Boolean(text.trim()) : m === "nd_duo_target" ? seat !== null : choice !== null;
   const payload = textual ? { text: text.trim() } : m === "nd_duo_target" ? { seat } : { choice };
   return (
-    <form className="stack stack--4" onSubmit={(e) => { e.preventDefault(); if (ready) void play("lock", payload); }}>
+    <form className="console-answer-form stack stack--4" onSubmit={(e) => { e.preventDefault(); if (ready) void play("lock", payload); }}>
       {role && (
         <p className="nd-chip">{role === "subject" ? t("conv.predict.youSubject") : t("conv.predict.youPredict", { name: nameOf(partner) })}</p>
       )}
@@ -175,27 +175,39 @@ function TruthDare({ st, card, me, partner, busy, play }: { st: SessionState; ca
   const [text, setText] = useState("");
   const active = card.active === me.seat;
   if (!active) {
-    return <WaitTurn st={st} partner={partner} text={t(card.phase === "choice" ? "conv.td.waitChoice" : "conv.td.waitAnswer", { name: nameOf(partner) })} />;
+    return <div className="td-console-wait"><Avatar name={partner?.display_name ?? ""} path={partner?.avatar_path} size={64} /><WaitTurn st={st} partner={partner} text={card.phase === "respond" && card.kind === "dare" ? `${nameOf(partner)} réalise son action…` : t(card.phase === "choice" ? "conv.td.waitChoice" : "conv.td.waitAnswer", { name: nameOf(partner) })} /></div>;
   }
   if (card.phase === "choice") {
-    return <TruthDareSeals busy={busy} onPick={(kind) => void play("choose_kind", { kind })} />;
+    return <div className="td-console-choices" aria-label="Choisir Action ou Vérité">
+      {(["dare", "truth"] as const).map((kind) => <button key={kind} className={`td-console-choice td-console-choice--${kind}`} disabled={busy} onClick={() => void play("choose_kind", { kind })}>
+        <img src={`/assets/original/boards3d/${kind === "dare" ? "action" : "truth"}.webp`} width={104} height={104} alt="" />
+        <span className="td-console-choice__title">{kind === "dare" ? "Action" : "Vérité"}</span>
+        <span className="td-console-choice__hint">{kind === "dare" ? "Un défi à vivre" : "Une réponse à partager"}</span>
+      </button>)}
+    </div>;
   }
   return (
-    <div className="stack stack--4">
+    <form className="console-answer-form td-console-response stack stack--4" onSubmit={(event) => {
+      event.preventDefault();
+      if (busy || (card.kind === "truth" && !text.trim())) return;
+      void play(card.kind === "truth" ? "submit_text" : "submit_action", card.kind === "truth" ? { text: text.trim() } : { status: "done", ...(text.trim() ? { text: text.trim() } : {}) });
+    }}>
       <div className="field">
         <label className="field__label" htmlFor="td-text">{card.kind === "truth" ? t("conv.td.answer") : t("conv.td.shareOptional")}</label>
         <textarea id="td-text" className="input q-textarea" maxLength={MAX} value={text} disabled={busy} onChange={(e) => setText(e.target.value)} />
-        <span className="field__hint">{card.kind === "truth" ? t("conv.textHint", { n: MAX - text.length }) : t("conv.td.noProof")}</span>
+        <span className="field__hint">{card.kind === "truth" ? t("conv.textHint", { n: MAX - text.length }) : "Aucune preuve demandée. Partage seulement si tu le souhaites."}</span>
       </div>
+      <div className="td-console-submit">
       {card.kind === "truth" ? (
-        <button className="btn" disabled={busy || !text.trim()} onClick={() => void play("submit_text", { text: text.trim() })}><Icon name="send" size={18} />{t("conv.td.send")}</button>
+        <button className="btn" type="submit" disabled={busy || !text.trim()}><Icon name="send" size={18} />{t("conv.td.send")}</button>
       ) : (
-        <button className="btn" disabled={busy} onClick={() => void play("submit_action", { status: "done", ...(text.trim() ? { text: text.trim() } : {}) })}>
+        <button className="btn" type="submit" disabled={busy}>
           <Icon name="check" size={18} />{t("conv.td.done")}
         </button>
       )}
-      <button className="btn btn--secondary" disabled={busy} onClick={() => void play("replace_card")}><Icon name="refresh" size={18} />{t("conv.td.replace")}</button>
-    </div>
+      <button className="btn btn--secondary" type="button" disabled={busy} onClick={() => void play("replace_card")}><Icon name="refresh" size={18} />{t("conv.td.replace")}</button>
+      </div>
+    </form>
   );
 }
 
@@ -281,7 +293,8 @@ function RoundView({ c, round }: { c: Common; round: CRound }) {
     : m === "nd_predict" ? forWho(players.find((p) => p.seat === card.subject), "conv.predict.subjectIsMe", "conv.predict.subjectIs") : undefined;
 
   return (
-    <section className="stack stack--5" key={round.round_no}>
+    <section className={`console-round conversation-console${m === "nd_truth_dare" ? " truth-dare-console" : ""}`} key={round.round_no} data-phase={card.done ? "reveal" : card.phase ?? (card.locked?.[me.seat] ? "waiting" : "answer")}>
+      <div className="console-progress">
       <div className="q-progress">
         <span className="t-meta">{t("conv.round", { n: round.round_no, total })}</span>
         {m === "nd_truth_dare" && <span className="t-meta">{forWho(players.find((p) => p.seat === card.active), "conv.td.yourTurn", "conv.td.turnOf")}</span>}
@@ -289,8 +302,16 @@ function RoundView({ c, round }: { c: Common; round: CRound }) {
         {m === "nd_two_truths" && card.mode === "simultaneous" && <span className="nd-chip nd-chip--mint">{card.phase === "write" ? t("tt2.simultaneous") : t("tt2.score", { n: theatreScore(c.st, me.seat), total })}</span>}
       </div>
       <IntensityTransition prev={prevId ? meta[prevId] : undefined} cur={curId ? meta[curId] : undefined} />
-      {(card.text || card.redacted) && <CardBox card={card} label={label} />}
+      </div>
+      <div className="console-question">
+        {(card.text || card.redacted) ? <CardBox card={card} label={label} /> : <article className="q-card" role="region" aria-label="Consigne de la manche" tabIndex={0}>
+          <span className="t-meta">{m === "nd_truth_dare" ? "À chacun son tour" : c.st.game.title}</span>
+          <h2 className="t-question">{m === "nd_truth_dare" ? "Action ou Vérité ?" : m === "nd_two_truths" ? "Deux vérités. Un mensonge." : "À vous de jouer"}</h2>
+          {m === "nd_truth_dare" && <p className="t-small">La carte est tirée après ton choix.</p>}
+        </article>}
+      </div>
 
+      <div className="console-answer-zone" role="region" aria-label="Réponses de la manche" tabIndex={0}>
       {card.done ? (
         <div className="stack stack--4">
           {card.redacted ? <Alert kind="info">{t("conv.interrupted")}</Alert>
@@ -333,17 +354,9 @@ function RoundView({ c, round }: { c: Common; round: CRound }) {
             )
           )}
 
-          <div className="action-bar stack stack--2">
-            <button className="btn" disabled={busy || continued} onClick={() => void after("continue")}>
-              {continued ? t("conv.waitingContinue", { name: nameOf(partner) }) : round.round_no < total ? t("conv.continue") : t("conv.finish")}
-              {!continued && <Icon name="arrow-right" />}
-            </button>
-            {theyContinued && !continued && <p className="t-meta center">{t("conv.partnerContinued", { name: nameOf(partner) })}</p>}
-            {continued && !theyContinued && <NudgeButton st={c.st} partner={partner} />}
-          </div>
         </div>
       ) : m === "nd_truth_dare" ? (
-        <TruthDare st={c.st} card={card} me={me} partner={partner} busy={busy} play={play} />
+        <TruthDare key={`${card.phase}-${card.card_id ?? "choice"}-${card.active}`} st={c.st} card={card} me={me} partner={partner} busy={busy} play={play} />
       ) : m === "nd_two_truths" && card.mode === "simultaneous" ? (
         <TwoTruthsTheatre st={c.st} card={card} priv={round.private} me={me} partner={partner} busy={busy} play={play} />
       ) : m === "nd_two_truths" ? (
@@ -359,10 +372,22 @@ function RoundView({ c, round }: { c: Common; round: CRound }) {
           {partner && card.locked?.[partner.seat] && <p className="t-meta row"><Icon name="check" size={16} />{t("conv.partnerLocked", { name: nameOf(partner) })}</p>}
         </>
       )}
+      </div>
 
+      <div className="console-round-controls">
       {err && <Alert>{err}</Alert>}
-      {!card.done && !card.redacted && LATER_MECHS.has(m) && <LaterButton sessionId={c.st.session.id} round={round.round_no} disabled={!c.online} />}
-      {!card.done && <button className="btn btn--quiet" disabled={busy} onClick={() => void play("skip_round")}>{t("conv.skip")}</button>}
+      {card.done && <div className="action-bar stack stack--2">
+        <button className="btn" disabled={busy || continued} onClick={() => void after("continue")}>
+          {continued ? t("conv.waitingContinue", { name: nameOf(partner) }) : round.round_no < total ? t("conv.continue") : t("conv.finish")}
+          {!continued && <Icon name="arrow-right" />}
+        </button>
+        {theyContinued && !continued && <p className="t-meta center">{t("conv.partnerContinued", { name: nameOf(partner) })}</p>}
+        {continued && !theyContinued && <NudgeButton st={c.st} partner={partner} />}
+      </div>}
+      {!card.done && !card.redacted && card.card_id && LATER_MECHS.has(m) && <LaterButton key={card.card_id} sessionId={c.st.session.id} round={round.round_no} disabled={!c.online} />}
+      {!card.done && <button className="btn btn--quiet" disabled={busy} onClick={() => void play("skip_round")}>{m === "nd_truth_dare" ? card.active === me.seat ? "Passer mon tour" : "Passer cette manche" : t("conv.skip")}</button>}
+      {m === "nd_truth_dare" && !card.done && <p className="td-console-consent">Tu peux refuser ou passer, sans pénalité.</p>}
+      </div>
     </section>
   );
 }

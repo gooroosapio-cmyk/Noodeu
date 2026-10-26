@@ -194,7 +194,7 @@ allScreens.push({ name: "52-N2-001-salon-options", path: `/partie/${SESSION}`, s
 const rebase = (o) => (Array.isArray(o) ? o.map(rebase) : o && typeof o === "object"
   ? ("__rel" in o ? new Date(Date.now() + o.__rel * 1000).toISOString() : Object.fromEntries(Object.entries(o).map(([k, v]) => [k, rebase(v)]))) : o);
 for (const key of Object.keys(fixture("index_c14.json"))) {
-  allScreens.push({ name: `60-${key}`, path: `/partie/${SESSION}`, scenario: { ...duo, intimate: key === "salon-huis-clos" || key === "conv-salon", state: rebase(fixture(`c14-${key}.json`)) } });
+  allScreens.push({ name: `60-${key}`, path: `/partie/${SESSION}`, scenario: { ...duo, intimate: key === "salon-huis-clos" || key === "conv-salon", state: fixture(`c14-${key}.json`) } });
 }
 export { setup, duo, sessionState, SESSION, ME, PARTNER, activeDuo };
 if (!process.env.NOODEU_FIXTURES_ONLY) {
@@ -212,7 +212,8 @@ for (const size of sizes) {
     const page = await ctx.newPage();
     const errors = [];
     page.on("pageerror", (e) => errors.push(e.message));
-    await setup(page, s.scenario);
+    // Chaque capture commence avec la même durée restante, même après une longue matrice.
+    await setup(page, rebase(s.scenario));
     await page.goto(BASE + s.path, { waitUntil: "networkidle" });
     await page.locator("#root > *").first().waitFor();
     if (zoom !== 1) await page.addStyleTag({ content: `html { font-size: ${zoom * 100}%; }` });

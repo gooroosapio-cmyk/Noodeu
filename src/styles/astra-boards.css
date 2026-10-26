@@ -1,0 +1,145 @@
+/* Plateaux : état serveur, matières tactiles, commandes accessibles. */
+.astra-board { --board-accent:#087f88; --board-soft:#e3f7f5; --board-ink:#174c55; min-width:0; gap:14px; }
+.astra-board--morpion { --board-accent:#087f88; --board-soft:#dff5f4; --board-ink:#11555a; }
+.astra-board--dots { --board-accent:#4a7842; --board-soft:#eaf5df; --board-ink:#365331; }
+.astra-board--naval { --board-accent:#1674ab; --board-soft:#e3f3ff; --board-ink:#15486a; }
+.astra-board--rps { --board-accent:#7650ba; --board-soft:#f0e9ff; --board-ink:#503177; }
+.astra-board--pig { --board-accent:#b64420; --board-soft:#fff0d4; --board-ink:#7c391d; }
+.astra-board--hangman { --board-accent:#3f7845; --board-soft:#edf7df; --board-ink:#315938; }
+.astra-board--petitbac { --board-accent:#ac6712; --board-soft:#fff1cc; --board-ink:#704412; }
+.astra-board :is(.t-meta,.t-small) { overflow-wrap:anywhere; }
+.astra-board .t-meta { font-size:.75rem; line-height:1.4; }
+.astra-board .t-small { font-size:.875rem; line-height:1.45; }
+.astra-board :is(button,input,select,summary) { min-height:44px; }
+.astra-board :is(button,input,select,summary):focus-visible { outline:3px solid var(--board-accent); outline-offset:3px; }
+.astra-board .btn:not(.btn--secondary):not(.btn--quiet) { background:var(--board-accent); color:#fff; }
+.astra-board .btn--secondary { border-color:var(--board-accent); color:var(--board-ink); background:var(--board-soft); }
+.astra-board .btn { white-space:normal; overflow-wrap:anywhere; }
+.astra-board .series-score { border-radius:16px; background:var(--board-soft); padding:10px 12px; gap:8px; }
+.astra-board .series-score > div { min-width:0; }
+.astra-board .series-score span { overflow-wrap:anywhere; }
+.astra-board .mini-scores__item { background:var(--board-soft); }
+.astra-board .mini-scores__item--me { border-color:var(--board-accent); }
+.astra-actions { min-height:48px; }
+.astra-actions > .btn { min-height:48px; width:100%; }
+.astra-status { min-height:2.8em; }
+.astra-expiry-retry { padding:12px; border:1px solid var(--board-accent); border-radius:14px; background:var(--board-soft); }
+
+/* Morpion : chaque pièce garde sa place ; le trait ne monte que sur une ligne gagnante publiée. */
+.stage--M01 .astra-ttt,.astra-ttt { position:relative; isolation:isolate; width:min(100%,320px); padding:12px; gap:8px; border-radius:24px; background:linear-gradient(145deg,#ccefeb,#8fc8c5); box-shadow:inset 0 2px 0 #fff9,0 6px 0 #6eaaa7,0 12px 20px #195c6415; }
+.stage--M01 .astra-ttt .ttt__cell,.astra-ttt .ttt__cell { min-width:44px; min-height:44px; border:1px solid #fff; border-radius:16px; background:linear-gradient(145deg,#fffefa,#f4e6d6); box-shadow:inset 0 -4px 0 #ddc9b7; }
+.astra-ttt .ttt__cell img { width:85%; height:85%; object-fit:contain; filter:drop-shadow(0 4px 3px #79362b26); }
+.stage--M01 .astra-ttt .ttt__cell--win,.astra-ttt .ttt__cell--win { background:#fff2ba; box-shadow:inset 0 -4px 0 #dcc269; }
+.astra-ttt__line { position:absolute; inset:12px; width:calc(100% - 24px); height:calc(100% - 24px); z-index:2; pointer-events:none; overflow:visible; }
+.astra-ttt__line line { stroke:#e75052; stroke-width:7; stroke-linecap:round; stroke-dasharray:1; filter:drop-shadow(0 2px 2px #fff9); }
+.astra-ttt__line.is-revealing line { animation:astra-win-line 450ms ease-out both; }
+@keyframes astra-win-line { from { stroke-dashoffset:1; } to { stroke-dashoffset:0; } }
+
+/* Une région locale défilante garde des cibles de 44 px, même à 320 px. */
+.astra-zoom { min-width:0; max-width:100%; }
+.astra-zoom .board-zoom { max-width:100%; min-width:0; padding:6px 3px 12px; border:1px solid color-mix(in srgb,var(--board-accent),white 70%); border-radius:16px; background:var(--board-soft); overscroll-behavior:contain; scroll-padding:6px; }
+.astra-zoom .board-zoom--naval .naval { width:498px; grid-template-columns:18px repeat(10,46px); gap:2px; }
+.astra-zoom .board-zoom--naval .naval__cell { width:46px; height:46px; min-height:46px; }
+.astra-overview { padding:8px; border-radius:16px; background:var(--board-soft); }
+.astra-overview .naval__cell { min-height:0; }
+.astra-board--dots .dots__dot { background:transparent url('/assets/original/boards3d/token.webp') center/contain no-repeat; width:20px; height:20px; filter:drop-shadow(0 2px 1px #36533122); }
+.astra-board--dots .dots__edge--me::after { background:#438344; box-shadow:0 2px 0 #2d5d30; }
+.astra-board--dots .dots__edge--them::after { background:#e28c2d; box-shadow:0 2px 0 #a7611b; }
+.astra-board--dots .dots__box--me { background:#c7e6b2; color:#2e5734; }
+.astra-board--dots .dots__box--them { background:#ffe3b5; color:#754114; }
+
+/* Naval : eau, impact, navire coulé. Seuls les tirs publics colorent la grille adverse. */
+.astra-board--naval .naval__head { color:#174c6d; }
+.astra-board--naval .naval__cell { background:linear-gradient(145deg,#f5fcff,#bfe4f6); border:1px solid #7db4d0; box-shadow:inset 0 1px 0 #fff; border-radius:7px; }
+.astra-board--naval .naval__cell--ship { background:linear-gradient(145deg,#82b3ce,#447b9c); border-color:#315e7a; box-shadow:inset 0 2px 0 #c6e9fc,0 2px 0 #315e7a; }
+.astra-board--naval .naval__cell--sel { outline:2px solid #edb738; outline-offset:-3px; }
+.astra-board--naval .naval__cell--hit { background:#ffdbb8; border-color:#e09554; }
+.astra-board--naval .naval__cell--sunk { background:#f4c6cc; border-color:#aa4058; }
+.astra-board--naval .naval__cell--aim { background:#fff3bc; border:2px solid #b97216; }
+.astra-shot { position:relative; display:block; width:32px; height:32px; border-radius:50%; }
+.astra-shot::before { content:""; position:absolute; inset:0; background:url('/assets/original/boards3d/token.webp') center/contain no-repeat; z-index:-1; }
+.astra-shot--miss { isolation:isolate; }
+.astra-shot--miss::before { filter:grayscale(1) brightness(1.9); }
+.astra-shot--hit { isolation:isolate; }
+.astra-shot--hit::before { filter:hue-rotate(245deg) saturate(1.8); }
+.astra-shot--sunk { isolation:isolate; display:grid; place-items:center; color:#fff; font:bold 21px/1 sans-serif; }
+.astra-shot--sunk::before { filter:hue-rotate(215deg) saturate(1.4) brightness(.8); }
+.astra-shot--target::before { display:none; }
+.astra-shot--target { display:grid; place-items:center; width:30px; height:30px; color:#8e5614; border:2px solid currentColor; font:24px/1 sans-serif; box-shadow:none; }
+.astra-naval-report { min-height:3.3em; padding:10px 12px; border-left:4px solid var(--board-accent); border-radius:6px 12px 12px 6px; background:var(--board-soft); color:var(--board-ink); }
+.astra-naval-report.is-confirmed { animation:astra-confirmed 450ms ease-out; }
+.astra-board--naval .naval-fire { position:static; min-height:48px; }
+.astra-board--naval .seg button { min-height:44px; min-width:0; overflow-wrap:anywhere; }
+.astra-board--naval .seg button[aria-selected=true] { color:var(--board-ink); }
+.astra-fleet-piece { display:flex; align-items:center; gap:10px; padding:4px 12px; border-radius:16px; background:var(--board-soft); }
+.astra-fleet-piece img { object-fit:contain; flex:none; }
+@keyframes astra-confirmed { from { box-shadow:0 0 0 4px #59b5ed88; } to { box-shadow:0 0 0 0 #59b5ed00; } }
+
+/* PFC : trois choix ensemble ; seules les deux cartes finales se retournent. */
+.astra-board--rps .rps { grid-template-columns:repeat(3,minmax(0,1fr)); gap:8px; }
+.stage--M11 .astra-board .rps__choice,.astra-board--rps .rps__choice { min-width:0; padding:12px 5px; border:2px solid #d8c7ed; border-radius:20px; background:linear-gradient(160deg,#fff,#f2ebff); box-shadow:0 4px 0 #dfd2ee; overflow-wrap:anywhere; }
+.astra-board--rps .rps__choice img { width:min(100%,88px); height:auto; aspect-ratio:1; object-fit:contain; }
+.stage--M11 .astra-board .rps__choice[aria-checked=true],.astra-board--rps .rps__choice[aria-checked=true] { border-color:#7650ba; background:#e8d9ff; box-shadow:0 4px 0 #b19ad6; }
+.astra-board--rps .rps-timer { color:#664096; }
+.astra-board--rps .rps-timer--urgent { color:#a83737; }
+.astra-board--rps .rps--reveal { grid-template-columns:repeat(2,minmax(0,1fr)); }
+.astra-rps-reveal .rps__choice { cursor:default; }
+.astra-rps-reveal.is-revealing .rps__choice { animation:astra-gesture-reveal 480ms cubic-bezier(.2,.8,.2,1) both; }
+@keyframes astra-gesture-reveal { from { transform:perspective(500px) rotateY(75deg) scale(.94); opacity:0; } to { transform:perspective(500px) rotateY(0) scale(1); opacity:1; } }
+
+/* Pig : une face serveur, aucun dé aléatoire ou changement de face pendant l'attente. */
+.astra-board--pig .pig-counters { gap:8px; }
+.astra-board--pig .pig-counter { min-width:0; padding:10px; background:#fff9e9; }
+.astra-board--pig .pig-counter.is-active { border-color:#b64420; }
+.astra-board--pig .pig-counter__who { overflow-wrap:anywhere; }
+.astra-board--pig .pig-counter__bar span { background:#db6b2d; }
+.astra-board--pig .pig-tray { width:min(100%,360px); min-height:150px; aspect-ratio:2.2; border:10px solid #dba35f; border-radius:32px; background:radial-gradient(ellipse at 50% 40%,#fff0c2,#f0c673); box-shadow:inset 0 4px 8px #965a2826,0 4px 0 #b77737; }
+.astra-board--pig .pig-tray__die { animation:none; }
+.astra-board--pig .pig-tray__die.astra-die--land { animation:astra-die-land 480ms ease-out both; }
+.astra-board--pig .pig-die-img { width:96px; height:96px; object-fit:contain; }
+.astra-board--pig .pig-pot { background:#fff4d9; padding:10px 12px; min-height:82px; }
+.astra-board--pig .pig-pot.is-bust { background:#ffe1d8; animation:none; }
+.astra-board--pig .pig-actions { grid-template-columns:repeat(2,minmax(0,1fr)); }
+.astra-board--pig .pig-actions .btn { padding:10px 8px; }
+@keyframes astra-die-land { from { transform:translateY(-16px) rotate(-14deg) scale(.92); } 65% { transform:translateY(3px) rotate(3deg) scale(1.03); } to { transform:translateY(0) rotate(0) scale(1); } }
+
+/* Pendu : six pétales séparés, une seule chute par nouvelle erreur confirmée. */
+.astra-board--hangman .hm-board { padding:10px; border-radius:24px; background:radial-gradient(ellipse at 50% 30%,#fffef3,#e7f3d9); }
+.astra-flower { position:relative; isolation:isolate; width:180px; height:180px; }
+.astra-flower__base { position:absolute; inset:0; width:100%; height:100%; object-fit:contain; z-index:2; }
+.astra-flower__petal-position { position:absolute; left:50%; top:38%; width:0; height:0; transform:rotate(var(--petal-angle)); z-index:1; }
+.astra-flower__petal { position:absolute; left:-38px; bottom:-4px; width:76px; max-width:none; height:72px; object-fit:fill; filter:drop-shadow(0 2px 2px #7d642f20); }
+.astra-flower__petal-position.is-falling { animation:astra-petal-fall 700ms ease-in both; z-index:3; }
+.astra-board--hangman .hm-keys { grid-template-columns:repeat(auto-fit,minmax(44px,1fr)); gap:6px; }
+.astra-board--hangman .hm-key { min-width:44px; min-height:44px; border-radius:12px; box-shadow:0 3px 0 #d4dfca; }
+.astra-board--hangman .hm-key--hit { background:#d1edb6; color:#2a5730; box-shadow:0 3px 0 #a1c78c; }
+.astra-board--hangman .hm-key--miss { background:#f3ddcf; color:#7d4c32; box-shadow:0 3px 0 #d7bfae; }
+.astra-board--hangman .hm-slots { gap:5px; }
+.astra-board--hangman .hm-slot { min-width:24px; border-radius:8px; background:#f1f7e9; }
+.stage--M09 .astra-board .hm-slot--on { color:#36723b; border-color:#78a35c; }
+@keyframes astra-petal-fall { from { transform:translate(0,0) rotate(var(--petal-angle)); opacity:1; } to { transform:translate(24px,90px) rotate(calc(var(--petal-angle) + 65deg)); opacity:0; } }
+
+/* Petit bac : huit rubriques gardées dans deux colonnes, y compris avec texte agrandi. */
+.astra-board--petitbac .pb-grid { grid-template-columns:repeat(2,minmax(0,1fr)); gap:8px; }
+.astra-board--petitbac .pb-head { padding:10px; border-radius:18px; background:#fff0c6; }
+.astra-board--petitbac .pb-token { width:60px; height:60px; }
+.astra-board--petitbac .pb-head__info { min-width:0; flex:1; }
+.astra-board--petitbac .pb-cell { min-width:0; min-height:96px; padding:8px; border-color:#e5cc95; border-radius:14px; background:#fffdf5; }
+.astra-board--petitbac .pb-cell.is-filled { background:#fff3ce; border-color:#d6ac53; }
+.astra-board--petitbac .pb-cell__label { font-size:.75rem; line-height:1.35; flex-wrap:wrap; }
+.astra-board--petitbac .pb-cell__label img { flex:none; width:22px; height:22px; }
+.astra-board--petitbac .pb-cell__input { padding-inline:7px; min-height:48px; }
+.astra-board--petitbac .pb-stop { position:static; }
+.astra-pb-help { border:1px solid #e1c895; border-radius:14px; background:#fff8e8; padding:0 12px; }
+.astra-pb-help summary { display:list-item; align-content:center; padding-block:12px; cursor:pointer; font-size:.875rem; font-weight:700; color:#704412; }
+.astra-pb-help p { padding-bottom:12px; }
+.astra-pb-reason { color:#785323; }
+.astra-board--petitbac .chips { gap:6px; }
+.astra-board--petitbac .chip { min-width:44px; white-space:normal; }
+
+@media (prefers-reduced-motion:reduce) {
+  .astra-board *, .astra-board *::before, .astra-board *::after { animation:none !important; transition:none !important; }
+  .astra-flower__petal-position.is-falling { display:none; }
+}
+html.reduced-motion .astra-board *,html.reduced-motion .astra-board *::before,html.reduced-motion .astra-board *::after { animation:none !important; transition:none !important; }
+html.reduced-motion .astra-flower__petal-position.is-falling { display:none; }

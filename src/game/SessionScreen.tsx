@@ -20,12 +20,14 @@ import { BoardPlaying, BoardResults, isBoard } from "./board/BoardGame";
 import { Hero, Stage } from "./premium/Stage";
 import { NudgeButton } from "./premium/Nudge";
 import { universeOf } from "./premium/universe";
+import { SessionRecoveryContext } from "./premium/BoardPieces";
 import { QuestionnairePlaying, QuestionnaireResults, isQuestionnaireMech } from "./board/QuestionnaireGames";
 import { ConversationPlaying, ConversationResults, isConversationMech } from "./board/ConversationGames";
 import { WordPlaying, isWordMech } from "./board/WordGames";
 import { LaunchFilm } from "./media/LaunchFilm";
 import { ConnectionNotice } from "./ConnectionNotice";
 import { AfterGame } from "../parcours/AfterGame";
+import "../styles/astra-console.css";
 
 type Run = (fn: string, args?: Record<string, unknown>) => Promise<{ ok: boolean }>;
 
@@ -38,6 +40,7 @@ export function SessionScreen() {
   const [chat, setChat] = useState(false);
   const [options, setOptions] = useState(false);
   const [confirmQuit, setConfirmQuit] = useState(false);
+  const [rules, setRules] = useState(false);
   const [actionError, setActionError] = useState<string | null>(null);
   const [busy, setBusy] = useState(false);
   const actionLock = useRef(false);
@@ -90,40 +93,39 @@ export function SessionScreen() {
   // Bandeau des packs et parties +18, au début : on peut passer, faire une pause ou arrêter à tout moment.
   const adultStart = (st.game.content_level === "intime" || Boolean(st.game.adult_active)) && st.session.current_round <= 1;
   const showOptions = rounds && hasOptions(st) && ["lobby", "playing", "paused"].includes(st.session.status) && !st.session.read_only;
+  const playing = st.session.status === "playing";
+  const activeSession = ["lobby", "playing", "paused"].includes(st.session.status) && !st.session.read_only;
 
   return (
-    <SubPage chatManaged
-      backTo="/accueil"
-      title={st.session.status === "lobby" ? t("game.roomTitle") : st.game.title}
-      actions={
-        <>
-          {showOptions && (
-            <button className="icon-btn icon-btn--soft" onClick={() => setOptions(true)} aria-label={t("rounds.options")}>
-              <Icon name="settings" />
-            </button>
-          )}
-          {st.session.status === "playing" && (
-            <button className="icon-btn icon-btn--soft" disabled={busy || !online} onClick={() => run("set_paused", { p_paused: true })}
-              aria-label={t("game.pause")}>
-              <Icon name="pause" />
-            </button>
-          )}
-        </>
-      }
-    >
-      <main className="page page--bare page--read session-with-chat">
-        <div className="session-exit">
-          {["lobby", "playing", "paused"].includes(st.session.status) && !st.session.read_only
-            ? <button className="btn btn--secondary" disabled={busy} onClick={() => setConfirmQuit(true)}><Icon name="logout" size={18} />Quitter la partie</button>
-            : <Link className="btn btn--secondary" to="/accueil"><Icon name="logout" size={18} />Quitter la partie</Link>}
+    <SessionRecoveryContext.Provider value={s.recoveryEpoch}>
+    <div className={`subpage session-shell${playing ? " session-console" : ""}`} data-session-status={st.session.status}>
+      <header className="session-toolbar">
+        <div className="session-toolbar__identity">
+          <span className="session-toolbar__state">{st.session.status === "lobby" ? "Votre salon" : st.session.status === "paused" ? "En pause" : playing ? "À vous de jouer" : "Votre partie"}</span>
+          <h1>{st.game.title}</h1>
         </div>
-        <ConnectionNotice online={online} channel={s.channel} networkError={s.error === "network"} onRetry={() => void s.load()} />
-        {actionError && <Alert>{actionError}</Alert>}
+        <Link className="session-toolbar__reduce" to="/accueil" aria-label="Réduire la partie et revenir à l’accueil" title="La partie continue ; retrouve-la sur l’accueil.">
+          <Icon name="minus" size={19} /><span>Réduire</span>
+        </Link>
+        <nav className="session-toolbar__commands" aria-label="Commandes de la partie">
+          {st.session.status !== "lobby" && <button onClick={() => setRules(true)}><Icon name="book-open" size={17} />Règles</button>}
+          {showOptions && st.session.status !== "lobby" && <button onClick={() => setOptions(true)}><Icon name="settings" size={17} />{t("rounds.options")}</button>}
+          {playing && <button disabled={busy || !online} onClick={() => run("set_paused", { p_paused: true })}><Icon name="pause" size={17} />Pause</button>}
+          {activeSession
+            ? <button className="session-toolbar__quit" disabled={busy} onClick={() => setConfirmQuit(true)}><Icon name="logout" size={17} />Quitter</button>
+            : <Link className="session-toolbar__quit" to="/accueil"><Icon name="logout" size={17} />Quitter</Link>}
+        </nav>
+      </header>
+      <main className="page page--bare page--read session-with-chat" aria-label={playing ? "Console de jeu" : "Partie"}>
+        <div className="session-notices">
+          <ConnectionNotice online={online} channel={s.channel} networkError={s.error === "network"} onRetry={() => void s.load()} />
+          {actionError && <Alert>{actionError}</Alert>}
+        </div>
 
         {st.session.status === "lobby" && <Lobby st={st} me={me} partner={partner} partnerHere={partnerHere} busy={busy} online={online} run={run}
-          onOptions={showOptions ? () => setOptions(true) : undefined} />}
-        {st.session.status === "playing" && adultStart && <Alert kind="info"><Icon name="shield-check" size={18} />{t("rhythm.adultBanner")}</Alert>}
-        {st.session.status === "playing" && <Stage u={universe} compact>{word ? <WordPlaying c={common} /> : conversation ? <ConversationPlaying c={common} /> : questionnaire ? <QuestionnairePlaying c={common} /> : board ? <BoardPlaying {...common} /> : rounds ? <RoundsPlaying {...common} /> : <Playing st={st} partnerName={partnerName} partner={partner} busy={busy} online={online} run={run} />}</Stage>}
+          onRules={() => setRules(true)} onOptions={showOptions ? () => setOptions(true) : undefined} />}
+        {playing && adultStart && <p className="session-adult-note"><Icon name="shield-check" size={16} />+18 · Tu peux passer à tout moment.</p>}
+        {playing && <div className="session-play-area"><Stage u={universe} compact>{word ? <WordPlaying c={common} /> : conversation ? <ConversationPlaying c={common} /> : questionnaire ? <QuestionnairePlaying c={common} /> : board ? <BoardPlaying {...common} /> : rounds ? <RoundsPlaying {...common} /> : <Playing st={st} partnerName={partnerName} partner={partner} busy={busy} online={online} run={run} />}</Stage></div>}
         {st.session.status === "paused" && <PausedPanel st={st} userId={userId} partnerName={partnerName} busy={busy} online={online} run={run} />}
         {(st.session.status === "ended" || st.session.status === "closed") && <Stage u={universe}>{(conversation
           ? <ConversationResults c={common} navigate={navigate} />
@@ -160,7 +162,9 @@ export function SessionScreen() {
       {duo.active && <ChatLauncher withNav={false} onOpen={() => setChat(true)} />}
       {chat && <ChatPanel inGame onClose={() => setChat(false)} />}
       {options && <OptionsSheet c={common} onClose={() => setOptions(false)} />}
-    </SubPage>
+      {rules && <RulesSheet title={st.game.title} rules={st.game.rules} onClose={() => setRules(false)} />}
+    </div>
+    </SessionRecoveryContext.Provider>
   );
 }
 
@@ -211,10 +215,9 @@ function LobbyFacts({st}:{st:SessionState}) {
  return <div className="lobby-facts" aria-label="Règles de cette activité">{facts.map(f=><span className="t-meta" key={f}>{f}</span>)}</div>;
 }
 
-function Lobby({ st, me, partner, partnerHere, busy, online, run, onOptions }: {
-  st: SessionState; me?: Player; partner?: Player; partnerHere: boolean; busy: boolean; online: boolean; run: Run; onOptions?: () => void;
+function Lobby({ st, me, partner, partnerHere, busy, online, run, onOptions, onRules }: {
+  st: SessionState; me?: Player; partner?: Player; partnerHere: boolean; busy: boolean; online: boolean; run: Run; onOptions?: () => void; onRules: () => void;
 }) {
-  const [showRules, setShowRules] = useState(false);
   const [showDescription, setShowDescription] = useState(false);
   const [launching,setLaunching]=useState(false);
   // Moteur 2.1.0 : les réglages passent par la fenêtre d'options (avec les préférences privées).
@@ -249,13 +252,13 @@ function Lobby({ st, me, partner, partnerHere, busy, online, run, onOptions }: {
 
       <div className="lobby-guide" aria-label="Découvrir cette activité">
         <button className="lobby-guide__button" onClick={() => setShowDescription(true)}><Icon name="info" size={22} /><span>Description</span></button>
-        <button className="lobby-guide__button" onClick={() => setShowRules(true)}><Icon name="book-open" size={22} /><span>Règles</span></button>
+        <button className="lobby-guide__button" onClick={onRules}><Icon name="book-open" size={22} /><span>Règles</span></button>
       </div>
       <div className="lobby-links">
         {onOptions && <button className="btn btn--secondary" onClick={onOptions}><Icon name="settings" size={18} />{t("rounds.options")}</button>}
       </div>
 
-      {sexual && <p className="t-meta row"><Icon name="info" size={18} />{t("game.sexualContent")}</p>}
+      {sexual && <p className="session-adult-note"><Icon name="shield-check" size={16} />+18 · Tu peux passer à tout moment.</p>}
 
       {st.game.rules.objective && <p className="lobby-description t-small">{st.game.rules.objective}</p>}
       <div className="lobby-settings">
@@ -277,7 +280,6 @@ function Lobby({ st, me, partner, partnerHere, busy, online, run, onOptions }: {
       {me?.ready && partner && !partner.ready && <NudgeButton st={st} partner={partner} />}
       {launching && me && <LaunchFilm sessionId={st.session.id} userId={me.user_id ?? `seat-${me.seat}`} title={st.game.title} onComplete={() => { setLaunching(false); if(online) void run("set_ready",{p_ready:true}); }} />}
       {showDescription && <Sheet title={<h2 className="t-section">Description · {st.game.title}</h2>} onClose={() => setShowDescription(false)}><p>{st.game.rules.objective || st.game.title}</p><LobbyFacts st={st} /><p className="t-small">{st.game.rules.privacy}</p></Sheet>}
-      {showRules && <RulesSheet title={st.game.title} rules={st.game.rules} onClose={() => setShowRules(false)} />}
     </section>
   );
 }
@@ -339,8 +341,8 @@ function PortraitStep({ st, round, stepKey, partnerName, partner, busy, online, 
   }
 
   return (
-    <section className="stack stack--6 enter">
-      <div className="stack stack--2">
+    <section className="console-round portrait-console enter">
+      <div className="console-progress stack stack--2">
         <div className="row row--between">
           <span className="t-small strong">{texts.title}</span>
           <span className="t-meta">{t("game.step", { n: index + 1, total })}</span>
@@ -349,11 +351,11 @@ function PortraitStep({ st, round, stepKey, partnerName, partner, busy, online, 
           <span style={{ width: `${((index + 1) / total) * 100}%` }} />
         </div>
       </div>
-      <div className="page-header">
+      <div className="console-question page-header" role="region" aria-label="Question et consigne" tabIndex={0}>
         <h1 className="t-page">{fill(texts.prompt, vars)}</h1>
         <p>{fill(texts.hint, vars)}</p>
       </div>
-      <ul className="word-grid" aria-label={fill(texts.hint, vars)}>
+      <ul className="word-grid console-answer-zone" aria-label={fill(texts.hint, vars)}>
         {round.card.words.map((w) => {
           const on = valid.includes(w.id);
           return (
@@ -366,8 +368,8 @@ function PortraitStep({ st, round, stepKey, partnerName, partner, busy, online, 
           );
         })}
       </ul>
-      <p className="t-meta row" style={{ justifyContent: "center" }}><Icon name="lock" size={16} />{t("game.privateHint")}</p>
-      <div className="action-bar">
+      <div className="action-bar console-round-controls">
+        <p className="t-meta row" style={{ justifyContent: "center" }}><Icon name="lock" size={16} />{t("game.privateHint")}</p>
         <p className="center t-small strong" aria-live="polite">{t("game.selected", { n: valid.length, max: cfg.pick })}</p>
         <button className="btn" disabled={busy || !online || valid.length !== cfg.pick} onClick={() => void submit(false)}>
           {busy ? t("common.sending") : texts.confirm}<Icon name="arrow-right" />

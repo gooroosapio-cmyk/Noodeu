@@ -6,6 +6,7 @@ import { t } from "../../i18n";
 import { Alert, Icon, Loading } from "../../components/ui";
 import type { Player } from "../../lib/types";
 import { CardBox, nameOf, forWho, useMoves, type Common, type CRound } from "./ConversationGames";
+import { ExpiryRetry, HangmanFlower, useServerExpiry } from "../premium/BoardPieces";
 
 type J = any;
 type Send = (type: string, payload?: Record<string, unknown>, quiet?: boolean) => Promise<{ ok: boolean; error?: string; info?: any }>;
@@ -99,7 +100,7 @@ function Hangman({ c, round }: { c: Common; round: CRound }) {
   const misses: string[] = card.misses ?? [];
 
   return (
-    <section className="stack stack--5">
+    <section className="stack stack--5 astra-board astra-board--hangman">
       <div className="q-progress">
         <span className="t-meta">{t("word.round", { n: round.round_no, total: c.st.session.total_rounds })}</span>
         <span className="t-meta">{forWho(giver, "word.hm.youGive", "word.hm.gives")}</span>
@@ -122,7 +123,7 @@ function Hangman({ c, round }: { c: Common; round: CRound }) {
       ) : (
         <div className="stack stack--4">
           <div className="hm-board">
-            <img className="hm-flower" src={`${PREMIUM}/M09/flower-${Math.min(errors, 6)}.svg`} alt={t("word.hm.petals", { n: 6 - Math.min(errors, 6) })} width={112} height={112} />
+            <HangmanFlower errors={errors} revision={Number(card.rev ?? 0)} online={c.online} label={t("word.hm.petals", { n: 6 - Math.min(errors, 6) })} />
             <p className="t-meta" aria-live="polite">{t("word.hm.errors", { n: errors, max: 6 })}</p>
           </div>
           <p className="hm-slots" aria-label={t("word.hm.maskLabel", { n: mask.length })}>
@@ -176,12 +177,8 @@ function PetitBacWrite({ c, round, send }: { c: Common; round: CRound; send: Sen
   const now = useTicker(true);
   const left = secondsLeft(card.deadline_at, now);
   const canStop = now >= new Date(card.stop_after).getTime() && cats.every((k) => text[k]?.trim());
-  const expired = useRef(false);
   const offline = !c.online;
-
-  useEffect(() => {
-    if (left === 0 && !expired.current) { expired.current = true; void send("expire", {}, true); }
-  }, [left, send]);
+  const expiry = useServerExpiry(card.deadline_at, left === 0 && !card.done, () => send("expire", {}, true));
   useEffect(() => () => Object.values(timers.current).forEach((id) => clearTimeout(id)), []);
 
   const save = (k: string, v: string) => {
@@ -233,6 +230,7 @@ function PetitBacWrite({ c, round, send }: { c: Common; round: CRound; send: Sen
           <span className="t-meta">{t("word.pb.filled", { n: filled, total: cats.length })} · {pending ? t("word.pb.saving") : t("word.pb.saved")}</span>
         </div>
       </div>
+      <p className="t-meta astra-pb-hint">Une réponse par rubrique, commençant par <strong>{card.letter}</strong>. Les accents et majuscules ne changent pas la réponse.</p>
       <div className="pb-grid">
         {cats.map((k) => (
           <div key={k} className={`pb-cell${text[k]?.trim() ? " is-filled" : ""}`}>
@@ -255,6 +253,7 @@ function PetitBacWrite({ c, round, send }: { c: Common; round: CRound; send: Sen
         ))}
       </div>
       {Object.values(failed).some(Boolean) && <Alert kind="info"><div className="stack stack--2"><p>Certaines réponses n’ont pas pu être enregistrées. Elles restent dans cet écran.</p><button type="button" className="btn btn--secondary" disabled={offline || left===0} onClick={()=>{for(const k of cats)if(failed[k])save(k,text[k]??"");}}>Réessayer l’enregistrement</button></div></Alert>}
+      <ExpiryRetry expiry={expiry} />
       <div className="pb-stop">
         <button className="btn" disabled={offline || !canStop || left === 0} onClick={stop}>
           <img src="/assets/premium/M16/stop.svg" alt="" aria-hidden="true" width={22} height={22} />{t("word.pb.stop")}
@@ -276,16 +275,25 @@ function PetitBacValidation({ c, round, send }: { c: Common; round: CRound; send
   const busy = c.busy || !c.online;
   const now = useTicker(!card.done);
   const left = secondsLeft(card.validation_deadline, now);
-  const expired = useRef(false);
-  useEffect(() => {
-    if (!card.done && left === 0 && !expired.current) { expired.current = true; void send("expire", {}, true); }
-  }, [left, card.done, send]);
+  const expiry = useServerExpiry(card.validation_deadline, left === 0 && !card.done, () => send("expire", {}, true));
   const order = [me, partner].filter(Boolean) as Player[];
   const final = Boolean(card.done);
+  const reasons: Record<string, string> = {
+    wrong_initial: "Cette réponse ne commence pas par la lettre de la manche.",
+    indexed_match: "Réponse reconnue dans cette rubrique.",
+    not_in_index: "Absente de notre index : à vérifier ensemble.",
+  };
 
   return (
     <div className="stack stack--4">
       {!final && <p className="t-small">{t("word.pb.judgeIntro", { n: left })}</p>}
+      <ExpiryRetry expiry={expiry} />
+      <details className="astra-pb-help">
+        <summary>Comment valider les réponses ?</summary>
+        <p className="t-small">Une réponse inconnue est absente de notre index : elle peut être correcte. Vérifiez la rubrique et la lettre ensemble, puis choisissez votre avis.</p>
+        <p className="t-small">Vos deux accords valident la réponse. Sans accord, elle reste non tranchée ou contestée et vaut 0 point. Vous pouvez aussi contester une réponse reconnue.</p>
+        <p className="t-small">Réponses valides : 5 points si elles sont identiques, 10 si elles sont différentes, 15 si une seule est valide.</p>
+      </details>
       {(card.categories ?? []).map((k: string) => {
         const a = order.map((p) => ({ p, e: card.answers?.[p.seat]?.[k] ?? {} }));
         const ok = (e: J) => ["valid", "unknown"].includes(e.status);
@@ -303,6 +311,7 @@ function PetitBacValidation({ c, round, send }: { c: Common; round: CRound; send
                     {st && st !== "empty" && <span className={`nd-chip ${STATUS_CHIP[st] ?? ""}`}>{t(`word.pb.st.${st}` as never)}</span>}
                     {final && <span className="nd-chip">{t("word.pts", { n: e.points ?? 0 })}</span>}
                   </p>
+                  {(reasons[e.reason] || (!e.reason && e.status === "unknown")) && <p className="t-meta astra-pb-reason">{reasons[e.reason] ?? reasons.not_in_index}</p>}
                   {!final && ok(e) && (
                     <div className="chips" role="group" aria-label={t("word.pb.voteFor", { name: nameOf(p), cat: labels[k] ?? k })}>
                       {(["accept", "reject", "unresolved"] as const).map((v) => {
@@ -350,7 +359,7 @@ function PetitBac({ c, round }: { c: Common; round: CRound }) {
   const { err, play, after, send } = useTimedMoves(c, round);
   const busy = c.busy || !c.online;
   return (
-    <section className="stack stack--5">
+    <section className="stack stack--5 astra-board astra-board--petitbac">
       <div className="q-progress">
         <span className="t-meta">{t("word.round", { n: round.round_no, total: c.st.session.total_rounds })}</span>
         {card.letter && <span className="t-meta">{t("word.pb.letterIs", { l: card.letter })}</span>}

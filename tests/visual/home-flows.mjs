@@ -15,7 +15,7 @@ await page.route('**/rest/v1/game_sessions?*',async route=>{
  await route.fulfill({json:[]});
 });
 await page.route('**/rpc/get_home_moment',async route=>{calls++; await route.fulfill({json:fail?{ok:false,error:'network'}:{ok:true,question:empty?null:`Question originale ${calls}`,games_played:0,server_now:'2026-10-25T22:59:59Z',expires_at:'2026-10-25T23:00:00Z'}})});
-await page.goto('http://127.0.0.1:4193/accueil');await page.getByText('Question originale 1',{exact:true}).waitFor();
+await page.goto(`${process.env.BASE ?? 'http://127.0.0.1:4193'}/accueil`);await page.getByText('Question originale 1',{exact:true}).waitFor();
 await page.clock.runFor(1200);await page.getByText('Question originale 2',{exact:true}).waitFor();assert(calls===2,'renouvellement à échéance serveur');
 fail=true;await page.evaluate(()=>window.dispatchEvent(new Event('online')));await page.getByRole('button',{name:'Réessayer',exact:true}).waitFor();assert(await page.getByText('Question originale 2',{exact:true}).count()===0,'pas de question périmée présentée comme courante');
 assert(await page.locator('.arcade-progress').innerText().then(t=>t.includes('0 jeux terminés')),'compteur existant disponible sans RPC horaire');

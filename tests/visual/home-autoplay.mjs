@@ -10,7 +10,7 @@ await page.addInitScript(()=>{
  const scroll=Element.prototype.scrollTo;
  Element.prototype.scrollTo=function(options){if(this.classList.contains('arcade-carousel')){window.rotations.push(options.left);return scroll.call(this,{...options,behavior:'instant'})}return scroll.apply(this,arguments)};
 });
-await page.goto('http://127.0.0.1:4193/accueil');await page.getByRole('heading',{name:'À quoi on joue ?'}).waitFor();
+await page.goto(`${process.env.BASE ?? 'http://127.0.0.1:4193'}/accueil`);await page.getByRole('heading',{name:'À quoi on joue ?'}).waitFor();
 const count=()=>page.evaluate(()=>window.rotations.length);
 await page.clock.runFor(2999);assert(await count()===0,'pas de rotation avant3000ms');
 await page.clock.runFor(1);assert(await count()===1,'rotation à3000ms');
