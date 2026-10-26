@@ -2,7 +2,11 @@
 -- Exécuter après 20261029000700 sur le Docker jetable uniquement.
 begin;
 do $$ begin
-  if current_database() not in ('noodeu_lot6_clean_2154', 'noodeu') then
+  if current_database() not in ('noodeu_lot6_clean_2154', 'noodeu') and not (
+    current_database() ~ '^noodeu_server_[a-zA-Z0-9_]+$' and coalesce((
+      select shobj_description(oid, 'pg_database') from pg_database where datname = current_database()
+    ), '') = 'noodeu:disposable-local-sql-test'
+  ) then
     raise exception 'Mesure réservée aux bases Docker jetables explicitement autorisées';
   end if;
 end $$;

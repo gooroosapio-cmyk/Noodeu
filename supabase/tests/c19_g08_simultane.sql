@@ -48,12 +48,12 @@ begin
 end $$;
 
 do $$
-declare s uuid; r jsonb; v text; seat_a int; seat_b int;
+declare s uuid; r jsonb; v text; state_a jsonb; state_b jsonb; private_a jsonb; private_b jsonb;
 begin
   perform t14.as_user('00000000-0000-4000-a000-0000000000a4');
   s := (public.create_session('nd-deux-verites-mensonge') ->> 'session_id')::uuid;
-  perform t14.ok((select total_rounds from public.game_sessions where id = s) is null
-                 or (select settings ->> 'cartes' from public.game_sessions where id = s) = '6', 'tours : 6 par défaut');
+  perform t14.ok((select settings -> 'cartes' from public.game_sessions where id = s) = '6'::jsonb,
+                 'tours : réglage numérique 6 par défaut');
   perform public.set_ready(s, true);
   perform t14.as_user('00000000-0000-4000-a000-0000000000b4');
   perform public.set_ready(s, true);
@@ -69,6 +69,16 @@ begin
   perform t14.ok((t14.mv(s, 1, 'lock_guess', '{"statement_id": "s1"}') ->> 'error') = 'phase', 'pas de devinette avant les deux');
   -- A reprend puis revalide : autorisé tant que B écrit.
   perform t14.ok((t14.mv(s, 1, 'unready') ->> 'ok')::boolean, 'A reprend ses affirmations');
+  state_a := t14.view(s, 1);
+  state_b := t14.view(s, 2);
+  perform t14.ok(state_a #>> '{rounds,0,card,phase}' = 'write'
+                 and not ((state_a #> '{rounds,0,card,ready}') ? '1')
+                 and state_a #> '{rounds,0,private}' = 'null'::jsonb
+                 and state_b #> '{rounds,0,private}' = 'null'::jsonb,
+                 'reprendre retire la disponibilité et la part secrète des deux vues');
+  v := state_a::text || state_b::text;
+  perform t14.ok(position('Alpha' in v) = 0 and position('"lie"' in v) = 0,
+                 'aucun texte ni mensonge publié ne subsiste dans les vues après reprise');
   perform t14.ok((t14.mv(s, 1, 'publish_three', t14.three('Alpha', 's2')) ->> 'ok')::boolean, 'A revalide');
   perform t14.ok((t14.mv(s, 2, 'publish_three', t14.three('Bravo', 's3')) ->> 'ok')::boolean, 'B prêt');
 
@@ -79,11 +89,26 @@ begin
   perform t14.ok(position('"lies"' in v) = 0 and position('"lie"' in (t14.view(s, 2) #> '{rounds,0,card}')::text) = 0, 'mensonges absents de la carte publique');
   perform t14.ok(t14.view(s, 2) #>> '{rounds,0,private,lie}' = 's3' and position('Alpha' in coalesce((t14.view(s, 2) #> '{rounds,0,private}')::text, '')) = 0,
                  'B ne reçoit que sa propre part secrète');
+  private_a := t14.view(s, 1) #> '{rounds,0,private}';
+  private_b := t14.view(s, 2) #> '{rounds,0,private}';
+  perform t14.ok(private_a = jsonb_build_object('lie', 's2', 'statements', t14.three('Alpha', 's2') -> 'statements')
+                 and private_b = jsonb_build_object('lie', 's3', 'statements', t14.three('Bravo', 's3') -> 'statements'),
+                 'chaque part privée contient exactement ses affirmations et son mensonge');
 
   -- Devinettes scellées puis révélées ensemble : A trouve (s3), B se trompe (s1 au lieu de s2).
   perform t14.ok((t14.mv(s, 1, 'lock_guess', '{"statement_id": "s3"}') ->> 'ok')::boolean, 'A devine');
   perform t14.ok(not coalesce((t14.card(s) ->> 'done')::boolean, false) and position('"guesses"' in t14.card(s)::text) = 0,
                  'devinette de A scellée tant que B n''a pas choisi');
+  state_a := t14.view(s, 1);
+  state_b := t14.view(s, 2);
+  perform t14.ok(not ((state_a #> '{rounds,0,card}') ?| array['guess', 'guesses', 'lie', 'lies'])
+                 and not ((state_b #> '{rounds,0,card}') ?| array['guess', 'guesses', 'lie', 'lies'])
+                 and state_a #>> '{rounds,0,card,phase}' = 'guess'
+                 and state_b #>> '{rounds,0,card,phase}' = 'guess',
+                 'après un seul choix, aucune devinette ni aucun mensonge dans les deux cartes publiques');
+  perform t14.ok(state_a #> '{rounds,0,private}' = private_a || jsonb_build_object('guess', 's3')
+                 and state_b #> '{rounds,0,private}' = private_b,
+                 'seul A reçoit son choix ; les affirmations et mensonges privés restent propres à chaque siège');
   perform t14.ok((t14.mv(s, 1, 'lock_guess', '{"statement_id": "s1"}') ->> 'error') = 'locked', 'un seul choix');
   perform t14.ok((t14.mv(s, 2, 'lock_guess', '{"statement_id": "s1"}') ->> 'ok')::boolean, 'B devine');
   perform t14.ok((t14.card(s) ->> 'done')::boolean and (t14.card(s) #>> '{scores,1}')::int = 1 and (t14.card(s) #>> '{scores,2}')::int = 0
@@ -91,11 +116,9 @@ begin
 
   -- Un tiers n'accède pas à la séance.
   perform t14.as_user('00000000-0000-4000-a000-0000000000c4');
-  begin
-    r := public.get_session_state(s);
-    perform t14.ok(r is null or (r ->> 'ok')::boolean is not true, 'tiers exclu');
-  exception when others then null;
-  end;
+  r := public.get_session_state(s);
+  perform t14.ok(r = '{"ok": false, "error": "session_not_found"}'::jsonb,
+                 'tiers exclu avec une réponse exacte, sans données de séance');
 end $$;
 
 -- ===== Relance et notifications sans messages =====

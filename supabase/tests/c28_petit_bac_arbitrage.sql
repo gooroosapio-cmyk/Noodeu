@@ -1,7 +1,11 @@
 -- PostgreSQL jetable uniquement. Tous les joueurs et coups sont annulés à la fin.
 begin;
 do $$ begin
-  if current_database() not in ('noodeu_lot6_clean_2154', 'noodeu') then
+  if current_database() not in ('noodeu_lot6_clean_2154', 'noodeu') and not (
+    current_database() ~ '^noodeu_server_[a-zA-Z0-9_]+$' and coalesce((
+      select shobj_description(oid, 'pg_database') from pg_database where datname = current_database()
+    ), '') = 'noodeu:disposable-local-sql-test'
+  ) then
     raise exception 'Test réservé aux bases Docker jetables explicitement autorisées';
   end if;
 end $$;

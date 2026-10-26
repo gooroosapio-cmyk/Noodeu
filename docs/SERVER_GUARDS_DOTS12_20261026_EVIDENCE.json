@@ -1,0 +1,372 @@
+{
+  "review_date": "2026-10-26",
+  "base_git_sha": "104564da4a7d8dc5761f9616d40d8f8a1ba5f658",
+  "scope": "Local PostgreSQL only. Draft12 unpublished and noncurrent. Source hashes recorded at closeout, not retrospectively signed execution provenance.",
+  "source_sha256": {
+    "supabase/migrations/20261029000900_session_settings_validation.sql": "c96c64dd8dbd9fa321cfdf46a19c5b42d2914e212587199837fe0dfbd64c0a17",
+    "supabase/migrations/20261029001000_dots12_versioned.sql": "f31b395771adfd4f7b51c62015b306d007b589068e2d529021b4a45b7232e75e",
+    "supabase/tests/c19_g08_simultane.sql": "3e7063f3ff5ac2b49cc91494ec7c2eb3291a44d9f30ea5554557bf43a0234b91",
+    "supabase/tests/c28_petit_bac_arbitrage.sql": "3fcadca6bc82e1e59f017d185dd31ecdd146065ab75a5657516a65c6cc050a3f",
+    "supabase/tests/c28_petit_bac_latency.sql": "7ee36acd0d3be01f6f7a89de18633c591e375e6f7fab6c0da64ef4451f4fa271",
+    "supabase/tests/c29_naval_payload_validation.sql": "8393dccdb8b4238346494075e11a64f50af0242f89fd43f917a1c15bf747d37c",
+    "supabase/tests/c30_session_settings.sql": "eaad92513f4df9802bc820796b5af70a7071d2189dd3c4f6a053391027aa5531",
+    "supabase/tests/c31_dots12.sql": "d3cf32d30dacbabd8d0f4965e45f9fc111ce903272cf90de7d04e4cbc90bd3e4",
+    "supabase/tests/c32_server_guards.sql": "bd76db44e3fb683113e2b59d34a9709aa5757305c9de84305fe2599b7b1d6c67",
+    "supabase/tests/upgrade/dots12_from_008.sql": "c34e8def1c6fa1f2169fc492ee6393e8c378538bf76d87d8a83f9c3e9d1cbf18",
+    "tests/sql/server_concurrency.py": "f4d8843e4cd064764c89a9d69625e472aed22265c1a174cd4d8b8958e2dab625",
+    "tests/sql/server_regression.py": "050ac15b62b0c4388a86c72d43a236de6d1d221469edb61d0de696f4130bc588"
+  },
+  "evidence_directory": "/workspace/noodeu-server-validation-20261026",
+  "log_sha256": {
+    "baseline-results.json": "e630956573c75ca6ac281f51ab42a2c7b24be07a8345b72a0f916e6f0e9abd3b",
+    "integrated-results.json": "feca38bad632e567f61b7ff74ccc69548da14421b7f762c9abb569598d4fe988",
+    "mutation-results.json": "ca0a730322b672314dd97b8f60a623d2c8b495ea825e74607d1de4132f0d299d",
+    "mutation-c19-old.log": "38274e444f0e8a3c2660e6aaa1704e9a221bbe88d6803b66523838c536a0d646",
+    "mutation-c19-fixed.log": "183d1fa8eec551d7ebc41b3eefc094b0f1105bcde2ea050b708680d224b6043f",
+    "mutation-c30-old-validator.log": "d555dd99fab81929887ca5e5708badba4c50e32d280da9f98cb90e17147603c7",
+    "server-concurrency.log": "85f9708abee97a4adf675d9c8c626d6748c48e1e3d569d06a9263bb699920ec4",
+    "dots-upgrade-versioned.log": "308f98457579281275dadbd419549d00811680ba1db17a3e5c20f13814e8ef5b",
+    "dots-baseline-comparison.log": "8afe134593d533549a43d3989ac9b21b1f85c9f3a32aa20730a566d2e02304c9",
+    "dots-migration010-reapply.log": "9dd0c59bd998012d86f42894b17ecb9001c9820b8a90b58a24566664dcff8eb9",
+    "dots-gate.log": "1950ed8798b1a661866c3b4942291c8d9c34386eaab96918a0b21ed0bd88a2e4",
+    "closeout-runner-upgrade-results.json": "a8ef66199900dc2ed10b2eebefd950abfc9d3aaba88f973dabf5001fe1cceb3e",
+    "closeout-runner-upgrade.log": "86344011a6a8bfc183c35a1458541f1450155733c637f8c9d9d3e993c8858f25"
+  },
+  "initial_baseline": {
+    "passed_test_files": 23,
+    "failed_test_files": [
+      {
+        "file": "supabase/tests/c28_petit_bac_arbitrage.sql",
+        "exit": 3,
+        "seconds": 0.083
+      }
+    ]
+  },
+  "integrated_results": [
+    {
+      "file": "c18_sans_permission_adulte.sql",
+      "exit": 0,
+      "seconds": 0.148
+    },
+    {
+      "file": "c19_g08_simultane.sql",
+      "exit": 0,
+      "seconds": 0.115
+    },
+    {
+      "file": "c20_purete.sql",
+      "exit": 0,
+      "seconds": 0.127
+    },
+    {
+      "file": "c21_de30_petitbac8.sql",
+      "exit": 0,
+      "seconds": 0.12
+    },
+    {
+      "file": "c22_jamais_libelles.sql",
+      "exit": 0,
+      "seconds": 0.089
+    },
+    {
+      "file": "c23_duo_space.sql",
+      "exit": 0,
+      "seconds": 0.1
+    },
+    {
+      "file": "c24_audio.sql",
+      "exit": 0,
+      "seconds": 0.12
+    },
+    {
+      "file": "c25_random.sql",
+      "exit": 0,
+      "seconds": 0.142
+    },
+    {
+      "file": "c26_random_mixed.sql",
+      "exit": 0,
+      "seconds": 1.591
+    },
+    {
+      "file": "c27_home_moment.sql",
+      "exit": 0,
+      "seconds": 0.144
+    },
+    {
+      "file": "c28_petit_bac_arbitrage.sql",
+      "exit": 0,
+      "seconds": 0.206
+    },
+    {
+      "file": "c28_petit_bac_latency.sql",
+      "exit": 0,
+      "seconds": 4.236
+    },
+    {
+      "file": "c29_naval_payload_validation.sql",
+      "exit": 0,
+      "seconds": 0.148
+    },
+    {
+      "file": "c30_session_settings.sql",
+      "exit": 0,
+      "seconds": 0.122
+    },
+    {
+      "file": "c31_dots12.sql",
+      "exit": 0,
+      "seconds": 0.581
+    },
+    {
+      "file": "c32_server_guards.sql",
+      "exit": 0
+    }
+  ],
+  "c19_mutation_results": [
+    {
+      "test": "old",
+      "exit": 0,
+      "expected": 0
+    },
+    {
+      "test": "fixed",
+      "exit": 3,
+      "expected": 3
+    }
+  ],
+  "concurrency": {
+    "run_id": "39a0c23f-8f3a-4d1c-ae16-a33b44ed2865",
+    "database": "noodeu_server_20261026_010539_integrated",
+    "container": "noodeu-refonte-test-20261025",
+    "users": {
+      "A": "5d1f7971-e4d0-4523-8142-281ba602c719",
+      "B": "20a30dec-608e-4669-998a-7537cc6b82da",
+      "C": "83d90b2b-16e6-40e8-a581-1bb9d8292b59",
+      "D": "7ae5b8dd-de51-4ff4-baa1-61bc415a0a98"
+    },
+    "duos": {
+      "AB": "9a94fedd-a12b-44ae-8e09-e383f0255fc4",
+      "CD": "74a17456-d798-4250-a05f-ff6b8bdbca9a"
+    },
+    "sessions": {
+      "sentinel_historical_CD": "cd3e1075-9445-4e92-bd91-c90684ef08f2",
+      "g08_AB": "fc213a72-fa49-415b-9db4-932d86302222",
+      "dots12_AB": "2d40fb06-2c26-48b2-838b-16a80159da9f"
+    },
+    "races": [
+      {
+        "label": "G08 : deux publications",
+        "tag": "ndc_7d9db4573b6d4a25b8",
+        "session": "fc213a72-fa49-415b-9db4-932d86302222",
+        "coordinator_pid": 4466,
+        "waiting": [
+          {
+            "pid": 4486,
+            "state": "active",
+            "tag_seen": true,
+            "blocked_by": [
+              4466
+            ],
+            "wait_event": "transactionid",
+            "wait_event_type": "Lock",
+            "application_name": "ndc_7d9db4573b6d4a25b8_w0"
+          },
+          {
+            "pid": 4487,
+            "state": "active",
+            "tag_seen": true,
+            "blocked_by": [
+              4486
+            ],
+            "wait_event": "tuple",
+            "wait_event_type": "Lock",
+            "application_name": "ndc_7d9db4573b6d4a25b8_w1"
+          }
+        ],
+        "responses": [
+          {
+            "ok": true,
+            "info": null
+          },
+          {
+            "ok": true,
+            "info": null
+          }
+        ],
+        "hold_after_observation_seconds": 2
+      },
+      {
+        "label": "G08 : deux devinettes",
+        "tag": "ndc_736a45936b9841f2b3",
+        "session": "fc213a72-fa49-415b-9db4-932d86302222",
+        "coordinator_pid": 4517,
+        "waiting": [
+          {
+            "pid": 4536,
+            "state": "active",
+            "tag_seen": true,
+            "blocked_by": [
+              4517
+            ],
+            "wait_event": "transactionid",
+            "wait_event_type": "Lock",
+            "application_name": "ndc_736a45936b9841f2b3_w0"
+          },
+          {
+            "pid": 4537,
+            "state": "active",
+            "tag_seen": true,
+            "blocked_by": [
+              4536
+            ],
+            "wait_event": "tuple",
+            "wait_event_type": "Lock",
+            "application_name": "ndc_736a45936b9841f2b3_w1"
+          }
+        ],
+        "responses": [
+          {
+            "ok": true,
+            "info": null
+          },
+          {
+            "ok": true,
+            "info": null
+          }
+        ],
+        "hold_after_observation_seconds": 2
+      },
+      {
+        "label": "M04 : même action ID",
+        "tag": "ndc_7aaafd1c637c46c8b3",
+        "session": "2d40fb06-2c26-48b2-838b-16a80159da9f",
+        "coordinator_pid": 4664,
+        "waiting": [
+          {
+            "pid": 4685,
+            "state": "active",
+            "tag_seen": true,
+            "blocked_by": [
+              4683
+            ],
+            "wait_event": "tuple",
+            "wait_event_type": "Lock",
+            "application_name": "ndc_7aaafd1c637c46c8b3_w0"
+          },
+          {
+            "pid": 4683,
+            "state": "active",
+            "tag_seen": true,
+            "blocked_by": [
+              4664
+            ],
+            "wait_event": "transactionid",
+            "wait_event_type": "Lock",
+            "application_name": "ndc_7aaafd1c637c46c8b3_w1"
+          }
+        ],
+        "responses": [
+          {
+            "ok": true,
+            "repeated": true
+          },
+          {
+            "ok": true,
+            "info": {
+              "gained": 0
+            }
+          }
+        ],
+        "hold_after_observation_seconds": 2
+      },
+      {
+        "label": "M04 : deux actions, même segment",
+        "tag": "ndc_54442a577892492198",
+        "session": "2d40fb06-2c26-48b2-838b-16a80159da9f",
+        "coordinator_pid": 4722,
+        "waiting": [
+          {
+            "pid": 4743,
+            "state": "active",
+            "tag_seen": true,
+            "blocked_by": [
+              4742
+            ],
+            "wait_event": "tuple",
+            "wait_event_type": "Lock",
+            "application_name": "ndc_54442a577892492198_w0"
+          },
+          {
+            "pid": 4742,
+            "state": "active",
+            "tag_seen": true,
+            "blocked_by": [
+              4722
+            ],
+            "wait_event": "transactionid",
+            "wait_event_type": "Lock",
+            "application_name": "ndc_54442a577892492198_w1"
+          }
+        ],
+        "responses": [
+          {
+            "ok": false,
+            "error": "not_your_turn"
+          },
+          {
+            "ok": true,
+            "info": {
+              "gained": 0
+            }
+          }
+        ],
+        "hold_after_observation_seconds": 2
+      }
+    ],
+    "checks": [
+      "G08 : publications et devinettes concurrentes, confidentialité intermédiaire, deux secrets préservés, 4 rejeux idempotents",
+      "M04 draft 12x12 : même action idempotente et deux actions concurrentes sur un segment ; une mutation par course",
+      "Catalogue inchangé, draft toujours non publié, session historique et duo C-D inchangés"
+    ],
+    "attestation": {
+      "user": "postgres",
+      "marker": "noodeu:disposable-local-sql-test",
+      "database": "noodeu_server_20261026_010539_integrated"
+    },
+    "ok": true
+  },
+  "upgrade_runner": {
+    "database": "noodeu_server_20261026_010539",
+    "phase": "upgrade",
+    "output": "/tmp/noodeu-server-regression-biijiliz",
+    "tests": [
+      {
+        "file": "supabase/tests/upgrade/dots12_from_008.sql",
+        "sql_sha256": "aedd248310243890c662adb5a34e119cc381ba02eff03f7bfeb88cf2da3dab8c",
+        "log": "/tmp/noodeu-server-regression-biijiliz/dots12_from_008.sql.log",
+        "exit": 0,
+        "seconds": 0.135
+      }
+    ],
+    "ok": true,
+    "attestation": {
+      "user": "postgres",
+      "marker": "noodeu:disposable-local-sql-test",
+      "database": "noodeu_server_20261026_010539"
+    }
+  },
+  "draft_gate": {
+    "published_versions_unchanged": 92,
+    "published_md5_before_and_after": "4ba8e0e367382b8410f880dcebf42e9c",
+    "current_pointers_md5_before_and_after": "eaf939818f924c6e7e77be910cbf9981",
+    "dots_current_version": 1,
+    "draft_version": 2,
+    "draft_published_at": null
+  },
+  "limitations": [
+    "Synthetic local auth and SQL roles, not signed JWT/PostgREST/Realtime or physical devices.",
+    "Concurrency fixtures intentionally retained; no automatic deletion.",
+    "New runner suite branch compiled and listed; only upgrade branch executed during closeout."
+  ]
+}
